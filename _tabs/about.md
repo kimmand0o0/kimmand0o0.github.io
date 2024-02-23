@@ -25,13 +25,12 @@ _2014.03 ~ (Drop out) : Visual Communication Design, Sahmyook University_
 <hr/>
 
 ### 📫_Tech Stack_  
+<div />
 
-<div style='display:flex; .img.mar'>
-  <img style='margin:0px 4px' src="https://img.shields.io/badge/TypeScipt-3178C6?style=flat&logo=typescript&logoColor=white"/>
-  <img style='margin:0px 4px' src="https://img.shields.io/badge/NodeJs-339933?style=flat&logo=nodedotjs&logoColor=white"/>
-  <img style='margin:0px 4px' src="https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=white"/>
-  <img style='margin:0px 4px' src="https://img.shields.io/badge/Electron-47848F?style=flat&logo=electron&logoColor=white"/>
-</div>
+![Typescript](https://img.shields.io/badge/TypeScipt-3178C6?style=flat&logo=typescript&logoColor=white)
+![NodeJs](https://img.shields.io/badge/NodeJs-339933?style=flat&logo=nodedotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=white)
+![Electron](https://img.shields.io/badge/Electron-47848F?style=flat&logo=electron&logoColor=white)
 
 
 <hr/>
