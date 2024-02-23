@@ -14,7 +14,7 @@ timezone: Asia/Seoul
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # ↓ --------------------------
 
-title: Haeran # the main title
+title: Haeran's blog # the main title
 
 tagline: 🌱새싹 개발자 김혜란 입니다.🌱 # it will display as the sub-title
 
