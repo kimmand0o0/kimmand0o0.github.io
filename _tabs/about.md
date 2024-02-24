@@ -33,7 +33,6 @@ _2014.03 ~ (Drop out) : Visual Communication Design, Sahmyook University_
   <img style='margin:0px 4px' src="https://img.shields.io/badge/Electron-47848F?style=flat&logo=electron&logoColor=white" alt='Electron'/>
 </div>
 
-
 <hr/>
 
 ### 📞 _Contact_
