@@ -4,22 +4,25 @@ icon: fas fa-info-circle
 order: 4
 ---
 
-## **_Haeran-Kim_**
+## 🌱 **_Haeran-Kim_** 🌱
+
+_Hi, I enjoy creating things._
+
+_I strive to create productive things to make life easier._
 
 <hr/>
 
 ### 💼 _Career_
 
->
-_2024.03 ~  : Department of Computer Science, Korea National Open University_
->
-_2024.02 ~  : Software Engineer (Frontend/Full stack), Jakga_
->
-_2023.04 ~ 2023.10 : BootCamp Code States (React)_
->
-_2022.11 ~ 2023.02 : BootCamp HangHae99 (Node.js)_
->
-_2014.03 ~ (Drop out) : Visual Communication Design, Sahmyook University_
+> _2024.03 ~  : Department of Computer Science, Korea National Open University_
+> 
+> _2024.02 ~  : Software Engineer (Frontend/Full stack), Jakga_
+> 
+> _2023.04 ~ 2023.10 : BootCamp Code States (React)_
+> 
+> _2022.11 ~ 2023.02 : BootCamp HangHae99 (Node.js)_
+> 
+> _2014.03 ~ (Drop out) : Visual Communication Design, Sahmyook University_
 
 
 <hr/>
@@ -41,3 +44,4 @@ Email : maeran.dev.u@gmail.com
 <hr/>
 
 ![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=kimmand0o0&&show_icons=true&theme=great-gatsby) 
+
