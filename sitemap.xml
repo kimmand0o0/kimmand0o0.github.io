@@ -1,0 +1,30 @@
+<feed xmlns="http://www.w3.org/2005/Atom">
+<id>https://kimmand0o0.github.io//</id>
+<title>Haeran's blog</title>
+<subtitle>Hi, I enjoy creating things. I strive to create productive things to make life easier.</subtitle>
+<updated>2024-02-26T15:15:37+09:00</updated>
+<author>
+<name>Haeran-Kim</name>
+<uri>https://kimmand0o0.github.io//</uri>
+</author>
+<link rel="self" type="application/atom+xml" href="https://kimmand0o0.github.io//feed.xml"/>
+<link rel="alternate" type="text/html" hreflang="en" href="https://kimmand0o0.github.io//"/>
+<generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator>
+<rights> © 2024 Haeran-Kim </rights>
+<icon>/assets/img/favicons/favicon.ico</icon>
+<logo>/assets/img/favicons/favicon-96x96.png</logo>
+<entry>
+<title>깃모지 사용 할까?</title>
+<link href="https://kimmand0o0.github.io//posts/gitmoji/" rel="alternate" type="text/html" title="깃모지 사용 할까?"/>
+<published>2024-02-25T16:07:00+09:00</published>
+<updated>2024-02-25T17:24:19+09:00</updated>
+<id>https://kimmand0o0.github.io//posts/gitmoji/</id>
+<content src="https://kimmand0o0.github.io//posts/gitmoji/"/>
+<author>
+<name>haeran</name>
+</author>
+<category term="Div"/>
+<category term="Git"/>
+<summary> Gitmoji 란? Gitmoji란 git + emoji를 합쳐서 부르는 말로 emoji를 사용하여 commit message를 작성하는 도구이다. 커밋 메세지 작성 시 :art:를 입력하면 🎨와 같이 표시되며 코드의 구조/형식 개선 을 의미한다. 이러한 이모지를 이용하여 커밋 메세지를 시각적으로 요약해서 전달해주는 역할을 한다. 장점 깃모지에 익숙하다면 시각적으로 명확한 작업 내용을 전달 할 수 있다 커밋 단위의 기준으로 사용할 수 있다 일반적인 프리픽스에 비해 세분화가 잘 되어있다 단점 깃모지에 익숙해 지는 시간이 필요하다. 경우에 따라 필요한 깃모지를 찾아 확인하는 수고가 든다. (gitmoji 사이트나 gitmoji-c... </summary>
+</entry>
+</feed>
