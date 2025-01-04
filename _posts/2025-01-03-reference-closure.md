@@ -1,5 +1,4 @@
 ---
-published: true
 title: 참조(Reference)와 클로저(Closure)
 author: haeran
 date: 2025-01-03 21:07:00 +0900

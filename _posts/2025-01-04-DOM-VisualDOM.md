@@ -1,5 +1,4 @@
 ---
-published: true
 title: DOM과 Visual DOM
 author: haeran
 date: 2025-01-04 21:07:00 +0900
