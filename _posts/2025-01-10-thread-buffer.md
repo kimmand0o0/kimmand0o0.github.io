@@ -1,5 +1,5 @@
 ---
-title: 비동기화를 위한 두 가지 방법: 스레드(Thread)와 버퍼(Buffer)
+title: 비동기화를 위한 두 가지 방법 - 스레드(Thread)와 버퍼(Buffer)
 author: haeran
 date: 2025-01-10 21:07:00 +0900
 categories: [Study, JavaScript]
