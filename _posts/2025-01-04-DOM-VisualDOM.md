@@ -6,8 +6,6 @@ categories: [Study, React]
 tags: [React]
 ---
 
-# DOM과 Visual DOM
-
 ## 1. DOM (Document Object Model)
 
 ### 1.1. 결정

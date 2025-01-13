@@ -6,8 +6,6 @@ categories: [Study, JavaScript]
 tags: [JavaScript]
 ---
 
-# Promises API, Callback API, Synchronous API
-
 ## 1. Promises API
 
 ### 설명

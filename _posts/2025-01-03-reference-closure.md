@@ -6,8 +6,6 @@ categories: [Study, JavaScript]
 tags: [JavaScript]
 ---
 
-# 참조(Reference)와 클로저(Closure)
-
 **참조(Reference)**와 **클로저(Closure)**는 둘 다 변수와 데이터의 접근 방식에 관련이 있지만, 완전히 다른 개념입니다. 아래에서 둘의 핵심적인 차이와 역할을 설명합니다.
 
 ### 참조 (Reference)

@@ -6,8 +6,6 @@ categories: [Study, JavaScript]
 tags: [JavaScript]
 ---
 
-# 위임 함수 (Delegation Function)와 역제어 =(Inversion of Control, IoC)
-
 ## 위임 함수 (Delegation Function)
 
 위임 함수는 특정 동작을 다른 객체나 함수에 위임하는 패턴으로, 재사용성과 유연성을 증가시킵니다. 이를 통해 특정 로직을 캡슐화하고 다른 부분에서 재사용할 수 있습니다.

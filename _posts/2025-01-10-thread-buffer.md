@@ -6,8 +6,6 @@ categories: [Study, JavaScript]
 tags: [JavaScript]
 ---
 
-# 비동기화를 위한 두 가지 방법: 스레드(Thread)와 버퍼(Buffer)
-
 ## 1. 스레드(Thread)
 스레드는 프로그램 내에서 병렬 처리를 가능하게 만드는 실행 단위입니다. 각 스레드는 독립적인 작업을 수행할 수 있어, 동시에 여러 작업을 실행하는 데 사용됩니다.
 

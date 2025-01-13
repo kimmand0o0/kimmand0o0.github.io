@@ -6,8 +6,6 @@ categories: [Study, JavaScript]
 tags: [JavaScript]
 ---
 
-# truthy & falsy (true가 되는 값 false가 되는 값)
-
 JavaScript에서 true 또는 false로 평가되는 값은 Truthy와 Falsy라는 두 개념으로 나뉩니다. 이 값들은 논리적 문맥(예: 조건문 if)에서 암시적으로 형변환되어 평가됩니다.
 
 ### 1. Falsy 값 (false로 평가되는 값)

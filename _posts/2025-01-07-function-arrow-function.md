@@ -6,8 +6,6 @@ categories: [Study, JavaScript]
 tags: [JavaScript]
 ---
 
-# Function과 Arrow Function
-
 ### 1. 등장 배경
 - **JS Function**: 전통적인 방식의 함수 정의로, ECMAScript 초창기부터 존재했습니다. 가독성과 재사용성을 높이는 데 초점이 맞춰졌습니다.
 - **Arrow Function**: ES6(2015)에서 도입된 새로운 함수 표기법으로, 짧고 간결한 문법과 더불어 `this` 바인딩 문제를 해결하기 위해 등장했습니다.
