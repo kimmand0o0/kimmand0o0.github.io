@@ -11,6 +11,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2  # 최신 안정 버전으로 변경 (예: 3.2)
+      
+      - name: Install Bundler
+        run: gem install bundler
+
+      - name: Install dependencies
+        run: bundle install
+
       # Use GitHub Actions' cache to cache dependencies on servers
       - uses: actions/cache@v3
         with:
