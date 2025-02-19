@@ -12,11 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Update Bundler version
-        run: |
-          gem install bundler
-          bundle update --bundler
-
       # Ruby 3.2.x 버전으로 설정
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -27,11 +22,13 @@ jobs:
       - name: Check Ruby version
         run: ruby -v  # Ruby 버전 확인
 
-      # Bundler와 의존성 설치
-      - name: Install Bundler
-        run: |
-          gem install bundler
-          bundle install
+      # Bundler 2.6.4 설치
+      - name: Install Bundler 2.6.4
+        run: gem install bundler -v 2.6.4
+
+      # 의존성 설치
+      - name: Bundle Install
+        run: bundle install
 
       # Use GitHub Actions' cache to cache dependencies on servers
       - uses: actions/cache@v3
