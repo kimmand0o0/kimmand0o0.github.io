@@ -35,7 +35,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.1'
-          bundler-cache: false  # 캐시 비활성화 (테스트용)
+          bundler-cache: false  # 캐시 비활성화
 
       - name: Remove Gemfile.lock (if exists)
         run: rm -f Gemfile.lock
@@ -49,11 +49,15 @@ jobs:
       - name: Build Jekyll site
         run: bundle exec jekyll build
 
+      - name: Check built site
+        run: ls -al _site || echo "_site folder not found!"
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: github-pages
           path: _site
+        continue-on-error: true  # 에러 발생 시 로그를 확인하기 위해 계속 진행
 
   deploy:
     needs: build_and_deploy
@@ -72,6 +76,9 @@ jobs:
         with:
           name: github-pages
           path: _site
+
+      - name: Check downloaded site
+        run: ls -al _site || echo "Downloaded _site folder not found!"
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
