@@ -3,32 +3,13 @@ name: Github Pages
 on:
   push:
     branches:
-      - master  # 변경된 브랜치가 있으면 수정하세요
+      - master  # Here source code branch is `master`, it could be other branch
 
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
-
-      # Ruby 3.2.x 버전으로 설정
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.2  # 최신 안정 버전 설정 (3.2.x)
-
-      # Ruby 버전 확인 (디버깅용)
-      - name: Check Ruby version
-        run: ruby -v  # Ruby 버전 확인
-
-      # Bundler 2.6.4 설치
-      - name: Install Bundler 2.6.4
-        run: gem install bundler -v 2.6.4
-
-      # 의존성 설치
-      - name: Bundle Install
-        run: bundle install
 
       # Use GitHub Actions' cache to cache dependencies on servers
       - uses: actions/cache@v3
@@ -38,15 +19,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gems-
 
-      # Jekyll 사이트를 빌드하고 GitHub Pages에 배포
+      # Use GitHub Deploy Action to build and deploy to Github
       - uses: jeffreytse/jekyll-deploy-action@v0.6.0
         with:
           provider: 'github'
-          token: ${{ secrets.GITHUB_TOKEN }}  # GitHub Token (기본 제공)
-          repository: ''                      # 기본값은 현재 저장소
-          branch: 'gh-pages'                  # 배포할 브랜치
-          jekyll_src: './'                    # 기본값은 루트 디렉토리
-          jekyll_cfg: '_config.yml'           # 기본값은 _config.yml
-          jekyll_baseurl: ''                  # 기본값은 빈 값
-          cname: ''                           # CNAME 사용 안 함 (선택 사항)
-          actor: ''                           # 기본값은 GITHUB_ACTOR
+          token: ${{ secrets.GITHUB_TOKEN }} # It's your Personal Access Token(PAT)
+          repository: ''             # Default is current repository
+          branch: 'gh-pages'         # Default is gh-pages for github provider
+          jekyll_src: './'           # Default is root directory
+          jekyll_cfg: '_config.yml'  # Default is _config.yml
+          jekyll_baseurl: ''  # Default is empty
+          cname: ''                  # Default is to not use a cname
+          actor: ''                  # Default is the GITHUB_ACTOR
