@@ -46,7 +46,7 @@ description: >- # this means to ignore newlines until "baseurl:"
   "개발, 기술, 그리고 생각을 기록하는 블로그. Haeran의 개발 이야기!"
 
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://kimmand0o0.github.io/"
+url: "https://kimmand0o0.github.io"
 favicon: "/assets/images/favicon.ico"
 
 # Yat date format
