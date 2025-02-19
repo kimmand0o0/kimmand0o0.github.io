@@ -3,13 +3,26 @@ name: Github Pages
 on:
   push:
     branches:
-      - master  # Here source code branch is `master`, it could be other branch
+      - master  # 변경된 브랜치가 있으면 수정하세요
 
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
+
+      # Ruby 3.2.x 버전으로 설정
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2  # 최신 안정 버전 설정 (3.2.x)
+
+      # Bundler와 의존성 설치
+      - name: Install Bundler
+        run: |
+          gem install bundler
+          bundle install
 
       # Use GitHub Actions' cache to cache dependencies on servers
       - uses: actions/cache@v3
@@ -19,15 +32,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gems-
 
-      # Use GitHub Deploy Action to build and deploy to Github
+      # Jekyll 사이트를 빌드하고 GitHub Pages에 배포
       - uses: jeffreytse/jekyll-deploy-action@v0.5.1
         with:
           provider: 'github'
-          token: ${{ secrets.GITHUB_TOKEN }} # It's your Personal Access Token(PAT)
-          repository: ''             # Default is current repository
-          branch: 'gh-pages'         # Default is gh-pages for github provider
-          jekyll_src: './'           # Default is root directory
-          jekyll_cfg: '_config.yml'  # Default is _config.yml
-          jekyll_baseurl: ''  # Default is empty
-          cname: ''                  # Default is to not use a cname
-          actor: ''                  # Default is the GITHUB_ACTOR
+          token: ${{ secrets.GITHUB_TOKEN }}  # GitHub Token (기본 제공)
+          repository: ''                      # 기본값은 현재 저장소
+          branch: 'gh-pages'                  # 배포할 브랜치
+          jekyll_src: './'                    # 기본값은 루트 디렉토리
+          jekyll_cfg: '_config.yml'           # 기본값은 _config.yml
+          jekyll_baseurl: ''                  # 기본값은 빈 값
+          cname: ''                           # CNAME 사용 안 함 (선택 사항)
+          actor: ''                           # 기본값은 GITHUB_ACTOR
