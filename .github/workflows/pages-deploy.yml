@@ -3,82 +3,31 @@ name: Github Pages
 on:
   push:
     branches:
-      - main
-      - master
-    paths-ignore:
-      - .gitignore
-      - README.md
-      - LICENSE
-
-  workflow_dispatch:
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
+      - main  # Here source code branch is `master`, it could be other branch
 
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      # Use GitHub Actions' cache to cache dependencies on servers
+      - uses: actions/cache@v1
         with:
-          fetch-depth: 0
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
 
-      - name: Set up Ruby and Bundler
-        uses: ruby/setup-ruby@v1
+      # Use GitHub Deploy Action to build and deploy to Github
+      - uses: jeffreytse/jekyll-deploy-action@v0.5.1
         with:
-          ruby-version: '3.1'
-          bundler-cache: false  # 캐시 비활성화
-
-      - name: Remove Gemfile.lock (if exists)
-        run: rm -f Gemfile.lock
-
-      - name: Update Bundler
-        run: gem install bundler
-
-      - name: Install dependencies
-        run: bundle install --jobs 4 --retry 3
-
-      - name: Build Jekyll site
-        run: bundle exec jekyll build
-
-      - name: Check built site
-        run: ls -al _site || echo "_site folder not found!"
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: github-pages
-          path: _site
-        continue-on-error: true  # 에러 발생 시 로그를 확인하기 위해 계속 진행
-
-  deploy:
-    needs: build_and_deploy
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    permissions:
-      pages: write
-      id-token: write
-
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: github-pages
-          path: _site
-
-      - name: Check downloaded site
-        run: ls -al _site || echo "Downloaded _site folder not found!"
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v2
+          provider: 'github'
+          token: ${{ secrets.GITHUB_TOKEN }} # It's your Personal Access Token(PAT)
+          repository: ''             # Default is current repository
+          branch: 'gh-pages'         # Default is gh-pages for github provider
+          jekyll_src: './'           # Default is root directory
+          jekyll_cfg: '_config.yml'  # Default is _config.yml
+          jekyll_baseurl: ''  # Default is empty
+          cname: ''                  # Default is to not use a cname
+          actor: ''                  # Default is the GITHUB_ACTOR
