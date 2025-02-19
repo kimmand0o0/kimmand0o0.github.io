@@ -10,10 +10,8 @@ on:
       - README.md
       - LICENSE
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+  workflow_dispatch:  # 수동 실행 가능
 
-# Allow one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -28,16 +26,12 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v3
-
-      # Use GitHub Actions' cache to cache dependencies on servers
+      # 캐시 설정 (Jekyll 의존성 저장)
       - uses: actions/cache@v3
         with:
           path: vendor/bundle
@@ -45,15 +39,37 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gems-
 
-      # Use GitHub Deploy Action to build and deploy to Github
-      - uses: jeffreytse/jekyll-deploy-action@v0.5.1
+      # Jekyll을 빌드하여 _site 디렉토리 생성
+      - name: Build Jekyll site
+        run: |
+          bundle install
+          bundle exec jekyll build
+
+      # 빌드된 Jekyll 사이트를 업로드
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          provider: 'github'
-          token: ${{ secrets.GITHUB_TOKEN }} # It's your Personal Access Token(PAT)
-          repository: ''             # Default is current repository
-          branch: 'gh-pages'         # Default is gh-pages for github provider
-          jekyll_src: './'           # Default is root directory
-          jekyll_cfg: '_config.yml'  # Default is _config.yml
-          jekyll_baseurl: ''  # Default is empty
-          cname: ''                  # Default is to not use a cname
-          actor: ''                  # Default is the GITHUB_ACTOR
+          name: github-pages
+          path: _site  # Jekyll이 생성한 정적 파일 폴더
+
+  # GitHub Pages 배포 작업
+  deploy:
+    needs: build_and_deploy  # 빌드가 끝난 후 실행
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v2
