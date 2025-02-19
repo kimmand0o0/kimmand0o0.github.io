@@ -12,6 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Update Bundler version
+        run: |
+          gem install bundler
+          bundle update --bundler
+
       # Ruby 3.2.x 버전으로 설정
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
