@@ -8,6 +8,10 @@ on:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 저장소의 콘텐츠를 변경할 수 있도록 허용
+      pages: write     # GitHub Pages 배포 권한 부여
+      id-token: write  # GitHub Pages OIDC 토큰 권한 (선택)
     steps:
       - uses: actions/checkout@v2
 
