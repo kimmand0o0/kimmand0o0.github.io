@@ -31,13 +31,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 캐시 설정 (Jekyll 의존성 저장)
-      - uses: actions/cache@v3
+      # Ruby 및 Bundler 설치
+      - name: Set up Ruby and Bundler
+        uses: ruby/setup-ruby@v1
         with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-
+          ruby-version: '3.1'  # Ruby 버전 지정 (Jekyll 지원 버전)
+          bundler-cache: true
 
       # Jekyll을 빌드하여 _site 디렉토리 생성
       - name: Build Jekyll site
