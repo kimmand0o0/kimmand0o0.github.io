@@ -39,7 +39,7 @@ jobs:
             ${{ runner.os }}-gems-
 
       # Jekyll 사이트를 빌드하고 GitHub Pages에 배포
-      - uses: jeffreytse/jekyll-deploy-action@v0.5.1
+      - uses: jeffreytse/jekyll-deploy-action@v0.6.0
         with:
           provider: 'github'
           token: ${{ secrets.GITHUB_TOKEN }}  # GitHub Token (기본 제공)
