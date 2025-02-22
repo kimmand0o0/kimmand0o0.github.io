@@ -1,0 +1,4242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Home | Haeran’s blog</title>
+<meta name="generator" content="Jekyll v4.4.1">
+<meta property="og:title" content="Home">
+<meta name="author" content="Haeran">
+<meta property="og:locale" content="ko">
+<meta name="description" content="“개발, 기술, 그리고 생각을 기록하는 블로그. Haeran의 개발 이야기!”">
+<meta property="og:description" content="“개발, 기술, 그리고 생각을 기록하는 블로그. Haeran의 개발 이야기!”">
+<link rel="canonical" href="https://kimmand0o0.github.io/">
+<meta property="og:url" content="https://kimmand0o0.github.io/">
+<meta property="og:site_name" content="Haeran’s blog">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Home">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","author":{"@type":"Person","name":"Haeran"},"description":"“개발, 기술, 그리고 생각을 기록하는 블로그. Haeran의 개발 이야기!”","headline":"Home","name":"Haeran’s blog","url":"https://kimmand0o0.github.io/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="icon" href="/assets/images/favicon.ico">
+  <link rel="canonical" href="https://kimmand0o0.github.io">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <script src="/assets/js/main.js"></script><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
+<!-- Google tag (gtag.js) -->
+<script>
+  function initGoogleAnalytics() {
+    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
+      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
+    var enableDNT = "false" == "true";
+
+    if (!enableDNT || !doNotTrack) {
+      var measurementId = 'G-ZNXE6HSKMS';
+
+      (function(src) {
+        var tag = document.createElement('script');
+        tag.src = src;
+        tag.async = true;
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', measurementId);
+    }
+  }
+  window.addEventListener("load", initGoogleAnalytics);
+</script>
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
+<style>
+  .pswp .pswp__container .pswp__img {
+    background-color: white;
+  }
+</style>
+
+<script>
+  function initPhotoSwipe() {
+    let customOptions = {};
+
+    try {
+      const data = ``.replaceAll("=>", ":");
+      customOptions = JSON.parse(data);
+    } catch (e) {
+      console.info("Invalid custom photo previewer options! " + e.message);
+    }
+
+    // Define object and gallery options
+    const options = Object.assign(
+      {
+        gallery: "section.main",
+        children: "a.photo-swipe",
+        photo_scale: 2,
+        // dynamic import is not supported in UMD version
+        pswpModule: PhotoSwipe,
+      },
+      customOptions
+    );
+
+    const galleryEl = document.querySelector(options.gallery);
+    if (!galleryEl) {
+      return;
+    }
+
+    const imgEls = [];
+    const els = galleryEl.querySelectorAll("img:not(.emoji)");
+    els.forEach((el) => {
+      if (el.src.trim() == "") {
+        return;
+      }
+      if (!imgEls.includes(el)) {
+        imgEls.push(el);
+      }
+    });
+
+    if (imgEls.length === 0) {
+      return;
+    }
+
+    imgEls.forEach((imgEl) => {
+      imgEl.outerHTML = `
+      <a class="photo-swipe"
+        href="${imgEl.src}"
+        data-pswp-width="${
+          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
+        }"
+        data-pswp-height="${
+          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
+        }"
+        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
+        target="_blank">
+        ${imgEl.outerHTML}
+      </a>`;
+    });
+
+    // Initialize PhotoSwipe 5
+    var lightbox = new PhotoSwipeLightbox(options);
+
+    lightbox.init();
+  }
+
+  window.addEventListener("load", initPhotoSwipe);
+</script>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header site-header-transparent" role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
+  Haeran's blog
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<div class="page-link" style="display: inline;">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<div class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="fr">
+          
+          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="zh-CN">
+          
+          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ja">
+          
+          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ko">
+          
+          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ru">
+          
+          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
+          
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ko',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+</div>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;documentElement.setAttribute("data-header-transparent", "");var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section class="page-banner">
+    <div class="page-banner-img">
+<div style="background-image: url(/assets/images/banners/home.png)"></div>
+        <img class="img-placeholder" src="/assets/images/banners/home.png">
+</div>
+    <div class="wrapper">
+      <div class="page-banner-inner"><div class="page-banner-default">
+            <h1 class="page-banner-heading">
+              개발, 기술, 그리고 생각을 기록하는 블로그. Haeran의 개발 이야기!
+            </h1>
+            <h2 class="page-banner-subheading">
+              
+            </h2>
+          </div></div>
+    </div>
+  </section><script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <div class="framework">
+  <section class="main">
+
+     <div class="articles">
+  
+
+  
+
+
+  
+
+
+
+
+<div class="pagination">
+  <!-- Post list links -->
+  <ul class="post-list z-image-style">
+    <!-- Top list item --><!-- Normal list item -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/2025/02/21/test_code_study.html">
+      테스트 코드를 왜 해야하는가<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Feb 21, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 9 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/2025/02/21/test_code_study.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://tech.inflab.com/static/7ce1995567e2a9099ff63acc47ff86e4/37523/believe.png); height: 160px"></div>
+    </a><a class="post-text" href="/study/2025/02/21/test_code_study.html">
+      <p>테스트 코드란 무엇인가? (link)
+
+테스트 코드는 소프트웨어의 기능을 (자동으로) 검증하는 코드이다. 
+주어진 입력에 대해 기대되는 출력을 확인하여 오류를 조기에 발견할 수 있다. 
+일반적으로 단위 테스트, 통합 테스트, E2E(End-to-End) 테스트 등 다양한 유형이 있다.
+
+용법
+
+Vitest 주요 메서드 정리
+... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags">
+<a class="post-tag" href="/tags.html#Study">#Study</a><a class="post-tag" href="/tags.html#Test_code">#Test_code</a>
+</div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/2025/02/20/yaml.html">
+      yaml파일과 yml파일의 차이점<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Feb 20, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 1 min</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/2025/02/20/yaml.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://images.velog.io/images/jnine/post/e67a97a2-fd8e-43ba-a14a-f0ad7e8d0304/yaml.jpeg); height: 160px"></div>
+    </a><a class="post-text" href="/study/2025/02/20/yaml.html">
+      <p>yaml과 yml 파일은 완전히 동일한 YAML 형식의 파일이며, 확장자만 다를 뿐입니다.
+
+✅ 차이점은 오직 확장자
+
+확장자 차이점
+
+  yaml : 더 긴 확장자 (공식 명칭에 가깝음)
+  yml : 더 짧은 확장자 (일부 시스템에서 선호)
+
+
+💡 원래 YAML의 공식 확장자는 .yaml이지만, .yml도 일반적... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#%EC%95%8C%EC%93%B8%EA%B0%9C%EC%9E%A1-%EC%95%8C%EC%95%84%EB%91%90%EB%A9%B4%20%EC%93%B8%EB%AA%A8%EC%9E%88%EB%8A%94%20%EA%B0%9C%EB%B0%9C%20%EC%9E%A1%EC%A7%80%EC%8B%9D">#알쓸개잡-알아두면 쓸모있는 개발 잡지식</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/zustand/2025/02/18/zustand__use_store.html">
+      Zustand를 use_store로 중앙 집중식 상태 관리<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Feb 18, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 6 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/zustand/2025/02/18/zustand__use_store.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://velog.velcdn.com/images/sangje112/post/54eb73ca-985a-42ee-aba0-e1439edd466e/image.png); height: 160px"></div>
+    </a><a class="post-text" href="/zustand/2025/02/18/zustand__use_store.html">
+      <p>zustand를 그냥 사용했을 때 문제점
+
+zustand를 각각의 slice로 관리하다보면 다음의 단점이 있습니다.
+
+  각각의 store에서 상태를 가져와야하기 때문에 import와 const 선언문이 길어집니다.
+  각각의 store에 속해있는 상태값을 서로 참고하거나 가져올 수 없습니다.
+
+
+use_store 훅을 통한 중앙 집... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#Zustand">#Zustand</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/next.js/2025/02/17/next_image__blur.html">
+      next image와 blur_image를 이용한 이미지 최적화<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Feb 17, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 2 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/next.js/2025/02/17/next_image__blur.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://github.com/user-attachments/assets/c4dcdb73-52ba-454e-8e64-79563874e6be); height: 160px"></div>
+    </a><a class="post-text" href="/next.js/2025/02/17/next_image__blur.html">
+      <p>쇼핑몰의 단점, 많은 이미지
+
+
+
+가장 유명한 쇼핑몰인 쿠팡에서도 화면을 불러오는 데 2초 이상 걸리기도 합니다.
+쇼핑몰은 데이터도, 이미지도 많아 화면을 로딩하는 과정에서 유저의 이탈률이 많이 생긴다고 합니다.
+이를 개선하기 위해 lazy-loading을 next/image에서 기본 제공을 하고 있다는 것을 알 수 있... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#Next.js">#Next.js</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/dnd-kit/typescript/2025/02/16/dnd_direction.html">
+      Direction을 통한 dnd관리<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Feb 16, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 3 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/dnd-kit/typescript/2025/02/16/dnd_direction.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://i.ytimg.com/vi/swFjfjLXe3I/maxresdefault.jpg); height: 160px"></div>
+    </a><a class="post-text" href="/dnd-kit/typescript/2025/02/16/dnd_direction.html">
+      <p>여러 형태의 컴포넌트를 서로 드래그 앤 드랍하여 작업하기 위해서는 드래그가 가능한 것과 드랍이 가능한 컴포넌트를 분리하고, 방향을 정해주는 게 중요하다고 생각했습니다.
+
+먼저 각각의 컴포넌트 타입을 정의합니다.
+그 후 드래그가 가능한 방향을 정의하고 값을 만들어주는 유틸을 만들었습니다.
+
+// type.ts
+// 드래그 가능한 컴포... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags">
+<a class="post-tag" href="/tags.html#dnd-kit">#dnd-kit</a><a class="post-tag" href="/tags.html#Typescript">#Typescript</a>
+</div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/javascript/2025/01/24/OOP.html">
+      객체지향 프로그래밍 (Object-Oriented Programming, OOP)<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Jan 24, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 30 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/javascript/2025/01/24/OOP.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://substackcdn.com/image/fetch/f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F7c56f17b-aaa7-4472-a65f-c7767ec5f243_1412x1062.png); height: 160px"></div>
+    </a><a class="post-text" href="/study/javascript/2025/01/24/OOP.html">
+      <p>객체지향 프로그래밍 (Object-Oriented Programming, OOP)
+
+객체지향 프로그래밍이란?
+
+객체지향 프로그래밍(OOP)은 프로그램을 객체(object)라는 기본 단위로 나누어 설계하고 개발하는 프로그래밍 패러다임입니다. 객체는 데이터(속성)와 해당 데이터에 작용하는 함수(메서드)를 포함하는 독립된 단위입니다.
+
+OOP는... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#JavaScript">#JavaScript</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/javascript/2025/01/22/jsx-babel.html">
+      JSX와 Babel<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Jan 22, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 7 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/javascript/2025/01/22/jsx-babel.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtJy26EoRFOOESR4MVeDEQIwLmATiwljSinA&amp;s); height: 160px"></div>
+    </a><a class="post-text" href="/study/javascript/2025/01/22/jsx-babel.html">
+      <p>JSX와 Babel
+
+JSX와 Babel은 현대 JavaScript 개발에서 매우 중요한 도구입니다. 아래에서 각각의 개념과 역할에 대해 설명하겠습니다.
+
+JSX (JavaScript XML)
+JSX는 JavaScript 내에서 HTML과 유사한 문법을 사용할 수 있게 해주는 문법 확장입니다. 일반적으로 React에서 사용되며... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#JavaScript">#JavaScript</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/javascript/2025/01/20/mvc-mvw.html">
+      MVC와 MVW<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Jan 20, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 5 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/javascript/2025/01/20/mvc-mvw.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://images.velog.io/images/shitaikoto/post/ffbe7968-bf95-40a9-8d75-a16503533cf5/img2.png); height: 160px"></div>
+    </a><a class="post-text" href="/study/javascript/2025/01/20/mvc-mvw.html">
+      <p>MVC와 MVW
+
+1. MVC (Model-View-Controller)
+
+구성 요소
+
+  Model:
+    
+      애플리케이션의 데이터와 비즈니스 로직을 관리합니다.
+      서버와의 데이터 통신 및 사용자 입력 처리 역할.
+    
+  
+  View:
+    
+      사용자에게 표시... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#JavaScript">#JavaScript</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/javascript/2025/01/15/angularjs.html">
+      AngularJS<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Jan 15, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 5 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/javascript/2025/01/15/angularjs.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://cdn.inflearn.com/wp-content/uploads/angular002.png?w=736); height: 160px"></div>
+    </a><a class="post-text" href="/study/javascript/2025/01/15/angularjs.html">
+      <p>AngularJS
+
+1. 탄생
+AngularJS는 Google에서 개발한 오픈 소스 프론트엔드 웹 프레임워크로, 2009년에 Miško Hevery와 Adam Abrons에 의해 처음 소개되었습니다. Miško Hevery는 당시 Google의 소프트웨어 엔지니어로, 웹 애플리케이션 개발을 단순화하기 위해 ... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#JavaScript">#JavaScript</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/javascript/2025/01/14/module.html">
+      모듈, 고립화와 지역화<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Jan 14, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 2 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/javascript/2025/01/14/module.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(/assets/images/default-image.jpeg); height: 160px"></div>
+    </a><a class="post-text" href="/study/javascript/2025/01/14/module.html">
+      <p>모듈, 고립화와 지역화
+
+모듈 (Modularity)
+모듈은 시스템을 독립적인 구성 요소로 나누는 설계 원칙으로, 각 모듈은 특정 기능이나 역할을 수행하도록 설계됩니다.
+
+장점
+
+  코드 재사용성 증가
+  유지보수 용이
+  테스트 및 디버깅 간소화
+
+
+단점
+
+  설계 및 분리 작업에 시간 소요
+  모듈 간 통신 복잡성... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#JavaScript">#JavaScript</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/javascript/2025/01/13/ajax.html">
+      Ajax<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Jan 13, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 4 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/javascript/2025/01/13/ajax.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXc1BszjDDOwXqOZcOEF-RIU4a1st1gWiQ_A&amp;s); height: 160px"></div>
+    </a><a class="post-text" href="/study/javascript/2025/01/13/ajax.html">
+      <p>Ajax
+
+Ajax의 탄생
+Ajax(Asynchronous JavaScript and XML)는 2005년 Google이 Google Maps와 Gmail을 선보이면서 대중적으로 주목받았습니다. 웹 애플리케이션에서 서버와 클라이언트 간 비동기 통신을 가능하게 하여, 페이지 전체를 다시 로드하지 않고도 데이터를 주고받... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#JavaScript">#JavaScript</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/javascript/2025/01/10/thread-buffer.html">
+      비동기화를 위한 두 가지 방법 - 스레드(Thread)와 버퍼(Buffer)<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Jan 10, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 4 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/javascript/2025/01/10/thread-buffer.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://aimatters.co.kr/wp-content/uploads/2024/11/Buffer.png); height: 160px"></div>
+    </a><a class="post-text" href="/study/javascript/2025/01/10/thread-buffer.html">
+      <p>1. 스레드(Thread)
+스레드는 프로그램 내에서 병렬 처리를 가능하게 만드는 실행 단위입니다. 각 스레드는 독립적인 작업을 수행할 수 있어, 동시에 여러 작업을 실행하는 데 사용됩니다.
+
+장점
+
+  병렬 처리: 여러 작업을 동시에 수행 가능하여 성능이 향상될 수 있음.
+  대기 시간 감소: I/O 작업 중에 CPU가... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#JavaScript">#JavaScript</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/javascript/2025/01/09/promises-callback-sync.html">
+      Promises API, Callback API, Synchronous API<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Jan 09, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 6 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/javascript/2025/01/09/promises-callback-sync.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://miro.medium.com/v2/resize:fit:1400/1*GBYrl80IomLGFmQmT8FVcg.png); height: 160px"></div>
+    </a><a class="post-text" href="/study/javascript/2025/01/09/promises-callback-sync.html">
+      <p>1. Promises API
+
+설명
+
+Promises는 비동기 작업을 관리하기 위한 JavaScript 객체입니다. 비동기 작업이 성공(success)하거나 실패(fail)했을 때 특정 동작을 실행할 수 있게 해줍니다.
+
+장점
+
+
+  가독성 향상: then, catch, finally를 사용하여 코드를 더 직관적으로 작성 ... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#JavaScript">#JavaScript</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/javascript/2025/01/08/delegation-function.html">
+      위임 함수 (Delegation Function)와 역제어 (Inversion of Control, IoC)<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Jan 08, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 6 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/javascript/2025/01/08/delegation-function.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(/assets/images/default-image.jpeg); height: 160px"></div>
+    </a><a class="post-text" href="/study/javascript/2025/01/08/delegation-function.html">
+      <p>위임 함수 (Delegation Function)
+
+위임 함수는 특정 동작을 다른 객체나 함수에 위임하는 패턴으로, 재사용성과 유연성을 증가시킵니다. 이를 통해 특정 로직을 캡슐화하고 다른 부분에서 재사용할 수 있습니다.
+
+장점
+
+  코드 재사용성: 공통된 로직을 별도로 정의하여 여러 곳에서 활용 가능
+  유지보수 용이성: 로직 변경 시... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#JavaScript">#JavaScript</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/javascript/2025/01/07/function-arrow-function.html">
+      Function과 Arrow Function<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Jan 07, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 7 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/javascript/2025/01/07/function-arrow-function.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://blog.kakaocdn.net/dn/bx4in4/btsAqCQLQJe/3fkqWCKSXnYegMU37c4aD0/img.png); height: 160px"></div>
+    </a><a class="post-text" href="/study/javascript/2025/01/07/function-arrow-function.html">
+      <p>1. 등장 배경
+
+  JS Function: 전통적인 방식의 함수 정의로, ECMAScript 초창기부터 존재했습니다. 가독성과 재사용성을 높이는 데 초점이 맞춰졌습니다.
+  Arrow Function: ES6(2015)에서 도입된 새로운 함수 표기법으로, 짧고 간결한 문법과 더불어 this 바인딩 문제를 해결하기 위해 등장했습니다... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#JavaScript">#JavaScript</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/javascript/2025/01/06/JSON.html">
+      JSON(JavaScript Object Notation)<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Jan 06, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 6 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/javascript/2025/01/06/JSON.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRix8m4xkJpIvLAfUXUmFgUn0nQ6YpnBeiDYA&amp;s); height: 160px"></div>
+    </a><a class="post-text" href="/study/javascript/2025/01/06/JSON.html">
+      <p>1. JSON의 등장 배경
+JSON(JavaScript Object Notation)은 2000년대 초반, 웹 애플리케이션이 점점 복잡해지고 데이터 교환이 중요해지면서 등장했습니다. 당시 XML이 데이터 교환의 표준으로 사용되고 있었지만, XML은 문법이 복잡하고 사람이 읽고 쓰기에 어려운 점이 있었습니다. 이러... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#JavaScript">#JavaScript</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/react/2025/01/04/DOM-VisualDOM.html">
+      DOM과 Visual DOM<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Jan 04, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 8 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/react/2025/01/04/DOM-VisualDOM.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4OOoxwIrmtlC4z9SXxkvElRtefFkciQ9jfWhu9GvvDbNp6pl6fCuayrWbKbwD5AdMewA&amp;usqp=CAU); height: 160px"></div>
+    </a><a class="post-text" href="/study/react/2025/01/04/DOM-VisualDOM.html">
+      <p>1. DOM (Document Object Model)
+
+1.1. 결정
+
+DOM(Document Object Model)은 웹 페이지를 구성하는 HTML, XML 문서의 구조를 객체(Object) 형태로 나타내는 모델입니다. 즉, 웹 페이지의 각 요소를 프로그램적으로 제어하고 변경할 수 있게 해줍니다. DOM은 브라... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#React">#React</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/javascript/2025/01/03/reference-closure.html">
+      참조(Reference)와 클로저(Closure)<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Jan 03, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 6 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/javascript/2025/01/03/reference-closure.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRH0QMSZwBSzt9zk4UK6hDtYcbJACnGY_7J4w&amp;s); height: 160px"></div>
+    </a><a class="post-text" href="/study/javascript/2025/01/03/reference-closure.html">
+      <p>참조(Reference)와 클로저(Closure)는 둘 다 변수와 데이터의 접근 방식에 관련이 있지만, 완전히 다른 개념입니다. 아래에서 둘의 핵심적인 차이와 역할을 설명합니다.
+
+참조 (Reference)
+참조는 변수나 데이터에 대한 또 다른 이름 또는 데이터를 가리키는 방식을 의미합니다. 참조를 통해 동일한 데이터를 여러 이름으... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#JavaScript">#JavaScript</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/javascript/2025/01/02/buffer.html">
+      JavaScript에서 버퍼란?<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Jan 02, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 5 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/javascript/2025/01/02/buffer.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(/assets/images/default-image.jpeg); height: 160px"></div>
+    </a><a class="post-text" href="/study/javascript/2025/01/02/buffer.html">
+      <p>버퍼(Buffer)는 임시 데이터 저장 공간을 의미하며, 데이터를 한 곳에서 다른 곳으로 전송하거나 처리할 때 중간 단계로 데이터를 임시로 저장하는 데 사용됩니다. 특히, 생산자와 소비자의 데이터 처리 속도가 다를 때 효율적으로 데이터를 관리하는 데 중요한 역할을 합니다.
+
+1. 일반적인 버퍼의 역할
+
+  데이터 입출력 속도를 ... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#JavaScript">#JavaScript</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/javascript/2025/01/01/truthy-falsy.html">
+      truthy &amp; falsy (true가 되는 값 false가 되는 값)<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Jan 01, 2025</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 3 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/javascript/2025/01/01/truthy-falsy.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRc69iRkPo6M42MRhslg7lOp3l52N17AA0slg&amp;s); height: 160px"></div>
+    </a><a class="post-text" href="/study/javascript/2025/01/01/truthy-falsy.html">
+      <p>JavaScript에서 true 또는 false로 평가되는 값은 Truthy와 Falsy라는 두 개념으로 나뉩니다. 이 값들은 논리적 문맥(예: 조건문 if)에서 암시적으로 형변환되어 평가됩니다.
+
+1. Falsy 값 (false로 평가되는 값)
+다음 값들은 false로 평가됩니다:
+false
+0 (숫자 0)
+-0 (음수 0)
+0... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#JavaScript">#JavaScript</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/javascript/2024/12/31/for.html">
+      javascript의 for는 함수가 아니야?<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Dec 31, 2024</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 5 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/javascript/2024/12/31/for.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(/assets/images/default-image.jpeg); height: 160px"></div>
+    </a><a class="post-text" href="/study/javascript/2024/12/31/for.html">
+      <p>JavaScript에서 for는 함수가 아닙니다. for는 JavaScript의 문(statement) 중 하나로, 특정 조건이 충족되는 동안 반복 실행하는 구조를 제공합니다.
+
+문(statement)와 함수(function)의 차이
+1. for는 문(statement)
+JavaScript의 문(statement)은 동작을 수행하기 위... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#JavaScript">#JavaScript</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/11/26/grokking-simplicity-04.html">
+      쏙쏙 들어오는 함수형 코딩 [CHAPTER 7, 8, 9]<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Nov 26, 2024</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 12 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/11/26/grokking-simplicity-04.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://velog.velcdn.com/images/dev_jiwon/post/b9d71062-73bf-4e93-988e-f4c94fdec6b9/image.png); height: 160px"></div>
+    </a><a class="post-text" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/11/26/grokking-simplicity-04.html">
+      <p>CHAPTER 7. 신뢰할 수 없는 코드를 쓰면서 불변성 지키기
+
+
+  카피-온-라이트와 방어적 복사
+    
+      카피 온 라이트는 불변성이 확보된 안전지대 안에서 데이터를 주고받는다면, 방어적 복사는 신뢰할 수 없는 코드와 데이터를 주고받을 때 복사본을 만들어 전달 혹은 사용합니다. 이때 방어적 복사는 깊은 복사를 ... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags">
+<a class="post-tag" href="/tags.html#Book">#Book</a><a class="post-tag" href="/tags.html#%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9">#쏙쏙 들어오는 함수형 코딩</a>
+</div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/10/22/grokking-simplicity-03.html">
+      쏙쏙 들어오는 함수형 코딩 [CHAPTER 5, 6]<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Oct 22, 2024</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 6 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/10/22/grokking-simplicity-03.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://velog.velcdn.com/images/dev_jiwon/post/b9d71062-73bf-4e93-988e-f4c94fdec6b9/image.png); height: 160px"></div>
+    </a><a class="post-text" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/10/22/grokking-simplicity-03.html">
+      <p>
+💡 이번 회차의 포인트는 `원칙 세우기` 입니다.
+
+
+
+
+
+CHAPTER 5. 더 좋은 액션 만들기
+
+좋은 액션이란 무엇일까? ⇒ 하나의 일만 하면서 이해하기 쉬운 것!
+
+
+  원칙 : 암묵적 입력과 출력이 적을수록 좋습니다.
+    
+      암묵적 입력과 출력이 있는 함수는 다른 곳에 영향을 주기도 하고, 언제... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags">
+<a class="post-tag" href="/tags.html#Book">#Book</a><a class="post-tag" href="/tags.html#%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9">#쏙쏙 들어오는 함수형 코딩</a>
+</div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/10/01/grokking-simplicity-02.html">
+      쏙쏙 들어오는 함수형 코딩 [CHAPTER 3, 4]<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Oct 01, 2024</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 9 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/10/01/grokking-simplicity-02.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://velog.velcdn.com/images/dev_jiwon/post/b9d71062-73bf-4e93-988e-f4c94fdec6b9/image.png); height: 160px"></div>
+    </a><a class="post-text" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/10/01/grokking-simplicity-02.html">
+      <p>CHAPTER 3. 액션과 계산, 데이터의 차이를 알기
+
+&lt;장보기로 알아보는 액션, 계산, 데이터&gt;
+
+냉장고 확인 //액션
+현재 재고 //데이터
+필요한 재고 //데이터
+필요한 재고에서 현재 재고 빼기 //계산
+장보기 목록 //데이터
+목록에 있는 것 구입 //액션
+
+
+
+  액션
+    
+      외부에 영향을 주거나... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags">
+<a class="post-tag" href="/tags.html#Book">#Book</a><a class="post-tag" href="/tags.html#%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9">#쏙쏙 들어오는 함수형 코딩</a>
+</div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/09/20/grokking-simplicity-01.html">
+      쏙쏙 들어오는 함수형 코딩 [CHAPTER 1, 2]<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Sep 20, 2024</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 6 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/09/20/grokking-simplicity-01.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://velog.velcdn.com/images/dev_jiwon/post/b9d71062-73bf-4e93-988e-f4c94fdec6b9/image.png); height: 160px"></div>
+    </a><a class="post-text" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/09/20/grokking-simplicity-01.html">
+      <p>CHAPTER 1. 쏙쏙 들어오는 함수형 코딩에 오신 것을 환영합니다.
+
+
+  
+    함수형 프로그래밍이란 무엇인가?
+
+    
+
+    🔼 구글에서 ‘프로그래밍 패러다임’을 검색하면 단골로 나오는 예시 이미지
+
+    함수형 프로그래밍은 순수 함수를 조합하여 소프트웨어를 만드는 방식의 선언형 프로그래밍이다.
+
+    함수... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags">
+<a class="post-tag" href="/tags.html#Book">#Book</a><a class="post-tag" href="/tags.html#%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9">#쏙쏙 들어오는 함수형 코딩</a>
+</div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/dev/infra/2024/03/06/cdn.html">
+      넷플릭스의 영상은 어디에 저장돼있을까? (CDN)<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Mar 06, 2024</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 4 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/dev/infra/2024/03/06/cdn.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://blog.kakaocdn.net/dn/ouJwB/btrNTKHSU7z/O4mR8idXeCNeTBE9XFjl60/img.png); height: 160px"></div>
+    </a><a class="post-text" href="/dev/infra/2024/03/06/cdn.html">
+      <p>넷플릭스같은 OTT가 유행하고 있다. 
+다양한 위치에서 OTT 사이트와 앱에 접속하게 되는데, 이때 공유되는 동영상은 어디서 오는 것일까?
+
+
+
+컨텐츠 전송 네트워크 (CDN - Content Delivery Network)
+
+CDN은 Content Delivery Network의 약자로, 전 세계적으로 웹 컨텐츠를 더 ... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags">
+<a class="post-tag" href="/tags.html#Infra">#Infra</a><a class="post-tag" href="/tags.html#CDN">#CDN</a>
+</div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/dev/react/2024/03/04/e.preventDefault_and_e.stopPropagation.html">
+      React - 이벤트 전달을 막아주는 e.preventDefault()와 e.stopPropagation()<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Mar 04, 2024</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 4 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/dev/react/2024/03/04/e.preventDefault_and_e.stopPropagation.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiiGiDTjeapZEtFoYC73Rmi8wI9HsGWIcyHw&amp;s); height: 160px"></div>
+    </a><a class="post-text" href="/dev/react/2024/03/04/e.preventDefault_and_e.stopPropagation.html">
+      <p>회사에서 버튼 이벤트 버그를 해결하던 중 이벤트의 동작 원리와, 전파에 대해 더 깊이 공부하게 되었다.
+
+그 과정에서 두가지 매서드의 차이점에 대해 알게 된 부분이 있다.
+
+e.preventDefault()와 e.stopPropagation()
+
+두 메서드는 이벤트의 전파 혹은 동작 호출을 막아준다.
+
+이 메서드의 존재 ... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags">
+<a class="post-tag" href="/tags.html#React">#React</a><a class="post-tag" href="/tags.html#Event">#Event</a>
+</div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/journal/retrospect/2024/02/26/Retrospect_in_2024_february.html">
+      2024년 2월 회고 - 게을러지지 않기 위하여<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Feb 26, 2024</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 4 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/journal/retrospect/2024/02/26/Retrospect_in_2024_february.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://velog.velcdn.com/images/s0young/post/db412800-d779-49da-99ba-5ae45db10a90/image.png); height: 160px"></div>
+    </a><a class="post-text" href="/journal/retrospect/2024/02/26/Retrospect_in_2024_february.html">
+      <p>
+
+2월은 나에게 기다림과 새로운 시작. 봄에 걸맞은 달이었다.
+
+1월의 취업 완료 후 준비
+
+
+1월 중순 취업이 확정되고 난 후, 매일 개발자로서의 첫 직장에 대한 기대로 잠을 잘 못이루기도 했다. 
+새로운 스택에 대한 공부와 그동안 만나지 못했던 친구들과의 만남으로 정신없는 시간이 갔던 것 같다.
+
+2월 1-2주는 취준생에서 ... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#%ED%9A%8C%EA%B3%A0">#회고</a></div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/journal/development%20diary/2024/02/26/source_code.html">
+      [ 스타트업 | 신입 개발 일기 ] - 01. 첫번째 업무, 소스 코드 분석하기<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Feb 26, 2024</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 11 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/journal/development%20diary/2024/02/26/source_code.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://blog.kakaocdn.net/dn/cnAEoq/btrV5eV4yRy/gdr3LNiYkO87K6L2kjnELk/img.png); height: 160px"></div>
+    </a><a class="post-text" href="/journal/development%20diary/2024/02/26/source_code.html">
+      <p>신입의 첫번째 ‘업무’ 소스 코드 분석하기
+
+
+
+
+소스 코드를 분석 한다는 것은 어떤 것일까? 🧐
+
+회사에서 진행중인 프로젝트의 구조, 기능을 친절히 설명해줄 시간은 없다. 
+
+다른 사람의 소스 코드를 분석해본 경험이 없는 신입 개발자는 어떻게 코드를 읽고, 적응하면 좋을까?
+
+소스코드와 오픈소스
+
+소스코드란?
+
+컴퓨터 소프트웨어의... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags">
+<a class="post-tag" href="/tags.html#%EA%B0%9C%EB%B0%9C%EC%9D%BC%EA%B8%B0">#개발일기</a><a class="post-tag" href="/tags.html#%EC%8B%A0%EC%9E%85%EA%B0%9C%EB%B0%9C%EC%9E%90">#신입개발자</a><a class="post-tag" href="/tags.html#%EC%8A%A4%ED%83%80%ED%8A%B8%EC%97%85">#스타트업</a>
+</div>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="post-item ">
+  <h2 class="post-title">
+    <a class="post-link" href="/dev/git/2024/02/25/gitmoji.html">
+      깃모지 사용 할까?<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+  </h2>
+  <div class="post-meta">
+    <span class="post-date"><i class="fa fa-calendar"></i> Feb 25, 2024</span><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span><span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 2 mins</span>
+  </div>
+  <div class="post-excerpt">
+<a class="post-image" href="/dev/git/2024/02/25/gitmoji.html" style="flex: 0 1 38.2%">
+      <div style="background-image: url(https://blog.kakaocdn.net/dn/vD0Fh/btsDDXK50d9/G7jlzfXEjcjhITeyKFx1DK/img.png); height: 160px"></div>
+    </a><a class="post-text" href="/dev/git/2024/02/25/gitmoji.html">
+      <p>Gitmoji 란?
+
+
+
+Gitmoji란 git + emoji를 합쳐서 부르는 말로 emoji를 사용하여 commit message를 작성하는 도구이다.
+
+커밋 메세지 작성 시<img class="emoji" title=":art:" alt=":art:" raw="🎨" src="https://github.githubassets.com/images/icons/emoji/unicode/1f3a8.png" style="vertical-align: middle; display: inline; max-width: 1em; visibility: hidden;" onload="this.style.visibility='visible'" onerror="this.replaceWith(this.getAttribute('raw'))">를 입력하면 🎨와 같이 표시되며 코드의 구조/형식 개선 을 의미한다.
+
+이러한 이모지를 이용하여 커밋 메세지를 시각적으로 요약해서 전달... <span class="read_more">Read More</span></p>
+    </a>
+  </div>
+  <div class="post-tags"><a class="post-tag" href="/tags.html#gitmoji">#gitmoji</a></div>
+</li>
+</ul>
+
+  <!-- Pagination links -->
+</div>
+</div>
+
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="common-list">
+  <ul>
+    <li>
+      <a href="/index.html">
+        All<span>30</span>
+      </a>
+    </li>
+
+    
+      <li>
+        <a href="/categories.html#h-Book">
+          Book <span>4</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-Dev">
+          Dev <span>3</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-Development%20Diary">
+          Development Diary <span>1</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-Git">
+          Git <span>1</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-Infra">
+          Infra <span>1</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-JavaScript">
+          JavaScript <span>15</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-Journal">
+          Journal <span>2</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-Next.js">
+          Next.js <span>1</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-React">
+          React <span>2</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-Retrospect">
+          Retrospect <span>1</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-Study">
+          Study <span>22</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-Typescript">
+          Typescript <span>1</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-Zustand">
+          Zustand <span>1</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-dnd-kit">
+          dnd-kit <span>1</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9">
+          쏙쏙 들어오는 함수형 코딩 <span>4</span>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+</section>
+</div>
+
+    </div>
+  </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>Unpublished Work <span class="copyleft">©</span> 2017-2025 Haeran</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+      <div class="footer-col rss-subscribe">Subscribe <a href="/feed.xml">via RSS</a>
+</div>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>
