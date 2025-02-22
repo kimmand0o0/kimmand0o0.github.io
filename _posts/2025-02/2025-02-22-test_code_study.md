@@ -2,7 +2,7 @@
 layout: post
 title: 테스트 코드를 왜 해야하는가
 author: haeran
-date: 2025-02-18 21:07:00 +0900
+date: 2025-02-21 21:07:00 +0900
 categories: [Study]
 banner:
   image: https://tech.inflab.com/static/7ce1995567e2a9099ff63acc47ff86e4/37523/believe.png
