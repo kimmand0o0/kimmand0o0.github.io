@@ -2,7 +2,7 @@
 layout: post
 title: 다이나믹 라우트(Dynamic Route)의 슬러그(Slug)가 뭐지?
 author: haeran
-date: 2025-02-22 21:07:00 +0900
+date: 2025-02-24 21:07:00 +0900
 categories: [Study]
 banner:
   image: https://github.com/user-attachments/assets/423c9943-b407-4482-84c1-cfedc2afc245
