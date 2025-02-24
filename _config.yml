@@ -7,7 +7,7 @@ author: Haeran
 copyright: "Unpublished Work (cleft) 2017-{currentYear} {author}"
 
 description: >- 
-  "개발, 기술, 그리고 생각을 기록하는 블로그. Haeran의 개발 이야기!"
+  "개발, 기술, 그리고 생각을 기록하는 블로그. 목표는 조금 다른 관점으로 개발 바라보기 👀"
 
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://kimmand0o0.github.io"
@@ -44,18 +44,6 @@ excerpt:
 
 # Pagination setting
 paginate: 5
-
-# Disqus comments (if needed)
-# disqus:
-#   shortname: "Your Disqus username"
-
-# Gitment comments (if needed)
-# gitment:
-#   username: "Your GitHub username"
-#   repo: "The repo to store comments"
-#   client_id: "Your client ID"
-#   client_secret: "Your client secret"
-#   redirect_uri: "Your redirect url"   # If you use a custom domain name
 
 # Utterances comments (if needed)
 utterances:
