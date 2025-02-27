@@ -2,7 +2,7 @@
 layout: post
 title: Dto와 type은 다른건가?
 author: haeran
-date: 2025-02-26 21:07:00 +0900
+date: 2025-02-27 21:07:00 +0900
 categories: [Study]
 banner:
   image: https://github.com/user-attachments/assets/6df847d8-c1f8-4bbb-90cb-80da6ddbe884
