@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Dto와 type은 다른건가?
+title: TypeScript `Partial`과 `Omit` 차이점
 author: haeran
 date: 2025-02-27 21:07:00 +0900
 categories: [Study]
