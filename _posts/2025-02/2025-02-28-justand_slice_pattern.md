@@ -15,7 +15,7 @@ banner:
 tags: [Study, Zustand]
 ---
 
-### 우리 프로젝트에서 Zustand 사용 방식
+### 💻 우리 프로젝트에서 Zustand 사용 방식
 
 `zustand`는 React 상태 관리를 위한 경량 상태 관리 라이브러리입니다. `zustand`를 사용하여 애플리케이션의 상태를 관리하고, `localStorage`에 상태를 지속(persist)하도록 설정하고 있습니다.
 
