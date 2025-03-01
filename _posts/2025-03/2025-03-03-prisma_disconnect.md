@@ -12,7 +12,7 @@ banner:
   min_height: "38vh"
   heading_style: "font-size: 4.25em; font-weight: bold; text-decoration: underline"
   subheading_style: "color: gold"
-tags: [Study, Prisma]
+tags: [Prisma]
 ---
 
 작업을 하던 중 Database와 연결이 계속해서 끊어지는 상황이 발생...

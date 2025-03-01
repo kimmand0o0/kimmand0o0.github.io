@@ -12,7 +12,7 @@ banner:
   min_height: "38vh"
   heading_style: "font-size: 4.25em; font-weight: bold; text-decoration: underline"
   subheading_style: "color: gold"
-tags: [Study, Test_code, Vitest]
+tags: [Test_code]
 ---
 
 Jest에 대한 블로그 게시글은 많았지만 Vitest의 해당 에러에 대한 내용을 찾기 어려워 블로그 글로 남깁니다...

@@ -12,7 +12,7 @@ banner:
   min_height: "38vh"
   heading_style: "font-size: 4.25em; font-weight: bold; text-decoration: underline"
   subheading_style: "color: gold"
-tags: [Study, Zustand]
+tags: [Zustand]
 ---
 
 ### 💻 우리 프로젝트에서 Zustand 사용 방식
