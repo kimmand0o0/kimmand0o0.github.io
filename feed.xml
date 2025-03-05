@@ -1,0 +1,820 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="ko"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://kimmand0o0.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://kimmand0o0.github.io/" rel="alternate" type="text/html" hreflang="ko" /><updated>2025-03-05T03:17:55+00:00</updated><id>https://kimmand0o0.github.io/feed.xml</id><title type="html">Haeran’s blog</title><subtitle>&quot;개발, 기술, 그리고 생각을 기록하는 블로그. 목표는 다른 관점으로 개발 바라보기 👀&quot;</subtitle><author><name>Haeran</name></author><entry><title type="html">vitest ‘mockResolvedValue’ 속성 없음</title><link href="https://kimmand0o0.github.io/study/2025/03/02/vitest_mock_type_error.html" rel="alternate" type="text/html" title="vitest ‘mockResolvedValue’ 속성 없음" /><published>2025-03-02T12:07:00+00:00</published><updated>2025-03-02T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/03/02/vitest_mock_type_error</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/03/02/vitest_mock_type_error.html"><![CDATA[<p>Jest에 대한 블로그 게시글은 많았지만 Vitest의 해당 에러에 대한 내용을 찾기 어려워 블로그 글로 남깁니다…</p>
+
+<h2 id="발생-에러">발생 에러</h2>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">() =&gt; Promise&lt;{ id: number; userId: number; marimoId: number; status: string; amount: number; paymentKey: string; payResponse: JsonValue; createdAt: Date; updatedAt: Date; }[] | null&gt;</span><span class="dl">'</span> <span class="nx">형식에</span> <span class="dl">'</span><span class="s1">mockResolvedValue</span><span class="dl">'</span> <span class="nx">속성이</span> <span class="nx">없습니다</span><span class="p">.</span><span class="nf">ts</span><span class="p">(</span><span class="mi">2339</span><span class="p">)</span>
+</code></pre></div></div>
+
+<table>
+  <tbody>
+    <tr>
+      <td>’() =&gt; Promise&lt;{ id: number; userId: number; marimoId: number; status: string; amount: number; paymentKey: string; payResponse: JsonValue; createdAt: Date; updatedAt: Date; }[]</td>
+      <td>null&gt;’ 형식에 ‘mockResolvedValue’ 속성이 없습니다.ts(2339)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>mockResolvedValue는 일반적으로 Promise를 반환하는 함수에 대해 사용되는 jest의 mock 기능입니다. 이 에러는, 해당 mock 함수에 대해 mockResolvedValue를 사용하려고 했을 때, 그 함수의 타입에 mockResolvedValue 속성이 존재하지 않아서 발생하는 것입니다.</p>
+
+<p>mockResolvedValue는 기본적으로 vi.fn()으로 만들어진 mock 함수에서 사용되며, 해당 함수가 반환하는 값이 Promise일 때만 유효합니다.</p>
+
+<h3 id="해결-방법">해결 방법</h3>
+
+<ul>
+  <li>
+    <p>vi.fn()을 사용하여 mock 함수 만들기: 해당 함수가 Promise를 반환하는지 확인한 후, jest.fn() 또는 vi.fn()으로 mock을 생성해야 합니다.</p>
+  </li>
+  <li>
+    <p>타입 지정: mock 함수의 타입이 정확히 Promise를 반환하는 함수로 지정되어 있는지 확인합니다. 예를 들어, mockResolvedValue를 사용하려면 mockFn이 Promise를 반환해야 하고, 이 경우 다음과 같이 작성할 수 있습니다.</p>
+  </li>
+</ul>
+
+<p><img src="https://github.com/user-attachments/assets/2c55e764-eaa1-4d68-9d90-1f671d5a4f90" alt="mockResolvedValue" />
+<img src="https://github.com/user-attachments/assets/52b39298-1330-4cc2-88e1-4bf3b1dd1395" alt="mockResolvedValue2" /></p>]]></content><author><name>haeran</name></author><category term="Study" /><category term="Test_code" /><summary type="html"><![CDATA[Jest에 대한 블로그 게시글은 많았지만 Vitest의 해당 에러에 대한 내용을 찾기 어려워 블로그 글로 남깁니다…]]></summary></entry><entry><title type="html">Prisma database와 연결 끊어주기</title><link href="https://kimmand0o0.github.io/study/2025/03/02/prisma_disconnect.html" rel="alternate" type="text/html" title="Prisma database와 연결 끊어주기" /><published>2025-03-02T12:07:00+00:00</published><updated>2025-03-02T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/03/02/prisma_disconnect</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/03/02/prisma_disconnect.html"><![CDATA[<p>작업을 하던 중 Database와 연결이 계속해서 끊어지는 상황이 발생…</p>
+
+<p><img width="912" alt="prisma0" src="https://github.com/user-attachments/assets/b52fea39-833e-41e2-8e3d-d27f31c7de85" /></p>
+
+<p>Prisma를 사용해 데이터베이스와 연결한 후 연결을 닫지 않으면, 데이터베이스의 연결 수가 한정되어 있기 때문에 연결을 닫지 않은 상태로 여러 번 요청을 보내게 되면 연결 수가 초과되어 더 이상 새로운 연결을 할 수 없게 됩니다.</p>
+
+<h3 id="원인">원인</h3>
+
+<p>Prisma에서 데이터베이스에 접근할 때마다 새로운 연결을 만들고, 그 연결을 명시적으로 닫지 않으면 연결을 재사용하지 못하고 계속해서 새로 연결을 시도하게 됩니다. 데이터베이스 서버에는 연결 수에 제한이 있기 때문에, 이 제한을 초과하면 더 이상 새 연결을 만들 수 없습니다.</p>
+
+<h3 id="해결">해결</h3>
+
+<p>이를 해결하려면 데이터베이스와의 연결을 명시적으로 닫아 연결 수를 효율적으로 관리해야 합니다. 이를 위해 Prisma에서 제공하는 finally 블럭을 사용하여 연결을 종료하는 방법을 적용할 수 있습니다. finally 블럭은 예외가 발생하든 안 하든 항상 실행되므로, 코드 실행이 완료된 후 연결을 확실히 끊을 수 있습니다.</p>
+
+<ul>
+  <li>try-catch 블럭: try 블럭 안에서 Prisma를 통해 데이터베이스 작업을 시도합니다. 예외가 발생할 경우, catch 블럭에서 예외를 처리할 수 있습니다.</li>
+  <li>finally 블럭: finally 블럭 안에서 prisma.$disconnect()를 호출하여 데이터베이스 연결을 명시적으로 종료합니다. 이 코드가 항상 실행되기 때문에 예외가 발생하더라도 연결을 끊을 수 있습니다.</li>
+</ul>
+
+<p><img src="https://github.com/user-attachments/assets/84c941fc-8071-4339-b791-1f85562073b8" alt="prisma" />
+<img src="https://github.com/user-attachments/assets/4ffd2631-b429-4e10-afb5-4b8edac60f4b" alt="prisma1" /></p>]]></content><author><name>haeran</name></author><category term="Study" /><category term="Prisma" /><summary type="html"><![CDATA[작업을 하던 중 Database와 연결이 계속해서 끊어지는 상황이 발생…]]></summary></entry><entry><title type="html">Toss Payments 연동하면서 만난 이슈들</title><link href="https://kimmand0o0.github.io/study/2025/03/01/toss_payments_api.html" rel="alternate" type="text/html" title="Toss Payments 연동하면서 만난 이슈들" /><published>2025-03-01T12:07:00+00:00</published><updated>2025-03-01T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/03/01/toss_payments_api</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/03/01/toss_payments_api.html"><![CDATA[<h2 id="toss-payments에-대하여"><strong>Toss payments에 대하여</strong></h2>
+
+<p>Toss Payments는 PG(결제 대행) 서비스로, 사용자가 결제를 시도하면 이를 중개하여 결제 처리 후 결과를 반환하는 역할을 합니다. Toss Payments는 RESTful API 방식으로 운영되며, application/json을 기본으로 사용합니다.</p>
+
+<h3 id="toss-payments의-특징"><strong>Toss Payments의 특징</strong></h3>
+
+<ol>
+  <li><strong>간단한 연동</strong>: REST API 기반으로 쉽고 빠르게 연동 가능</li>
+  <li><strong>다양한 결제 수단 지원</strong>: 카드, 계좌이체, 간편결제 등 다양한 결제 옵션 제공</li>
+  <li><strong>보안 강화</strong>: 암호화 및 보안 인증 적용</li>
+  <li><strong>실시간 결제 상태 확인</strong>: 웹훅(Webhook) 지원으로 실시간 상태 업데이트 가능</li>
+</ol>
+
+<h3 id="toss-payments의-결제-흐름"><strong>Toss Payments의 결제 흐름</strong></h3>
+
+<p><img src="https://github.com/user-attachments/assets/a5d9bd4e-6121-40ad-84ac-d80d457b64eb" alt="toss" /></p>
+
+<p>연동에 대해서는 <a href="https://docs.tosspayments.com/guides/v2/payment-widget/integration">공식문서</a>에 자세히 잘 나와있지만, 실제 연동을 하다보니 만난 문제들이 있어 블로그로 정리하려고 합니다.</p>
+
+<h2 id="toss-payment---alreadywidgetrenderederror-이미-위젯이-렌더링되어-있습니다-다시-렌더링하려면-cleanup-을-먼저-호출해주세요">toss payment - AlreadyWidgetRenderedError: 이미 위젯이 렌더링되어 있습니다. 다시 렌더링하려면 cleanup 을 먼저 호출해주세요</h2>
+
+<p><img src="https://github.com/user-attachments/assets/b882dc39-746d-449b-88ae-b863eb670b16" alt="toss-truble1" /></p>
+
+<h3 id="원인"><strong>원인</strong></h3>
+
+<p>금액을 바꿀때마다 <code class="language-plaintext highlighter-rouge">widgets</code>이 갱신되어 결제 ui를 여러번 렌더링 하는 문제가 발생하였습니다. 결제 금액이 달라졌기 때문에 위젯은 갱신 되어야하는 것이 맞았고, 기존 위젯을 삭제해야하는 문제였습니다.</p>
+
+<h3 id="해결"><strong>해결</strong></h3>
+
+<p>먼저 금액을 바꾸는 이벤트에 debounce를 줘 위젯을 갱신하는 이벤트를 최소화하였습니다.</p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kd">const</span> <span class="nx">debouncedPrice</span> <span class="o">=</span> <span class="nf">useDebounce</span><span class="p">(</span><span class="nx">price</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+
+<span class="nf">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nf">setAmount</span><span class="p">({</span>
+    <span class="na">currency</span><span class="p">:</span> <span class="dl">"</span><span class="s2">KRW</span><span class="dl">"</span><span class="p">,</span>
+    <span class="na">value</span><span class="p">:</span> <span class="nf">extractNumber</span><span class="p">(</span><span class="nx">debouncedPrice</span> <span class="o">??</span> <span class="dl">""</span><span class="p">),</span>
+  <span class="p">})</span>
+<span class="p">},</span> <span class="p">[</span><span class="nx">debouncedPrice</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>두번째로 새로운 위젯이 생성되기 전 기존 위젯을 삭제하는 로직을 추가하였습니다.</p>
+
+<p>useEffect가 실행될 때 위젯을 한번 제거해준 후, 그래도 에러가 난다면 catch에서 위젯을 확인한 후 제거해주는 로직으로 문제를 해결하였습니다.</p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">async</span> <span class="kd">function</span> <span class="nf">renderPaymentWidgets</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">widgets</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span>
+    <span class="p">}</span>
+
+    <span class="k">try</span> <span class="p">{</span>
+      <span class="nf">setReady</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+
+      <span class="k">await</span> <span class="nx">renderUi</span><span class="p">?.</span><span class="nf">destroy</span><span class="p">()</span>
+      <span class="k">await</span> <span class="nx">agreementUi</span><span class="p">?.</span><span class="nf">destroy</span><span class="p">()</span>
+
+      <span class="k">await</span> <span class="nx">widgets</span><span class="p">.</span><span class="nf">setAmount</span><span class="p">(</span><span class="nx">amount</span><span class="p">)</span>
+
+      <span class="kd">const</span> <span class="nx">newUi</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">widgets</span><span class="p">.</span><span class="nf">renderPaymentMethods</span><span class="p">({</span>
+        <span class="na">selector</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#payment-method</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">variantKey</span><span class="p">:</span> <span class="dl">"</span><span class="s2">DEFAULT</span><span class="dl">"</span><span class="p">,</span>
+      <span class="p">})</span>
+
+      <span class="nf">setRenderUi</span><span class="p">(</span><span class="nx">newUi</span><span class="p">)</span>
+
+      <span class="kd">const</span> <span class="nx">newAgreement</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">widgets</span><span class="p">.</span><span class="nf">renderAgreement</span><span class="p">({</span>
+        <span class="na">selector</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#agreement</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">variantKey</span><span class="p">:</span> <span class="dl">"</span><span class="s2">AGREEMENT</span><span class="dl">"</span><span class="p">,</span>
+      <span class="p">})</span>
+
+      <span class="nf">setAgreementUi</span><span class="p">(</span><span class="nx">newAgreement</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if </span><span class="p">(</span><span class="nx">renderUi</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">renderUi</span><span class="p">.</span><span class="nf">destroy</span><span class="p">()</span>
+        <span class="nf">setRenderUi</span><span class="p">(</span><span class="kc">null</span><span class="p">)</span>
+      <span class="p">}</span>
+      <span class="k">if </span><span class="p">(</span><span class="nx">agreementUi</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">agreementUi</span><span class="p">.</span><span class="nf">destroy</span><span class="p">()</span>
+        <span class="nf">setAgreementUi</span><span class="p">(</span><span class="kc">null</span><span class="p">)</span>
+      <span class="p">}</span>
+      <span class="nf">setReady</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nf">setReady</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="nf">renderPaymentWidgets</span><span class="p">()</span>
+
+  <span class="k">return </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">renderUi</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">renderUi</span><span class="p">.</span><span class="nf">destroy</span><span class="p">().</span><span class="nf">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="nf">setRenderUi</span><span class="p">(</span><span class="kc">null</span><span class="p">))</span>
+    <span class="p">}</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">agreementUi</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">agreementUi</span><span class="p">.</span><span class="nf">destroy</span><span class="p">().</span><span class="nf">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="nf">setAgreementUi</span><span class="p">(</span><span class="kc">null</span><span class="p">))</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">},</span> <span class="p">[</span><span class="nx">widgets</span><span class="p">,</span> <span class="nx">amount</span><span class="p">])</span>
+</code></pre></div></div>
+
+<h2 id="oss에서-redirect를-해주는-경우-cookie에-값이-없는-상태로-넘어오기-때문에-middleware에서-엣지-케이스-처리">oss에서 redirect를 해주는 경우 cookie에 값이 없는 상태로 넘어오기 때문에 middleware에서 엣지 케이스 처리</h2>
+
+<p>토스에서 결제가 완료 된 후 클라이언트로 리다이렉트 되는 과정에서 계속해서 메인 화면으로 이동하는 문제가 발생하였습니다.</p>
+
+<h3 id="원인-1"><strong>원인</strong></h3>
+
+<p>next/middleware를 통해 jwt token이 없는 유저의 경우 로그인 화면으로 이동시키고 있었는데, 토스 클라이언트에서 리다이렉트 해오는 과정에서 jwt token이 server로 넘어오지 않는 문제였습니다. 당연히 저희 클라이언트에서 보내는 요청이 아니기 때문에 토큰이 담기지 않는 것이었죵…</p>
+
+<h3 id="해결-1"><strong>해결</strong></h3>
+
+<p>미들웨어에서 토스에서 결과값을 받아오는 두가지 페이지만 엣지케이스로 등록하는 방법을 선택하였습니다.</p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">if </span><span class="p">(</span><span class="nx">pathname</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">/pay/toss/success</span><span class="dl">"</span> <span class="o">||</span> <span class="nx">pathname</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">/pay/toss/fail</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">next</span><span class="p">()</span>
+  <span class="p">}</span>
+</code></pre></div></div>]]></content><author><name>haeran</name></author><category term="Study" /><category term="TossAPI" /><summary type="html"><![CDATA[Toss payments에 대하여]]></summary></entry><entry><title type="html">Zustand의 Slice 패턴</title><link href="https://kimmand0o0.github.io/study/2025/02/28/justand_slice_pattern.html" rel="alternate" type="text/html" title="Zustand의 Slice 패턴" /><published>2025-02-28T12:07:00+00:00</published><updated>2025-02-28T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/02/28/justand_slice_pattern</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/02/28/justand_slice_pattern.html"><![CDATA[<h3 id="-우리-프로젝트에서-zustand-사용-방식">💻 우리 프로젝트에서 Zustand 사용 방식</h3>
+
+<p><code class="language-plaintext highlighter-rouge">zustand</code>는 React 상태 관리를 위한 경량 상태 관리 라이브러리입니다. <code class="language-plaintext highlighter-rouge">zustand</code>를 사용하여 애플리케이션의 상태를 관리하고, <code class="language-plaintext highlighter-rouge">localStorage</code>에 상태를 지속(persist)하도록 설정하고 있습니다.</p>
+
+<p>저희의 zustand 구조는 <a href="https://zustand.docs.pmnd.rs/migrations/migrating-to-v4#statecreator">v4</a>를 기반으로 두고 있습니다. 최근(24년 10월 14일) v5가 나왔지만, 아직 익숙하지 않아서 적용 시키지는 못했습니다. 좋은 블로그글이 있어 공유합니다 <a href="https://j-ho.dev/50/">(블로그)</a></p>
+
+<p>현재 패턴은 슬라이스(Slice) 패턴을 사용하고 있습니다.
+Zustand의 <strong>슬라이스(slice) 패턴</strong>은 상태(store)를 모듈화하여 관리하는 방식입니다. 애플리케이션의 상태를 논리적으로 분리함으로써 유지보수성과 확장성을 높일 수 있습니다.</p>
+
+<p><img src="https://github.com/user-attachments/assets/dd7f9851-3b42-4d2f-9f1b-451d2389d39d" alt="zustand" /></p>
+
+<h3 id="1-슬라이스-패턴이-필요한-이유">1. <strong>슬라이스 패턴이 필요한 이유</strong></h3>
+
+<p>Zustand를 사용할 때 상태가 커지면 하나의 큰 <code class="language-plaintext highlighter-rouge">create</code> 스토어에 모든 상태를 관리하는 것이 비효율적입니다. 이를 해결하기 위해 <strong>슬라이스 패턴</strong>을 사용하면 특정 기능(예: 유저 상태, 테마 상태 등)별로 분리하여 관리할 수 있습니다.</p>
+
+<p>✅ <strong>장점</strong></p>
+
+<ul>
+  <li><strong>코드 가독성 증가</strong>: 상태를 논리적으로 분리하여 쉽게 이해할 수 있음</li>
+  <li><strong>유지보수성 향상</strong>: 특정 기능을 수정할 때 다른 상태에 영향을 주지 않음</li>
+  <li><strong>모듈화 가능</strong>: 상태를 독립적으로 정의하여 재사용 가능</li>
+</ul>
+
+<h3 id="2-슬라이스slice-분리하기"><strong>2. 슬라이스(Slice) 분리하기</strong></h3>
+
+<p>각 상태를 개별적인 <strong>슬라이스(slice)</strong>로 분리하여 관리합니다.</p>
+
+<p><strong>1️⃣ 슬라이스 정의</strong></p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// counterSlice.ts</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">StateCreator</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">zustand</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="kr">interface</span> <span class="nx">CounterSlice</span> <span class="p">{</span>
+  <span class="nl">count</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+  <span class="nl">increase</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="k">void</span><span class="p">;</span>
+  <span class="nl">decrease</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="k">void</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">createCounterSlice</span><span class="p">:</span> <span class="nx">StateCreator</span><span class="o">&lt;</span>
+  <span class="nx">CounterSlice</span><span class="p">,</span>
+  <span class="p">[],</span>
+  <span class="p">[],</span>
+  <span class="nx">CounterSlice</span>
+<span class="o">&gt;</span> <span class="o">=</span> <span class="p">(</span><span class="kd">set</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">({</span>
+  <span class="na">count</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+  <span class="na">increase</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">set</span><span class="p">((</span><span class="nx">state</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">({</span> <span class="na">count</span><span class="p">:</span> <span class="nx">state</span><span class="p">.</span><span class="nx">count</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">})),</span>
+  <span class="na">decrease</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">set</span><span class="p">((</span><span class="nx">state</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">({</span> <span class="na">count</span><span class="p">:</span> <span class="nx">state</span><span class="p">.</span><span class="nx">count</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">})),</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">CounterSlice</code> 인터페이스를 정의하여 상태와 액션을 타입으로 명시</li>
+  <li><code class="language-plaintext highlighter-rouge">createCounterSlice</code> 함수에서 <code class="language-plaintext highlighter-rouge">set</code>을 이용해 상태를 변경하는 로직을 구현</li>
+</ul>
+
+<p><strong>2️⃣ 여러 슬라이스 합치기</strong></p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// useStore.ts</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">create</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">zustand</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">CounterSlice</span><span class="p">,</span> <span class="nx">createCounterSlice</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./counterSlice</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">ThemeSlice</span><span class="p">,</span> <span class="nx">createThemeSlice</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./themeSlice</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">type</span> <span class="nx">Store</span> <span class="o">=</span> <span class="nx">CounterSlice</span> <span class="o">&amp;</span> <span class="nx">ThemeSlice</span><span class="p">;</span> <span class="c1">//여러개의 slice 통합</span>
+
+<span class="kd">const</span> <span class="nx">useStore</span> <span class="o">=</span> <span class="nx">create</span><span class="o">&lt;</span><span class="nx">Store</span><span class="o">&gt;</span><span class="p">()((...</span><span class="nx">a</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">({</span>
+  <span class="p">...</span><span class="nf">createCounterSlice</span><span class="p">(...</span><span class="nx">a</span><span class="p">),</span>
+  <span class="p">...</span><span class="nf">createThemeSlice</span><span class="p">(...</span><span class="nx">a</span><span class="p">),</span>
+<span class="p">}));</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="nx">useStore</span><span class="p">;</span>
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">create</code> 함수에서 여러 슬라이스를 병합하여 하나의 스토어로 생성</li>
+  <li><code class="language-plaintext highlighter-rouge">...createCounterSlice(...a)</code>를 통해 상태를 결합</li>
+</ul>
+
+<h3 id="3-정리"><strong>3. 정리</strong></h3>
+
+<p>✅ <strong>슬라이스 패턴의 핵심 개념</strong></p>
+
+<ul>
+  <li><strong>기능별로 상태를 분리</strong>하여 유지보수성을 높임</li>
+  <li><strong>여러 슬라이스를 결합하여 하나의 상태로 통합</strong></li>
+  <li><strong>Zustand의 <code class="language-plaintext highlighter-rouge">StateCreator</code>를 활용하여 슬라이스 타입을 안전하게 관리</strong></li>
+</ul>
+
+<p>✅ <strong>언제 사용할까?</strong></p>
+
+<ul>
+  <li>애플리케이션 상태가 점점 커질 때</li>
+  <li>여러 상태(예: <code class="language-plaintext highlighter-rouge">user</code>, <code class="language-plaintext highlighter-rouge">theme</code>, <code class="language-plaintext highlighter-rouge">cart</code> 등)를 관리해야 할 때</li>
+  <li>코드의 가독성과 유지보수를 개선하고 싶을 때</li>
+</ul>]]></content><author><name>haeran</name></author><category term="Study" /><category term="Zustand" /><summary type="html"><![CDATA[💻 우리 프로젝트에서 Zustand 사용 방식]]></summary></entry><entry><title type="html">TypeScript `Partial`과 `Omit` 차이점</title><link href="https://kimmand0o0.github.io/study/2025/02/27/typescript_omit_partial.html" rel="alternate" type="text/html" title="TypeScript `Partial`과 `Omit` 차이점" /><published>2025-02-27T12:07:00+00:00</published><updated>2025-02-27T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/02/27/typescript_omit_partial</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/02/27/typescript_omit_partial.html"><![CDATA[<h1 id="typescript-partial과-omit-차이점">TypeScript <code class="language-plaintext highlighter-rouge">Partial</code>과 <code class="language-plaintext highlighter-rouge">Omit</code> 차이점</h1>
+
+<p>TypeScript에서 <code class="language-plaintext highlighter-rouge">Partial</code>과 <code class="language-plaintext highlighter-rouge">Omit</code>은 객체 타입을 변경하는 유용한 유틸리티 타입입니다. 이들의 차이점은 주로 속성을 어떻게 처리하는지에 있습니다.</p>
+
+<h2 id="1-partialt">1. <code class="language-plaintext highlighter-rouge">Partial&lt;T&gt;</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">Partial</code>은 주어진 타입 <code class="language-plaintext highlighter-rouge">T</code>의 모든 속성을 <strong>선택적으로</strong> 만듭니다. 즉, 타입의 각 프로퍼티를 optional로 바꿔줍니다.</p>
+
+<h3 id="예시">예시:</h3>
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">interface</span> <span class="nx">User</span> <span class="p">{</span>
+  <span class="nl">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">age</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">user</span><span class="p">:</span> <span class="nb">Partial</span><span class="o">&lt;</span><span class="nx">User</span><span class="o">&gt;</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Alice</span><span class="dl">"</span>
+  <span class="c1">// age는 선택적이므로 생략 가능</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h3 id="특징">특징:</h3>
+<ul>
+  <li>모든 속성이 선택적입니다.</li>
+  <li>객체의 속성 중 일부만 포함될 수 있습니다.</li>
+</ul>
+
+<h2 id="2-omitt-k">2. <code class="language-plaintext highlighter-rouge">Omit&lt;T, K&gt;</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">Omit</code>은 주어진 타입 <code class="language-plaintext highlighter-rouge">T</code>에서 특정 속성 <code class="language-plaintext highlighter-rouge">K</code>를 <strong>제거</strong>한 새로운 타입을 생성합니다. <code class="language-plaintext highlighter-rouge">K</code>는 제거할 속성들의 키를 나타냅니다.</p>
+
+<h3 id="예시-1">예시:</h3>
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">interface</span> <span class="nx">User</span> <span class="p">{</span>
+  <span class="nl">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">age</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+  <span class="nl">email</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">user</span><span class="p">:</span> <span class="nb">Omit</span><span class="o">&lt;</span><span class="nx">User</span><span class="p">,</span> <span class="dl">"</span><span class="s2">email</span><span class="dl">"</span><span class="o">&gt;</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Alice</span><span class="dl">"</span><span class="p">,</span>
+  <span class="na">age</span><span class="p">:</span> <span class="mi">25</span>
+  <span class="c1">// email 속성은 제거됨</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h3 id="특징-1">특징:</h3>
+<ul>
+  <li>특정 속성을 제외하고 나머지 속성만 포함합니다.</li>
+  <li>하나 이상의 속성도 제거할 수 있습니다.</li>
+</ul>
+
+<h2 id="차이점-요약">차이점 요약:</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>유틸리티 타입</th>
+      <th>동작 방식</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**<code class="language-plaintext highlighter-rouge">Partial&lt;T&gt;</code>**</td>
+      <td>모든 속성을 선택적으로 만듭니다.</td>
+    </tr>
+    <tr>
+      <td>**<code class="language-plaintext highlighter-rouge">Omit&lt;T, K&gt;</code>**</td>
+      <td>특정 속성을 제거하고 나머지 속성만 포함합니다.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>따라서, <code class="language-plaintext highlighter-rouge">Partial</code>은 속성을 선택적으로 만들 때 사용하고, <code class="language-plaintext highlighter-rouge">Omit</code>은 특정 속성을 제거할 때 사용됩니다.</p>]]></content><author><name>haeran</name></author><category term="Study" /><category term="Study" /><category term="Typescript" /><summary type="html"><![CDATA[TypeScript Partial과 Omit 차이점]]></summary></entry><entry><title type="html">Next.js server와 client의 다른 fetch…</title><link href="https://kimmand0o0.github.io/study/2025/02/26/next_fetch.html" rel="alternate" type="text/html" title="Next.js server와 client의 다른 fetch…" /><published>2025-02-26T12:07:00+00:00</published><updated>2025-02-26T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/02/26/next_fetch</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/02/26/next_fetch.html"><![CDATA[<h2 id="-서버server에서는-url이-필요-없는-이유">🚀 서버(Server)에서는 URL이 필요 없는 이유</h2>
+<p>Next.js 서버는 <strong>배코드 환경(Node.js)에서 실행</strong>되기 때문에, 서버 내부에서 API를 호출할 때는 <strong>절대 URL이 필요하지 않음</strong>.<br />
+상대 경로(<code class="language-plaintext highlighter-rouge">/api/something</code>)만 사용해도 요청을 처리할 수 있다.</p>
+
+<h3 id="예제-코드">예제 코드</h3>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// pages/api/example.ts</span>
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">handler</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nf">status</span><span class="p">(</span><span class="mi">200</span><span class="p">).</span><span class="nf">json</span><span class="p">({</span> <span class="na">message</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Hello from API!</span><span class="dl">"</span> <span class="p">});</span>
+<span class="p">}</span>
+
+<span class="c1">// pages/index.tsx (서버에서 실행)</span>
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">getServerSideProps</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">res</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="s2">`/api/example`</span><span class="p">);</span> <span class="c1">// 절대 URL 불필요</span>
+  <span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">res</span><span class="p">.</span><span class="nf">json</span><span class="p">();</span>
+
+  <span class="k">return</span> <span class="p">{</span> <span class="na">props</span><span class="p">:</span> <span class="p">{</span> <span class="nx">data</span> <span class="p">}</span> <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="이유">이유</h3>
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">fetch("/api/example")</code> 하면 Next.js 서버 내부에서 처리되는 것이기 때문에, <strong>절대 URL 없이 상대 경로만으로 요청 가능</strong>.</li>
+  <li>API 라우트(<code class="language-plaintext highlighter-rouge">/api/*</code>)는 <strong>Next.js 서버가 직접 처리</strong>하는 것이기 때문에, 요청을 외부 네트워크로 보내지 않음.</li>
+</ol>
+
+<hr />
+
+<h2 id="-클라이언트client에서는-url이-필요한-이유">🌍 클라이언트(Client)에서는 URL이 필요한 이유</h2>
+<p>클라이언트는 <strong>브라우저에서 실행</strong>되는데, API 요청을 할 때는 <strong>절대 URL이 필요</strong>하다.<br />
+<code class="language-plaintext highlighter-rouge">fetch</code>를 사용할 때 <code class="language-plaintext highlighter-rouge">http://localhost:3000/api/something</code> 또는 배포된 도메인(예: <code class="language-plaintext highlighter-rouge">https://myapp.com/api/something</code>)을 명시해야 한다.</p>
+
+<h3 id="예제-코드-1">예제 코드</h3>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// components/Example.tsx (클라이언트에서 실행)</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useEffect</span><span class="p">,</span> <span class="nx">useState</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">react</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Example</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">data</span><span class="p">,</span> <span class="nx">setData</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+
+  <span class="nf">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nf">fetch</span><span class="p">(</span><span class="dl">"</span><span class="s2">http://localhost:3000/api/example</span><span class="dl">"</span><span class="p">)</span> <span class="c1">// 절대 URL 필요</span>
+      <span class="p">.</span><span class="nf">then</span><span class="p">((</span><span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">res</span><span class="p">.</span><span class="nf">json</span><span class="p">())</span>
+      <span class="p">.</span><span class="nf">then</span><span class="p">((</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nf">setData</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
+  <span class="p">},</span> <span class="p">[]);</span>
+
+  <span class="k">return</span> <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span><span class="p">{</span><span class="nx">data</span> <span class="p">?</span> <span class="nx">data</span><span class="p">.</span><span class="nx">message</span> <span class="p">:</span> <span class="dl">"</span><span class="s2">Loading...</span><span class="dl">"</span><span class="p">}</span><span class="o">&lt;</span><span class="sr">/div&gt;</span><span class="err">;
+</span><span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="이유-1">이유</h3>
+<ol>
+  <li><strong>브라우저는 Next.js 서버와 분리된 환경</strong>에서 실행되기 때문에, API 호출시 <strong>정확한 주소(절대 URL)</strong>가 필요함.</li>
+  <li>클라이언트에서 <code class="language-plaintext highlighter-rouge">fetch("/api/example")</code>만 사용하면, <strong>현재 페이지 URL 기준으로 요청</strong>해서 경로가 꼽일 수 있음.</li>
+  <li>배포된 환경에서는 <code class="language-plaintext highlighter-rouge">localhost</code>가 아니라 실제 도메인(<code class="language-plaintext highlighter-rouge">https://myapp.com/api/something</code>)을 사용해야 하기 때문.</li>
+</ol>
+
+<p><img src="https://github.com/user-attachments/assets/0533d3cc-09e7-4493-8e2b-b91fa6f9c526" alt="client와server의fetch" /></p>
+
+<h2 id="-정리">✅ 정리</h2>
+<p>| 실행 환경 | URL 필요 여부 | 이유 |
+|———-|————|——|
+| **서버 (Next.js API, <code class="language-plaintext highlighter-rouge">getServerSideProps</code>)** | ❌ 필요 없음 | 서버 내부에서 실행되는데 상대 경로 사용 가능 |
+| **클라이언트 (React 컴포넌트, <code class="language-plaintext highlighter-rouge">useEffect</code>)** | ✅ 필요함 | 브라우저에서 API 호출할 때 절대 URL 필요 |</p>]]></content><author><name>haeran</name></author><category term="Study" /><category term="Study" /><category term="Next.js" /><summary type="html"><![CDATA[🚀 서버(Server)에서는 URL이 필요 없는 이유 Next.js 서버는 배코드 환경(Node.js)에서 실행되기 때문에, 서버 내부에서 API를 호출할 때는 절대 URL이 필요하지 않음. 상대 경로(/api/something)만 사용해도 요청을 처리할 수 있다.]]></summary></entry><entry><title type="html">Dto와 type은 다른건가?</title><link href="https://kimmand0o0.github.io/study/2025/02/26/dto_type.html" rel="alternate" type="text/html" title="Dto와 type은 다른건가?" /><published>2025-02-26T12:07:00+00:00</published><updated>2025-02-26T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/02/26/dto_type</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/02/26/dto_type.html"><![CDATA[<h3 id="dto란-data-transfer-object"><strong>DTO란? (Data Transfer Object)</strong></h3>
+<p>DTO(Data Transfer Object)는 계층 간 데이터 전송을 위해 사용하는 객체입니다. 주로 <strong>컨트롤러 ↔ 서비스 ↔ 데이터베이스</strong> 간에 데이터를 주고받을 때 사용됩니다.</p>
+
+<h4 id="dto의-특징"><strong>DTO의 특징</strong></h4>
+<ul>
+  <li>불필요한 데이터를 제외하고, 필요한 데이터만 포함</li>
+  <li>데이터를 변환하거나 가공할 수 있음</li>
+  <li>보안 및 성능 최적화를 위해 사용</li>
+  <li><code class="language-plaintext highlighter-rouge">class</code> 또는 <code class="language-plaintext highlighter-rouge">interface</code>로 선언 가능</li>
+</ul>
+
+<h4 id="예시-typescript"><strong>예시 (TypeScript)</strong></h4>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">UserDto</span> <span class="p">{</span>
+  <span class="nl">id</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+  <span class="nl">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">email</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+
+  <span class="nf">constructor</span><span class="p">(</span><span class="nx">id</span><span class="p">:</span> <span class="kr">number</span><span class="p">,</span> <span class="nx">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span> <span class="nx">email</span><span class="p">:</span> <span class="kr">string</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">id</span> <span class="o">=</span> <span class="nx">id</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="nx">name</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">email</span> <span class="o">=</span> <span class="nx">email</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>위 <code class="language-plaintext highlighter-rouge">UserDto</code> 클래스는 데이터베이스에서 가져온 유저 정보를 가공하여 클라이언트에 전달하는 데 사용할 수 있습니다.</p>
+
+<hr />
+
+<h3 id="type과-dto의-차이점"><strong>type과 DTO의 차이점</strong></h3>
+<p>| 비교 항목      | type | DTO |
+|—————|——–|—–|
+| 선언 방식     | type 키워드 사용 | <code class="language-plaintext highlighter-rouge">class</code> 또는 <code class="language-plaintext highlighter-rouge">interface</code> 사용 |
+| 기능         | 단순 타입 정의 | 데이터 가공 및 메서드 포함 가능 |
+| 인스턴스화 가능 여부 | ❌ (객체 생성 불가) | ✅ (객체 생성 가능) |
+| 계층 간 데이터 전송 | ❌ (주로 타입 검증 용도) | ✅ (데이터 변환, 유효성 검사 가능) |</p>
+
+<h4 id="type-예시-typescript"><strong>type 예시 (TypeScript)</strong></h4>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">type</span> <span class="nx">User</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">id</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+  <span class="nl">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">email</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h4 id="dto와-type-비교-예시"><strong>DTO와 type 비교 예시</strong></h4>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// type: 단순 데이터 구조</span>
+<span class="kd">type</span> <span class="nx">UserType</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">id</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+  <span class="nl">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">email</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// DTO: 데이터 변환 및 가공 가능</span>
+<span class="kd">class</span> <span class="nc">UserDto</span> <span class="p">{</span>
+  <span class="nl">id</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+  <span class="nl">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">email</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+
+  <span class="nf">constructor</span><span class="p">(</span><span class="nx">user</span><span class="p">:</span> <span class="nx">UserType</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">id</span> <span class="o">=</span> <span class="nx">user</span><span class="p">.</span><span class="nx">id</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nf">toUpperCase</span><span class="p">();</span> <span class="c1">// 예제: 이름을 대문자로 변환</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">email</span> <span class="o">=</span> <span class="nx">user</span><span class="p">.</span><span class="nx">email</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="정리"><strong>정리</strong></h3>
+<p>✅ type은 단순한 데이터 구조를 정의하는 데 사용<br />
+✅ DTO는 데이터를 가공하거나 변환할 때 사용</p>]]></content><author><name>haeran</name></author><category term="Study" /><category term="Study" /><category term="Typescript" /><summary type="html"><![CDATA[DTO란? (Data Transfer Object) DTO(Data Transfer Object)는 계층 간 데이터 전송을 위해 사용하는 객체입니다. 주로 컨트롤러 ↔ 서비스 ↔ 데이터베이스 간에 데이터를 주고받을 때 사용됩니다.]]></summary></entry><entry><title type="html">Next.js - middleware로 유저 인증하기</title><link href="https://kimmand0o0.github.io/study/2025/02/25/next_middleware.html" rel="alternate" type="text/html" title="Next.js - middleware로 유저 인증하기" /><published>2025-02-25T12:07:00+00:00</published><updated>2025-02-25T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/02/25/next_middleware</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/02/25/next_middleware.html"><![CDATA[<h2 id="-middleware-개요">📌 Middleware 개요</h2>
+<p>Next.js의 <strong>Middleware</strong>는 사용자의 요청(Request)을 처리하기 전에 실행되는 코드로, 요청을 변경하거나 특정 조건에 따라 다른 응답을 반환하는 데 사용됩니다. Next.js Middleware는 <strong>Edge Runtime</strong>에서 실행되며, 서버리스 환경에서도 작동할 수 있습니다.</p>
+
+<hr />
+
+<h2 id="-middleware-기본-구조">📌 Middleware 기본 구조</h2>
+
+<p><code class="language-plaintext highlighter-rouge">middleware.ts</code> 파일을 프로젝트 루트에 추가하여 사용합니다.</p>
+
+<h3 id="1️⃣-기본-예제">1️⃣ 기본 예제</h3>
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">NextRequest</span><span class="p">,</span> <span class="nx">NextResponse</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/server</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">middleware</span><span class="p">(</span><span class="nx">req</span><span class="p">:</span> <span class="nx">NextRequest</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">token</span> <span class="o">=</span> <span class="nx">req</span><span class="p">.</span><span class="nx">cookies</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">token</span><span class="dl">"</span><span class="p">)?.</span><span class="nx">value</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">pathname</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">req</span><span class="p">.</span><span class="nx">nextUrl</span>
+
+  <span class="c1">// 로그인 여부에 따라 페이지 이동</span>
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">token</span> <span class="o">&amp;&amp;</span> <span class="nx">pathname</span> <span class="o">!==</span> <span class="dl">"</span><span class="s2">/login</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">redirect</span><span class="p">(</span><span class="k">new</span> <span class="nc">URL</span><span class="p">(</span><span class="dl">"</span><span class="s2">/login</span><span class="dl">"</span><span class="p">,</span> <span class="nx">req</span><span class="p">.</span><span class="nx">url</span><span class="p">))</span>
+  <span class="p">}</span>
+
+  <span class="k">if </span><span class="p">(</span><span class="nx">token</span> <span class="o">&amp;&amp;</span> <span class="nx">pathname</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">/login</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">redirect</span><span class="p">(</span><span class="k">new</span> <span class="nc">URL</span><span class="p">(</span><span class="dl">"</span><span class="s2">/</span><span class="dl">"</span><span class="p">,</span> <span class="nx">req</span><span class="p">.</span><span class="nx">url</span><span class="p">))</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">next</span><span class="p">();</span> <span class="c1">// 요청 계속 진행</span>
+<span class="p">}</span>
+
+<span class="c1">// 특정 경로에만 Middleware 적용할 수 있습니다.</span>
+<span class="c1">// 저는 static, image, favicon, api, image, pay를 제외시켰습니다.</span>
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">config</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">matcher</span><span class="p">:</span> <span class="p">[</span><span class="dl">"</span><span class="s2">/((?!_next/static|_next/image|favicon.ico|api|.*</span><span class="se">\\</span><span class="s2">.(?:svg|png|jpg|jpeg|gif|webp)$|^/pay).*)</span><span class="dl">"</span><span class="p">,],</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h2 id="-middleware-실행-흐름">📌 Middleware 실행 흐름</h2>
+<ol>
+  <li>클라이언트 요청 발생</li>
+  <li><code class="language-plaintext highlighter-rouge">middleware.ts</code> 실행 (요청 변경 가능)</li>
+  <li><code class="language-plaintext highlighter-rouge">NextResponse.next()</code> 호출 시 원래 요청된 페이지로 진행</li>
+  <li><code class="language-plaintext highlighter-rouge">NextResponse.redirect()</code> 또는 <code class="language-plaintext highlighter-rouge">NextResponse.rewrite()</code>를 통해 요청 경로 변경 가능</li>
+</ol>
+
+<h2 id="-middleware-주요-기능">📌 Middleware 주요 기능</h2>
+
+<h3 id="-1-리디렉션-redirect">✅ 1. 리디렉션 (Redirect)</h3>
+<p>사용자가 특정 페이지에 접근하면 강제로 다른 페이지로 이동시킵니다.</p>
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">function</span> <span class="nf">middleware</span><span class="p">(</span><span class="nx">req</span><span class="p">:</span> <span class="nx">NextRequest</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">redirect</span><span class="p">(</span><span class="k">new</span> <span class="nc">URL</span><span class="p">(</span><span class="dl">'</span><span class="s1">/new-page</span><span class="dl">'</span><span class="p">,</span> <span class="nx">req</span><span class="p">.</span><span class="nx">url</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="-2-url-재작성-rewrite">✅ 2. URL 재작성 (Rewrite)</h3>
+<p>URL을 변경하지만 브라우저 URL은 유지됩니다.</p>
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">function</span> <span class="nf">middleware</span><span class="p">(</span><span class="nx">req</span><span class="p">:</span> <span class="nx">NextRequest</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">rewrite</span><span class="p">(</span><span class="k">new</span> <span class="nc">URL</span><span class="p">(</span><span class="dl">'</span><span class="s1">/new-path</span><span class="dl">'</span><span class="p">,</span> <span class="nx">req</span><span class="p">.</span><span class="nx">url</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="-3-헤더-변경">✅ 3. 헤더 변경</h3>
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">function</span> <span class="nf">middleware</span><span class="p">(</span><span class="nx">req</span><span class="p">:</span> <span class="nx">NextRequest</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">next</span><span class="p">();</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nx">headers</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="dl">'</span><span class="s1">X-Custom-Header</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">Hello</span><span class="dl">'</span><span class="p">);</span>
+  <span class="k">return</span> <span class="nx">res</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="-4-쿠키-조작">✅ 4. 쿠키 조작</h3>
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">function</span> <span class="nf">middleware</span><span class="p">(</span><span class="nx">req</span><span class="p">:</span> <span class="nx">NextRequest</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">next</span><span class="p">();</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nx">cookies</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="dl">'</span><span class="s1">token</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">123456</span><span class="dl">'</span><span class="p">);</span>
+  <span class="k">return</span> <span class="nx">res</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="-특정-경로에만-middleware-적용-matcher">📌 특정 경로에만 Middleware 적용 (Matcher)</h2>
+<p><code class="language-plaintext highlighter-rouge">config.matcher</code>를 사용하면 특정 경로에만 Middleware를 적용할 수 있습니다.</p>
+
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">const</span> <span class="nx">config</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">matcher</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">/admin/:path*</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">/dashboard/:path*</span><span class="dl">'</span><span class="p">],</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">/admin/*</code> 및 <code class="language-plaintext highlighter-rouge">/dashboard/*</code> 경로에만 Middleware 적용</li>
+</ul>
+
+<hr />
+
+<h2 id="-middleware-vs-api-route-vs-server-components">📌 Middleware vs API Route vs Server Components</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>기능</th>
+      <th>Middleware</th>
+      <th>API Route</th>
+      <th>Server Component</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>실행 시점</td>
+      <td>요청 전에 실행</td>
+      <td>요청 시 실행</td>
+      <td>페이지 렌더링 중 실행</td>
+    </tr>
+    <tr>
+      <td>Edge 실행</td>
+      <td>✅</td>
+      <td>❌</td>
+      <td>❌</td>
+    </tr>
+    <tr>
+      <td>요청 수정</td>
+      <td>✅</td>
+      <td>❌</td>
+      <td>❌</td>
+    </tr>
+    <tr>
+      <td>데이터 패칭</td>
+      <td>❌</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>리디렉트 가능</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>❌</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Middleware는 요청을 가로채고 변경하는 역할을 하며, API Route나 Server Component와 다르게 <strong>Edge에서 실행 가능</strong>하다는 점이 특징입니다.</p>
+
+<hr />
+
+<h2 id="-실제-사용-예시-로그인-체크-및-리디렉트">✅ 실제 사용 예시: 로그인 체크 및 리디렉트</h2>
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">function</span> <span class="nf">middleware</span><span class="p">(</span><span class="nx">req</span><span class="p">:</span> <span class="nx">NextRequest</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">token</span> <span class="o">=</span> <span class="nx">req</span><span class="p">.</span><span class="nx">cookies</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">'</span><span class="s1">auth</span><span class="dl">'</span><span class="p">);</span>
+
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">token</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">redirect</span><span class="p">(</span><span class="k">new</span> <span class="nc">URL</span><span class="p">(</span><span class="dl">'</span><span class="s1">/login</span><span class="dl">'</span><span class="p">,</span> <span class="nx">req</span><span class="p">.</span><span class="nx">url</span><span class="p">));</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">next</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">config</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">matcher</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">/dashboard/:path*</span><span class="dl">'</span><span class="p">],</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>➡ <code class="language-plaintext highlighter-rouge">/dashboard</code>에 접근하려면 <code class="language-plaintext highlighter-rouge">auth</code> 쿠키가 있어야 하며, 없으면 <code class="language-plaintext highlighter-rouge">/login</code>으로 이동합니다.</p>
+
+<hr />
+
+<h2 id="-정리">📌 정리</h2>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">middleware.ts</code> 파일에서 <code class="language-plaintext highlighter-rouge">export function middleware()</code>을 정의하여 사용</li>
+  <li><code class="language-plaintext highlighter-rouge">NextRequest</code>와 <code class="language-plaintext highlighter-rouge">NextResponse</code>를 활용해 요청을 수정 가능</li>
+  <li><code class="language-plaintext highlighter-rouge">NextResponse.next()</code>, <code class="language-plaintext highlighter-rouge">NextResponse.redirect()</code>, <code class="language-plaintext highlighter-rouge">NextResponse.rewrite()</code> 등의 메서드 제공</li>
+  <li><code class="language-plaintext highlighter-rouge">config.matcher</code>를 활용하여 특정 경로에서만 실행 가능</li>
+</ul>]]></content><author><name>haeran</name></author><category term="Study" /><category term="Study" /><category term="Next.js" /><summary type="html"><![CDATA[📌 Middleware 개요 Next.js의 Middleware는 사용자의 요청(Request)을 처리하기 전에 실행되는 코드로, 요청을 변경하거나 특정 조건에 따라 다른 응답을 반환하는 데 사용됩니다. Next.js Middleware는 Edge Runtime에서 실행되며, 서버리스 환경에서도 작동할 수 있습니다.]]></summary></entry><entry><title type="html">다이나믹 라우트(Dynamic Route)의 슬러그(Slug)가 뭐지?</title><link href="https://kimmand0o0.github.io/study/2025/02/24/dynamic_route_slug.html" rel="alternate" type="text/html" title="다이나믹 라우트(Dynamic Route)의 슬러그(Slug)가 뭐지?" /><published>2025-02-24T12:07:00+00:00</published><updated>2025-02-24T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/02/24/dynamic_route_slug</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/02/24/dynamic_route_slug.html"><![CDATA[<h3 id="nextjs에서-다이나믹-라우트dynamic-route에서-슬러그slug">Next.js에서 다이나믹 라우트(Dynamic Route)에서 슬러그(Slug)</h3>
+<p>Next.js에서 다이나믹 라우트에서 <strong>슬러그(Slug)</strong> 는 URL의 특정 부분을 변수처럼 다루는 역할을 합니다.</p>
+
+<h3 id="-슬러그slug의-의미">📌 “슬러그(Slug)”의 의미</h3>
+<p>“슬러그(Slug)”는 웹 개발에서 <strong>URL의 식별자 역할을 하는 문자열</strong>을 의미해요.<br />
+주로 페이지나 포스트의 고유한 부분을 가리키며, 보통 <strong>영어 소문자와 하이픈(-)을 사용</strong>해서 사람이 읽기 쉬운 형태로 만듭니다.</p>
+
+<p>예를 들어:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">https://example.com/blog/nextjs-routing</code></li>
+  <li><code class="language-plaintext highlighter-rouge">https://example.com/product/iphone-15-pro</code></li>
+</ul>
+
+<p>여기서 <strong>“nextjs-routing”</strong> 이나 <strong>“iphone-15-pro”</strong> 같은 부분이 <strong>슬러그(slug)</strong> 입니다.</p>
+
+<hr />
+
+<h3 id="-슬러그-예제">📌 슬러그 예제</h3>
+<p>다음과 같이 <code class="language-plaintext highlighter-rouge">pages/blog/[slug].js</code> 파일을 만들었다고 가정해 보겠습니다.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">useRouter</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/router</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">BlogPost</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">router</span> <span class="o">=</span> <span class="nf">useRouter</span><span class="p">();</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">slug</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">router</span><span class="p">.</span><span class="nx">query</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>블로그 포스트: <span class="si">{</span><span class="nx">slug</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;;</span>
+<span class="p">};</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="nx">BlogPost</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="-해당-페이지의-동작-방식">🔹 해당 페이지의 동작 방식</h4>
+<p>이제 아래와 같은 URL을 입력하면:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">/blog/nextjs-routing</code> → <code class="language-plaintext highlighter-rouge">slug = "nextjs-routing"</code></li>
+  <li><code class="language-plaintext highlighter-rouge">/blog/how-to-use-api</code> → <code class="language-plaintext highlighter-rouge">slug = "how-to-use-api"</code></li>
+</ul>
+
+<p>이렇게 URL의 일부가 <strong>동적으로 변경되는 값(slug)</strong> 으로 사용됩니다.</p>
+
+<hr />
+
+<h3 id="-다중-슬러그-catch-all-routes">📌 다중 슬러그 (Catch-all Routes)</h3>
+<p>여러 개의 동적 경로를 처리하고 싶다면 <code class="language-plaintext highlighter-rouge">[...slug].js</code>를 사용할 수도 있습니다.</p>
+
+<p>예를 들어, <code class="language-plaintext highlighter-rouge">pages/blog/[...slug].js</code> 를 만들면 <code class="language-plaintext highlighter-rouge">/blog/category/javascript/react</code> 같은 경로를 배열로 받을 수 있습니다.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">useRouter</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">next/router</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">BlogPost</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">router</span> <span class="o">=</span> <span class="nf">useRouter</span><span class="p">();</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">slug</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">router</span><span class="p">.</span><span class="nx">query</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Slug 값: <span class="si">{</span><span class="nx">JSON</span><span class="p">.</span><span class="nf">stringify</span><span class="p">(</span><span class="nx">slug</span><span class="p">)</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;;</span>
+<span class="p">};</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="nx">BlogPost</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h4 id="-해당-페이지의-동작-방식-1">🔹 해당 페이지의 동작 방식</h4>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">/blog/category/javascript</code> → <code class="language-plaintext highlighter-rouge">slug = ["category", "javascript"]</code></li>
+  <li><code class="language-plaintext highlighter-rouge">/blog/category/javascript/react</code> → <code class="language-plaintext highlighter-rouge">slug = ["category", "javascript", "react"]</code></li>
+</ul>
+
+<p>이처럼 <strong>여러 개의 동적 경로를 배열 형태로 받을 수 있습니다.</strong><br />
+Next.js에서 다이나믹 라우트 슬러그는 URL에서 특정 값을 변수처럼 활용하는 중요한 개념이에요! 🚀</p>
+
+<hr />
+
+<h3 id="-왜-slug라고-부를까">📌 왜 “Slug”라고 부를까?</h3>
+<p>“Slug”라는 단어는 원래 <strong>신문사</strong>에서 유래했어요.<br />
+신문사에서는 기사나 원고를 식별하기 위해 <strong>짧고 고유한 이름(코드)을 붙이는 것</strong>을 “slug”라고 불렀어요.<br />
+웹 개발에서도 <strong>URL에서 페이지나 콘텐츠를 식별하는 역할</strong>을 하기 때문에 같은 개념이 사용된 거예요.</p>
+
+<p>📖 <strong>어원 정리</strong></p>
+<ul>
+  <li><strong>신문사에서 기사 제목을 짧게 줄여 쓰던 용어</strong> → <strong>웹에서 URL의 특정 부분을 의미하는 용어로 발전</strong></li>
+</ul>
+
+<hr />
+
+<h3 id="-슬러그의-특징">📌 슬러그의 특징</h3>
+<ol>
+  <li><strong>고유해야 함</strong> → 같은 페이지에 중복된 슬러그가 있으면 안 됨.</li>
+  <li><strong>SEO(검색 엔진 최적화)에 유리</strong> → 사람이 읽기 쉬운 URL이 검색에 더 잘 노출됨.</li>
+  <li><strong>소문자와 하이픈(-) 사용이 일반적</strong> → 띄어쓰기는 <code class="language-plaintext highlighter-rouge">%20</code>(공백) 대신 하이픈을 사용해서 가독성을 높임.</li>
+</ol>
+
+<p>📌 <strong>예제 비교</strong>
+✅ <strong>좋은 슬러그:</strong></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">/blog/how-to-use-nextjs</code></li>
+  <li><code class="language-plaintext highlighter-rouge">/product/iphone-15-pro</code></li>
+</ul>
+
+<p>❌ <strong>나쁜 슬러그:</strong></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">/blog/HowToUseNextJS</code> (대소문자 혼용)</li>
+  <li><code class="language-plaintext highlighter-rouge">/product/iphone_15_pro</code> (언더스코어 <code class="language-plaintext highlighter-rouge">_</code> 대신 하이픈 <code class="language-plaintext highlighter-rouge">-</code> 사용 권장)</li>
+</ul>
+
+<hr />
+
+<h3 id="-정리">📌 정리</h3>
+<p>✅ <strong>슬러그(Slug)</strong> 는 웹 URL에서 특정 콘텐츠를 가리키는 짧고 고유한 식별자!<br />
+✅ <strong>신문사에서 사용하던 용어</strong>가 웹 개발로 넘어와 정착된 개념!<br />
+✅ <strong>SEO와 가독성</strong>을 위해 짧고 의미 있게 작성하는 것이 중요! 🚀</p>]]></content><author><name>haeran</name></author><category term="Study" /><category term="Study" /><category term="Next.js" /><summary type="html"><![CDATA[Next.js에서 다이나믹 라우트(Dynamic Route)에서 슬러그(Slug) Next.js에서 다이나믹 라우트에서 슬러그(Slug) 는 URL의 특정 부분을 변수처럼 다루는 역할을 합니다.]]></summary></entry><entry><title type="html">waitForTimeout 매서드를 꼭 써야할까?</title><link href="https://kimmand0o0.github.io/study/2025/02/22/test_code_waitForTimeout.html" rel="alternate" type="text/html" title="waitForTimeout 매서드를 꼭 써야할까?" /><published>2025-02-22T12:07:00+00:00</published><updated>2025-02-22T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/02/22/test_code_waitForTimeout</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/02/22/test_code_waitForTimeout.html"><![CDATA[<h2 id="playwright-vs-vitest에서-waitfortimeout500-사용에-대한-비교">Playwright vs Vitest에서 <code class="language-plaintext highlighter-rouge">waitForTimeout(500)</code> 사용에 대한 비교</h2>
+
+<h3 id="-playwright에서-waitfortimeout500이-불필요한-이유">✅ <strong>Playwright에서 <code class="language-plaintext highlighter-rouge">waitForTimeout(500)</code>이 불필요한 이유</strong></h3>
+<p>Playwright는 기본적으로 자동 대기 기능을 제공하여, 대부분의 경우 <code class="language-plaintext highlighter-rouge">waitForTimeout(500)</code>과 같은 명시적인 대기 시간을 설정할 필요가 없습니다. 주요 이유는 다음과 같습니다:</p>
+
+<ol>
+  <li>
+    <p><strong>자동 대기 기능</strong>
+Playwright는 대기 시간 설정 없이도 자동으로 이벤트나 요소가 나타날 때까지 기다려줍니다. 예를 들어, <code class="language-plaintext highlighter-rouge">page.once('dialog', callback)</code>를 사용하면 <code class="language-plaintext highlighter-rouge">dialog</code> 이벤트가 발생할 때까지 기다립니다. 별도로 <code class="language-plaintext highlighter-rouge">waitForTimeout</code>을 사용하지 않아도 충분히 동작합니다.</p>
+  </li>
+  <li>
+    <p><strong>비효율적인 대기 시간 하드코딩</strong>
+<code class="language-plaintext highlighter-rouge">waitForTimeout(500)</code>은 특정 시간(500ms) 동안 강제로 대기하게 만듭니다. 이는 불필요한 지연을 초래하고, 테스트 환경이나 성능 차이에 따라 다르게 동작할 수 있어 비효율적입니다.</p>
+  </li>
+  <li>
+    <p><strong>대안적인 방법 사용</strong>
+Playwright는 <code class="language-plaintext highlighter-rouge">waitForEvent</code>, <code class="language-plaintext highlighter-rouge">waitForSelector</code>, <code class="language-plaintext highlighter-rouge">waitForFunction</code> 등 다양한 대기 메서드를 제공하여, 대기 시간을 하드코딩하지 않고도 테스트를 안정적으로 수행할 수 있습니다. <br />
+예를 들어:</p>
+    <div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">dialog</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">page</span><span class="p">.</span><span class="nf">waitForEvent</span><span class="p">(</span><span class="dl">'</span><span class="s1">dialog</span><span class="dl">'</span><span class="p">);</span>
+<span class="nf">expect</span><span class="p">(</span><span class="nx">dialog</span><span class="p">.</span><span class="nf">message</span><span class="p">()).</span><span class="nf">toBe</span><span class="p">(</span><span class="dl">'</span><span class="s1">비밀번호가 일치하지 않습니다</span><span class="dl">'</span><span class="p">);</span>
+<span class="k">await</span> <span class="nx">dialog</span><span class="p">.</span><span class="nf">dismiss</span><span class="p">();</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h3 id="-playwright에서-waitfortimeout500이-필요한-예외적인-경우">✅ <strong>Playwright에서 <code class="language-plaintext highlighter-rouge">waitForTimeout(500)</code>이 필요한 예외적인 경우</strong></h3>
+<p>일부 상황에서는 <code class="language-plaintext highlighter-rouge">waitForTimeout</code>이 유용할 수 있습니다. 예를 들어, 애니메이션이나 UI 업데이트로 인해 충분한 대기 시간이 필요할 때 사용할 수 있습니다.</p>
+
+<ol>
+  <li>
+    <p><strong>애니메이션 또는 트랜지션 대기</strong>
+UI 요소가 애니메이션이나 트랜지션을 통해 변할 때, Playwright의 자동 대기 기능이 충분히 기다리지 못할 수 있습니다. 이때 <code class="language-plaintext highlighter-rouge">waitForTimeout(500)</code>을 추가하여 애니메이션이 완료되도록 대기할 수 있습니다.</p>
+  </li>
+  <li>
+    <p><strong>테스트 실행 속도가 빠른 경우</strong>
+Playwright는 빠르게 실행되기 때문에, UI가 업데이트되기 전에 테스트가 진행될 수 있습니다. 이 경우 <code class="language-plaintext highlighter-rouge">waitForTimeout(500)</code>을 사용하여 안정성을 확보할 수 있지만, <code class="language-plaintext highlighter-rouge">waitForSelector</code> 등의 대체 방법이 더 적합합니다.</p>
+  </li>
+</ol>
+
+<hr />
+
+<h3 id="-vitest에서-waitfortimeout500이-불필요한-이유">✅ <strong>Vitest에서 <code class="language-plaintext highlighter-rouge">waitForTimeout(500)</code>이 불필요한 이유</strong></h3>
+<p>Vitest는 자동 대기 기능을 제공하여, <code class="language-plaintext highlighter-rouge">waitForTimeout(500)</code>을 사용하지 않아도 대부분의 경우 안정적인 테스트를 할 수 있습니다.</p>
+
+<ol>
+  <li>
+    <p><strong>자동 대기 기능</strong>
+Vitest의 <code class="language-plaintext highlighter-rouge">expect(element).toBeVisible()</code> 같은 matcher는 요소가 나타날 때까지 자동으로 대기합니다. 또한, <code class="language-plaintext highlighter-rouge">findBy*</code> 계열 메서드 (<code class="language-plaintext highlighter-rouge">findByText</code>, <code class="language-plaintext highlighter-rouge">findByRole</code> 등)는 요소가 나타날 때까지 기다리므로 별도의 대기 시간이 필요 없습니다.</p>
+  </li>
+  <li>
+    <p><strong>하드코딩된 대기 시간 비효율적</strong>
+<code class="language-plaintext highlighter-rouge">waitForTimeout(500)</code>은 테스트 실행 환경에 따라 다르게 동작할 수 있으며, 하드코딩된 대기 시간을 추가하는 것은 불필요한 지연을 초래할 수 있습니다.</p>
+  </li>
+  <li>
+    <p><strong>대안적인 방법 사용</strong>
+Vitest에서도 <code class="language-plaintext highlighter-rouge">waitFor</code>나 <code class="language-plaintext highlighter-rouge">findBy*</code> 메서드를 사용하면, 요소가 나타날 때까지 기다린 후 테스트를 실행할 수 있습니다.
+예를 들어:</p>
+    <div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">await</span> <span class="nf">waitFor</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="nf">expect</span><span class="p">(</span><span class="nx">something</span><span class="p">).</span><span class="nf">toBeTruthy</span><span class="p">());</span>
+<span class="k">await</span> <span class="nx">screen</span><span class="p">.</span><span class="nf">findByRole</span><span class="p">(</span><span class="dl">'</span><span class="s1">alert</span><span class="dl">'</span><span class="p">);</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h3 id="-vitest에서-waitfortimeout500이-필요한-예외적인-경우">✅ <strong>Vitest에서 <code class="language-plaintext highlighter-rouge">waitForTimeout(500)</code>이 필요한 예외적인 경우</strong></h3>
+<p>Vitest에서도 일부 예외적인 상황에서 <code class="language-plaintext highlighter-rouge">waitForTimeout</code>이 필요할 수 있습니다. 예를 들어:</p>
+
+<ol>
+  <li>
+    <p><strong>애니메이션 또는 트랜지션 대기</strong>
+UI 요소가 애니메이션을 통해 변화하거나, 업데이트가 느리게 일어나는 경우 <code class="language-plaintext highlighter-rouge">waitForTimeout(500)</code>을 사용하여 애니메이션이 끝날 때까지 기다릴 수 있습니다.</p>
+  </li>
+  <li>
+    <p><strong>비동기 요청의 빠른 실행</strong>
+API 응답을 기다리기 위해 테스트가 너무 빨리 실행되는 경우, <code class="language-plaintext highlighter-rouge">waitForTimeout(500)</code>을 사용할 수 있습니다. 그러나, 이럴 때에도 <code class="language-plaintext highlighter-rouge">waitFor</code>와 같은 메서드 사용을 권장합니다.
+예시:</p>
+    <div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">await</span> <span class="nf">waitFor</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="nf">expect</span><span class="p">(</span><span class="nx">mockApi</span><span class="p">).</span><span class="nf">toHaveBeenCalled</span><span class="p">());</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h3 id="-결론">🎯 <strong>결론</strong></h3>
+<p><strong>Playwright와 Vitest 모두에서 <code class="language-plaintext highlighter-rouge">waitForTimeout(500)</code>은 대부분의 경우 불필요합니다.</strong> 두 도구 모두 자동 대기 기능과 더 적절한 대체 방법들을 제공하여, 테스트를 안정적으로 수행할 수 있습니다. 하지만 특정 상황에서 애니메이션이나 UI 업데이트가 완료될 때까지 기다려야 하는 경우, 또는 비동기 요청의 실행 속도가 너무 빠를 때 <code class="language-plaintext highlighter-rouge">waitForTimeout</code>을 사용하는 것이 유용할 수 있습니다. 그렇지만 가능한 한 <strong>대기 시간을 하드코딩하기보다는 Playwright와 Vitest의 대기 메서드를 활용하는 것이 더 좋은 해결책</strong>입니다.</p>]]></content><author><name>haeran</name></author><category term="Study" /><category term="Study" /><category term="Test_code" /><summary type="html"><![CDATA[Playwright vs Vitest에서 waitForTimeout(500) 사용에 대한 비교]]></summary></entry></feed>
