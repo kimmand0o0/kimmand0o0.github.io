@@ -1,6 +1,6 @@
 ---
 layout: post
-title: vitest 'mockResolvedValue' 속성 없음
+title: Prisma database와 연결 끊어주기
 author: haeran
 date: 2025-03-02 21:07:00 +0900
 categories: [Study]
@@ -19,7 +19,7 @@ tags: [Prisma]
 
 <img width="912" alt="prisma0" src="https://github.com/user-attachments/assets/b52fea39-833e-41e2-8e3d-d27f31c7de85" />
 
-Prisma를 사용해 데이터베이스와 연결한 후 연결을 닫지 않으면, 데이터베이스의 연결 수가 한정되어 있기 때문에 연결을 닫지 않은 상태로 여러 번 요청을 보내게 되면 연결 수가 초과되어 더 이상 새로운 연결을 할 수 없게 됩니다. 이는 연결을 재사용하지 않고 계속해서 새로운 연결을 열기 때문에 발생하는 문제입니다.
+Prisma를 사용해 데이터베이스와 연결한 후 연결을 닫지 않으면, 데이터베이스의 연결 수가 한정되어 있기 때문에 연결을 닫지 않은 상태로 여러 번 요청을 보내게 되면 연결 수가 초과되어 더 이상 새로운 연결을 할 수 없게 됩니다.
 
 ### 원인
 
