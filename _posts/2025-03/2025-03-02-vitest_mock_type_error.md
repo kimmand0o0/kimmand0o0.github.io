@@ -17,7 +17,7 @@ tags: [Test_code]
 
 Jest에 대한 블로그 게시글은 많았지만 Vitest의 해당 에러에 대한 내용을 찾기 어려워 블로그 글로 남깁니다...
 
-## 발생 에러
+## 발생 에러 
 
 ```jsx
 '() => Promise<{ id: number; userId: number; marimoId: number; status: string; amount: number; paymentKey: string; payResponse: JsonValue; createdAt: Date; updatedAt: Date; }[] | null>' 형식에 'mockResolvedValue' 속성이 없습니다.ts(2339)

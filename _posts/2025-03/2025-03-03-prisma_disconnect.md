@@ -15,7 +15,7 @@ banner:
 tags: [Prisma]
 ---
 
-작업을 하던 중 Database와 연결이 계속해서 끊어지는 상황이 발생...
+작업을 하던 중 Database와 연결이 계속해서 끊어지는 상황이 발생... 
 
 <img width="912" alt="prisma0" src="https://github.com/user-attachments/assets/b52fea39-833e-41e2-8e3d-d27f31c7de85" />
 

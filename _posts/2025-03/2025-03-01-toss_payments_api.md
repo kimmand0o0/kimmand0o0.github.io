@@ -15,7 +15,7 @@ banner:
 tags: [TossAPI]
 ---
 
-## **Toss payments에 대하여**
+## **Toss payments에 대하여** 
 
 Toss Payments는 PG(결제 대행) 서비스로, 사용자가 결제를 시도하면 이를 중개하여 결제 처리 후 결과를 반환하는 역할을 합니다. Toss Payments는 RESTful API 방식으로 운영되며, application/json을 기본으로 사용합니다.
 
