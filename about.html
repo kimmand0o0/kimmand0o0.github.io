@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Google Translate Customization (if needed) -->
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+
+  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>About | Haeran’s blog</title>
+<meta name="generator" content="Jekyll v4.4.1">
+<meta property="og:title" content="About">
+<meta name="author" content="Haeran">
+<meta property="og:locale" content="ko">
+<meta name="description" content="“개발, 기술, 그리고 생각을 기록하는 블로그. 목표는 다른 관점으로 개발 바라보기 👀”">
+<meta property="og:description" content="“개발, 기술, 그리고 생각을 기록하는 블로그. 목표는 다른 관점으로 개발 바라보기 👀”">
+<link rel="canonical" href="https://kimmand0o0.github.io/about.html">
+<meta property="og:url" content="https://kimmand0o0.github.io/about.html">
+<meta property="og:site_name" content="Haeran’s blog">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="About">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","author":{"@type":"Person","name":"Haeran"},"description":"“개발, 기술, 그리고 생각을 기록하는 블로그. 목표는 다른 관점으로 개발 바라보기 👀”","headline":"About","url":"https://kimmand0o0.github.io/about.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- Favicon -->
+  <link rel="icon" href="/assets/images/favicon.ico">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kimmand0o0.github.io/about.html">
+
+  <!-- Social Media (Open Graph, Twitter Card) -->
+  <meta property="og:title" content="About">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+  <meta property="og:url" content="https://kimmand0o0.github.io/about.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="About">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+
+  <!-- Stylesheets and External Resources -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- JavaScript -->
+  <script src="/assets/js/main.js"></script>
+
+  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
+<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
+<script>
+  function initGoogleAnalytics() {
+    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
+      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
+    var enableDNT = "false" == "true";
+
+    if (!enableDNT || !doNotTrack) {
+      var measurementId = 'G-ZNXE6HSKMS';
+
+      (function(src) {
+        var tag = document.createElement('script');
+        tag.src = src;
+        tag.async = true;
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', measurementId);
+    }
+  }
+  window.addEventListener("load", initGoogleAnalytics);
+</script>
+
+<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
+<style>
+  .pswp .pswp__container .pswp__img {
+    background-color: white;
+  }
+</style>
+
+<script>
+  function initPhotoSwipe() {
+    let customOptions = {};
+
+    try {
+      const data = ``.replaceAll("=>", ":");
+      customOptions = JSON.parse(data);
+    } catch (e) {
+      console.info("Invalid custom photo previewer options! " + e.message);
+    }
+
+    // Define object and gallery options
+    const options = Object.assign(
+      {
+        gallery: "section.main",
+        children: "a.photo-swipe",
+        photo_scale: 2,
+        // dynamic import is not supported in UMD version
+        pswpModule: PhotoSwipe,
+      },
+      customOptions
+    );
+
+    const galleryEl = document.querySelector(options.gallery);
+    if (!galleryEl) {
+      return;
+    }
+
+    const imgEls = [];
+    const els = galleryEl.querySelectorAll("img:not(.emoji)");
+    els.forEach((el) => {
+      if (el.src.trim() == "") {
+        return;
+      }
+      if (!imgEls.includes(el)) {
+        imgEls.push(el);
+      }
+    });
+
+    if (imgEls.length === 0) {
+      return;
+    }
+
+    imgEls.forEach((imgEl) => {
+      imgEl.outerHTML = `
+      <a class="photo-swipe"
+        href="${imgEl.src}"
+        data-pswp-width="${
+          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
+        }"
+        data-pswp-height="${
+          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
+        }"
+        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
+        target="_blank">
+        ${imgEl.outerHTML}
+      </a>`;
+    });
+
+    // Initialize PhotoSwipe 5
+    var lightbox = new PhotoSwipeLightbox(options);
+
+    lightbox.init();
+  }
+
+  window.addEventListener("load", initPhotoSwipe);
+</script>
+<!-- Custom Head HTML (if any) -->
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
+  Haeran's blog
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<div class="page-link" style="display: inline;">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<div class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="fr">
+          
+          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="zh-CN">
+          
+          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ja">
+          
+          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ko">
+          
+          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ru">
+          
+          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
+          
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ko',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+</div>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <div class="framework">
+  <section class="main">
+
+     <div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <h2>Introduce</h2>
+<hr>
+<h3>Product Developer</h3>
+<p>
+    저는 단순히 기능을 구현하는 것이 아니라, <strong>문제의 본질을 파악하고 해결하는 과정</strong>을 중요하게 생각합니다.
+    <br>
+    다양한 기술과 도구를 활용하여 확장성과 유지보수성을 고려한 해결책을 찾아, 더 나은 사용자 경험과 시스템 성능을 제공하는 개발을 이어가고 있습니다.
+</p>
+
+<h4>CONNECT</h4>
+<ul>
+    <li>
+<strong>Mail:</strong> maeran.dev.u@gmail.com</li>
+    <li>
+<strong>Github:</strong> <a href="https://github.com/kimmand0o0">https://github.com/kimmand0o0</a>
+</li>
+</ul>
+
+<h2>Skills</h2>
+<hr>
+<div style="display: flex; flex-direction: row; width: 100%; align-items: end; justify-content: space-between; padding-right: 50px; box-sizing: border-box;">
+    <div style="display: flex; flex-direction: column;">
+        <p style="margin-bottom: 10px">JavaScript</p>
+        <p style="margin-bottom: 10px">React.js</p>
+        <p style="margin-bottom: 10px">Styled-Components</p>
+    </div>
+    <div style="display: flex; flex-direction: column;">
+        <p style="margin-bottom: 10px">TypeScript</p>
+        <p style="margin-bottom: 10px">Tailwind-css</p>
+        <p style="margin-bottom: 10px">Electron.js</p>
+    </div>
+    <div style="display: flex; flex-direction: column;">
+        <p style="margin-bottom: 10px">Next.js</p>
+        <p style="margin-bottom: 10px">CSS-modules</p>
+    </div>
+</div>
+
+<h2>Work Experience</h2>
+<hr>
+<h3><a href="https://prospacebrowser.com/">작가 주식회사</a></h3>
+<p>
+    <strong>Product Developer</strong> (2024. 02 ~ 2024. 12)
+    <br>
+    <span style="color: gray;">React, TypeScript, Electron.js, Zustand, Million.js, Supabase, Tailwind-css</span>
+</p>
+
+<p>
+    <span>Electron.js를 활용해 <strong>Task 관리에 최적화된 생산성 브라우저 데스크탑 앱</strong>을 개발했습니다.</span>
+    <br>
+    <span>
+        사용자는 To-Do List로 할 일을 정리하고, Rich Text Editor를 통해 노트를 작성하며, 브라우저 기능을 프로스페이스 앱에서 Task 기능과 함께 활용해 효율적인 작업을 도와주는
+        서비스 입니다.
+    </span>
+</p>
+
+<ul>
+    <li>million.js를 활용한 퍼포먼스 개선으로 같은 조건에서 시작한 랜더링의 완료 속도가 65% 가량 감소 <a href="https://github.com/kimmand0o0/kimmand0o0.github.io/wiki/million.js%EB%A5%BC-%ED%86%B5%ED%95%9C-%EB%8D%B0%EC%8A%A4%ED%81%AC%ED%83%91-%EB%B8%8C%EB%9D%BC%EC%9A%B0%EC%A0%80-%EC%95%B1-%EC%B5%9C%EC%A0%81%ED%99%94">(Wiki)</a>
+    </li>
+    <li>tiptap-editor를 이용하여 리치 텍스트 에디터 구현 및 키보드 단축키 연결</li>
+    <li>Dnd-kit을 활용하여 space, tab-group, tab 사이의 드래그 앤 드랍 구현</li>
+    <li>Web-Worker를 통해 각 스페이스(공간)별 시간 기록</li>
+    <li>color-picker를 이용해 확장성 높은 색상 팔레트 구현 및 cwag기준에 맞는 텍스트 컬러 변경</li>
+</ul>
+
+<h2>Project</h2>
+<hr>
+<h3>하루 담은</h3>
+<p>
+    <a href="https://github.com/FRONT-END-BOOTCAMP-PLUS-3/haru-damu"><strong>Github</strong></a> |
+    <a href="https://github.com/FRONT-END-BOOTCAMP-PLUS-3/haru-damu/wiki/%EC%B5%9C%EC%A2%85-%EB%B0%9C%ED%91%9C-PPT"><strong>PPT</strong></a>
+    (2024. 02 ~ 2024. 12)
+    <br>
+    <span style="color: gray;">Next.js, TypeScript, Zustand, Chart.js, Dnd-kit, Supabase, Css-modules</span>
+</p>
+<p>
+    <strong>건강한 하루 식단을 위한 맞춤형 쇼핑몰</strong>
+    <br>
+    기존 이커머스 플랫폼에서 제공하지 못한 맞춤형 헬스케어 서비스를 제공하여 차별화 한 서비스. 현대인의 권장 영양 성분표를 차트로 시각화하 장바구니에서 실시간 영양성분 반영 차트를 제공함으로써 모두의 건강을
+    가치 창출 목표로 하고 있습니다.
+</p>
+
+<p>
+    <strong>What did i do</strong>
+    <br>
+    <span>- Chart.js 라이브러리를 이용한 권장 영양성분 데이터 시각화</span>
+    <br>
+    <span>- Dnd-kit을 이용하여 장바구니와 한끼 장바구니 아이템 이동</span>
+    <br>
+    <span>- Supabase 구글 로그인과 Next.js middleware를 이용한 유저 인증</span>
+    <br>
+    <span>- plaiceholder 라이브러리로 blur 이미지를 생성하여 사용자 경험 향상</span>
+</p>
+
+<h4>
+    1. Zustand를 이용한 중앙 상태 관리 <a href="https://github.com/FRONT-END-BOOTCAMP-PLUS-3/haru-damu/wiki/Zustand%EB%A5%BC-use_store%EB%A1%9C-%EC%A4%91%EC%95%99-%EC%A7%91%EC%A4%91%EC%8B%9D-%EC%83%81%ED%83%9C-%EA%B4%80%EB%A6%AC">(Wiki)</a>
+</h4>
+<p>
+    Zustand를 활용해 상태 관리를 할 때, 개별 store를 분리하면 다음과 같은 문제가 발생합니다.
+    <br>
+    - 각 store에서 상태를 가져오려면 import와 선언문이 길어짐
+    <br>
+    - 서로 다른 store의 상태를 직접 참조할 수 없음
+    <br>
+    <br>
+    이 문제를 해결하기 위해 use_store 훅을 도입하여 상태를 한 곳에서 관리할 수 있도록 구성했습니다.
+    <br>
+    - 모든 store를 use_store에 통합해 상호 참조 가능하도록 변경
+    <br>
+    - localStorage에 상태를 저장하여 데이터 휘발 방지 및 재사용성 향상
+</p>
+
+<h4>
+    2. Dnd-kit - 유연한 드래그 앤 드롭 시스템 구현<a href="https://github.com/FRONT-END-BOOTCAMP-PLUS-3/haru-damu/wiki/Direction%EC%9D%84-%ED%86%B5%ED%95%9C-dnd%EA%B4%80%EB%A6%AC">(Wiki)</a>
+</h4>
+<p>
+    드래그 앤 드롭 기능을 확장성 있게 설계하는 과정에서 드래그 방향을 명확히 정의하는 방식을 도입해 다양한 유형의 드래그 앤 드롭이 가능해졌으며, 코드 확장성이 대폭 향상되었습니다. <br> <br>
+    핵심 문제 <br>
+    - 서로 다른 유형의 컴포넌트 간 드래그가 필요 <br>
+    - 드래그 가능 대상과 드랍 가능 대상의 명확한 구분 필요 <br> <br>
+    해결 방법 <br>
+    - DraggableComponent, DroppableArea 타입 정의 → 역할을 명확히 분리 <br>
+    - getDragDirection 유틸 생성 → 드래그 방향을 문자열로 지정 <br>
+    - 방향 기반 분기 처리 → 지정된 방향에 따라 이벤트 적용 <br>
+</p>
+
+<h4>
+    3. Next.js 이미지 최적화 및 Blur-image를 통한 사용자 경험 개선<a href="https://github.com/FRONT-END-BOOTCAMP-PLUS-3/haru-damu/wiki/next-image%EC%99%80-blur_image%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%9C-%EC%9D%B4%EB%AF%B8%EC%A7%80-%EC%B5%9C%EC%A0%81%ED%99%94">(Wiki)</a>
+</h4>
+<p>
+    이미지 최적화를 통해 페이지 로딩 속도를 단축하고, 초기 로딩 경험을 개선하여 사용자 이탈률을 낮추는 효과를 얻을 수 있었습니다. <br> <br>
+    핵심 문제 <br>
+    - 쇼핑몰 페이지에서 이미지 로딩 속도가 1.5초 이상 지연되는 현상 발생 <br>
+    - next/image의 lazy-loading만으로는 초기 화면에서 빈 공간이 발생 <br>
+    - 외부 스토리지를 사용할 경우 blur 이미지 제공이 어려움 <br> <br>
+    해결 방법 <br>
+    - next/image의 lazy-loading 적용 → 보이지 않는 이미지를 늦게 로딩하여 성능 최적화 <br>
+    - Blur Placeholder 적용 → 로딩 중에도 흐릿한 이미지 표시로 자연스러운 UX 제공 <br>
+    - plaiceholder 라이브러리 활용 → 서버에서 blur 이미지를 생성하여 성능 향상 <br>
+</p>
+
+<h2>Education</h2>
+<hr>
+<div style="display: flex; flex-direction: row; width: 100%; align-items: end; justify-content: space-between;">
+    <h3 style="margin: 10px 0px;">멋쟁이 사자처럼 3기</h3>
+    <p><strong>Front-end Plus</strong> (2024. 12 - 2025. 03)</p>
+</div>
+<p>KDT-심화 부트캠프로 TypeScript 심화과정과 Next.js 프로젝트를 진행</p>
+
+<div style="display: flex; flex-direction: row; width: 100%; align-items: end; justify-content: space-between;">
+    <h3 style="margin: 10px 0px;">코드스테이츠 45기</h3>
+    <p><strong>React</strong> (2023. 04 - 2023. 10)</p>
+</div>
+<p>프론트엔드 KDT. DOM의 기초 및 CSS, React를 활용한 프로젝트 진행</p>
+
+<div style="display: flex; flex-direction: row; width: 100%; align-items: end; justify-content: space-between;">
+    <h3 style="margin: 10px 0px;">항해 99 10기</h3>
+    <p><strong>Node.js</strong> (2022. 11 - 2023. 02)</p>
+</div>
+<p>백엔드. 공공API를 받아 가공하여 약학 데이터를 시각적으로 보여주는 프로젝트를 진행</p>
+
+    </div>
+
+</article>
+<div class="post-comments">
+<div id="utterances-placeholder"></div>
+<script>
+  const utterancesThemeFromDataTheme = () => {
+    const dataTheme = document.documentElement.getAttribute('data-theme');
+    return `github-${dataTheme}`;
+  };
+
+  const setUtterancesTheme = () => {
+    const iframe = document.querySelector('.utterances-frame');
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: utterancesThemeFromDataTheme()
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  // dynamic change
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        setUtterancesTheme();
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
+
+  let utterancesScript = document.createElement('script');
+  utterancesScript.async = true;
+  utterancesScript.src = 'https://utteranc.es/client.js';
+  utterancesScript.crossOrigin = 'anonymous';
+  utterancesScript.setAttribute('issue-term', 'title');
+  utterancesScript.setAttribute('label', 'utterances comment');
+  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
+  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
+
+  const placeholder = document.getElementById('utterances-placeholder');
+  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
+</script>
+</div></section>
+</div>
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items --><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+    </div>
+  </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>Unpublished Work <span class="copyleft">©</span> 2017-2025 Haeran</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+      <div class="footer-col rss-subscribe">Subscribe <a href="/feed.xml">via RSS</a>
+</div>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>

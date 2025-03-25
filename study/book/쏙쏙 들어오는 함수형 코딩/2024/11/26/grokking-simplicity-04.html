@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Google Translate Customization (if needed) -->
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+
+  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>쏙쏙 들어오는 함수형 코딩 [CHAPTER 7, 8, 9] | Haeran’s blog</title>
+<meta name="generator" content="Jekyll v4.4.1">
+<meta property="og:title" content="쏙쏙 들어오는 함수형 코딩 [CHAPTER 7, 8, 9]">
+<meta name="author" content="haeran">
+<meta property="og:locale" content="ko">
+<meta name="description" content="CHAPTER 7. 신뢰할 수 없는 코드를 쓰면서 불변성 지키기">
+<meta property="og:description" content="CHAPTER 7. 신뢰할 수 없는 코드를 쓰면서 불변성 지키기">
+<link rel="canonical" href="https://kimmand0o0.github.io/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/11/26/grokking-simplicity-04.html">
+<meta property="og:url" content="https://kimmand0o0.github.io/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/11/26/grokking-simplicity-04.html">
+<meta property="og:site_name" content="Haeran’s blog">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2024-11-26T12:07:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="쏙쏙 들어오는 함수형 코딩 [CHAPTER 7, 8, 9]">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"haeran"},"dateModified":"2024-11-26T12:07:00+00:00","datePublished":"2024-11-26T12:07:00+00:00","description":"CHAPTER 7. 신뢰할 수 없는 코드를 쓰면서 불변성 지키기","headline":"쏙쏙 들어오는 함수형 코딩 [CHAPTER 7, 8, 9]","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/11/26/grokking-simplicity-04.html"},"url":"https://kimmand0o0.github.io/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/11/26/grokking-simplicity-04.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- Favicon -->
+  <link rel="icon" href="/assets/images/favicon.ico">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kimmand0o0.github.io/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/11/26/grokking-simplicity-04.html">
+
+  <!-- Social Media (Open Graph, Twitter Card) -->
+  <meta property="og:title" content="쏙쏙 들어오는 함수형 코딩 [CHAPTER 7, 8, 9]">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+  <meta property="og:url" content="https://kimmand0o0.github.io/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/11/26/grokking-simplicity-04.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="쏙쏙 들어오는 함수형 코딩 [CHAPTER 7, 8, 9]">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+
+  <!-- Stylesheets and External Resources -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- JavaScript -->
+  <script src="/assets/js/main.js"></script>
+
+  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
+<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
+<script>
+  function initGoogleAnalytics() {
+    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
+      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
+    var enableDNT = "false" == "true";
+
+    if (!enableDNT || !doNotTrack) {
+      var measurementId = 'G-ZNXE6HSKMS';
+
+      (function(src) {
+        var tag = document.createElement('script');
+        tag.src = src;
+        tag.async = true;
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', measurementId);
+    }
+  }
+  window.addEventListener("load", initGoogleAnalytics);
+</script>
+
+<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
+<style>
+  .pswp .pswp__container .pswp__img {
+    background-color: white;
+  }
+</style>
+
+<script>
+  function initPhotoSwipe() {
+    let customOptions = {};
+
+    try {
+      const data = ``.replaceAll("=>", ":");
+      customOptions = JSON.parse(data);
+    } catch (e) {
+      console.info("Invalid custom photo previewer options! " + e.message);
+    }
+
+    // Define object and gallery options
+    const options = Object.assign(
+      {
+        gallery: "section.main",
+        children: "a.photo-swipe",
+        photo_scale: 2,
+        // dynamic import is not supported in UMD version
+        pswpModule: PhotoSwipe,
+      },
+      customOptions
+    );
+
+    const galleryEl = document.querySelector(options.gallery);
+    if (!galleryEl) {
+      return;
+    }
+
+    const imgEls = [];
+    const els = galleryEl.querySelectorAll("img:not(.emoji)");
+    els.forEach((el) => {
+      if (el.src.trim() == "") {
+        return;
+      }
+      if (!imgEls.includes(el)) {
+        imgEls.push(el);
+      }
+    });
+
+    if (imgEls.length === 0) {
+      return;
+    }
+
+    imgEls.forEach((imgEl) => {
+      imgEl.outerHTML = `
+      <a class="photo-swipe"
+        href="${imgEl.src}"
+        data-pswp-width="${
+          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
+        }"
+        data-pswp-height="${
+          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
+        }"
+        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
+        target="_blank">
+        ${imgEl.outerHTML}
+      </a>`;
+    });
+
+    // Initialize PhotoSwipe 5
+    var lightbox = new PhotoSwipeLightbox(options);
+
+    lightbox.init();
+  }
+
+  window.addEventListener("load", initPhotoSwipe);
+</script>
+<!-- Custom Head HTML (if any) -->
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header site-header-transparent" role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
+  Haeran's blog
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<div class="page-link" style="display: inline;">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<div class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="fr">
+          
+          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="zh-CN">
+          
+          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ja">
+          
+          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ko">
+          
+          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ru">
+          
+          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
+          
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ko',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+</div>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;documentElement.setAttribute("data-header-transparent", "");var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+    html .page-banner {
+      background: #000;
+    }
+  </style>
+<style>html .page-banner {
+      height:  36.8vh;
+      min-height: 38vh;
+    }
+    html[data-scroll-status="top"] .page-banner {
+      height: 100vh;
+    }
+  </style>
+<style>
+    html .page-banner .page-banner-img > *:first-child {
+      opacity: 0.618;
+    }
+
+    html[data-theme="dark"] .page-banner .page-banner-img > *:first-child {
+      opacity: 0.443724;
+    }
+  </style>
+<style>
+    html .page-banner .page-banner-inner > *:first-child > *:nth-child(1) {
+      font-size: 4.25em; font-weight: bold; text-decoration: underline
+    }
+  </style>
+<style>
+    html .page-banner .page-banner-inner > *:first-child > *:nth-child(2) {
+      color: gold
+    }
+  </style>
+<section class="page-banner">
+    <div class="page-banner-img">
+<div style="background-image: url(https://velog.velcdn.com/images/dev_jiwon/post/b9d71062-73bf-4e93-988e-f4c94fdec6b9/image.png)"></div>
+        <img class="img-placeholder" src="https://velog.velcdn.com/images/dev_jiwon/post/b9d71062-73bf-4e93-988e-f4c94fdec6b9/image.png">
+</div>
+    <div class="wrapper">
+      <div class="page-banner-inner">
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">쏙쏙 들어오는 함수형 코딩 [CHAPTER 7, 8, 9]</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <div class="post-meta">
+    <time class="dt-published" datetime="2024-11-26T12:07:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Nov 26, 2024
+    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 12 mins</span>
+  </div>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#Book">#Book</a><a class="post-tag" href="/tags.html#%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9">#쏙쏙 들어오는 함수형 코딩</a>
+</div></header>
+</div>
+    </div>
+  </section><script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <div class="framework">
+  <section class="main">
+
+     <div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <h3 id="chapter-7-신뢰할-수-없는-코드를-쓰면서-불변성-지키기">CHAPTER 7. 신뢰할 수 없는 코드를 쓰면서 불변성 지키기</h3>
+
+<ul>
+  <li>
+<strong>카피-온-라이트와 방어적 복사</strong>
+    <ul>
+      <li>카피 온 라이트는 불변성이 확보된 안전지대 안에서 데이터를 주고받는다면, 방어적 복사는 신뢰할 수 없는 코드와 데이터를 주고받을 때 복사본을 만들어 전달 혹은 사용합니다. 이때 방어적 복사는 깊은 복사를 하여 모든 것을 복사하기 때문에, 카피 온 라이트에 비해 비용이 많이 든다는 단점이 있습니다.</li>
+      <li>
+        <p>웹 기반 API도 암묵적으로 방어적 복사를 하게 됩니다. request, response 를 주고받을때 JSON 형식으로 직렬화하여 데이터를 전송하는 것도 방어적 복사로 데이터를 복사해서 복사본을 전달하는 방식을 사용합니다.</p>
+
+        <p>| **주제** | **카피 온 라이트** | **방어적 복사** |
+  | — | — | — |
+  | **언제?** | 통제할 수 있는 데이터를 바꿀 때 | 신뢰 할 수 없는 코드와 데이터를 주고 받을 때 |
+  | **어디서?** | 안전지대 어디서나 사용 | 안전지대의 경계에서 데이터가 오고 갈 때 |
+  | **복사 방식** | 얕은 복사 | 깊은 복사 |
+  | **규칙** | 1. 바꿀 데이터의 복사본을 생성</p>
+        <ol>
+          <li>복사본 변경</li>
+          <li>
+            <table>
+              <tbody>
+                <tr>
+                  <td>복사본 리턴</td>
+                  <td>
+<ol>
+  <li>안전지대로 들어오는 데이터를 깊은 복사</li>
+</ol>
+</td>
+                </tr>
+              </tbody>
+            </table>
+          </li>
+          <li>
+            <table>
+              <tbody>
+                <tr>
+                  <td>안전지대를 나가는 데이터에 깊은 복사</td>
+                </tr>
+              </tbody>
+            </table>
+          </li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+  <li>얕은 복사와 깊은 복사
+    <ul>
+      <li>얕은 복사 : 객체의 참조값(주소 값)을 복사 → 복사된 객체를 수정하면 기존 객체를 저장한 변수에 영향
+        <ul>
+          <li>객체 안에 객체가 있을 경우, 한 개의 객체라도 기존 변수 객체를 참조하고 있다면 얕은 복사</li>
+          <li>대표적인 예 : <code class="language-plaintext highlighter-rouge">Array.slice()</code> → start, end를 설정하지 않는다면, 기존 배열 전체를 얕은 복사</li>
+        </ul>
+      </li>
+      <li>깊은 복사 : 객체의 실제 값을 복사 → 복사된 객체를 수정하여도 기존 원시값을 저장한 변수에 영향이 없다
+        <ul>
+          <li>원본과 참조가 완전히 끊어진 객체</li>
+          <li>대표적인 예 : <code class="language-plaintext highlighter-rouge">JSON.stringify</code> → 객체를 json 문자열로 변환하는 과정에서 원본 객체와의 참조가 모두 끊어짐</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="chapter-8-계층형-설계-i">CHAPTER 8. 계층형 설계 I</h3>
+
+<ul>
+  <li>계층형 설계란?
+    <ul>
+      <li>소프트웨어를 계층으로 구성하는 기술을 말합니다.</li>
+      <li>비즈니스 규칙, 동작들, 카피-온-라이트, 배열 관련 기능등 목적에 따라 계층으로 나누어 구성합니다.</li>
+    </ul>
+
+    <p><img src="https://prod-files-secure.s3.us-west-2.amazonaws.com/1e33c9be-7fc7-4d9b-bd09-cde89805af4c/964a6da4-479f-4fe7-8595-87ad6d3bc385/image.png" alt="image.png"></p>
+  </li>
+  <li>계층형 설계 패턴 1 - 직접 구현
+    <ul>
+      <li>직접 구현이란 : 함수가 더 구체적인 내용을 다루지 않도록 함수를 일반적인 함수로 빼내는 것</li>
+    </ul>
+
+    <div class="language-jsx highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  <span class="kd">function</span> <span class="nf">freeTieClip</span><span class="p">(</span><span class="nx">cart</span><span class="p">)</span> <span class="p">{</span>
+  	<span class="kd">var</span> <span class="nx">hasTie</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+  	<span class="kd">var</span> <span class="nx">hasTieClip</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+  	<span class="k">for </span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">cart</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+  		<span class="kd">var</span> <span class="nx">item</span> <span class="o">=</span> <span class="nx">cart</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+  		<span class="k">if </span><span class="p">(</span><span class="nx">item</span><span class="p">.</span><span class="nx">name</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">tie</span><span class="dl">'</span><span class="p">)</span> <span class="nx">hasTie</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+  		<span class="k">if </span><span class="p">(</span><span class="nx">item</span><span class="p">.</span><span class="nx">name</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">tie clip</span><span class="dl">'</span><span class="p">)</span> <span class="nx">hasTieClip</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+  	<span class="p">}</span>
+    
+  	<span class="k">if </span><span class="p">(</span><span class="nx">hasTie</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">hasTieClip</span><span class="p">)</span> <span class="p">{</span>
+  		<span class="kd">var</span> <span class="nx">tieClip</span> <span class="o">=</span> <span class="nf">make_item</span><span class="p">(</span><span class="dl">'</span><span class="s1">tie clip</span><span class="dl">'</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+  		<span class="k">return</span> <span class="nf">add_item</span><span class="p">(</span><span class="nx">cart</span><span class="p">,</span> <span class="nx">tieClip</span><span class="p">);</span>
+  	<span class="p">}</span>
+  	<span class="k">return</span> <span class="nx">cart</span><span class="p">;</span>
+  <span class="p">}</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>문제점
+        <ul>
+          <li>너무 구체적이기 때문에 직접 구현 패턴을 따르지 않고 있음</li>
+          <li>장바구니가 배열이라는 사실을 알 필요가 없음</li>
+          <li>array index, for loop는 언어 기능이고, make_item, add_item은 함수를 호출하기 때문에 <strong>서로 다른 계층임</strong>
+</li>
+        </ul>
+      </li>
+      <li>
+        <p>개선</p>
+
+        <div class="language-jsx highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  <span class="kd">function</span> <span class="nf">freeTieClip</span><span class="p">(</span><span class="nx">cart</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">hasTie</span> <span class="o">=</span> <span class="nf">isInCart</span><span class="p">(</span><span class="nx">cart</span><span class="p">,</span> <span class="dl">'</span><span class="s1">tie</span><span class="dl">'</span><span class="p">);</span>
+      <span class="kd">var</span> <span class="nx">hasTieClip</span> <span class="o">=</span> <span class="nf">isInCart</span><span class="p">(</span><span class="nx">cart</span><span class="p">,</span> <span class="dl">'</span><span class="s1">tie clip</span><span class="dl">'</span><span class="p">);</span>
+      <span class="k">if </span><span class="p">(</span><span class="nx">hasTie</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">hasTieClip</span><span class="p">)</span> <span class="p">{</span>
+  		<span class="kd">var</span> <span class="nx">tieClip</span> <span class="o">=</span> <span class="nf">make_item</span><span class="p">(</span><span class="dl">'</span><span class="s1">tie clip</span><span class="dl">'</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+  		<span class="k">return</span> <span class="nf">add_item</span><span class="p">(</span><span class="nx">cart</span><span class="p">,</span> <span class="nx">tieClip</span><span class="p">);</span>
+  	<span class="p">}</span>
+  	<span class="k">return</span> <span class="nx">cart</span><span class="p">;</span>
+  <span class="p">}</span>
+        
+  <span class="kd">function</span> <span class="nf">isInCart</span><span class="p">(</span><span class="nx">cart</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  	<span class="k">for </span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">cart</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+  		<span class="k">if </span><span class="p">(</span><span class="nx">cart</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">name</span> <span class="o">===</span> <span class="nx">name</span><span class="p">)</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+  	<span class="p">}</span>
+  	<span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="p">}</span>
+</code></pre></div>        </div>
+
+        <ul>
+          <li>isInCart 함수를 만들어 공통으로 사용함</li>
+          <li>freeTieClip 함수는 장바구니가 배열인지 몰라도됨 =&gt; 함수가 모두 비슷한 계층에 있다는 것을 의미함</li>
+          <li>함수가 모두 비슷한 계층에 있기 때문에 직접 구현</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="chapter-8-계층형-설계-ii">CHAPTER 8. 계층형 설계 II</h3>
+
+<ul>
+  <li>
+    <p>계층형 설계 패턴 2 - 추상화의 벽</p>
+
+    <p><img src="https://prod-files-secure.s3.us-west-2.amazonaws.com/1e33c9be-7fc7-4d9b-bd09-cde89805af4c/8b316645-b999-40a6-a49d-46c46a5a2555/image.png" alt="image.png"></p>
+
+    <ul>
+      <li>추상화의 벽을 통하여 책임을 명확하게 나눔</li>
+      <li>세부 표현을 감춘 함수로 이루어진 계층으로 사용할 때 구현을 전혀 몰라도 된다</li>
+      <li>사용하는 경우
+        <ul>
+          <li>쉽게 구현을 바꾸기 위하여</li>
+          <li>코드를 읽고 쓰기 쉽게 만들기 위하여 (유지보수성 및 가독성)</li>
+          <li>주어진 문제에 집중하기 위하여</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>계층형 설계 패턴 3 - 작은 인터페이스
+    <ul>
+      <li>인터페이스를 최소화하여 하위 계층에 불필요한 기능이 쓸데없이 커지는 것을 막을 수 있다.</li>
+      <li>이상적인 계층은 더도 덜도 아닌 필요한 함수만 가지고 있어야 한다.</li>
+    </ul>
+  </li>
+  <li>계층형 설계 패턴 4 - 편리한 계층
+    <ul>
+      <li>다른 패턴과 다르게 조금 더 현실적이고 실용적인 측면을 가진 계층</li>
+      <li>계층이 크고, 위의 패턴들이 잘 지켜지지 않더라도 현재 작업하는 코드가 편리하다고 느낀다면 설계를 조금 멈춰도 괜찮다. 반복문을 감싸지 않고 그대로 두고, 호출 화살표가 조금 길어지거나 계층이 다른 계층과 섞여도 그대로 두어도 괜찮다.</li>
+      <li>언제나 설계와 새로운 기능의 필요성 사이 어느 지점에 머물게 된다. 개발자로서의 필요성과 비즈니스 요구사항 모두를 만족시켜야한다.</li>
+    </ul>
+  </li>
+</ul>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/10/22/grokking-simplicity-03.html" title="쏙쏙 들어오는 함수형 코딩 [CHAPTER 5, 6]">쏙쏙 들어오는 함수형 코딩 [CHAPTER 5,...</a><a class="next" href="/study/javascript/2024/12/31/for.html" title="javascript의 for는 함수가 아니야?">javascript의 for는 함수가 아니야?</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li class="">
+          <a class="post-link" href="/study/javascript/2025/01/08/delegation-function.html" title="위임 함수 (Delegation Function)와 역제어 (Inversion of Control, IoC)">
+            위임 함수 (Delegation Function)와 역제어 (Inversion of Control, IoC)<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/journal/retrospect/2024/02/26/Retrospect_in_2024_february.html" title="2024년 2월 회고 - 게을러지지 않기 위하여">
+            2024년 2월 회고 - 게을러지지 않기 위하여<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/2025/02/22/test_code_waitForTimeout.html" title="waitForTimeout 매서드를 꼭 써야할까?">
+            waitForTimeout 매서드를 꼭 써야할까?<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/javascript/2025/01/20/mvc-mvw.html" title="MVC와 MVW">
+            MVC와 MVW<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+</ul>
+    </div>
+<div class="post-comments">
+<div id="utterances-placeholder"></div>
+<script>
+  const utterancesThemeFromDataTheme = () => {
+    const dataTheme = document.documentElement.getAttribute('data-theme');
+    return `github-${dataTheme}`;
+  };
+
+  const setUtterancesTheme = () => {
+    const iframe = document.querySelector('.utterances-frame');
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: utterancesThemeFromDataTheme()
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  // dynamic change
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        setUtterancesTheme();
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
+
+  let utterancesScript = document.createElement('script');
+  utterancesScript.async = true;
+  utterancesScript.src = 'https://utteranc.es/client.js';
+  utterancesScript.crossOrigin = 'anonymous';
+  utterancesScript.setAttribute('issue-term', 'title');
+  utterancesScript.setAttribute('label', 'utterances comment');
+  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
+  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
+
+  const placeholder = document.getElementById('utterances-placeholder');
+  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
+</script>
+</div></section>
+</div>
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items --><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+    </div>
+  </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>Unpublished Work <span class="copyleft">©</span> 2017-2025 Haeran</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+      <div class="footer-col rss-subscribe">Subscribe <a href="/feed.xml">via RSS</a>
+</div>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>

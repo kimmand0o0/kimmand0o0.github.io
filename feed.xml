@@ -1,0 +1,929 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="ko"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://kimmand0o0.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://kimmand0o0.github.io/" rel="alternate" type="text/html" hreflang="ko" /><updated>2025-03-25T13:42:47+00:00</updated><id>https://kimmand0o0.github.io/feed.xml</id><title type="html">Haeran’s blog</title><subtitle>&quot;개발, 기술, 그리고 생각을 기록하는 블로그. 목표는 다른 관점으로 개발 바라보기 👀&quot;</subtitle><author><name>Haeran</name></author><entry><title type="html">MAC 주소와 ARP 프로토콜</title><link href="https://kimmand0o0.github.io/network/2025/03/24/MAC_%EC%A3%BC%EC%86%8C%EC%99%80_ARP_%ED%94%84%EB%A1%9C%ED%86%A0%EC%BD%9C.html" rel="alternate" type="text/html" title="MAC 주소와 ARP 프로토콜" /><published>2025-03-24T12:07:00+00:00</published><updated>2025-03-24T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/network/2025/03/24/MAC_%EC%A3%BC%EC%86%8C%EC%99%80_ARP_%ED%94%84%EB%A1%9C%ED%86%A0%EC%BD%9C</id><content type="html" xml:base="https://kimmand0o0.github.io/network/2025/03/24/MAC_%EC%A3%BC%EC%86%8C%EC%99%80_ARP_%ED%94%84%EB%A1%9C%ED%86%A0%EC%BD%9C.html"><![CDATA[<h2 id="mac-주소-media-access-control-address-물리적-주소">MAC 주소 (Media Access Control Address, 물리적 주소)</h2>
+
+<p>MAC 주소는 네트워크 인터페이스 카드(NIC, Network Interface Card)에 할당된 <strong>고유한 하드웨어(물리적인) 주소</strong>입니다.<br />
+<img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/11_mac_%EC%A3%BC%EC%86%8C.png" alt="MAC" /></p>
+
+<p>IP(논리적인 주소) 만으로 통신을 하게 되면 언제든 지 변경 될 수 있는 유동성 때문에 원활한 통신이 되지 않아 혼선이 올 수 있습니다.<br />
+단말간의 통신에서 사용되는 MAC 주소는 논리적인 IP와 다르게 변경이 어렵고, 고유한 성질을 가지고 있습니다.</p>
+
+<p>예를 들어, IP 주소는 사람 이름, MAC 주소는 핸드폰 번호라고 생각해 보겠습니다.<br />
+이떤 이벤트에서 김헤란이라는 사람이 당첨 되었을 때, 참여한 모든 김혜란에게 상품을 주는 것은 말이 되지 않습니다.
+김혜란이라는 이름에 전화 번호가 010-1234-5678 이라는 번호를 가진 사람이 이벤트에 당첨 되었다면 같은 전화 번호가 두개일 수 없기 때문에 김혜란을 특정 할 수 있습니다.</p>
+
+<p>이 논리 주소인 IP와 물리 주소인 MAC을 연결 시켜주는 프로토콜이 <strong>ARP 프로토콜</strong> 입니다.</p>
+
+<h3 id="조회-방법">조회 방법</h3>
+
+<p>윈도우 환경에서 MAC 주소를 조회하는 방법은 cmd 창에 <code class="language-plaintext highlighter-rouge">ipconfig /all</code> 명령어를 입력하면 조회가 가능합니다.<br />
+리눅스 환경에서는 <code class="language-plaintext highlighter-rouge">ifconfig</code> 명령어를 통해 조회가 가능합니다.</p>
+
+<p>MAC 주소는 원도우 환경에서 하이픈(-) 기호, 리눅스에서는 콜론(;) 기호로 구분하는 차이가 있다.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">00:1A:2B:3C:4D:5E</code></li>
+  <li><code class="language-plaintext highlighter-rouge">AC:DE:48:00:11:22</code></li>
+</ul>
+
+<p><img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/11_MAC%EC%A3%BC%EC%86%8C_%EC%A1%B0%ED%9A%8C%EB%B0%A9%EB%B2%95.png" alt="윈도우_MAC주소_조회방법" />
+<img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/11_MAC%EC%A3%BC%EC%86%8C_%EC%A1%B0%ED%9A%8C%EB%B0%A9%EB%B2%95_01.png" alt="리눅스_MAC주소_조회방법" /></p>
+
+<h3 id="mac-주소-구조">MAC 주소 구조</h3>
+
+<p>MAC 주소는 48bit의 숫자로 표기되며, 앞의 24bit는 제조사 식별 코드, 뒤의 24bit의 단말 일련번호로 이루어져 있습니다.</p>
+
+<ol>
+  <li><strong>OUI (Organizationally Unique Identifier, 조직별 식별자, 앞 24비트)</strong>
+    <ul>
+      <li>제조업체를 나타냄</li>
+    </ul>
+  </li>
+  <li><strong>NIC Specific (개별 장치 식별자, 뒤 24비트)</strong>
+    <ul>
+      <li>제조업체가 장치마다 고유하게 할당</li>
+    </ul>
+  </li>
+</ol>
+
+<p><img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/11_MAC_%EC%A3%BC%EC%86%8C%EA%B5%AC%EC%A1%B0.png" alt="MAC_주소구조" /></p>
+
+<h2 id="arp-address-resolution-protocol-주소-결정-프로토콜">ARP (Address Resolution Protocol, 주소 결정 프로토콜)</h2>
+
+<p>ARP를 직역하자면 주소(Address) 결정(Resolution) 프로토콜(Protocol)로 논리적인 IP 주소를 물리적인 MAC 주소로 매칭 시켜주는 프로토콜 입니다.</p>
+
+<p>MAC 주소를 매칭 시키기 때문에 데이터링크 계정(2계층)에서 동작하는 프로토콜로 착각하는 경우도 있지만, IP 주소와 MAC 주소 둘다 필요하기 때문에 IP가 속해있는 네트워크 계층(3계층)에서 사용되는 프로토콜입니다.</p>
+
+<h3 id="arp의-통신-과정">ARP의 통신 과정</h3>
+
+<ol>
+  <li><strong>ARP Request</strong> : 호스트 A가 호스트 B의 MAC 주소를 알아야 할 때 상대의 IP를 가지고 MAC 주소 정보를 요청하는 패킷
+    <ul>
+      <li>LAN 구간의 모든 호스트에게 전달해야 하기 때문에 Broadcast(ff:ff:ff:ff:ff:ff) 통신을 합니다.</li>
+      <li>예시 ) Request who-has 192.168.10.1 tell 192.168.19.3, length 46 -&gt; 나는 192.168.10.1 인데, 192.168.19.3을 가진 호스트의 MAC 주소는 뭐야?</li>
+    </ul>
+  </li>
+  <li><strong>ARP Reply</strong> : ARP Request를 받은 호스트가 해당 IP를 가지고 있으면, 자신의 MAC 주소를 담아 응답하는 패킷
+    <ul>
+      <li>ARP Request를 요청한 호스트에게만 전달하면 되기 때문에 해당 호스트에게 Unicast 통신으로 응답합니다.</li>
+      <li>자신의 IP와 다른 ARP Request를 받은 호스트들은 해당 패킷을 무시합니다.</li>
+      <li>예시 ) ARP (0x0906), length 62:Reply 192.168.10.1 is-at aa:aa:aa:aa:aa:aa, length 46 -&gt; 내 IP는 192.168.10.1 이고, 나의 MAC 주소는 aa:aa:aa:aa:aa:aa 야</li>
+    </ul>
+  </li>
+  <li><strong>ARP 캐시 테이블에 저장</strong> : A는 B의 MAC 주소를 캐시에 저장하여 다음 요청 시 재사용
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">arp -a</code> 명령어로 현재 캐시에 저장된 ARP 테이블을 확인할 수 있습니다.</li>
+    </ul>
+  </li>
+</ol>
+
+<blockquote>
+  <p><strong>Broadcast 통신과 Unicast 통신</strong></p>
+
+  <p>Broadcast는 네트워크 내 모든 장치에게 정보를 전달할 때 사용되고, Unicast는 특정 대상에게만 데이터를 전송하는 방식입니다.</p>
+
+  <ol>
+    <li><strong>Broadcast 통신</strong><br />
+네트워크에서 하나의 송신자가 모든 수신자에게 데이터를 보내는 방식입니다.<br />
+특징
+      <ul>
+        <li>네트워크의 모든 노드가 데이터를 수신합니다.</li>
+        <li>특정 대상을 지정하지 않기 때문에 네트워크 트래픽이 증가할 수 있습니다.</li>
+        <li>LAN(Local Area Network) 환경에서 주로 사용됩니다.</li>
+      </ul>
+    </li>
+    <li><strong>Unicast 통신</strong>
+한 송신자가 특정 수신자에게만 데이터를 보내는 방식입니다.
+특징
+      <ul>
+        <li>데이터가 목표 수신자 1명에게만 전달됩니다.</li>
+        <li>네트워크 트래픽이 효율적으로 관리됩니다.</li>
+        <li>대부분의 인터넷 트래픽이 Unicast 방식으로 이루어집니다.</li>
+      </ul>
+    </li>
+  </ol>
+</blockquote>
+
+<h3 id="arp-스푸핑-공격">ARP 스푸핑 공격</h3>
+
+<p>공격자가 가짜 ARP 응답을 보내 다른 장치의 MAC 주소를 자신의 것으로 속여, 데이터를 가로챌 수 있습니다.</p>
+
+<p>공격자는 네트워크 내에서 가짜 ARP 패킷을 보내 특정 IP 주소의 MAC 주소를 자신의 MAC 주소로 속여 중간자(MITM, Man-In-The-Middle) 공격으로 네트워크 트래픽을 감청하거나 변조할 수 있습니다. 가장 나쁜 시나리오는 로그인 정보나 금융 거래 데이터를 탈취하는 데 악용되는 것 입니다.</p>
+
+<p><strong>해결책</strong></p>
+
+<ul>
+  <li><strong>Dynamic ARP Inspection (DAI) 활성화</strong>: 네트워크 스위치에서 ARP 패킷을 검사하여 신뢰할 수 없는 ARP 응답을 차단.</li>
+  <li><strong>ARP 테이블 정적 할당</strong>: 중요한 장치의 IP-MAC 매핑을 정적으로 설정하여 스푸핑 공격을 방지.</li>
+  <li><strong>패킷 필터링 및 모니터링</strong>: IDS/IPS(침입 탐지 및 방지 시스템)를 사용하여 비정상적인 ARP 트래픽을 감지하고 차단.</li>
+</ul>
+
+<h2 id="arp-캐시-테이블">ARP 캐시 테이블</h2>
+
+<p><img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/11_ARP_%EC%BA%90%EC%8B%9C%ED%85%8C%EC%9D%B4%EB%B8%94.png" alt="ARP_캐시테이블" /></p>
+
+<p>ARP 캐시 테이블은 네트워크 인터페이스 카드(NIC)가 IP 주소와 대응하는 MAC 주소를 저장하는 메모리입니다.<br />
+ARP 캐시에는 최근에 수행된 ARP 요청에 대한 응답으로 얻은 매핑 정보가 저장되며, 이를 통해 Broadcast 메세지를 통한 주소 해결을 줄이고 네트워크 성향을 향상 할 수 있습니다.</p>
+
+<h3 id="arp-캐시-테이블-구조">ARP 캐시 테이블 구조</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>IP 주소</th>
+      <th>MAC 주소</th>
+      <th>TTL (Time To Live)</th>
+      <th>상태</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>192.168.1.1</td>
+      <td>00:14:22:01:23:45</td>
+      <td>120s</td>
+      <td>동적</td>
+    </tr>
+    <tr>
+      <td>192.168.1.2</td>
+      <td>00:14:22:67:89:AB</td>
+      <td>120s</td>
+      <td>동적</td>
+    </tr>
+    <tr>
+      <td>192.168.1.3</td>
+      <td>00:14:22:45:67:CD</td>
+      <td>120s</td>
+      <td>동적</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="arp-캐시-관리">ARP 캐시 관리</h3>
+
+<ul>
+  <li><strong>동적 항목</strong>: 네트워크 상에서 자동으로 생성되는 ARP 항목으로 TTL이 만료되면 삭제됩니다.</li>
+  <li><strong>정적 항목</strong>: 사용자가 수동으로 ARP 캐시 테이블에 항목을 추가한 경우 TTL이 없거나 길게 설정되어 자동으로 삭제되지 않습니다.</li>
+</ul>
+
+<h2 id="arp-캐시-확인-명령어">ARP 캐시 확인 명령어</h2>
+
+<ul>
+  <li><strong>Windows</strong>: <code class="language-plaintext highlighter-rouge">arp -a</code></li>
+  <li><strong>Linux</strong>: <code class="language-plaintext highlighter-rouge">ip neighbour</code> 또는 <code class="language-plaintext highlighter-rouge">arp -n</code></li>
+</ul>]]></content><author><name>haeran</name></author><category term="NETWORK" /><category term="NETWORK" /><category term="MAC" /><category term="ARP" /><summary type="html"><![CDATA[MAC 주소 (Media Access Control Address, 물리적 주소)]]></summary></entry><entry><title type="html">Network Address Translation, 네트워크 주소 변환</title><link href="https://kimmand0o0.github.io/network/2025/03/24/%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC_%EC%A3%BC%EC%86%8C_%EB%B3%80%ED%99%98.html" rel="alternate" type="text/html" title="Network Address Translation, 네트워크 주소 변환" /><published>2025-03-24T12:07:00+00:00</published><updated>2025-03-24T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/network/2025/03/24/%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC_%EC%A3%BC%EC%86%8C_%EB%B3%80%ED%99%98</id><content type="html" xml:base="https://kimmand0o0.github.io/network/2025/03/24/%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC_%EC%A3%BC%EC%86%8C_%EB%B3%80%ED%99%98.html"><![CDATA[<h2 id="nat-network-address-translation-네트워크-주소-변환">NAT (Network Address Translation, 네트워크 주소 변환)</h2>
+
+<p>네트워크 주소 변환(network address translation, 줄여서 NAT)은 컴퓨터 네트워킹에서 쓰이는 용어로서, IP패킷의 TCP/UDP 포트 숫자와 소스 및 목적지의 IP 주소 등을 재기록하면서 라우터를 통해 네트워크 트래픽을 주고 받는 기술을 말한다. 한 마디로 Network Address인 IP를 변환(Translation)하는 기술입니다.</p>
+
+<p>NAT는 대부분 사설 네트워크(Private Network)에 속한 여러 개의 호스트가 하나의 공인 IP 주소를 사용하여 인터넷에 접속하기 위하여 이용합니다.</p>
+
+<blockquote>
+  <p><strong>Private Network에서 사용 가능한 Private IP</strong></p>
+
+  <p>10.0.0.0 ~ 10.255.255.255<br />
+172.16.0.0 ~ 172.31.255.255<br />
+192.168.0.0 ~ 192.168.255.255</p>
+</blockquote>
+
+<h3 id="왜-필요할까">왜 필요할까?</h3>
+
+<p>IPv4 주소는 한정적이지만, 인터넷에 연결되는 기기는 계속 증가하고 있습니다.</p>
+
+<p>IP 주소에는 Public(공인) IP와 Private(사설) IP가 있습니다. IP를 굳이 두 종류로 나눈 이유는 IPv4 주소의 낭비를 막고, 공인 IP가 필요하지 않은 단말들에게 중복 사용 가능한 IP를 제공하기 위함입니다.</p>
+
+<p>NAT를 사용하면 하나의 공인 IP를 여러 장치가 공유할 수 있습니다.</p>
+
+<p>공인인터넷망과 제 컴퓨터 사이에는 내 컴퓨터에게 IP를 할당해주는 공유기가 있습니다. 그리고 공유기는 공인 IP를 보유하며 인터넷과 맞닿아 있습니다. Private IP 뿐인 내 컴퓨터가 외부 서비스를 사용하고자 공유기로 나아가면, 공유기는 Private IP 뿐인 내 컴퓨터의 IP를 공유기 자신의 공인 IP로 변환(Translation) 하게 됩니다.</p>
+
+<p><img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/12_NAT.png" alt="NAT" />
+<img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/12_NAT_01.png" alt="NAT_01" /></p>
+
+<p>즉, 공유기를 지나 외부 인터넷으로 나아갈 때에는 공유기의 공인 IP를 가지고 원하는 Destination Address로 향하는 것입니다.</p>
+
+<p>이 기술을 <strong>NAT</strong>이라고 합니다.</p>
+
+<p><strong>용도</strong></p>
+
+<ol>
+  <li>
+    <p><strong>IP 주소 절약</strong>: NAT는 여러 내부 기기들이 공인 IP 주소 하나를 공유하여 인터넷에 연결할 수 있게 도와줍니다. 이로 인해 공인 IP 주소의 낭비를 줄이고, 부족한 공인 IP 주소 자원을 효율적으로 사용할 수 있습니다.</p>
+  </li>
+  <li>
+    <p><strong>보안</strong>: NAT는 외부에서 내부 네트워크로의 직접적인 접근을 차단하는 역할을 할 수 있습니다. 외부에서 내부 IP 주소를 알 수 없기 때문에, 공격자가 내부 시스템을 직접 공격하는 것을 방지할 수 있습니다.</p>
+  </li>
+  <li>
+    <p><strong>다중 연결 지원</strong>: NAT는 내부 네트워크에서 여러 기기들이 인터넷에 접속할 때 각각 고유한 포트를 할당하여, 하나의 공인 IP 주소로 여러 기기들이 동시에 연결할 수 있게 해줍니다.</p>
+  </li>
+  <li>
+    <p><strong>네트워크 경계 보호</strong>: NAT는 네트워크의 내부와 외부를 구분짓는 역할을 하며, 내부 네트워크의 구조나 주소를 외부에서 알 수 없게 만들어 외부 공격자로부터 보호합니다.</p>
+  </li>
+</ol>
+
+<p>NAT는 주로 홈 네트워크나 기업 내에서 사용하는 라우터나 방화벽 장비에서 사용되며, 일반적으로 SNAT(Source NAT)와 DNAT(Destination NAT) 방식이 있습니다.</p>
+
+<h3 id="nat의-종류">NAT의 종류</h3>
+
+<ol>
+  <li><strong>정적 NAT (Static NAT)</strong>
+    <ul>
+      <li>내부 IP와 외부 IP를 1:1로 매핑</li>
+      <li>특정 서버(예: 웹 서버)에 고정된 공인 IP를 할당할 때 사용</li>
+    </ul>
+  </li>
+  <li><strong>동적 NAT (Dynamic NAT)</strong>
+    <ul>
+      <li>내부 IP가 NAT 테이블에 등록될 때마다 외부 IP가 동적으로 할당됨</li>
+    </ul>
+  </li>
+  <li><strong>PAT (Port Address Translation, 다중 주소 변환, 흔히 NAT라고 부름)</strong>
+    <ul>
+      <li><strong>하나의 공인 IP를 여러 사설 IP에서 공유</strong></li>
+      <li>장치마다 다른 포트 번호를 할당하여 여러 기기가 동시에 인터넷을 사용할 수 있도록 함</li>
+    </ul>
+  </li>
+</ol>]]></content><author><name>haeran</name></author><category term="NETWORK" /><category term="NETWORK" /><category term="NAT" /><summary type="html"><![CDATA[NAT (Network Address Translation, 네트워크 주소 변환)]]></summary></entry><entry><title type="html">로드 밸런싱(Load balancing) 종류와 알고리즘</title><link href="https://kimmand0o0.github.io/network/2025/03/24/%EB%B6%80%ED%95%98%EB%B6%84%EC%82%B0_%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%84%9C.html" rel="alternate" type="text/html" title="로드 밸런싱(Load balancing) 종류와 알고리즘" /><published>2025-03-24T12:07:00+00:00</published><updated>2025-03-24T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/network/2025/03/24/%EB%B6%80%ED%95%98%EB%B6%84%EC%82%B0_%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%84%9C</id><content type="html" xml:base="https://kimmand0o0.github.io/network/2025/03/24/%EB%B6%80%ED%95%98%EB%B6%84%EC%82%B0_%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%84%9C.html"><![CDATA[<h2 id="로드-밸런싱load-balancing과-로드-밸런서load-balancer">로드 밸런싱(load balancing)과 로드 밸런서(Load Balancer)</h2>
+
+<p>부하분산 또는 로드 밸런싱(load balancing)은 컴퓨터 네트워크 기술의 일종으로 둘 혹은 셋 이상의 중앙처리장치 혹은 저장장치와 같은 컴퓨터 자원들에게 네트워크 트래픽을 여러 서버로 분산하여 작업해 시스템의 성능과 가용성을 높이는 것을 의미합니다.</p>
+
+<p><strong>그럼 로드 밸런서는 뭘까?</strong></p>
+
+<p>로드 밸런서는 로드 밸런싱의 트래픽을 여러 서버로 분배하는 기술을 제공하는 서비스 또는 장치(하드웨어, 소프트웨어)입니다.</p>
+
+<p>주요 역할은 다음과 같습니다:</p>
+
+<ol>
+  <li>클라이언트 요청을 분산 → 여러 서버가 균등하게 트래픽을 처리하도록 조정</li>
+  <li>서버 상태 모니터링 → 특정 서버가 다운되면 트래픽을 정상적인 서버로 우회</li>
+  <li>세션 유지 (Sticky Session) → 동일 사용자의 요청을 동일한 서버로 전달 가능</li>
+  <li>SSL 종료 (SSL Termination) → HTTPS 트래픽을 해석하여 서버 부하 감소</li>
+</ol>
+
+<h2 id="로드-밸런싱-방식">로드 밸런싱 방식</h2>
+
+<ul>
+  <li><strong>라운드 로빈 (Round Robin)</strong>: 순차적으로 각 서버에 요청을 배분</li>
+  <li><strong>가중 라운드 로빈 (Weighted Round Robin)</strong>: 서버의 성능에 따라 가중치를 설정하고 트래픽을 배분</li>
+  <li><strong>최소 연결 (Least Connection)</strong>: 현재 연결 수가 가장 적은 서버로 요청을 보냄</li>
+  <li><strong>IP 해시 (IP Hash)</strong>: 사용자의 IP를 해싱하여 특정 서버로 고정 매핑</li>
+</ul>
+
+<h2 id="로드-밸런싱의-종류">로드 밸런싱의 종류</h2>
+
+<p>로드 밸런싱의 종류는 OSI 7계층에 따라 나뉩니다.</p>
+
+<ul>
+  <li><strong>L4 (Layer 4) 로드 밸런서</strong>: 네트워크 계층(전송 Transport 계층, TCP/UDP)을 기반으로 IP 주소와 포트 번호 부하 분산</li>
+  <li><strong>L7 (Layer 7) 로드 밸런서</strong>: 애플리케이션 Application 계층(HTTP, HTTPS)에서 URL, 쿠키, 헤더 등을 분석하여 트래픽을 분산</li>
+</ul>
+
+<blockquote>
+  <p><strong>OSI 7 계층이란?</strong></p>
+
+  <p>OSI 7 계층은 네트워크 통신이 어떻게 이루어지는지를 설명하는 계층화된 모델입니다.<br />
+각 계층은 특정한 역할을 수행하며, 하위 계층에서 상위 계층으로 데이터를 전달합니다.</p>
+
+  <ol>
+    <li>
+      <p><strong>물리 계층 (Physical Layer)</strong><br />
+데이터를 0과 1의 전기 신호, 빛, 전파 형태로 변환하여 전달<br />
+네트워크 장비: LAN 케이블, 리피터, 허브<br />
+데이터 단위: 비트(Bit)<br />
+🛠 예제: UTP 케이블, 광케이블, Wi-Fi 신호, RS-232 (시리얼 통신), 이더넷</p>
+    </li>
+    <li>
+      <p><strong>데이터 링크 계층 (Data Link Layer)</strong><br />
+MAC 주소를 기반으로 데이터 전송<br />
+같은 네트워크(브로드캐스트 도메인) 내에서 통신 담당<br />
+네트워크 장비: 스위치, 브리지<br />
+데이터 단위: 프레임(Frame)<br />
+🛠 예제: 이더넷 (Ethernet), MAC 주소 기반의 통신, VLAN</p>
+    </li>
+    <li>
+      <p><strong>네트워크 계층 (Network Layer)</strong><br />
+IP 주소를 기반으로 패킷을 목적지까지 라우팅<br />
+서로 다른 네트워크 간 통신 가능 (인터넷 통신)<br />
+네트워크 장비: 라우터, L3 스위치<br />
+데이터 단위: 패킷(Packet)<br />
+🛠 예제: IPv4, IPv6, ICMP (핑), 라우팅 프로토콜 (OSPF, BGP)</p>
+    </li>
+    <li>
+      <p><strong>전송 계층 (Transport Layer)</strong><br />
+포트 번호를 사용하여 프로세스 간 통신<br />
+신뢰성 보장 (TCP) vs 속도 우선 (UDP)<br />
+데이터 단위: 세그먼트(Segment, TCP) / 데이터그램(Datagram, UDP)<br />
+🛠 예제: TCP (신뢰성 있는 연결, 흐름 제어, 오류 검출), UDP (빠른 전송, 실시간 스트리밍), 포트 번호 (예: HTTP - 80, HTTPS - 443)</p>
+    </li>
+    <li>
+      <p><strong>세션 계층 (Session Layer)</strong><br />
+클라이언트와 서버 간의 세션(연결) 관리<br />
+연결 유지, 인증, 재연결 기능 제공<br />
+🛠 예제: 로그인 세션 유지 (예: 웹사이트 로그인), RPC (원격 프로시저 호출), 소켓 통신 (WebSocket)</p>
+    </li>
+    <li>
+      <p><strong>표현 계층 (Presentation Layer)</strong><br />
+데이터의 인코딩, 암호화, 압축 처리<br />
+서로 다른 데이터 형식을 변환하여 이해 가능하게 만듦<br />
+🛠 예제: JPEG, PNG (이미지 포맷 변환), TLS/SSL (데이터 암호화), UTF-8, ASCII (문자 인코딩)</p>
+    </li>
+    <li>
+      <p><strong>응용 계층 (Application Layer)</strong><br />
+사용자가 직접 접하는 계층<br />
+웹 브라우저, 이메일 클라이언트, 파일 전송 등이 해당됨<br />
+🛠 예제: HTTP, HTTPS (웹 브라우징), FTP (파일 전송), SMTP (이메일 전송), DNS (도메인 네임 시스템)</p>
+    </li>
+  </ol>
+</blockquote>
+
+<p><img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/10_%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%8B%B1%EC%9D%98_%EC%A2%85%EB%A5%98.png" alt="로드밸런싱의_종류" /></p>
+
+<h2 id="nlb와-alb">NLB와 ALB</h2>
+
+<p>「여러 서버가 분산 처리 하는것을 로드 밸런싱이라고 한다」 까지는 알겠는데, 그럼 대체 로드 밸런서 L4와 L7의 차이는 무엇일까요?</p>
+
+<p>먼저, 로드 밸런서는 몇 계층에서 분산작업을 수행하느냐에 따라 NLB(Network LoadBalancer)와 ALB(Application LoadBalancer)로 나눌 수 있습니다. 기존에는 CLB(Classic LoadBalancer)라고 하는 여러 EC2 인스턴스간에 간단한 트래픽 부하 분산 하는 로드 밸런서도 있었지만, 최근에는 잘 사용하지 않습니다.</p>
+
+<h3 id="nlbnetwork-loadbalancer"><strong>NLB(Network LoadBalancer)</strong></h3>
+
+<p><img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/10_NLB.png" alt="NLB" /></p>
+
+<ul>
+  <li>Client IP와 서버사이에 서버로 들어오는 트래픽은 Load Balancer를 통하고 나가는 트래픽은 Client IP와 직접 통신합니다.</li>
+  <li>NLB는 Security Group 적용이 되지 않아서 서버에 적용된 Security Group 에서 보안이 가능합니다.</li>
+  <li>Client → Server에서 Access 제한 가능</li>
+  <li>NLB는 할당한 Elastic IP 를 Static IP로 사용이 가능하여 DNS Name과 IP주소 모두 사용이 가능합니다.</li>
+  <li>Name Server 또는 Route 53에서 A Record 사용이 가능합니다.</li>
+</ul>
+
+<h3 id="albapplication-loadbalancer"><strong>ALB(Application LoadBalancer)</strong></h3>
+
+<p><img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/10_ALB.png" alt="ALB" /></p>
+
+<ul>
+  <li>Reverse Proxy 대로 Client IP와 서버사이에 들어오고 나가는 트래픽이 모두 Load Balancer 와 통신합니다.</li>
+  <li>CLB/ALB는 Security Group 을 통한 보안이 가능합니다.</li>
+  <li>Client → Load Balancer의 Access 제한 가능</li>
+  <li>ALB/CLB는 IP 주소가 변동되기 때문에 Client 에서 Access 할 ELB의 DNS Name을 이용해야 합니다.</li>
+  <li>Name Server 또는 Route 53에서 CNAME 을 사용해야 Domain Name 연동이 가능합니다.</li>
+</ul>
+
+<h2 id="load-balancing-algorithm-종류">Load Balancing algorithm 종류</h2>
+
+<p>로드 밸런싱의 알고리즘 종류는 어떤 것이 있을까요. 로드 밸런싱의 알고리즘은 여러가지가 있지만 그 중에서 몇가지만 정리 해봤습니다.</p>
+
+<h3 id="라운드-로빈-방식">라운드 로빈 방식</h3>
+
+<p>라운드 로빈(Round Robin Method)은 클라이언트로부터 받은 요청을 로드밸런싱 대상 서버에 순서대로 할당받는 방식입니다. 첫 번째 요청은 첫 번째 서버, 두 번째 요청은 두 번째 서버, 세 번째 요청은 세 번째 서버에 할당합니다. 로드밸러닝 대상 서버의 성능이 동일하고 처리 시간이 짧은 애플리케이션의 경우, 균등하게 분산이 이루어지기 때문에 이 방식을 사용합니다.</p>
+
+<h3 id="가중-라운드-로빈-방식">가중 라운드 로빈 방식</h3>
+
+<p>가중 라운드 로빈 방식(Weighted Round Robin Method)은 실제 서버에 서로 다른 처리 용량을 지정할 수 있습니다. 각 서버에 가중치를 부여할 수 있으며, 여기서 지정한 정숫값을 통해 처리 용량을 정합니다.</p>
+
+<h3 id="최소-연결-방식">최소 연결 방식</h3>
+
+<p>최소 연결 방식은 연결 수가 가장 적은 서버에 네트워크 연결방향을 정합니다. 동적인 분산 알고리즘으로 각 서버에 대한 현재 연결 수를 동적으로 카운트할 수 있고, 동적으로 변하는 요청에 대한 부하를 분산시킬 수 있습니다.</p>
+
+<h2 id="로드-밸런서의-종류와-비교">로드 밸런서의 종류와 비교</h2>
+
+<ul>
+  <li><strong>AWS ELB</strong>: 클라우드 환경에서 자동 확장 및 관리 편의성이 필요할 때 적합.</li>
+  <li><strong>Nginx</strong>: 웹 서버와 함께 리버스 프록시 및 L7 로드밸런서 역할을 할 때 유용.</li>
+  <li><strong>HAProxy</strong>: 고성능, 저지연이 필요한 환경에서 효율적인 로드밸런싱을 원할 때 선택.</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th>**구분**</th>
+      <th>**AWS ELB**</th>
+      <th>**Nginx**</th>
+      <th>**HAProxy**</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**유형**</td>
+      <td>클라우드 기반 로드밸런서</td>
+      <td>소프트웨어 기반 리버스 프록시 &amp; 로드밸런서</td>
+      <td>소프트웨어 기반 로드밸런서</td>
+    </tr>
+    <tr>
+      <td>**설치 방식**</td>
+      <td>AWS 관리형 서비스 (설치 불필요)</td>
+      <td>수동 설치 (서버에서 실행)</td>
+      <td>수동 설치 (서버에서 실행)</td>
+    </tr>
+    <tr>
+      <td>**지원 계층**</td>
+      <td>L4 (NLB), L7 (ALB)</td>
+      <td>L7 (HTTP/HTTPS) + 일부 L4</td>
+      <td>L4, L7 (완벽 지원)</td>
+    </tr>
+    <tr>
+      <td>**로드밸런싱 알고리즘**</td>
+      <td>라운드 로빈, Least Outstanding Requests, IP 해시</td>
+      <td>라운드 로빈, Least Connections, IP 해시</td>
+      <td>라운드 로빈, Least Connections, IP 해시, 가중 라운드 로빈</td>
+    </tr>
+    <tr>
+      <td>**SSL 종료**</td>
+      <td>지원 (ALB, NLB)</td>
+      <td>지원 (단, 별도 설정 필요)</td>
+      <td>지원 (단, 별도 설정 필요)</td>
+    </tr>
+    <tr>
+      <td>**세션 유지 (Sticky Session)**</td>
+      <td>지원</td>
+      <td>쿠키 기반 설정 가능</td>
+      <td>지원</td>
+    </tr>
+    <tr>
+      <td>**헬스 체크 (Health Check)**</td>
+      <td>기본 제공</td>
+      <td>별도 설정 필요</td>
+      <td>기본 제공</td>
+    </tr>
+    <tr>
+      <td>**고가용성**</td>
+      <td>AWS가 자동으로 관리</td>
+      <td>Active-Passive 설정 가능</td>
+      <td>Active-Passive 및 Active-Active 설정 가능</td>
+    </tr>
+    <tr>
+      <td>**확장성**</td>
+      <td>자동 스케일링 지원</td>
+      <td>수동 확장 필요</td>
+      <td>수동 확장 필요</td>
+    </tr>
+    <tr>
+      <td>**사용 사례**</td>
+      <td>클라우드 환경에서 확장성과 관리 편의성을 중시하는 경우</td>
+      <td>웹 서버와 함께 사용하는 리버스 프록시 &amp; 로드밸런서</td>
+      <td>고성능, 저지연이 필요한 로드밸런싱 환경</td>
+    </tr>
+    <tr>
+      <td>**주요 특징**</td>
+      <td>AWS 서비스와 통합, 자동 확장 및 복원력 제공</td>
+      <td>정적 콘텐츠 캐싱, 리버스 프록시 기능 포함</td>
+      <td>높은 성능과 낮은 리소스 사용량</td>
+    </tr>
+  </tbody>
+</table>]]></content><author><name>haeran</name></author><category term="NETWORK" /><category term="NETWORK" /><category term="LoadBalancer" /><summary type="html"><![CDATA[로드 밸런싱(load balancing)과 로드 밸런서(Load Balancer)]]></summary></entry><entry><title type="html">vitest ‘mockResolvedValue’ 속성 없음</title><link href="https://kimmand0o0.github.io/study/2025/03/02/vitest_mock_type_error.html" rel="alternate" type="text/html" title="vitest ‘mockResolvedValue’ 속성 없음" /><published>2025-03-02T12:07:00+00:00</published><updated>2025-03-02T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/03/02/vitest_mock_type_error</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/03/02/vitest_mock_type_error.html"><![CDATA[<p>Jest에 대한 블로그 게시글은 많았지만 Vitest의 해당 에러에 대한 내용을 찾기 어려워 블로그 글로 남깁니다…</p>
+
+<h2 id="발생-에러">발생 에러</h2>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">() =&gt; Promise&lt;{ id: number; userId: number; marimoId: number; status: string; amount: number; paymentKey: string; payResponse: JsonValue; createdAt: Date; updatedAt: Date; }[] | null&gt;</span><span class="dl">'</span> <span class="nx">형식에</span> <span class="dl">'</span><span class="s1">mockResolvedValue</span><span class="dl">'</span> <span class="nx">속성이</span> <span class="nx">없습니다</span><span class="p">.</span><span class="nf">ts</span><span class="p">(</span><span class="mi">2339</span><span class="p">)</span>
+</code></pre></div></div>
+
+<table>
+  <tbody>
+    <tr>
+      <td>’() =&gt; Promise&lt;{ id: number; userId: number; marimoId: number; status: string; amount: number; paymentKey: string; payResponse: JsonValue; createdAt: Date; updatedAt: Date; }[]</td>
+      <td>null&gt;’ 형식에 ‘mockResolvedValue’ 속성이 없습니다.ts(2339)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>mockResolvedValue는 일반적으로 Promise를 반환하는 함수에 대해 사용되는 jest의 mock 기능입니다. 이 에러는, 해당 mock 함수에 대해 mockResolvedValue를 사용하려고 했을 때, 그 함수의 타입에 mockResolvedValue 속성이 존재하지 않아서 발생하는 것입니다.</p>
+
+<p>mockResolvedValue는 기본적으로 vi.fn()으로 만들어진 mock 함수에서 사용되며, 해당 함수가 반환하는 값이 Promise일 때만 유효합니다.</p>
+
+<h3 id="해결-방법">해결 방법</h3>
+
+<ul>
+  <li>
+    <p>vi.fn()을 사용하여 mock 함수 만들기: 해당 함수가 Promise를 반환하는지 확인한 후, jest.fn() 또는 vi.fn()으로 mock을 생성해야 합니다.</p>
+  </li>
+  <li>
+    <p>타입 지정: mock 함수의 타입이 정확히 Promise를 반환하는 함수로 지정되어 있는지 확인합니다. 예를 들어, mockResolvedValue를 사용하려면 mockFn이 Promise를 반환해야 하고, 이 경우 다음과 같이 작성할 수 있습니다.</p>
+  </li>
+</ul>
+
+<p><img src="https://github.com/user-attachments/assets/2c55e764-eaa1-4d68-9d90-1f671d5a4f90" alt="mockResolvedValue" />
+<img src="https://github.com/user-attachments/assets/52b39298-1330-4cc2-88e1-4bf3b1dd1395" alt="mockResolvedValue2" /></p>]]></content><author><name>haeran</name></author><category term="Study" /><category term="Test_code" /><summary type="html"><![CDATA[Jest에 대한 블로그 게시글은 많았지만 Vitest의 해당 에러에 대한 내용을 찾기 어려워 블로그 글로 남깁니다…]]></summary></entry><entry><title type="html">Prisma database와 연결 끊어주기</title><link href="https://kimmand0o0.github.io/study/2025/03/02/prisma_disconnect.html" rel="alternate" type="text/html" title="Prisma database와 연결 끊어주기" /><published>2025-03-02T12:07:00+00:00</published><updated>2025-03-02T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/03/02/prisma_disconnect</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/03/02/prisma_disconnect.html"><![CDATA[<p>작업을 하던 중 Database와 연결이 계속해서 끊어지는 상황이 발생…</p>
+
+<p><img width="912" alt="prisma0" src="https://github.com/user-attachments/assets/b52fea39-833e-41e2-8e3d-d27f31c7de85" /></p>
+
+<p>Prisma를 사용해 데이터베이스와 연결한 후 연결을 닫지 않으면, 데이터베이스의 연결 수가 한정되어 있기 때문에 연결을 닫지 않은 상태로 여러 번 요청을 보내게 되면 연결 수가 초과되어 더 이상 새로운 연결을 할 수 없게 됩니다.</p>
+
+<h3 id="원인">원인</h3>
+
+<p>Prisma에서 데이터베이스에 접근할 때마다 새로운 연결을 만들고, 그 연결을 명시적으로 닫지 않으면 연결을 재사용하지 못하고 계속해서 새로 연결을 시도하게 됩니다. 데이터베이스 서버에는 연결 수에 제한이 있기 때문에, 이 제한을 초과하면 더 이상 새 연결을 만들 수 없습니다.</p>
+
+<h3 id="해결">해결</h3>
+
+<p>이를 해결하려면 데이터베이스와의 연결을 명시적으로 닫아 연결 수를 효율적으로 관리해야 합니다. 이를 위해 Prisma에서 제공하는 finally 블럭을 사용하여 연결을 종료하는 방법을 적용할 수 있습니다. finally 블럭은 예외가 발생하든 안 하든 항상 실행되므로, 코드 실행이 완료된 후 연결을 확실히 끊을 수 있습니다.</p>
+
+<ul>
+  <li>try-catch 블럭: try 블럭 안에서 Prisma를 통해 데이터베이스 작업을 시도합니다. 예외가 발생할 경우, catch 블럭에서 예외를 처리할 수 있습니다.</li>
+  <li>finally 블럭: finally 블럭 안에서 prisma.$disconnect()를 호출하여 데이터베이스 연결을 명시적으로 종료합니다. 이 코드가 항상 실행되기 때문에 예외가 발생하더라도 연결을 끊을 수 있습니다.</li>
+</ul>
+
+<p><img src="https://github.com/user-attachments/assets/84c941fc-8071-4339-b791-1f85562073b8" alt="prisma" />
+<img src="https://github.com/user-attachments/assets/4ffd2631-b429-4e10-afb5-4b8edac60f4b" alt="prisma1" /></p>]]></content><author><name>haeran</name></author><category term="Study" /><category term="Prisma" /><summary type="html"><![CDATA[작업을 하던 중 Database와 연결이 계속해서 끊어지는 상황이 발생…]]></summary></entry><entry><title type="html">Toss Payments 연동하면서 만난 이슈들</title><link href="https://kimmand0o0.github.io/study/2025/03/01/toss_payments_api.html" rel="alternate" type="text/html" title="Toss Payments 연동하면서 만난 이슈들" /><published>2025-03-01T12:07:00+00:00</published><updated>2025-03-01T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/03/01/toss_payments_api</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/03/01/toss_payments_api.html"><![CDATA[<h2 id="toss-payments에-대하여"><strong>Toss payments에 대하여</strong></h2>
+
+<p>Toss Payments는 PG(결제 대행) 서비스로, 사용자가 결제를 시도하면 이를 중개하여 결제 처리 후 결과를 반환하는 역할을 합니다. Toss Payments는 RESTful API 방식으로 운영되며, application/json을 기본으로 사용합니다.</p>
+
+<h3 id="toss-payments의-특징"><strong>Toss Payments의 특징</strong></h3>
+
+<ol>
+  <li><strong>간단한 연동</strong>: REST API 기반으로 쉽고 빠르게 연동 가능</li>
+  <li><strong>다양한 결제 수단 지원</strong>: 카드, 계좌이체, 간편결제 등 다양한 결제 옵션 제공</li>
+  <li><strong>보안 강화</strong>: 암호화 및 보안 인증 적용</li>
+  <li><strong>실시간 결제 상태 확인</strong>: 웹훅(Webhook) 지원으로 실시간 상태 업데이트 가능</li>
+</ol>
+
+<h3 id="toss-payments의-결제-흐름"><strong>Toss Payments의 결제 흐름</strong></h3>
+
+<p><img src="https://github.com/user-attachments/assets/a5d9bd4e-6121-40ad-84ac-d80d457b64eb" alt="toss" /></p>
+
+<p>연동에 대해서는 <a href="https://docs.tosspayments.com/guides/v2/payment-widget/integration">공식문서</a>에 자세히 잘 나와있지만, 실제 연동을 하다보니 만난 문제들이 있어 블로그로 정리하려고 합니다.</p>
+
+<h2 id="toss-payment---alreadywidgetrenderederror-이미-위젯이-렌더링되어-있습니다-다시-렌더링하려면-cleanup-을-먼저-호출해주세요">toss payment - AlreadyWidgetRenderedError: 이미 위젯이 렌더링되어 있습니다. 다시 렌더링하려면 cleanup 을 먼저 호출해주세요</h2>
+
+<p><img src="https://github.com/user-attachments/assets/b882dc39-746d-449b-88ae-b863eb670b16" alt="toss-truble1" /></p>
+
+<h3 id="원인"><strong>원인</strong></h3>
+
+<p>금액을 바꿀때마다 <code class="language-plaintext highlighter-rouge">widgets</code>이 갱신되어 결제 ui를 여러번 렌더링 하는 문제가 발생하였습니다. 결제 금액이 달라졌기 때문에 위젯은 갱신 되어야하는 것이 맞았고, 기존 위젯을 삭제해야하는 문제였습니다.</p>
+
+<h3 id="해결"><strong>해결</strong></h3>
+
+<p>먼저 금액을 바꾸는 이벤트에 debounce를 줘 위젯을 갱신하는 이벤트를 최소화하였습니다.</p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kd">const</span> <span class="nx">debouncedPrice</span> <span class="o">=</span> <span class="nf">useDebounce</span><span class="p">(</span><span class="nx">price</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+
+<span class="nf">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nf">setAmount</span><span class="p">({</span>
+    <span class="na">currency</span><span class="p">:</span> <span class="dl">"</span><span class="s2">KRW</span><span class="dl">"</span><span class="p">,</span>
+    <span class="na">value</span><span class="p">:</span> <span class="nf">extractNumber</span><span class="p">(</span><span class="nx">debouncedPrice</span> <span class="o">??</span> <span class="dl">""</span><span class="p">),</span>
+  <span class="p">})</span>
+<span class="p">},</span> <span class="p">[</span><span class="nx">debouncedPrice</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>두번째로 새로운 위젯이 생성되기 전 기존 위젯을 삭제하는 로직을 추가하였습니다.</p>
+
+<p>useEffect가 실행될 때 위젯을 한번 제거해준 후, 그래도 에러가 난다면 catch에서 위젯을 확인한 후 제거해주는 로직으로 문제를 해결하였습니다.</p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">async</span> <span class="kd">function</span> <span class="nf">renderPaymentWidgets</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">widgets</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span>
+    <span class="p">}</span>
+
+    <span class="k">try</span> <span class="p">{</span>
+      <span class="nf">setReady</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+
+      <span class="k">await</span> <span class="nx">renderUi</span><span class="p">?.</span><span class="nf">destroy</span><span class="p">()</span>
+      <span class="k">await</span> <span class="nx">agreementUi</span><span class="p">?.</span><span class="nf">destroy</span><span class="p">()</span>
+
+      <span class="k">await</span> <span class="nx">widgets</span><span class="p">.</span><span class="nf">setAmount</span><span class="p">(</span><span class="nx">amount</span><span class="p">)</span>
+
+      <span class="kd">const</span> <span class="nx">newUi</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">widgets</span><span class="p">.</span><span class="nf">renderPaymentMethods</span><span class="p">({</span>
+        <span class="na">selector</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#payment-method</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">variantKey</span><span class="p">:</span> <span class="dl">"</span><span class="s2">DEFAULT</span><span class="dl">"</span><span class="p">,</span>
+      <span class="p">})</span>
+
+      <span class="nf">setRenderUi</span><span class="p">(</span><span class="nx">newUi</span><span class="p">)</span>
+
+      <span class="kd">const</span> <span class="nx">newAgreement</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">widgets</span><span class="p">.</span><span class="nf">renderAgreement</span><span class="p">({</span>
+        <span class="na">selector</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#agreement</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">variantKey</span><span class="p">:</span> <span class="dl">"</span><span class="s2">AGREEMENT</span><span class="dl">"</span><span class="p">,</span>
+      <span class="p">})</span>
+
+      <span class="nf">setAgreementUi</span><span class="p">(</span><span class="nx">newAgreement</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if </span><span class="p">(</span><span class="nx">renderUi</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">renderUi</span><span class="p">.</span><span class="nf">destroy</span><span class="p">()</span>
+        <span class="nf">setRenderUi</span><span class="p">(</span><span class="kc">null</span><span class="p">)</span>
+      <span class="p">}</span>
+      <span class="k">if </span><span class="p">(</span><span class="nx">agreementUi</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">agreementUi</span><span class="p">.</span><span class="nf">destroy</span><span class="p">()</span>
+        <span class="nf">setAgreementUi</span><span class="p">(</span><span class="kc">null</span><span class="p">)</span>
+      <span class="p">}</span>
+      <span class="nf">setReady</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nf">setReady</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="nf">renderPaymentWidgets</span><span class="p">()</span>
+
+  <span class="k">return </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">renderUi</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">renderUi</span><span class="p">.</span><span class="nf">destroy</span><span class="p">().</span><span class="nf">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="nf">setRenderUi</span><span class="p">(</span><span class="kc">null</span><span class="p">))</span>
+    <span class="p">}</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">agreementUi</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">agreementUi</span><span class="p">.</span><span class="nf">destroy</span><span class="p">().</span><span class="nf">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="nf">setAgreementUi</span><span class="p">(</span><span class="kc">null</span><span class="p">))</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">},</span> <span class="p">[</span><span class="nx">widgets</span><span class="p">,</span> <span class="nx">amount</span><span class="p">])</span>
+</code></pre></div></div>
+
+<h2 id="oss에서-redirect를-해주는-경우-cookie에-값이-없는-상태로-넘어오기-때문에-middleware에서-엣지-케이스-처리">oss에서 redirect를 해주는 경우 cookie에 값이 없는 상태로 넘어오기 때문에 middleware에서 엣지 케이스 처리</h2>
+
+<p>토스에서 결제가 완료 된 후 클라이언트로 리다이렉트 되는 과정에서 계속해서 메인 화면으로 이동하는 문제가 발생하였습니다.</p>
+
+<h3 id="원인-1"><strong>원인</strong></h3>
+
+<p>next/middleware를 통해 jwt token이 없는 유저의 경우 로그인 화면으로 이동시키고 있었는데, 토스 클라이언트에서 리다이렉트 해오는 과정에서 jwt token이 server로 넘어오지 않는 문제였습니다. 당연히 저희 클라이언트에서 보내는 요청이 아니기 때문에 토큰이 담기지 않는 것이었죵…</p>
+
+<h3 id="해결-1"><strong>해결</strong></h3>
+
+<p>미들웨어에서 토스에서 결과값을 받아오는 두가지 페이지만 엣지케이스로 등록하는 방법을 선택하였습니다.</p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">if </span><span class="p">(</span><span class="nx">pathname</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">/pay/toss/success</span><span class="dl">"</span> <span class="o">||</span> <span class="nx">pathname</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">/pay/toss/fail</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">NextResponse</span><span class="p">.</span><span class="nf">next</span><span class="p">()</span>
+  <span class="p">}</span>
+</code></pre></div></div>]]></content><author><name>haeran</name></author><category term="Study" /><category term="TossAPI" /><summary type="html"><![CDATA[Toss payments에 대하여]]></summary></entry><entry><title type="html">Zustand의 Slice 패턴</title><link href="https://kimmand0o0.github.io/study/2025/02/28/justand_slice_pattern.html" rel="alternate" type="text/html" title="Zustand의 Slice 패턴" /><published>2025-02-28T12:07:00+00:00</published><updated>2025-02-28T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/02/28/justand_slice_pattern</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/02/28/justand_slice_pattern.html"><![CDATA[<h3 id="-우리-프로젝트에서-zustand-사용-방식">💻 우리 프로젝트에서 Zustand 사용 방식</h3>
+
+<p><code class="language-plaintext highlighter-rouge">zustand</code>는 React 상태 관리를 위한 경량 상태 관리 라이브러리입니다. <code class="language-plaintext highlighter-rouge">zustand</code>를 사용하여 애플리케이션의 상태를 관리하고, <code class="language-plaintext highlighter-rouge">localStorage</code>에 상태를 지속(persist)하도록 설정하고 있습니다.</p>
+
+<p>저희의 zustand 구조는 <a href="https://zustand.docs.pmnd.rs/migrations/migrating-to-v4#statecreator">v4</a>를 기반으로 두고 있습니다. 최근(24년 10월 14일) v5가 나왔지만, 아직 익숙하지 않아서 적용 시키지는 못했습니다. 좋은 블로그글이 있어 공유합니다 <a href="https://j-ho.dev/50/">(블로그)</a></p>
+
+<p>현재 패턴은 슬라이스(Slice) 패턴을 사용하고 있습니다.
+Zustand의 <strong>슬라이스(slice) 패턴</strong>은 상태(store)를 모듈화하여 관리하는 방식입니다. 애플리케이션의 상태를 논리적으로 분리함으로써 유지보수성과 확장성을 높일 수 있습니다.</p>
+
+<p><img src="https://github.com/user-attachments/assets/dd7f9851-3b42-4d2f-9f1b-451d2389d39d" alt="zustand" /></p>
+
+<h3 id="1-슬라이스-패턴이-필요한-이유">1. <strong>슬라이스 패턴이 필요한 이유</strong></h3>
+
+<p>Zustand를 사용할 때 상태가 커지면 하나의 큰 <code class="language-plaintext highlighter-rouge">create</code> 스토어에 모든 상태를 관리하는 것이 비효율적입니다. 이를 해결하기 위해 <strong>슬라이스 패턴</strong>을 사용하면 특정 기능(예: 유저 상태, 테마 상태 등)별로 분리하여 관리할 수 있습니다.</p>
+
+<p>✅ <strong>장점</strong></p>
+
+<ul>
+  <li><strong>코드 가독성 증가</strong>: 상태를 논리적으로 분리하여 쉽게 이해할 수 있음</li>
+  <li><strong>유지보수성 향상</strong>: 특정 기능을 수정할 때 다른 상태에 영향을 주지 않음</li>
+  <li><strong>모듈화 가능</strong>: 상태를 독립적으로 정의하여 재사용 가능</li>
+</ul>
+
+<h3 id="2-슬라이스slice-분리하기"><strong>2. 슬라이스(Slice) 분리하기</strong></h3>
+
+<p>각 상태를 개별적인 <strong>슬라이스(slice)</strong>로 분리하여 관리합니다.</p>
+
+<p><strong>1️⃣ 슬라이스 정의</strong></p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// counterSlice.ts</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">StateCreator</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">zustand</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="kr">interface</span> <span class="nx">CounterSlice</span> <span class="p">{</span>
+  <span class="nl">count</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+  <span class="nl">increase</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="k">void</span><span class="p">;</span>
+  <span class="nl">decrease</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="k">void</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">createCounterSlice</span><span class="p">:</span> <span class="nx">StateCreator</span><span class="o">&lt;</span>
+  <span class="nx">CounterSlice</span><span class="p">,</span>
+  <span class="p">[],</span>
+  <span class="p">[],</span>
+  <span class="nx">CounterSlice</span>
+<span class="o">&gt;</span> <span class="o">=</span> <span class="p">(</span><span class="kd">set</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">({</span>
+  <span class="na">count</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+  <span class="na">increase</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">set</span><span class="p">((</span><span class="nx">state</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">({</span> <span class="na">count</span><span class="p">:</span> <span class="nx">state</span><span class="p">.</span><span class="nx">count</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">})),</span>
+  <span class="na">decrease</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">set</span><span class="p">((</span><span class="nx">state</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">({</span> <span class="na">count</span><span class="p">:</span> <span class="nx">state</span><span class="p">.</span><span class="nx">count</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">})),</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">CounterSlice</code> 인터페이스를 정의하여 상태와 액션을 타입으로 명시</li>
+  <li><code class="language-plaintext highlighter-rouge">createCounterSlice</code> 함수에서 <code class="language-plaintext highlighter-rouge">set</code>을 이용해 상태를 변경하는 로직을 구현</li>
+</ul>
+
+<p><strong>2️⃣ 여러 슬라이스 합치기</strong></p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// useStore.ts</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">create</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">zustand</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">CounterSlice</span><span class="p">,</span> <span class="nx">createCounterSlice</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./counterSlice</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">ThemeSlice</span><span class="p">,</span> <span class="nx">createThemeSlice</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./themeSlice</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">type</span> <span class="nx">Store</span> <span class="o">=</span> <span class="nx">CounterSlice</span> <span class="o">&amp;</span> <span class="nx">ThemeSlice</span><span class="p">;</span> <span class="c1">//여러개의 slice 통합</span>
+
+<span class="kd">const</span> <span class="nx">useStore</span> <span class="o">=</span> <span class="nx">create</span><span class="o">&lt;</span><span class="nx">Store</span><span class="o">&gt;</span><span class="p">()((...</span><span class="nx">a</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">({</span>
+  <span class="p">...</span><span class="nf">createCounterSlice</span><span class="p">(...</span><span class="nx">a</span><span class="p">),</span>
+  <span class="p">...</span><span class="nf">createThemeSlice</span><span class="p">(...</span><span class="nx">a</span><span class="p">),</span>
+<span class="p">}));</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="nx">useStore</span><span class="p">;</span>
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">create</code> 함수에서 여러 슬라이스를 병합하여 하나의 스토어로 생성</li>
+  <li><code class="language-plaintext highlighter-rouge">...createCounterSlice(...a)</code>를 통해 상태를 결합</li>
+</ul>
+
+<h3 id="3-정리"><strong>3. 정리</strong></h3>
+
+<p>✅ <strong>슬라이스 패턴의 핵심 개념</strong></p>
+
+<ul>
+  <li><strong>기능별로 상태를 분리</strong>하여 유지보수성을 높임</li>
+  <li><strong>여러 슬라이스를 결합하여 하나의 상태로 통합</strong></li>
+  <li><strong>Zustand의 <code class="language-plaintext highlighter-rouge">StateCreator</code>를 활용하여 슬라이스 타입을 안전하게 관리</strong></li>
+</ul>
+
+<p>✅ <strong>언제 사용할까?</strong></p>
+
+<ul>
+  <li>애플리케이션 상태가 점점 커질 때</li>
+  <li>여러 상태(예: <code class="language-plaintext highlighter-rouge">user</code>, <code class="language-plaintext highlighter-rouge">theme</code>, <code class="language-plaintext highlighter-rouge">cart</code> 등)를 관리해야 할 때</li>
+  <li>코드의 가독성과 유지보수를 개선하고 싶을 때</li>
+</ul>]]></content><author><name>haeran</name></author><category term="Study" /><category term="Zustand" /><summary type="html"><![CDATA[💻 우리 프로젝트에서 Zustand 사용 방식]]></summary></entry><entry><title type="html">TypeScript `Partial`과 `Omit` 차이점</title><link href="https://kimmand0o0.github.io/study/2025/02/27/typescript_omit_partial.html" rel="alternate" type="text/html" title="TypeScript `Partial`과 `Omit` 차이점" /><published>2025-02-27T12:07:00+00:00</published><updated>2025-02-27T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/02/27/typescript_omit_partial</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/02/27/typescript_omit_partial.html"><![CDATA[<h1 id="typescript-partial과-omit-차이점">TypeScript <code class="language-plaintext highlighter-rouge">Partial</code>과 <code class="language-plaintext highlighter-rouge">Omit</code> 차이점</h1>
+
+<p>TypeScript에서 <code class="language-plaintext highlighter-rouge">Partial</code>과 <code class="language-plaintext highlighter-rouge">Omit</code>은 객체 타입을 변경하는 유용한 유틸리티 타입입니다. 이들의 차이점은 주로 속성을 어떻게 처리하는지에 있습니다.</p>
+
+<h2 id="1-partialt">1. <code class="language-plaintext highlighter-rouge">Partial&lt;T&gt;</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">Partial</code>은 주어진 타입 <code class="language-plaintext highlighter-rouge">T</code>의 모든 속성을 <strong>선택적으로</strong> 만듭니다. 즉, 타입의 각 프로퍼티를 optional로 바꿔줍니다.</p>
+
+<h3 id="예시">예시:</h3>
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">interface</span> <span class="nx">User</span> <span class="p">{</span>
+  <span class="nl">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">age</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">user</span><span class="p">:</span> <span class="nb">Partial</span><span class="o">&lt;</span><span class="nx">User</span><span class="o">&gt;</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Alice</span><span class="dl">"</span>
+  <span class="c1">// age는 선택적이므로 생략 가능</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h3 id="특징">특징:</h3>
+<ul>
+  <li>모든 속성이 선택적입니다.</li>
+  <li>객체의 속성 중 일부만 포함될 수 있습니다.</li>
+</ul>
+
+<h2 id="2-omitt-k">2. <code class="language-plaintext highlighter-rouge">Omit&lt;T, K&gt;</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">Omit</code>은 주어진 타입 <code class="language-plaintext highlighter-rouge">T</code>에서 특정 속성 <code class="language-plaintext highlighter-rouge">K</code>를 <strong>제거</strong>한 새로운 타입을 생성합니다. <code class="language-plaintext highlighter-rouge">K</code>는 제거할 속성들의 키를 나타냅니다.</p>
+
+<h3 id="예시-1">예시:</h3>
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">interface</span> <span class="nx">User</span> <span class="p">{</span>
+  <span class="nl">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">age</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+  <span class="nl">email</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">user</span><span class="p">:</span> <span class="nb">Omit</span><span class="o">&lt;</span><span class="nx">User</span><span class="p">,</span> <span class="dl">"</span><span class="s2">email</span><span class="dl">"</span><span class="o">&gt;</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Alice</span><span class="dl">"</span><span class="p">,</span>
+  <span class="na">age</span><span class="p">:</span> <span class="mi">25</span>
+  <span class="c1">// email 속성은 제거됨</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h3 id="특징-1">특징:</h3>
+<ul>
+  <li>특정 속성을 제외하고 나머지 속성만 포함합니다.</li>
+  <li>하나 이상의 속성도 제거할 수 있습니다.</li>
+</ul>
+
+<h2 id="차이점-요약">차이점 요약:</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>유틸리티 타입</th>
+      <th>동작 방식</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**<code class="language-plaintext highlighter-rouge">Partial&lt;T&gt;</code>**</td>
+      <td>모든 속성을 선택적으로 만듭니다.</td>
+    </tr>
+    <tr>
+      <td>**<code class="language-plaintext highlighter-rouge">Omit&lt;T, K&gt;</code>**</td>
+      <td>특정 속성을 제거하고 나머지 속성만 포함합니다.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>따라서, <code class="language-plaintext highlighter-rouge">Partial</code>은 속성을 선택적으로 만들 때 사용하고, <code class="language-plaintext highlighter-rouge">Omit</code>은 특정 속성을 제거할 때 사용됩니다.</p>]]></content><author><name>haeran</name></author><category term="Study" /><category term="Study" /><category term="Typescript" /><summary type="html"><![CDATA[TypeScript Partial과 Omit 차이점]]></summary></entry><entry><title type="html">Next.js server와 client의 다른 fetch…</title><link href="https://kimmand0o0.github.io/study/2025/02/26/next_fetch.html" rel="alternate" type="text/html" title="Next.js server와 client의 다른 fetch…" /><published>2025-02-26T12:07:00+00:00</published><updated>2025-02-26T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/02/26/next_fetch</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/02/26/next_fetch.html"><![CDATA[<h2 id="-서버server에서는-url이-필요-없는-이유">🚀 서버(Server)에서는 URL이 필요 없는 이유</h2>
+<p>Next.js 서버는 <strong>배코드 환경(Node.js)에서 실행</strong>되기 때문에, 서버 내부에서 API를 호출할 때는 <strong>절대 URL이 필요하지 않음</strong>.<br />
+상대 경로(<code class="language-plaintext highlighter-rouge">/api/something</code>)만 사용해도 요청을 처리할 수 있다.</p>
+
+<h3 id="예제-코드">예제 코드</h3>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// pages/api/example.ts</span>
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">handler</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nf">status</span><span class="p">(</span><span class="mi">200</span><span class="p">).</span><span class="nf">json</span><span class="p">({</span> <span class="na">message</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Hello from API!</span><span class="dl">"</span> <span class="p">});</span>
+<span class="p">}</span>
+
+<span class="c1">// pages/index.tsx (서버에서 실행)</span>
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">getServerSideProps</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">res</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="s2">`/api/example`</span><span class="p">);</span> <span class="c1">// 절대 URL 불필요</span>
+  <span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">res</span><span class="p">.</span><span class="nf">json</span><span class="p">();</span>
+
+  <span class="k">return</span> <span class="p">{</span> <span class="na">props</span><span class="p">:</span> <span class="p">{</span> <span class="nx">data</span> <span class="p">}</span> <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="이유">이유</h3>
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">fetch("/api/example")</code> 하면 Next.js 서버 내부에서 처리되는 것이기 때문에, <strong>절대 URL 없이 상대 경로만으로 요청 가능</strong>.</li>
+  <li>API 라우트(<code class="language-plaintext highlighter-rouge">/api/*</code>)는 <strong>Next.js 서버가 직접 처리</strong>하는 것이기 때문에, 요청을 외부 네트워크로 보내지 않음.</li>
+</ol>
+
+<hr />
+
+<h2 id="-클라이언트client에서는-url이-필요한-이유">🌍 클라이언트(Client)에서는 URL이 필요한 이유</h2>
+<p>클라이언트는 <strong>브라우저에서 실행</strong>되는데, API 요청을 할 때는 <strong>절대 URL이 필요</strong>하다.<br />
+<code class="language-plaintext highlighter-rouge">fetch</code>를 사용할 때 <code class="language-plaintext highlighter-rouge">http://localhost:3000/api/something</code> 또는 배포된 도메인(예: <code class="language-plaintext highlighter-rouge">https://myapp.com/api/something</code>)을 명시해야 한다.</p>
+
+<h3 id="예제-코드-1">예제 코드</h3>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// components/Example.tsx (클라이언트에서 실행)</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useEffect</span><span class="p">,</span> <span class="nx">useState</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">react</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">function</span> <span class="nf">Example</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">data</span><span class="p">,</span> <span class="nx">setData</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+
+  <span class="nf">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nf">fetch</span><span class="p">(</span><span class="dl">"</span><span class="s2">http://localhost:3000/api/example</span><span class="dl">"</span><span class="p">)</span> <span class="c1">// 절대 URL 필요</span>
+      <span class="p">.</span><span class="nf">then</span><span class="p">((</span><span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">res</span><span class="p">.</span><span class="nf">json</span><span class="p">())</span>
+      <span class="p">.</span><span class="nf">then</span><span class="p">((</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nf">setData</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
+  <span class="p">},</span> <span class="p">[]);</span>
+
+  <span class="k">return</span> <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span><span class="p">{</span><span class="nx">data</span> <span class="p">?</span> <span class="nx">data</span><span class="p">.</span><span class="nx">message</span> <span class="p">:</span> <span class="dl">"</span><span class="s2">Loading...</span><span class="dl">"</span><span class="p">}</span><span class="o">&lt;</span><span class="sr">/div&gt;</span><span class="err">;
+</span><span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="이유-1">이유</h3>
+<ol>
+  <li><strong>브라우저는 Next.js 서버와 분리된 환경</strong>에서 실행되기 때문에, API 호출시 <strong>정확한 주소(절대 URL)</strong>가 필요함.</li>
+  <li>클라이언트에서 <code class="language-plaintext highlighter-rouge">fetch("/api/example")</code>만 사용하면, <strong>현재 페이지 URL 기준으로 요청</strong>해서 경로가 꼽일 수 있음.</li>
+  <li>배포된 환경에서는 <code class="language-plaintext highlighter-rouge">localhost</code>가 아니라 실제 도메인(<code class="language-plaintext highlighter-rouge">https://myapp.com/api/something</code>)을 사용해야 하기 때문.</li>
+</ol>
+
+<p><img src="https://github.com/user-attachments/assets/0533d3cc-09e7-4493-8e2b-b91fa6f9c526" alt="client와server의fetch" /></p>
+
+<h2 id="-정리">✅ 정리</h2>
+<p>| 실행 환경 | URL 필요 여부 | 이유 |
+|———-|————|——|
+| **서버 (Next.js API, <code class="language-plaintext highlighter-rouge">getServerSideProps</code>)** | ❌ 필요 없음 | 서버 내부에서 실행되는데 상대 경로 사용 가능 |
+| **클라이언트 (React 컴포넌트, <code class="language-plaintext highlighter-rouge">useEffect</code>)** | ✅ 필요함 | 브라우저에서 API 호출할 때 절대 URL 필요 |</p>]]></content><author><name>haeran</name></author><category term="Study" /><category term="Study" /><category term="Next.js" /><summary type="html"><![CDATA[🚀 서버(Server)에서는 URL이 필요 없는 이유 Next.js 서버는 배코드 환경(Node.js)에서 실행되기 때문에, 서버 내부에서 API를 호출할 때는 절대 URL이 필요하지 않음. 상대 경로(/api/something)만 사용해도 요청을 처리할 수 있다.]]></summary></entry><entry><title type="html">Dto와 type은 다른건가?</title><link href="https://kimmand0o0.github.io/study/2025/02/26/dto_type.html" rel="alternate" type="text/html" title="Dto와 type은 다른건가?" /><published>2025-02-26T12:07:00+00:00</published><updated>2025-02-26T12:07:00+00:00</updated><id>https://kimmand0o0.github.io/study/2025/02/26/dto_type</id><content type="html" xml:base="https://kimmand0o0.github.io/study/2025/02/26/dto_type.html"><![CDATA[<h3 id="dto란-data-transfer-object"><strong>DTO란? (Data Transfer Object)</strong></h3>
+<p>DTO(Data Transfer Object)는 계층 간 데이터 전송을 위해 사용하는 객체입니다. 주로 <strong>컨트롤러 ↔ 서비스 ↔ 데이터베이스</strong> 간에 데이터를 주고받을 때 사용됩니다.</p>
+
+<h4 id="dto의-특징"><strong>DTO의 특징</strong></h4>
+<ul>
+  <li>불필요한 데이터를 제외하고, 필요한 데이터만 포함</li>
+  <li>데이터를 변환하거나 가공할 수 있음</li>
+  <li>보안 및 성능 최적화를 위해 사용</li>
+  <li><code class="language-plaintext highlighter-rouge">class</code> 또는 <code class="language-plaintext highlighter-rouge">interface</code>로 선언 가능</li>
+</ul>
+
+<h4 id="예시-typescript"><strong>예시 (TypeScript)</strong></h4>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">UserDto</span> <span class="p">{</span>
+  <span class="nl">id</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+  <span class="nl">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">email</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+
+  <span class="nf">constructor</span><span class="p">(</span><span class="nx">id</span><span class="p">:</span> <span class="kr">number</span><span class="p">,</span> <span class="nx">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span> <span class="nx">email</span><span class="p">:</span> <span class="kr">string</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">id</span> <span class="o">=</span> <span class="nx">id</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="nx">name</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">email</span> <span class="o">=</span> <span class="nx">email</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>위 <code class="language-plaintext highlighter-rouge">UserDto</code> 클래스는 데이터베이스에서 가져온 유저 정보를 가공하여 클라이언트에 전달하는 데 사용할 수 있습니다.</p>
+
+<hr />
+
+<h3 id="type과-dto의-차이점"><strong>type과 DTO의 차이점</strong></h3>
+<p>| 비교 항목      | type | DTO |
+|—————|——–|—–|
+| 선언 방식     | type 키워드 사용 | <code class="language-plaintext highlighter-rouge">class</code> 또는 <code class="language-plaintext highlighter-rouge">interface</code> 사용 |
+| 기능         | 단순 타입 정의 | 데이터 가공 및 메서드 포함 가능 |
+| 인스턴스화 가능 여부 | ❌ (객체 생성 불가) | ✅ (객체 생성 가능) |
+| 계층 간 데이터 전송 | ❌ (주로 타입 검증 용도) | ✅ (데이터 변환, 유효성 검사 가능) |</p>
+
+<h4 id="type-예시-typescript"><strong>type 예시 (TypeScript)</strong></h4>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">type</span> <span class="nx">User</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">id</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+  <span class="nl">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">email</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h4 id="dto와-type-비교-예시"><strong>DTO와 type 비교 예시</strong></h4>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// type: 단순 데이터 구조</span>
+<span class="kd">type</span> <span class="nx">UserType</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">id</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+  <span class="nl">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">email</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// DTO: 데이터 변환 및 가공 가능</span>
+<span class="kd">class</span> <span class="nc">UserDto</span> <span class="p">{</span>
+  <span class="nl">id</span><span class="p">:</span> <span class="kr">number</span><span class="p">;</span>
+  <span class="nl">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">email</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+
+  <span class="nf">constructor</span><span class="p">(</span><span class="nx">user</span><span class="p">:</span> <span class="nx">UserType</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">id</span> <span class="o">=</span> <span class="nx">user</span><span class="p">.</span><span class="nx">id</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nf">toUpperCase</span><span class="p">();</span> <span class="c1">// 예제: 이름을 대문자로 변환</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">email</span> <span class="o">=</span> <span class="nx">user</span><span class="p">.</span><span class="nx">email</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="정리"><strong>정리</strong></h3>
+<p>✅ type은 단순한 데이터 구조를 정의하는 데 사용<br />
+✅ DTO는 데이터를 가공하거나 변환할 때 사용</p>]]></content><author><name>haeran</name></author><category term="Study" /><category term="Study" /><category term="Typescript" /><summary type="html"><![CDATA[DTO란? (Data Transfer Object) DTO(Data Transfer Object)는 계층 간 데이터 전송을 위해 사용하는 객체입니다. 주로 컨트롤러 ↔ 서비스 ↔ 데이터베이스 간에 데이터를 주고받을 때 사용됩니다.]]></summary></entry></feed>

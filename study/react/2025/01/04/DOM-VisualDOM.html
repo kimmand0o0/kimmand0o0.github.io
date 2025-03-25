@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Google Translate Customization (if needed) -->
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+
+  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>DOM과 Visual DOM | Haeran’s blog</title>
+<meta name="generator" content="Jekyll v4.4.1">
+<meta property="og:title" content="DOM과 Visual DOM">
+<meta name="author" content="haeran">
+<meta property="og:locale" content="ko">
+<meta name="description" content="1. DOM (Document Object Model)">
+<meta property="og:description" content="1. DOM (Document Object Model)">
+<link rel="canonical" href="https://kimmand0o0.github.io/study/react/2025/01/04/DOM-VisualDOM.html">
+<meta property="og:url" content="https://kimmand0o0.github.io/study/react/2025/01/04/DOM-VisualDOM.html">
+<meta property="og:site_name" content="Haeran’s blog">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2025-01-04T12:07:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="DOM과 Visual DOM">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"haeran"},"dateModified":"2025-01-04T12:07:00+00:00","datePublished":"2025-01-04T12:07:00+00:00","description":"1. DOM (Document Object Model)","headline":"DOM과 Visual DOM","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/study/react/2025/01/04/DOM-VisualDOM.html"},"url":"https://kimmand0o0.github.io/study/react/2025/01/04/DOM-VisualDOM.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- Favicon -->
+  <link rel="icon" href="/assets/images/favicon.ico">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kimmand0o0.github.io/study/react/2025/01/04/DOM-VisualDOM.html">
+
+  <!-- Social Media (Open Graph, Twitter Card) -->
+  <meta property="og:title" content="DOM과 Visual DOM">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+  <meta property="og:url" content="https://kimmand0o0.github.io/study/react/2025/01/04/DOM-VisualDOM.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="DOM과 Visual DOM">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+
+  <!-- Stylesheets and External Resources -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- JavaScript -->
+  <script src="/assets/js/main.js"></script>
+
+  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
+<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
+<script>
+  function initGoogleAnalytics() {
+    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
+      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
+    var enableDNT = "false" == "true";
+
+    if (!enableDNT || !doNotTrack) {
+      var measurementId = 'G-ZNXE6HSKMS';
+
+      (function(src) {
+        var tag = document.createElement('script');
+        tag.src = src;
+        tag.async = true;
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', measurementId);
+    }
+  }
+  window.addEventListener("load", initGoogleAnalytics);
+</script>
+
+<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
+<style>
+  .pswp .pswp__container .pswp__img {
+    background-color: white;
+  }
+</style>
+
+<script>
+  function initPhotoSwipe() {
+    let customOptions = {};
+
+    try {
+      const data = ``.replaceAll("=>", ":");
+      customOptions = JSON.parse(data);
+    } catch (e) {
+      console.info("Invalid custom photo previewer options! " + e.message);
+    }
+
+    // Define object and gallery options
+    const options = Object.assign(
+      {
+        gallery: "section.main",
+        children: "a.photo-swipe",
+        photo_scale: 2,
+        // dynamic import is not supported in UMD version
+        pswpModule: PhotoSwipe,
+      },
+      customOptions
+    );
+
+    const galleryEl = document.querySelector(options.gallery);
+    if (!galleryEl) {
+      return;
+    }
+
+    const imgEls = [];
+    const els = galleryEl.querySelectorAll("img:not(.emoji)");
+    els.forEach((el) => {
+      if (el.src.trim() == "") {
+        return;
+      }
+      if (!imgEls.includes(el)) {
+        imgEls.push(el);
+      }
+    });
+
+    if (imgEls.length === 0) {
+      return;
+    }
+
+    imgEls.forEach((imgEl) => {
+      imgEl.outerHTML = `
+      <a class="photo-swipe"
+        href="${imgEl.src}"
+        data-pswp-width="${
+          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
+        }"
+        data-pswp-height="${
+          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
+        }"
+        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
+        target="_blank">
+        ${imgEl.outerHTML}
+      </a>`;
+    });
+
+    // Initialize PhotoSwipe 5
+    var lightbox = new PhotoSwipeLightbox(options);
+
+    lightbox.init();
+  }
+
+  window.addEventListener("load", initPhotoSwipe);
+</script>
+<!-- Custom Head HTML (if any) -->
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header site-header-transparent" role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
+  Haeran's blog
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<div class="page-link" style="display: inline;">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<div class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="fr">
+          
+          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="zh-CN">
+          
+          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ja">
+          
+          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ko">
+          
+          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ru">
+          
+          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
+          
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ko',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+</div>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;documentElement.setAttribute("data-header-transparent", "");var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+    html .page-banner {
+      background: #000;
+    }
+  </style>
+<style>html .page-banner {
+      height:  36.8vh;
+      min-height: 38vh;
+    }
+    html[data-scroll-status="top"] .page-banner {
+      height: 100vh;
+    }
+  </style>
+<style>
+    html .page-banner .page-banner-img > *:first-child {
+      opacity: 0.618;
+    }
+
+    html[data-theme="dark"] .page-banner .page-banner-img > *:first-child {
+      opacity: 0.443724;
+    }
+  </style>
+<style>
+    html .page-banner .page-banner-inner > *:first-child > *:nth-child(1) {
+      font-size: 4.25em; font-weight: bold; text-decoration: underline
+    }
+  </style>
+<style>
+    html .page-banner .page-banner-inner > *:first-child > *:nth-child(2) {
+      color: gold
+    }
+  </style>
+<section class="page-banner">
+    <div class="page-banner-img">
+<div style="background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4OOoxwIrmtlC4z9SXxkvElRtefFkciQ9jfWhu9GvvDbNp6pl6fCuayrWbKbwD5AdMewA&amp;usqp=CAU)"></div>
+        <img class="img-placeholder" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4OOoxwIrmtlC4z9SXxkvElRtefFkciQ9jfWhu9GvvDbNp6pl6fCuayrWbKbwD5AdMewA&amp;usqp=CAU">
+</div>
+    <div class="wrapper">
+      <div class="page-banner-inner">
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">DOM과 Visual DOM</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <div class="post-meta">
+    <time class="dt-published" datetime="2025-01-04T12:07:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Jan 04, 2025
+    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 8 mins</span>
+  </div>
+<div class="post-tags"><a class="post-tag" href="/tags.html#React">#React</a></div></header>
+</div>
+    </div>
+  </section><script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <div class="framework">
+  <section class="main">
+
+     <div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <h2 id="1-dom-document-object-model">1. DOM (Document Object Model)</h2>
+
+<h3 id="11-결정">1.1. 결정</h3>
+
+<p>DOM(Document Object Model)은 웹 페이지를 구성하는 HTML, XML 문서의 구조를 객체(Object) 형태로 나타내는 모델입니다. 즉, 웹 페이지의 각 요소를 프로그램적으로 제어하고 변경할 수 있게 해줍니다. DOM은 브라우저가 HTML 문서를 해석해 트리 구조로 만든 객체 모델입니다.</p>
+
+<h3 id="12-구조">1.2. 구조</h3>
+
+<p>DOM은 트리 구조로 구성되며, 각 HTML 태그는 하나의 노드(node)가 되는 그런 구조를 가지며, 부모-자식 구조를 가지며, 각각의 노드는 다양한 유형을 갖을 수 있습니다:</p>
+
+<ul>
+  <li>
+<strong>Element Node</strong>: HTML 태그</li>
+  <li>
+<strong>Text Node</strong>: 텍스트 컨텐츠</li>
+  <li>
+<strong>Attribute Node</strong>: HTML 속성</li>
+  <li>
+<strong>Document Node</strong>: 문서 자체</li>
+</ul>
+
+<h3 id="13-dom의-특징">1.3. DOM의 특징</h3>
+
+<ul>
+  <li>
+<strong>동적</strong>: DOM은 페이지가 로드되면서 JavaScript를 통해 실시간에 수정, 삭제, 추가할 수 있습니다.</li>
+  <li>
+<strong>HTML과 역해</strong>: DOM은 HTML 문서를 기반으로 하고 있으며, 문서의 모든 요소를 객체로 다룰 수 있습니다.</li>
+</ul>
+
+<h3 id="14-dom-예시">1.4. DOM 예시</h3>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+  <span class="nt">&lt;html&gt;</span>
+    <span class="nt">&lt;head&gt;</span>
+      <span class="nt">&lt;title&gt;</span>DOM 예시<span class="nt">&lt;/title&gt;</span>
+    <span class="nt">&lt;/head&gt;</span>
+  <span class="nt">&lt;body&gt;</span>
+    <span class="nt">&lt;h1&gt;</span>안녕하세요, DOM!<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;p&gt;</span>이 문서는 DOM의 예시입니다.<span class="nt">&lt;/p&gt;</span>
+  <span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div></div>
+
+<p>위 HTML 문서의 DOM은 트리 구조로 변환되어 각 <code class="language-plaintext highlighter-rouge">&lt;h1&gt;</code>, <code class="language-plaintext highlighter-rouge">&lt;p&gt;</code>, <code class="language-plaintext highlighter-rouge">&lt;body&gt;</code>, <code class="language-plaintext highlighter-rouge">&lt;html&gt;</code> 태그가 각각 하나의 객체로 표현됩니다.</p>
+
+<h2 id="2-visual-dom-가상-dom">2. Visual DOM (가상 DOM)</h2>
+
+<h3 id="21-결정">2.1. 결정</h3>
+
+<p>Visual DOM은 실제 DOM을 가상화한 것으로, <strong>변경 상황을 가상으로 처리해 성능을 최적화</strong>하는 기술입니다. React 같은 라이브러리에서 사용되며, 실제 DOM을 직접 수정하는 대신 가상 DOM을 먼저 업데이트하고, 변경된 부분만 실제 DOM에 반영합니다.</p>
+
+<h3 id="22-동작-원리">2.2. 동작 원리</h3>
+
+<ol>
+  <li>
+<strong>가상 DOM 업데이트</strong>: 상태(state)가 변경되면 React 등은 가상 DOM을 업데이트합니다.</li>
+  <li>
+<strong>가상 DOM과 실제 DOM 비교</strong>: 가상 DOM과 실제 DOM을 비교해 <strong>변경된 및 가장 작은 변경 부분</strong>만 판결합니다.</li>
+  <li>
+<strong>효율적 반영</strong>: 변경된 부분만 실제 DOM에 적용해 렌더링 성능을 최적화합니다.</li>
+</ol>
+
+<h3 id="23-visual-dom의-장점">2.3. Visual DOM의 장점</h3>
+
+<ul>
+  <li>
+<strong>성능 최적화</strong>: 불필요한 DOM 업데이트를 방지하여 성능을 높입니다.</li>
+  <li>
+<strong>UI 일관성 유지</strong>: 상태 변화에 따라 UI를 효율적으로 관리하고 일관되게 유지합니다.</li>
+  <li>
+<strong>개발 생산성 향상</strong>: 변경된 부분만 업데이트하므로 디버깅과 유지보수가 용이합니다.</li>
+</ul>
+
+<h3 id="24-visual-dom-예시-react">2.4. Visual DOM 예시 (React)</h3>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">MyComponent</span> <span class="kd">extends</span> <span class="nc">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="nf">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span> <span class="na">text</span><span class="p">:</span> <span class="dl">'</span><span class="s1">안녕하세요, Visual DOM!</span><span class="dl">'</span> <span class="p">};</span>
+  <span class="p">}</span>
+
+  <span class="nf">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">text</span><span class="p">}</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span><span class="err">;
+</span>  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nx">ReactDOM</span><span class="p">.</span><span class="nf">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">MyComponent</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nf">getElementById</span><span class="p">(</span><span class="dl">'</span><span class="s1">root</span><span class="dl">'</span><span class="p">));</span>
+</code></pre></div></div>
+
+<p>위 코드에서 <code class="language-plaintext highlighter-rouge">MyComponent</code>가 렌더링될 때, 상태 변경이 발생하면 가상 DOM이 먼저 업데이트되고, 실제 DOM과 비교 후 최소한의 변경만 적용됩니다.</p>
+
+<h2 id="3-dom과-visual-dom의-차이">3. DOM과 Visual DOM의 차이</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>특징</strong></th>
+      <th><strong>DOM</strong></th>
+      <th><strong>Visual DOM</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>구조</strong></td>
+      <td>실제 DOM 구조</td>
+      <td>가상화된 DOM 구조</td>
+    </tr>
+    <tr>
+      <td><strong>업데이트 방식</strong></td>
+      <td>변경 시 즉각적으로 DOM을 수정</td>
+      <td>가상 DOM을 수정 후, 실제 DOM에 최소한으로 반영</td>
+    </tr>
+    <tr>
+      <td><strong>성능</strong></td>
+      <td>많은 업데이트가 발생하면 느려질 수 있음</td>
+      <td>불필요한 업데이트를 방지하여 성능 최적화</td>
+    </tr>
+    <tr>
+      <td><strong>사용 사례</strong></td>
+      <td>순수 JavaScript로 DOM 조작 시 사용</td>
+      <td>React, Vue 등 현대적인 프레임워크에서 사용</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="4-결론">4. 결론</h2>
+
+<p>DOM은 웹 페이지를 구조화하고, JavaScript를 통해 동적으로 조작할 수 있는 강력한 도구입니다. 하지만 직접 DOM을 조작하면 성능 문제나 코드 복잡도가 증가할 수 있습니다. Visual DOM은 이러한 문제를 해결하기 위해 등장했으며, 변경 사항을 가상으로 처리하고 최소한의 변경만 실제 DOM에 반영하여 성능과 개발 생산성을 높입니다. 현대적인 웹 개발에서는 Visual DOM을 활용한 라이브러리가 점점 더 중요한 역할을 하고 있습니다.</p>
+
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/study/javascript/2025/01/03/reference-closure.html" title="참조(Reference)와 클로저(Closure)">참조(Reference)와 클로저(Closure)</a><a class="next" href="/study/javascript/2025/01/06/JSON.html" title="JSON(JavaScript Object Notation)">JSON(JavaScript Object Notation)</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li class="">
+          <a class="post-link" href="/study/2025/02/27/typescript_omit_partial.html" title="TypeScript `Partial`과 `Omit` 차이점">
+            TypeScript `Partial`과 `Omit` 차이점<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/javascript/2025/01/03/reference-closure.html" title="참조(Reference)와 클로저(Closure)">
+            참조(Reference)와 클로저(Closure)<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/dev/react/2024/03/04/e.preventDefault_and_e.stopPropagation.html" title="React - 이벤트 전달을 막아주는 e.preventDefault()와 e.stopPropagation()">
+            React - 이벤트 전달을 막아주는 e.preventDefault()와 e.stopPropagation()<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/next.js/2025/02/17/next_image__blur.html" title="next image와 blur_image를 이용한 이미지 최적화">
+            next image와 blur_image를 이용한 이미지 최적화<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+</ul>
+    </div>
+<div class="post-comments">
+<div id="utterances-placeholder"></div>
+<script>
+  const utterancesThemeFromDataTheme = () => {
+    const dataTheme = document.documentElement.getAttribute('data-theme');
+    return `github-${dataTheme}`;
+  };
+
+  const setUtterancesTheme = () => {
+    const iframe = document.querySelector('.utterances-frame');
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: utterancesThemeFromDataTheme()
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  // dynamic change
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        setUtterancesTheme();
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
+
+  let utterancesScript = document.createElement('script');
+  utterancesScript.async = true;
+  utterancesScript.src = 'https://utteranc.es/client.js';
+  utterancesScript.crossOrigin = 'anonymous';
+  utterancesScript.setAttribute('issue-term', 'title');
+  utterancesScript.setAttribute('label', 'utterances comment');
+  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
+  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
+
+  const placeholder = document.getElementById('utterances-placeholder');
+  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
+</script>
+</div></section>
+</div>
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items --><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+    </div>
+  </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>Unpublished Work <span class="copyleft">©</span> 2017-2025 Haeran</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+      <div class="footer-col rss-subscribe">Subscribe <a href="/feed.xml">via RSS</a>
+</div>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>

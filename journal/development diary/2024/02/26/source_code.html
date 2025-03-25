@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Google Translate Customization (if needed) -->
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+
+  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>[ 스타트업 신입 개발 일기 ] - 01. 첫번째 업무, 소스 코드 분석하기 | Haeran’s blog</title>
+<meta name="generator" content="Jekyll v4.4.1">
+<meta property="og:title" content="[ 스타트업 신입 개발 일기 ] - 01. 첫번째 업무, 소스 코드 분석하기">
+<meta name="author" content="haeran">
+<meta property="og:locale" content="ko">
+<meta name="description" content="신입의 첫번째 ‘업무’ 소스 코드 분석하기">
+<meta property="og:description" content="신입의 첫번째 ‘업무’ 소스 코드 분석하기">
+<link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2024/02/26/source_code.html">
+<meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2024/02/26/source_code.html">
+<meta property="og:site_name" content="Haeran’s blog">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2024-02-26T12:07:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="[ 스타트업 신입 개발 일기 ] - 01. 첫번째 업무, 소스 코드 분석하기">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"haeran"},"dateModified":"2024-02-26T12:07:00+00:00","datePublished":"2024-02-26T12:07:00+00:00","description":"신입의 첫번째 ‘업무’ 소스 코드 분석하기","headline":"[ 스타트업 신입 개발 일기 ] - 01. 첫번째 업무, 소스 코드 분석하기","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/journal/development%20diary/2024/02/26/source_code.html"},"url":"https://kimmand0o0.github.io/journal/development%20diary/2024/02/26/source_code.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- Favicon -->
+  <link rel="icon" href="/assets/images/favicon.ico">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2024/02/26/source_code.html">
+
+  <!-- Social Media (Open Graph, Twitter Card) -->
+  <meta property="og:title" content="[ 스타트업 | 신입 개발 일기 ] - 01. 첫번째 업무, 소스 코드 분석하기">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+  <meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2024/02/26/source_code.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="[ 스타트업 | 신입 개발 일기 ] - 01. 첫번째 업무, 소스 코드 분석하기">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+
+  <!-- Stylesheets and External Resources -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- JavaScript -->
+  <script src="/assets/js/main.js"></script>
+
+  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
+<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
+<script>
+  function initGoogleAnalytics() {
+    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
+      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
+    var enableDNT = "false" == "true";
+
+    if (!enableDNT || !doNotTrack) {
+      var measurementId = 'G-ZNXE6HSKMS';
+
+      (function(src) {
+        var tag = document.createElement('script');
+        tag.src = src;
+        tag.async = true;
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', measurementId);
+    }
+  }
+  window.addEventListener("load", initGoogleAnalytics);
+</script>
+
+<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
+<style>
+  .pswp .pswp__container .pswp__img {
+    background-color: white;
+  }
+</style>
+
+<script>
+  function initPhotoSwipe() {
+    let customOptions = {};
+
+    try {
+      const data = ``.replaceAll("=>", ":");
+      customOptions = JSON.parse(data);
+    } catch (e) {
+      console.info("Invalid custom photo previewer options! " + e.message);
+    }
+
+    // Define object and gallery options
+    const options = Object.assign(
+      {
+        gallery: "section.main",
+        children: "a.photo-swipe",
+        photo_scale: 2,
+        // dynamic import is not supported in UMD version
+        pswpModule: PhotoSwipe,
+      },
+      customOptions
+    );
+
+    const galleryEl = document.querySelector(options.gallery);
+    if (!galleryEl) {
+      return;
+    }
+
+    const imgEls = [];
+    const els = galleryEl.querySelectorAll("img:not(.emoji)");
+    els.forEach((el) => {
+      if (el.src.trim() == "") {
+        return;
+      }
+      if (!imgEls.includes(el)) {
+        imgEls.push(el);
+      }
+    });
+
+    if (imgEls.length === 0) {
+      return;
+    }
+
+    imgEls.forEach((imgEl) => {
+      imgEl.outerHTML = `
+      <a class="photo-swipe"
+        href="${imgEl.src}"
+        data-pswp-width="${
+          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
+        }"
+        data-pswp-height="${
+          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
+        }"
+        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
+        target="_blank">
+        ${imgEl.outerHTML}
+      </a>`;
+    });
+
+    // Initialize PhotoSwipe 5
+    var lightbox = new PhotoSwipeLightbox(options);
+
+    lightbox.init();
+  }
+
+  window.addEventListener("load", initPhotoSwipe);
+</script>
+<!-- Custom Head HTML (if any) -->
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header site-header-transparent" role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
+  Haeran's blog
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<div class="page-link" style="display: inline;">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<div class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="fr">
+          
+          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="zh-CN">
+          
+          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ja">
+          
+          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ko">
+          
+          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ru">
+          
+          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
+          
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ko',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+</div>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;documentElement.setAttribute("data-header-transparent", "");var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+    html .page-banner {
+      background: #000;
+    }
+  </style>
+<style>html .page-banner {
+      height:  36.8vh;
+      min-height: 38vh;
+    }
+    html[data-scroll-status="top"] .page-banner {
+      height: 100vh;
+    }
+  </style>
+<style>
+    html .page-banner .page-banner-img > *:first-child {
+      opacity: 0.618;
+    }
+
+    html[data-theme="dark"] .page-banner .page-banner-img > *:first-child {
+      opacity: 0.443724;
+    }
+  </style>
+<style>
+    html .page-banner .page-banner-inner > *:first-child > *:nth-child(1) {
+      font-size: 4.25em; font-weight: bold; text-decoration: underline
+    }
+  </style>
+<style>
+    html .page-banner .page-banner-inner > *:first-child > *:nth-child(2) {
+      color: gold
+    }
+  </style>
+<section class="page-banner">
+    <div class="page-banner-img">
+<div style="background-image: url(https://blog.kakaocdn.net/dn/cnAEoq/btrV5eV4yRy/gdr3LNiYkO87K6L2kjnELk/img.png)"></div>
+        <img class="img-placeholder" src="https://blog.kakaocdn.net/dn/cnAEoq/btrV5eV4yRy/gdr3LNiYkO87K6L2kjnELk/img.png">
+</div>
+    <div class="wrapper">
+      <div class="page-banner-inner">
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">[ 스타트업 | 신입 개발 일기 ] - 01. 첫번째 업무, 소스 코드 분석하기</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <div class="post-meta">
+    <time class="dt-published" datetime="2024-02-26T12:07:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Feb 26, 2024
+    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 11 mins</span>
+  </div>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#%EA%B0%9C%EB%B0%9C%EC%9D%BC%EA%B8%B0">#개발일기</a><a class="post-tag" href="/tags.html#%EC%8B%A0%EC%9E%85%EA%B0%9C%EB%B0%9C%EC%9E%90">#신입개발자</a><a class="post-tag" href="/tags.html#%EC%8A%A4%ED%83%80%ED%8A%B8%EC%97%85">#스타트업</a>
+</div></header>
+</div>
+    </div>
+  </section><script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <div class="framework">
+  <section class="main">
+
+     <div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <h2 id="신입의-첫번째-업무-소스-코드-분석하기"><strong>신입의 첫번째 ‘업무’ 소스 코드 분석하기</strong></h2>
+<hr>
+
+<p><img src="https://blog.kakaocdn.net/dn/bsWnnP/btsrUu0tYxH/wBga3XanrA3gMD4YnEDTgk/img.png" alt="소스코드"></p>
+
+<p><strong>소스 코드를 분석 한다</strong>는 것은 어떤 것일까? 🧐</p>
+
+<p>회사에서 진행중인 프로젝트의 구조, 기능을 친절히 설명해줄 시간은 없다. 
+<br>
+다른 사람의 소스 코드를 분석해본 경험이 없는 신입 개발자는 어떻게 코드를 읽고, 적응하면 좋을까?</p>
+
+<h3 id="소스코드와-오픈소스"><em>소스코드와 오픈소스</em></h3>
+
+<p><a href="https://namu.wiki/w/%EC%86%8C%EC%8A%A4%20%EC%BD%94%EB%93%9C"><strong>소스코드란?</strong></a>
+<br>
+컴퓨터 소프트웨어의 제작에 사용되는 설계도이다.
+개념만 나타낸 추상적인 설계도가 아니라, 당장 컴퓨터에 입력만 하면 진짜로 프로그램을 완성할 수 있는 매우 세밀하고 구체적으로 짜인 설계도이다.</p>
+
+<p>첫 입사 후 내가 만나게 된 기존 코드들이 소스코드라고 할 수 있다.
+<br>
+업무에 들어가기 전 이 소스코드를 이해해야지만 기능 구현, 수정 또한 모두 할 수 있다.
+<br>
+<br></p>
+
+<p>소스코드 중 가장 많이 접하게 되는 것은 <strong>오픈소스</strong> 이다.</p>
+
+<p><a href="https://ko.wikipedia.org/wiki/%EC%98%A4%ED%94%88_%EC%86%8C%EC%8A%A4_%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4"><strong>오픈소스란?</strong></a>
+<br>
+오픈 소스 소프트웨어는 소스 코드를 공개해 누구나 특별한 제한 없이 그 코드를 보고 사용할 수 있는 오픈 소스 라이선스를 만족하는 소프트웨어를 말한다. 통상 간략하게 오픈 소스라고 말하기도 하며 대한민국의 공공기관에서는 공개 소프트웨어라는 표현을 사용한다.
+<br>
+쉽게 말해 공개적으로 모두가 사용하고, 수정할 수 있는 설계도인 것이다.
+<br>
+<br></p>
+
+<blockquote>
+  <p><em><strong>오픈소스가 중요한 이유</strong></em>
+<br>
+<br>
+오픈 소스의 아이디어는 기술 커뮤니티에서 나왔습니다. 기술 혁신이 발전하려면 글로벌 협업이 필요합니다. 예를 들어, 미국의 프로그래밍 팀이 금융 애플리케이션을 위한 새로운 오픈 소스 기술을 개발한다고 가정해 보겠습니다. 호주의 다른 프로그래밍 팀이 의료 부문에 더 적합한 새로운 기능으로 기술을 수정합니다. 그리고 아시아의 또 다른 팀은 원천 기술을 핵심 구성 요소로 사용하는 새로운 오픈 소스 제품을 개발합니다.
+<br>
+<br>
+이러한 지식 공유와 집단적 혁신은 전체 커뮤니티에 도움이 됩니다. 특허, 저작권과 값비싼 라이선스로 기술을 제한하면 발전이 저해됩니다. 많은 인기 있는 오픈 소스 프로젝트가 지난 수십 년간 전 세계적으로 급속한 기술 발전으로 이어졌습니다.</p>
+</blockquote>
+<div style="font-size:small; display:flex; justify-content:end"> 출처 : <a href="https://aws.amazon.com/ko/what-is/open-source/#:~:text=%EC%98%A4%ED%94%88%20%EC%86%8C%EC%8A%A4%EB%8A%94%20%EA%B3%B5%EA%B0%9C%EC%A0%81%EC%9C%BC%EB%A1%9C,%ED%95%9C%EB%8B%A4%EB%8A%94%20%EC%9D%98%EB%AF%B8%EC%97%90%EC%84%9C%20%EB%B9%84%EB%A1%AF%EB%90%98%EC%97%88%EC%8A%B5%EB%8B%88%EB%8B%A4.">AWS</a>
+</div>
+
+<h2 id="소스-코드를-읽으면-좋은-점"><strong>소스 코드를 읽으면 좋은 점</strong></h2>
+<hr>
+
+<ol>
+  <li>
+<strong>코드 퀄리티 향상</strong>
+    <ul>
+      <li>여러 종류의 프로그래밍 방식에 대해 알 수 있다.</li>
+      <li>Low Level에서 코드를 어떻게 추상화하는 지 파악할 수 있다.</li>
+    </ul>
+  </li>
+  <li>
+<strong>다양한 지식 추가 습득</strong>
+    <ul>
+      <li>코드를 작성하는 방식에 대한 기준을 가질 수 있다.</li>
+      <li>코드 작성에 대한 키워드를 찾을 수 있다.</li>
+    </ul>
+  </li>
+  <li>
+<strong>메타인지를 가질 수 있다</strong>
+    <ul>
+      <li>코드의 길을 따라가며 여러가지 생각을 가질 수 있다.</li>
+      <li>‘이걸 왜 이렇게 구현 했을까?’</li>
+      <li>‘다른 방식으로 구현하면 어떨까?’
+<br>
+<br>
+</li>
+    </ul>
+  </li>
+</ol>
+
+<h2 id="소스-코드를-읽는-방법"><strong>소스 코드를 읽는 방법</strong></h2>
+<hr>
+
+<p><img src="https://velog.velcdn.com/images%2Fqksud14%2Fpost%2F4852271e-62b4-47b7-b39f-606f4e020380%2Fusing-paths-of-actions-to-understand-pieces-of-code.png" alt="소스코드 나눠 읽기"></p>
+
+<ol>
+  <li>
+<strong>배경지식을 갖출 것</strong>
+    <ul>
+      <li>소스 코드에 사용 되는 언어와 라이브러리에 대한 배경 지식을 가지고 있지 않으면, 소스 코드를 분석하는 것은 불가능하거나 엄청난 시간이 필요하다.</li>
+    </ul>
+  </li>
+  <li>
+<strong>소스의 목적을 명확히 이해할 것</strong>
+    <ul>
+      <li>어떤 서비스, 어떤 기능을 하는 지 이해하지 못하면 삽질밖에는 할 수 없다. 주석과 파일명, 함수명, 호출 위치등에서 최대한 정보를 얻어내어 어떤 역할을 하는 소스 코드인지를 파악해야한다.</li>
+    </ul>
+  </li>
+  <li>
+<strong>스타일을 파악 할 것</strong>
+    <ul>
+      <li>같은 언어와 기능이라고 해도 작성자에 따라 스타일과 의도한 바가 다르다. 속도를 중요하게 생각 할 수도 있고, 직관적으로 보이는 것을 중요하게 생각 할 수도 있는 것이다. 변수나 함수 작명법, 에디팅 스타일, 유틸 함수, 에러 처리 등등 그 사람의 스타일을 이해하면 소스를 한층 더 정확하고 빠르게 읽을 수 있게 된다.</li>
+    </ul>
+  </li>
+  <li>
+<strong>코드의 길을 따라 읽을 것</strong>
+    <ul>
+      <li>길은 여러 방식이 있을 수 있다. 기능, 파일이나 폴더 등 큰 틀을 먼저 살핀 후 작은 함수 단위로 쪼개서 보는 게 좋다. 또는 기능 하나를 정한 후 기능의 진행 방향으로 코드를 읽어보는 것도 도움이 된다.</li>
+    </ul>
+  </li>
+</ol>
+
+<h2 id="나에게-도움이-된-분석-태도와-팁"><strong>나에게 도움이 된 분석 태도와 팁</strong></h2>
+<hr>
+
+<ol>
+  <li>
+<strong>목적을 정하자</strong>
+    <ul>
+      <li>처음 시작하면 너무 막막할 수 있다. 그럴때는 소스 코드를 실제로 실행시켜서 보면서 특정 기능이나 데이트를 찾아서 따라가는 것이 도움이 된다. 콘솔을 찍어가면서 실제로 어떤 데이터가 움직이는 지, 어떤 라이프사이클을 가지는 지 파악하는 게 첫 시작으로 좋았다.</li>
+    </ul>
+  </li>
+  <li>
+<strong>코드를 한땀 한땀 분석 할 필요는 없다</strong>
+    <ul>
+      <li>코드를 100% 이해 할 수 없다. 내가 짠 코드도 1년 뒤에 이해 안되는 데, 다른 사람이 짠 코드를 완전히 이해하는 게 가능 할까?</li>
+      <li>회사에서 코드를 분석한다는 건, 사실 어떤 방식으로 코드를 작성하고 있는 지, 어떤 기능을 구현할 지를 보는 것이 아닐까 하는 생각을 하게 되었다.</li>
+    </ul>
+  </li>
+  <li>
+<strong>조급해 하지 말자</strong>
+    <ul>
+      <li>개발자는 마치 작가같다. 빨리보다 정확하게, 조금 더 나은 코드를 작성하기 위해 충분한 시간을 제공한다. 이 시간은 다시 오지 않을 시간이므로 소중하게 천천히 정확하게 알아가도록 해야한다. 너무 빨리 개발에 들어가고 싶어 할 필요는 없는 것 같다.</li>
+    </ul>
+  </li>
+  <li>
+<strong>파일의 크기를 보고 겁먹지 말 것</strong>
+    <ul>
+      <li>내가 경험해 본 사이드 프로젝트들과 다른 크기와 많은 라이브러리에 처음부터 겁을 먹을 필요는 없는 것 같다. 생각해보면 한 기능이 아무리 커봤자 눈앞에 있는 모든 코드에 관여해 있을 리는 없으니까!</li>
+    </ul>
+  </li>
+  <li>
+<strong>모르는 부분은 메모하고, 찾아보고, 물어보자</strong>
+    <ul>
+      <li>기능을 기준으로 코드를 분석하다보면 라이브러리 사용법이나 변수, 함수등에 막히는 경우가 생긴다. 이럴때는 메모를 해 두고 끝까지 읽는다. 가는 길에 해결책이 있는 경우도 있고, 인터넷이나 gpt를 통해 답을 얻는 경우도 있다. 하지만 그래도 모를 경우는 ‘어떤 것이 어려운지’, ‘어디까지 알아봤는 지’를 가지고 질문을 하자.</li>
+      <li>그런데 좋은 질문을 하는 건 어렵더라…</li>
+    </ul>
+  </li>
+  <li>
+<strong>용어를 정리하자</strong>
+    <ul>
+      <li>변수명, 함수명, 어쩌면 편하게 사용하는 은어까지도 받아 적고 찾아보는 과정이 중요하다. 내가 놓친 지식을 더 알수도 있고, 코드를 읽을 때 다시 만나면 반갑기도 하다.</li>
+      <li>또, 정리하는 과정에서 작성자의 습관을 알아내게 되는 것도 큰 도움이 되었다.</li>
+    </ul>
+  </li>
+  <li>
+<strong>이전에 했던 방식 잊기</strong>
+    <ul>
+      <li>내가 신입이라 베이스가 없어 이 부분은 문제가 없을 것이라 생각했었다. 그런데 오히려 이전 혼자서 작업 했던 방식이 전부일 것이라는 바보같은 생각으로 시야가 편협할 수 있더라. 개발의 세계에는 한개의 기능을 구현하더라도 수백, 수천개의 이유와 방식이 있을 수 있다는 것을 실제로 체감하게 되었다.
+<br>
+<br>
+<br>
+<br>
+<br>
+</li>
+    </ul>
+  </li>
+</ol>
+
+<blockquote>
+  <p>Reference</p>
+  <ul>
+    <li><a href="https://fishpoint.tistory.com/1097">Blog : 소스코드 분석, 코드 리뷰 분석 방법 모아봤습니다.</a></li>
+    <li><a href="https://development-crow.tistory.com/21">Blog : 오픈소스 분석 방법과 개발자 공부 방법</a></li>
+  </ul>
+</blockquote>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/dev/git/2024/02/25/gitmoji.html" title="깃모지 사용 할까?">깃모지 사용 할까?</a><a class="next" href="/journal/retrospect/2024/02/26/Retrospect_in_2024_february.html" title="2024년 2월 회고 - 게을러지지 않기 위하여">2024년 2월 회고 - 게을러지지 않기...</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li class="">
+          <a class="post-link" href="/study/2025/02/24/dynamic_route_slug.html" title="다이나믹 라우트(Dynamic Route)의 슬러그(Slug)가 뭐지?">
+            다이나믹 라우트(Dynamic Route)의 슬러그(Slug)가 뭐지?<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/zustand/2025/02/18/zustand__use_store.html" title="Zustand를 use_store로 중앙 집중식 상태 관리">
+            Zustand를 use_store로 중앙 집중식 상태 관리<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/javascript/2025/01/22/jsx-babel.html" title="JSX와 Babel">
+            JSX와 Babel<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/javascript/2025/01/24/OOP.html" title="객체지향 프로그래밍 (Object-Oriented Programming, OOP)">
+            객체지향 프로그래밍 (Object-Oriented Programming, OOP)<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+</ul>
+    </div>
+<div class="post-comments">
+<div id="utterances-placeholder"></div>
+<script>
+  const utterancesThemeFromDataTheme = () => {
+    const dataTheme = document.documentElement.getAttribute('data-theme');
+    return `github-${dataTheme}`;
+  };
+
+  const setUtterancesTheme = () => {
+    const iframe = document.querySelector('.utterances-frame');
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: utterancesThemeFromDataTheme()
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  // dynamic change
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        setUtterancesTheme();
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
+
+  let utterancesScript = document.createElement('script');
+  utterancesScript.async = true;
+  utterancesScript.src = 'https://utteranc.es/client.js';
+  utterancesScript.crossOrigin = 'anonymous';
+  utterancesScript.setAttribute('issue-term', 'title');
+  utterancesScript.setAttribute('label', 'utterances comment');
+  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
+  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
+
+  const placeholder = document.getElementById('utterances-placeholder');
+  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
+</script>
+</div></section>
+</div>
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items --><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+    </div>
+  </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>Unpublished Work <span class="copyleft">©</span> 2017-2025 Haeran</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+      <div class="footer-col rss-subscribe">Subscribe <a href="/feed.xml">via RSS</a>
+</div>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>

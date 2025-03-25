@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Google Translate Customization (if needed) -->
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+
+  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>MAC 주소와 ARP 프로토콜 | Haeran’s blog</title>
+<meta name="generator" content="Jekyll v4.4.1">
+<meta property="og:title" content="MAC 주소와 ARP 프로토콜">
+<meta name="author" content="haeran">
+<meta property="og:locale" content="ko">
+<meta name="description" content="MAC 주소 (Media Access Control Address, 물리적 주소)">
+<meta property="og:description" content="MAC 주소 (Media Access Control Address, 물리적 주소)">
+<link rel="canonical" href="https://kimmand0o0.github.io/network/2025/03/24/MAC_%EC%A3%BC%EC%86%8C%EC%99%80_ARP_%ED%94%84%EB%A1%9C%ED%86%A0%EC%BD%9C.html">
+<meta property="og:url" content="https://kimmand0o0.github.io/network/2025/03/24/MAC_%EC%A3%BC%EC%86%8C%EC%99%80_ARP_%ED%94%84%EB%A1%9C%ED%86%A0%EC%BD%9C.html">
+<meta property="og:site_name" content="Haeran’s blog">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2025-03-24T12:07:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="MAC 주소와 ARP 프로토콜">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"haeran"},"dateModified":"2025-03-24T12:07:00+00:00","datePublished":"2025-03-24T12:07:00+00:00","description":"MAC 주소 (Media Access Control Address, 물리적 주소)","headline":"MAC 주소와 ARP 프로토콜","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/network/2025/03/24/MAC_%EC%A3%BC%EC%86%8C%EC%99%80_ARP_%ED%94%84%EB%A1%9C%ED%86%A0%EC%BD%9C.html"},"url":"https://kimmand0o0.github.io/network/2025/03/24/MAC_%EC%A3%BC%EC%86%8C%EC%99%80_ARP_%ED%94%84%EB%A1%9C%ED%86%A0%EC%BD%9C.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- Favicon -->
+  <link rel="icon" href="/assets/images/favicon.ico">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kimmand0o0.github.io/network/2025/03/24/MAC_%EC%A3%BC%EC%86%8C%EC%99%80_ARP_%ED%94%84%EB%A1%9C%ED%86%A0%EC%BD%9C.html">
+
+  <!-- Social Media (Open Graph, Twitter Card) -->
+  <meta property="og:title" content="MAC 주소와 ARP 프로토콜">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+  <meta property="og:url" content="https://kimmand0o0.github.io/network/2025/03/24/MAC_%EC%A3%BC%EC%86%8C%EC%99%80_ARP_%ED%94%84%EB%A1%9C%ED%86%A0%EC%BD%9C.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MAC 주소와 ARP 프로토콜">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+
+  <!-- Stylesheets and External Resources -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- JavaScript -->
+  <script src="/assets/js/main.js"></script>
+
+  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
+<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
+<script>
+  function initGoogleAnalytics() {
+    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
+      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
+    var enableDNT = "false" == "true";
+
+    if (!enableDNT || !doNotTrack) {
+      var measurementId = 'G-ZNXE6HSKMS';
+
+      (function(src) {
+        var tag = document.createElement('script');
+        tag.src = src;
+        tag.async = true;
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', measurementId);
+    }
+  }
+  window.addEventListener("load", initGoogleAnalytics);
+</script>
+
+<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
+<style>
+  .pswp .pswp__container .pswp__img {
+    background-color: white;
+  }
+</style>
+
+<script>
+  function initPhotoSwipe() {
+    let customOptions = {};
+
+    try {
+      const data = ``.replaceAll("=>", ":");
+      customOptions = JSON.parse(data);
+    } catch (e) {
+      console.info("Invalid custom photo previewer options! " + e.message);
+    }
+
+    // Define object and gallery options
+    const options = Object.assign(
+      {
+        gallery: "section.main",
+        children: "a.photo-swipe",
+        photo_scale: 2,
+        // dynamic import is not supported in UMD version
+        pswpModule: PhotoSwipe,
+      },
+      customOptions
+    );
+
+    const galleryEl = document.querySelector(options.gallery);
+    if (!galleryEl) {
+      return;
+    }
+
+    const imgEls = [];
+    const els = galleryEl.querySelectorAll("img:not(.emoji)");
+    els.forEach((el) => {
+      if (el.src.trim() == "") {
+        return;
+      }
+      if (!imgEls.includes(el)) {
+        imgEls.push(el);
+      }
+    });
+
+    if (imgEls.length === 0) {
+      return;
+    }
+
+    imgEls.forEach((imgEl) => {
+      imgEl.outerHTML = `
+      <a class="photo-swipe"
+        href="${imgEl.src}"
+        data-pswp-width="${
+          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
+        }"
+        data-pswp-height="${
+          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
+        }"
+        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
+        target="_blank">
+        ${imgEl.outerHTML}
+      </a>`;
+    });
+
+    // Initialize PhotoSwipe 5
+    var lightbox = new PhotoSwipeLightbox(options);
+
+    lightbox.init();
+  }
+
+  window.addEventListener("load", initPhotoSwipe);
+</script>
+<!-- Custom Head HTML (if any) -->
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header site-header-transparent" role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
+  Haeran's blog
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<div class="page-link" style="display: inline;">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<div class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="fr">
+          
+          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="zh-CN">
+          
+          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ja">
+          
+          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ko">
+          
+          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ru">
+          
+          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
+          
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ko',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+</div>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;documentElement.setAttribute("data-header-transparent", "");var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+    html .page-banner {
+      background: #000;
+    }
+  </style>
+<style>html .page-banner {
+      height:  36.8vh;
+      min-height: 38vh;
+    }
+    html[data-scroll-status="top"] .page-banner {
+      height: 100vh;
+    }
+  </style>
+<style>
+    html .page-banner .page-banner-img > *:first-child {
+      opacity: 0.618;
+    }
+
+    html[data-theme="dark"] .page-banner .page-banner-img > *:first-child {
+      opacity: 0.443724;
+    }
+  </style>
+<style>
+    html .page-banner .page-banner-inner > *:first-child > *:nth-child(1) {
+      font-size: 4.25em; font-weight: bold; text-decoration: underline
+    }
+  </style>
+<style>
+    html .page-banner .page-banner-inner > *:first-child > *:nth-child(2) {
+      color: gold
+    }
+  </style>
+<section class="page-banner">
+    <div class="page-banner-img">
+<div style="background-image: url(https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/11_mac_%EC%A3%BC%EC%86%8C.png)"></div>
+        <img class="img-placeholder" src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/11_mac_%EC%A3%BC%EC%86%8C.png">
+</div>
+    <div class="wrapper">
+      <div class="page-banner-inner">
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">MAC 주소와 ARP 프로토콜</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <div class="post-meta">
+    <time class="dt-published" datetime="2025-03-24T12:07:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Mar 24, 2025
+    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 11 mins</span>
+  </div>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#NETWORK">#NETWORK</a><a class="post-tag" href="/tags.html#MAC">#MAC</a><a class="post-tag" href="/tags.html#ARP">#ARP</a>
+</div></header>
+</div>
+    </div>
+  </section><script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <div class="framework">
+  <section class="main">
+
+     <div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <h2 id="mac-주소-media-access-control-address-물리적-주소">MAC 주소 (Media Access Control Address, 물리적 주소)</h2>
+
+<p>MAC 주소는 네트워크 인터페이스 카드(NIC, Network Interface Card)에 할당된 <strong>고유한 하드웨어(물리적인) 주소</strong>입니다.<br>
+<img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/11_mac_%EC%A3%BC%EC%86%8C.png" alt="MAC"></p>
+
+<p>IP(논리적인 주소) 만으로 통신을 하게 되면 언제든 지 변경 될 수 있는 유동성 때문에 원활한 통신이 되지 않아 혼선이 올 수 있습니다.<br>
+단말간의 통신에서 사용되는 MAC 주소는 논리적인 IP와 다르게 변경이 어렵고, 고유한 성질을 가지고 있습니다.</p>
+
+<p>예를 들어, IP 주소는 사람 이름, MAC 주소는 핸드폰 번호라고 생각해 보겠습니다.<br>
+이떤 이벤트에서 김헤란이라는 사람이 당첨 되었을 때, 참여한 모든 김혜란에게 상품을 주는 것은 말이 되지 않습니다.
+김혜란이라는 이름에 전화 번호가 010-1234-5678 이라는 번호를 가진 사람이 이벤트에 당첨 되었다면 같은 전화 번호가 두개일 수 없기 때문에 김혜란을 특정 할 수 있습니다.</p>
+
+<p>이 논리 주소인 IP와 물리 주소인 MAC을 연결 시켜주는 프로토콜이 <strong>ARP 프로토콜</strong> 입니다.</p>
+
+<h3 id="조회-방법">조회 방법</h3>
+
+<p>윈도우 환경에서 MAC 주소를 조회하는 방법은 cmd 창에 <code class="language-plaintext highlighter-rouge">ipconfig /all</code> 명령어를 입력하면 조회가 가능합니다.<br>
+리눅스 환경에서는 <code class="language-plaintext highlighter-rouge">ifconfig</code> 명령어를 통해 조회가 가능합니다.</p>
+
+<p>MAC 주소는 원도우 환경에서 하이픈(-) 기호, 리눅스에서는 콜론(;) 기호로 구분하는 차이가 있다.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">00:1A:2B:3C:4D:5E</code></li>
+  <li><code class="language-plaintext highlighter-rouge">AC:DE:48:00:11:22</code></li>
+</ul>
+
+<p><img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/11_MAC%EC%A3%BC%EC%86%8C_%EC%A1%B0%ED%9A%8C%EB%B0%A9%EB%B2%95.png" alt="윈도우_MAC주소_조회방법">
+<img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/11_MAC%EC%A3%BC%EC%86%8C_%EC%A1%B0%ED%9A%8C%EB%B0%A9%EB%B2%95_01.png" alt="리눅스_MAC주소_조회방법"></p>
+
+<h3 id="mac-주소-구조">MAC 주소 구조</h3>
+
+<p>MAC 주소는 48bit의 숫자로 표기되며, 앞의 24bit는 제조사 식별 코드, 뒤의 24bit의 단말 일련번호로 이루어져 있습니다.</p>
+
+<ol>
+  <li>
+<strong>OUI (Organizationally Unique Identifier, 조직별 식별자, 앞 24비트)</strong>
+    <ul>
+      <li>제조업체를 나타냄</li>
+    </ul>
+  </li>
+  <li>
+<strong>NIC Specific (개별 장치 식별자, 뒤 24비트)</strong>
+    <ul>
+      <li>제조업체가 장치마다 고유하게 할당</li>
+    </ul>
+  </li>
+</ol>
+
+<p><img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/11_MAC_%EC%A3%BC%EC%86%8C%EA%B5%AC%EC%A1%B0.png" alt="MAC_주소구조"></p>
+
+<h2 id="arp-address-resolution-protocol-주소-결정-프로토콜">ARP (Address Resolution Protocol, 주소 결정 프로토콜)</h2>
+
+<p>ARP를 직역하자면 주소(Address) 결정(Resolution) 프로토콜(Protocol)로 논리적인 IP 주소를 물리적인 MAC 주소로 매칭 시켜주는 프로토콜 입니다.</p>
+
+<p>MAC 주소를 매칭 시키기 때문에 데이터링크 계정(2계층)에서 동작하는 프로토콜로 착각하는 경우도 있지만, IP 주소와 MAC 주소 둘다 필요하기 때문에 IP가 속해있는 네트워크 계층(3계층)에서 사용되는 프로토콜입니다.</p>
+
+<h3 id="arp의-통신-과정">ARP의 통신 과정</h3>
+
+<ol>
+  <li>
+<strong>ARP Request</strong> : 호스트 A가 호스트 B의 MAC 주소를 알아야 할 때 상대의 IP를 가지고 MAC 주소 정보를 요청하는 패킷
+    <ul>
+      <li>LAN 구간의 모든 호스트에게 전달해야 하기 때문에 Broadcast(ff:ff:ff:ff:ff:ff) 통신을 합니다.</li>
+      <li>예시 ) Request who-has 192.168.10.1 tell 192.168.19.3, length 46 -&gt; 나는 192.168.10.1 인데, 192.168.19.3을 가진 호스트의 MAC 주소는 뭐야?</li>
+    </ul>
+  </li>
+  <li>
+<strong>ARP Reply</strong> : ARP Request를 받은 호스트가 해당 IP를 가지고 있으면, 자신의 MAC 주소를 담아 응답하는 패킷
+    <ul>
+      <li>ARP Request를 요청한 호스트에게만 전달하면 되기 때문에 해당 호스트에게 Unicast 통신으로 응답합니다.</li>
+      <li>자신의 IP와 다른 ARP Request를 받은 호스트들은 해당 패킷을 무시합니다.</li>
+      <li>예시 ) ARP (0x0906), length 62:Reply 192.168.10.1 is-at aa:aa:aa:aa:aa:aa, length 46 -&gt; 내 IP는 192.168.10.1 이고, 나의 MAC 주소는 aa:aa:aa:aa:aa:aa 야</li>
+    </ul>
+  </li>
+  <li>
+<strong>ARP 캐시 테이블에 저장</strong> : A는 B의 MAC 주소를 캐시에 저장하여 다음 요청 시 재사용
+    <ul>
+      <li>
+<code class="language-plaintext highlighter-rouge">arp -a</code> 명령어로 현재 캐시에 저장된 ARP 테이블을 확인할 수 있습니다.</li>
+    </ul>
+  </li>
+</ol>
+
+<blockquote>
+  <p><strong>Broadcast 통신과 Unicast 통신</strong></p>
+
+  <p>Broadcast는 네트워크 내 모든 장치에게 정보를 전달할 때 사용되고, Unicast는 특정 대상에게만 데이터를 전송하는 방식입니다.</p>
+
+  <ol>
+    <li>
+<strong>Broadcast 통신</strong><br>
+네트워크에서 하나의 송신자가 모든 수신자에게 데이터를 보내는 방식입니다.<br>
+특징
+      <ul>
+        <li>네트워크의 모든 노드가 데이터를 수신합니다.</li>
+        <li>특정 대상을 지정하지 않기 때문에 네트워크 트래픽이 증가할 수 있습니다.</li>
+        <li>LAN(Local Area Network) 환경에서 주로 사용됩니다.</li>
+      </ul>
+    </li>
+    <li>
+<strong>Unicast 통신</strong>
+한 송신자가 특정 수신자에게만 데이터를 보내는 방식입니다.
+특징
+      <ul>
+        <li>데이터가 목표 수신자 1명에게만 전달됩니다.</li>
+        <li>네트워크 트래픽이 효율적으로 관리됩니다.</li>
+        <li>대부분의 인터넷 트래픽이 Unicast 방식으로 이루어집니다.</li>
+      </ul>
+    </li>
+  </ol>
+</blockquote>
+
+<h3 id="arp-스푸핑-공격">ARP 스푸핑 공격</h3>
+
+<p>공격자가 가짜 ARP 응답을 보내 다른 장치의 MAC 주소를 자신의 것으로 속여, 데이터를 가로챌 수 있습니다.</p>
+
+<p>공격자는 네트워크 내에서 가짜 ARP 패킷을 보내 특정 IP 주소의 MAC 주소를 자신의 MAC 주소로 속여 중간자(MITM, Man-In-The-Middle) 공격으로 네트워크 트래픽을 감청하거나 변조할 수 있습니다. 가장 나쁜 시나리오는 로그인 정보나 금융 거래 데이터를 탈취하는 데 악용되는 것 입니다.</p>
+
+<p><strong>해결책</strong></p>
+
+<ul>
+  <li>
+<strong>Dynamic ARP Inspection (DAI) 활성화</strong>: 네트워크 스위치에서 ARP 패킷을 검사하여 신뢰할 수 없는 ARP 응답을 차단.</li>
+  <li>
+<strong>ARP 테이블 정적 할당</strong>: 중요한 장치의 IP-MAC 매핑을 정적으로 설정하여 스푸핑 공격을 방지.</li>
+  <li>
+<strong>패킷 필터링 및 모니터링</strong>: IDS/IPS(침입 탐지 및 방지 시스템)를 사용하여 비정상적인 ARP 트래픽을 감지하고 차단.</li>
+</ul>
+
+<h2 id="arp-캐시-테이블">ARP 캐시 테이블</h2>
+
+<p><img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/11_ARP_%EC%BA%90%EC%8B%9C%ED%85%8C%EC%9D%B4%EB%B8%94.png" alt="ARP_캐시테이블"></p>
+
+<p>ARP 캐시 테이블은 네트워크 인터페이스 카드(NIC)가 IP 주소와 대응하는 MAC 주소를 저장하는 메모리입니다.<br>
+ARP 캐시에는 최근에 수행된 ARP 요청에 대한 응답으로 얻은 매핑 정보가 저장되며, 이를 통해 Broadcast 메세지를 통한 주소 해결을 줄이고 네트워크 성향을 향상 할 수 있습니다.</p>
+
+<h3 id="arp-캐시-테이블-구조">ARP 캐시 테이블 구조</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>IP 주소</th>
+      <th>MAC 주소</th>
+      <th>TTL (Time To Live)</th>
+      <th>상태</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>192.168.1.1</td>
+      <td>00:14:22:01:23:45</td>
+      <td>120s</td>
+      <td>동적</td>
+    </tr>
+    <tr>
+      <td>192.168.1.2</td>
+      <td>00:14:22:67:89:AB</td>
+      <td>120s</td>
+      <td>동적</td>
+    </tr>
+    <tr>
+      <td>192.168.1.3</td>
+      <td>00:14:22:45:67:CD</td>
+      <td>120s</td>
+      <td>동적</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="arp-캐시-관리">ARP 캐시 관리</h3>
+
+<ul>
+  <li>
+<strong>동적 항목</strong>: 네트워크 상에서 자동으로 생성되는 ARP 항목으로 TTL이 만료되면 삭제됩니다.</li>
+  <li>
+<strong>정적 항목</strong>: 사용자가 수동으로 ARP 캐시 테이블에 항목을 추가한 경우 TTL이 없거나 길게 설정되어 자동으로 삭제되지 않습니다.</li>
+</ul>
+
+<h2 id="arp-캐시-확인-명령어">ARP 캐시 확인 명령어</h2>
+
+<ul>
+  <li>
+<strong>Windows</strong>: <code class="language-plaintext highlighter-rouge">arp -a</code>
+</li>
+  <li>
+<strong>Linux</strong>: <code class="language-plaintext highlighter-rouge">ip neighbour</code> 또는 <code class="language-plaintext highlighter-rouge">arp -n</code>
+</li>
+</ul>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/study/2025/03/02/prisma_disconnect.html" title="Prisma database와 연결 끊어주기">Prisma database와 연결 끊어주기</a><a class="next" href="/network/2025/03/24/%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC_%EC%A3%BC%EC%86%8C_%EB%B3%80%ED%99%98.html" title="Network Address Translation, 네트워크 주소 변환">Network Address Translation, 네트워크 주소 변환...</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li class="">
+          <a class="post-link" href="/dev/react/2024/03/04/e.preventDefault_and_e.stopPropagation.html" title="React - 이벤트 전달을 막아주는 e.preventDefault()와 e.stopPropagation()">
+            React - 이벤트 전달을 막아주는 e.preventDefault()와 e.stopPropagation()<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/09/20/grokking-simplicity-01.html" title="쏙쏙 들어오는 함수형 코딩 [CHAPTER 1, 2]">
+            쏙쏙 들어오는 함수형 코딩 [CHAPTER 1, 2]<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/2025/02/22/test_code_waitForTimeout.html" title="waitForTimeout 매서드를 꼭 써야할까?">
+            waitForTimeout 매서드를 꼭 써야할까?<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/journal/retrospect/2024/02/26/Retrospect_in_2024_february.html" title="2024년 2월 회고 - 게을러지지 않기 위하여">
+            2024년 2월 회고 - 게을러지지 않기 위하여<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span>
+  <span class="post-badge badge-new">NEW</span>
+</span>
+</a>
+        </li>
+</ul>
+    </div>
+<div class="post-comments">
+<div id="utterances-placeholder"></div>
+<script>
+  const utterancesThemeFromDataTheme = () => {
+    const dataTheme = document.documentElement.getAttribute('data-theme');
+    return `github-${dataTheme}`;
+  };
+
+  const setUtterancesTheme = () => {
+    const iframe = document.querySelector('.utterances-frame');
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: utterancesThemeFromDataTheme()
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  // dynamic change
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        setUtterancesTheme();
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
+
+  let utterancesScript = document.createElement('script');
+  utterancesScript.async = true;
+  utterancesScript.src = 'https://utteranc.es/client.js';
+  utterancesScript.crossOrigin = 'anonymous';
+  utterancesScript.setAttribute('issue-term', 'title');
+  utterancesScript.setAttribute('label', 'utterances comment');
+  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
+  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
+
+  const placeholder = document.getElementById('utterances-placeholder');
+  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
+</script>
+</div></section>
+</div>
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items --><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+    </div>
+  </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>Unpublished Work <span class="copyleft">©</span> 2017-2025 Haeran</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+      <div class="footer-col rss-subscribe">Subscribe <a href="/feed.xml">via RSS</a>
+</div>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>
