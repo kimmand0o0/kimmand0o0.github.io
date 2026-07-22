@@ -3,6 +3,16 @@ layout: about
 title: About
 ---
 
+<style>
+  .stat-highlight {
+    color: #0d9488;
+    font-weight: 600;
+  }
+  html[data-theme="dark"] .stat-highlight {
+    color: #2dd4bf;
+  }
+</style>
+
 <h2>Introduce</h2>
 <hr>
 <h3>Product Developer</h3>
@@ -65,31 +75,31 @@ title: About
     <li>
         신규 유저 대상 첫결제 유도 배너 배포 후 전환 데이터를 추적해 5주간 미노출되던 버그를 발견·수정
         <br />
-        <span style="color: #ff5100;">결제 전환율 0.81% → 8.03%(약 10배), 주문 8.8배 증가</span> (동일 규모 16만 명 코호트 비교)
+        <span class="stat-highlight">결제 전환율 0.81% → 8.03%(약 10배), 주문 8.8배 증가</span> (동일 규모 16만 명 코호트 비교)
     </li>
     <li>
         비로그인 체험 대화 → 가입 → 결제로 이어지는 전환 퍼널을 이벤트 추적 체계와 함께 설계
         <br />
-        <span style="color: #ff5100;">가입 전환 유저의 30.8%가 결제로 이어지는 구조 확인</span>(서비스 평균 대비 약 1.6배)
+        <span class="stat-highlight">가입 전환 유저의 30.8%가 결제로 이어지는 구조 확인</span>(서비스 평균 대비 약 1.6배)
     </li>
     <li>
         커플룸/정실 등록 리텐션 기능 출시 후 데이터로 효과 검증
         <br />
-        <span style="color: #ff5100;">활동 유저 비율 +10.4%p, 1인당 활동일수 약 2배 증가</span>
+        <span class="stat-highlight">활동 유저 비율 +10.4%p, 1인당 활동일수 약 2배 증가</span>
     </li>
     <li>
         위프(재화) 차감 로직을 선차감 → 후차감 방식으로 통일, 차감 정책 명문화
         <br />
-        <span style="color: #ff5100;">dead code 약 850줄 제거</span>
+        <span class="stat-highlight">dead code 약 850줄 제거</span>
     </li>
     <li>재화 자동충전 결제 기능을 백엔드 전 계층으로 구현, 이후 멱등성을 강화해 중복 충전 방지</li>
     <li>
-        정실 유저 약 1만 명의 리텐션 적립이 <span style="color: #ff5100;">19시간 전면 실패</span>한 장애를 원인 분석·긴급 수정·데이터 백필로 대응
+        정실 유저 약 1만 명의 리텐션 적립이 <span class="stat-highlight">19시간 전면 실패</span>한 장애를 원인 분석·긴급 수정·데이터 백필로 대응
         <br />
         재발 방지 규칙을 팀 전역 문서화
     </li>
-    <li>커플룸 등록 기능(<span style="color: #ff5100;">123커밋 규모</span>)을 LLM 기반 상황 대사 생성 포함해 도메인 전체 설계·구현</li>
-    <li>앱 내 본인인증(Capacitor), 쿠키 동의 배너(CCPA/LGPD) 등 <span style="color: #ff5100;">9개국</span> 서비스의 글로벌 규제 대응 구현</li>
+    <li>커플룸 등록 기능(<span class="stat-highlight">123커밋 규모</span>)을 LLM 기반 상황 대사 생성 포함해 도메인 전체 설계·구현</li>
+    <li>앱 내 본인인증(Capacitor), 쿠키 동의 배너(CCPA/LGPD) 등 <span class="stat-highlight">9개국</span> 서비스의 글로벌 규제 대응 구현</li>
     <li>Claude Code 기반 AI 페어 프로그래밍 워크플로우(커스텀 스킬/서브에이전트 자동화)를 팀 개발 표준으로 도입·정착</li>
 </ul>
 
