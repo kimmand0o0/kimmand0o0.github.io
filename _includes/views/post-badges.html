@@ -1,4 +1,21 @@
+{%- comment -%}
+  기본 yat 테마는 NEW 배지를 날짜와 무관하게 항상 표시하고, `a:visited`로만
+  숨긴다(방문 여부 기준). 여기서는 실제 발행일 기준 7일 이내인 글에만
+  NEW가 붙도록 build 시각(now) 대비 경과 시간을 계산한다.
+{%- endcomment -%}
+{%- assign is_new = false -%}
+{%- if post.date -%}
+  {%- assign now_ts = 'now' | date: '%s' | plus: 0 -%}
+  {%- assign post_ts = post.date | date: '%s' | plus: 0 -%}
+  {%- assign age_seconds = now_ts | minus: post_ts -%}
+  {%- if age_seconds >= 0 and age_seconds <= 604800 -%}
+    {%- assign is_new = true -%}
+  {%- endif -%}
+{%- endif -%}
+
 <span class="post-badges">
   <span class="post-badge badge-top">TOP</span>
+  {%- if is_new -%}
   <span class="post-badge badge-new">NEW</span>
+  {%- endif -%}
 </span>
