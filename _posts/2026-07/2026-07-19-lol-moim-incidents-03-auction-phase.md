@@ -14,7 +14,7 @@ tags: [운영일지, 실시간, WebSocket, Redis, 동시성]
 경매의 진행 상태(`auctionPhase`: `IDLE`/`WAITING`/`BIDDING`/`PAUSED`/`COMPLETE`)는 두 개의 완전히 분리된 프로세스가 나눠서 쓴다.
 
 - **API 서버** (`packages/api`, Cloud Run) — 라운드 낙찰 처리, 다음 매물로 넘어가는 등 **정합성이 중요한 전환**을 담당
-- **WS 서버** (`server-ws.ts`, GCE VM `lol-api-seoul`, pm2 `auction-ws`) — 입찰, 포기, 일시정지/재개, 라운드 시작 등 **지연시간이 중요한 전환**을 담당
+- **WS 서버** (`server-ws.ts`, 별도 GCE VM, pm2 `auction-ws`) — 입찰, 포기, 일시정지/재개, 라운드 시작 등 **지연시간이 중요한 전환**을 담당
 
 ```mermaid
 flowchart TB
