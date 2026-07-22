@@ -1,0 +1,137 @@
+---
+layout: framework
+---
+
+<div class="search-page">
+  <h1 class="page-heading">Search</h1>
+  <p class="search-sub">제목·태그·카테고리·본문 요약으로 검색합니다. 태그를 눌러 필터링할 수 있어요.</p>
+
+  <div class="search-box">
+    <input type="text" id="search-input" placeholder="검색어를 입력하세요..." autocomplete="off">
+  </div>
+
+  <div class="search-tags" id="search-tags"></div>
+
+  <div class="search-meta" id="search-meta"></div>
+
+  <ul class="search-results" id="search-results"></ul>
+</div>
+
+<script>
+(function () {
+  var DATA_URL = "{{ '/search.json' | relative_url }}";
+  var input = document.getElementById('search-input');
+  var tagsEl = document.getElementById('search-tags');
+  var metaEl = document.getElementById('search-meta');
+  var resultsEl = document.getElementById('search-results');
+
+  var posts = [];
+  var activeTags = {};
+  var debounceTimer = null;
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function buildTagCloud() {
+    var counts = {};
+    posts.forEach(function (p) {
+      (p.tags || []).forEach(function (t) {
+        counts[t] = (counts[t] || 0) + 1;
+      });
+    });
+    var tags = Object.keys(counts).sort(function (a, b) {
+      return counts[b] - counts[a] || a.localeCompare(b);
+    });
+    tagsEl.innerHTML = tags.map(function (t) {
+      return '<button type="button" class="search-tag" data-tag="' + escapeHtml(t) + '">'
+        + escapeHtml(t) + ' <span class="search-tag-count">' + counts[t] + '</span></button>';
+    }).join('');
+  }
+
+  function matchesQuery(post, terms) {
+    if (terms.length === 0) return true;
+    var haystack = [
+      post.title,
+      (post.tags || []).join(' '),
+      (post.categories || []).join(' '),
+      post.excerpt
+    ].join(' ').toLowerCase();
+    return terms.every(function (term) {
+      return haystack.indexOf(term) !== -1;
+    });
+  }
+
+  function matchesTags(post) {
+    var selected = Object.keys(activeTags).filter(function (k) { return activeTags[k]; });
+    if (selected.length === 0) return true;
+    var postTags = post.tags || [];
+    return selected.some(function (t) { return postTags.indexOf(t) !== -1; });
+  }
+
+  function render() {
+    var query = (input.value || '').trim().toLowerCase();
+    var terms = query.length ? query.split(/\s+/) : [];
+
+    var filtered = posts.filter(function (p) {
+      return matchesQuery(p, terms) && matchesTags(p);
+    });
+
+    metaEl.textContent = filtered.length + '개의 글';
+
+    if (filtered.length === 0) {
+      resultsEl.innerHTML = '<li class="search-empty">검색 결과가 없습니다.</li>';
+      return;
+    }
+
+    resultsEl.innerHTML = filtered.map(function (p) {
+      var badges = (p.categories || []).map(function (c) {
+        return '<span class="search-badge">' + escapeHtml(c) + '</span>';
+      }).join('');
+      return (
+        '<li class="search-result">'
+        + '<a href="' + p.url + '">'
+        + '<span class="search-result-title">' + escapeHtml(p.title) + '</span>'
+        + '<span class="search-result-meta">' + p.date + ' ' + badges + '</span>'
+        + '<span class="search-result-excerpt">' + escapeHtml(p.excerpt) + '</span>'
+        + '</a></li>'
+      );
+    }).join('');
+  }
+
+  tagsEl.addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('.search-tag') : null;
+    if (!btn) return;
+    var tag = btn.getAttribute('data-tag');
+    activeTags[tag] = !activeTags[tag];
+    btn.classList.toggle('active', !!activeTags[tag]);
+    render();
+  });
+
+  input.addEventListener('input', function () {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(render, 120);
+  });
+
+  fetch(DATA_URL)
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      posts = data;
+      buildTagCloud();
+      render();
+      var params = new URLSearchParams(location.search);
+      var q = params.get('q');
+      if (q) {
+        input.value = q;
+        render();
+      }
+    })
+    .catch(function () {
+      metaEl.textContent = '검색 데이터를 불러오지 못했습니다.';
+    });
+})();
+</script>

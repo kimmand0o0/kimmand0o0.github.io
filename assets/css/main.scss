@@ -53,3 +53,221 @@ $selection-background-color: unquote("{{ site.selection.background_color }}");
 }
 
 @import "yat";
+
+// ── Custom additions (interactive layer, kept separate from the yat theme) ──
+
+// Native cross-document page transitions. Progressive enhancement:
+// unsupported browsers just keep instant navigation, nothing breaks.
+@view-transition {
+  navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.22s;
+}
+
+// Reading progress bar (post pages only)
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  z-index: 1000;
+  background: transparent;
+  pointer-events: none;
+}
+
+.reading-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: $brand-color;
+  transition: width 0.1s linear;
+}
+
+// Code block copy button
+pre {
+  position: relative;
+}
+
+.code-copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 3px 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+pre:hover .code-copy-btn,
+.code-copy-btn:focus {
+  opacity: 1;
+}
+
+.code-copy-btn:hover {
+  background: $brand-color;
+  border-color: $brand-color;
+}
+
+// Mermaid diagrams: safe generic card wrapper + horizontal scroll for wide graphs
+.mermaid {
+  display: block;
+  overflow-x: auto;
+  margin: 1em 0;
+  padding: 12px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="dark"] .mermaid {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+// Search page
+.search-page {
+  .search-sub {
+    opacity: 0.7;
+    margin-bottom: 1.2em;
+  }
+
+  .search-box input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    font-size: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    outline: none;
+    transition: border-color 0.15s ease;
+
+    &:focus {
+      border-color: $brand-color;
+    }
+  }
+}
+
+html[data-theme="dark"] .search-page .search-box input {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.search-tags {
+  margin: 14px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.search-tag {
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+  .search-tag-count {
+    opacity: 0.5;
+    font-size: 11px;
+  }
+
+  &.active {
+    background: $brand-color;
+    border-color: $brand-color;
+    color: #fff;
+
+    .search-tag-count {
+      opacity: 0.85;
+    }
+  }
+}
+
+html[data-theme="dark"] .search-tag {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.search-meta {
+  margin: 10px 0;
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.search-results {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.search-result {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 14px 0;
+
+  a {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .search-result-title {
+    display: block;
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .search-result-meta {
+    display: block;
+    font-size: 12px;
+    opacity: 0.6;
+    margin: 4px 0;
+  }
+
+  .search-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.06);
+    font-size: 11px;
+  }
+
+  .search-result-excerpt {
+    display: block;
+    font-size: 14px;
+    opacity: 0.8;
+  }
+
+  &:hover .search-result-title {
+    color: $brand-color;
+  }
+}
+
+html[data-theme="dark"] .search-result {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+
+  .search-badge {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.search-empty {
+  opacity: 0.6;
+  padding: 20px 0;
+}
