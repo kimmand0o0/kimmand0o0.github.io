@@ -62,7 +62,11 @@
 {%- include functions.html func='get_value' default=0 -%}
 {% assign banner_start_at = return %}
 
-{% if banner_image or banner_video %}
-  {% assign has_banner = true %}
-{% endif %}
+{%- comment -%}
+  미니멀/에디토리얼 리디자인: 히어로 배너를 사이트 전체에서 끈다.
+  개별 글의 banner front matter는 그대로 두되(대량 수정 불필요), has_banner를
+  항상 false로 둬서 views/banner.html의 히어로 섹션과 header.html의
+  transparent 헤더 분기를 동시에 무력화한다.
+{%- endcomment -%}
+{% assign has_banner = false %}
 

@@ -31,6 +31,9 @@ lang: "ko"  # default lang is en
 theme_color: "#ffffff"  # Default color (snowwhite)
 brand_color: "#ff5100"  # orangered brand color
 
+# 미니멀/에디토리얼 리디자인 — 본문 폭을 좁혀 타이포그래피 중심으로
+content_width: "700px"
+
 # Night/Dark mode
 night_mode: "auto"  # Set to "auto" for auto night shift (19:00 - 07:00)
 

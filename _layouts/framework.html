@@ -2,22 +2,23 @@
 layout: default
 ---
 
-<div class="framework">
+{%- comment -%} Resolve sidebar items ahead of time so we know whether to render a single- or two-column shell. {%- endcomment -%}
+{%- if page.sidebar -%}
+  {%- assign sidebar = page.sidebar -%}
+{%- elsif site.defaults[page.layout].sidebar -%}
+  {%- assign sidebar = site.defaults[page.layout].sidebar -%}
+{%- elsif layout.sidebar -%}
+  {%- assign sidebar = layout.sidebar -%}
+{%- endif -%}
+
+<div class="framework{% unless sidebar %} no-sidebar{% endunless %}">
   <section class="main">
 
      {{ content }}
 
   </section>
-  <section class="sidebar" style="margin-left: 15px;">
-    <!-- Get sidebar items -->
-    {%- if page.sidebar -%}
-      {%- assign sidebar = page.sidebar -%}
-    {%- elsif site.defaults[page.layout].sidebar -%}
-      {%- assign sidebar = site.defaults[page.layout].sidebar -%}
-    {%- elsif layout.sidebar -%}
-      {%- assign sidebar = layout.sidebar -%}
-    {%- endif -%}
-
+  {%- if sidebar -%}
+  <section class="sidebar">
     {%- for item in sidebar -%}
 
       {%- assign file = item -%}
@@ -32,4 +33,5 @@ layout: default
 
     {%- endfor -%}
   </section>
+  {%- endif -%}
 </div>

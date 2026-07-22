@@ -271,3 +271,264 @@ html[data-theme="dark"] .search-result {
   opacity: 0.6;
   padding: 20px 0;
 }
+
+// ── Editorial redesign: typography-first, hero banners removed, sidebars gone
+//    except for the post TOC (now a quiet margin note instead of a boxed widget) ──
+
+$editorial-serif: "Noto Serif KR", "Noto Serif", serif;
+$hairline: rgba(0, 0, 0, 0.08);
+$hairline-dark: rgba(255, 255, 255, 0.12);
+$muted: rgba(0, 0, 0, 0.55);
+$muted-dark: rgba(255, 255, 255, 0.55);
+
+body {
+  line-height: 1.75;
+}
+
+h1, h2, h3, h4, h5, h6,
+.post-title, .page-banner-heading, .post-item .post-title {
+  font-family: $editorial-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+// Masthead: text wordmark, no icon clutter
+.site-brand-inner {
+  font-family: $editorial-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+
+  .site-favicon {
+    display: none;
+  }
+}
+
+.site-header {
+  border-bottom: 1px solid $hairline;
+  background: inherit;
+}
+
+html[data-theme="dark"] .site-header {
+  border-bottom-color: $hairline-dark;
+}
+
+// Single-column shell for every page without a sidebar (home/archives/categories/tags/search)
+.framework.no-sidebar {
+  display: block;
+
+  .main {
+    max-width: $content-width;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+// Post pages keep the two-column shell, but the sidebar is now a quiet margin
+// note (TOC), not a bordered widget competing with the article for attention.
+.framework:not(.no-sidebar) {
+  .sidebar {
+    margin-left: 32px;
+  }
+}
+
+@media (max-width: 1080px) {
+  .framework:not(.no-sidebar) .sidebar {
+    display: none;
+  }
+}
+
+.post-menu {
+  position: sticky;
+  top: 24px;
+  font-size: 13px;
+  line-height: 1.6;
+
+  .post-menu-title {
+    font-family: $editorial-serif;
+    font-weight: 700;
+    margin-bottom: 8px;
+    opacity: 0.5;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 11px;
+  }
+
+  ul {
+    border-left: 1px solid $hairline;
+  }
+
+  li {
+    padding-left: 12px;
+    margin: 6px 0;
+
+    a {
+      color: $muted;
+      text-decoration: none;
+    }
+
+    &.active a {
+      color: $brand-color;
+      font-weight: 600;
+    }
+  }
+}
+
+html[data-theme="dark"] .post-menu ul {
+  border-left-color: $hairline-dark;
+}
+
+html[data-theme="dark"] .post-menu li a {
+  color: $muted-dark;
+}
+
+// Post header: plain typographic title block, no hero image behind it
+.post-header {
+  padding: 48px 0 24px;
+
+  .post-title {
+    font-size: 2.1em;
+    line-height: 1.3;
+    margin: 0;
+  }
+
+  .post-subtitle {
+    font-weight: 400;
+    opacity: 0.6;
+    margin-top: 8px;
+  }
+
+  .post-meta {
+    margin-top: 16px;
+    font-size: 13px;
+    color: $muted;
+
+    .fa {
+      display: none;
+    }
+
+    .left-vsplit::before {
+      content: "·";
+      margin: 0 6px;
+    }
+  }
+
+  .post-tags {
+    margin-top: 10px;
+
+    .post-tag {
+      font-size: 12px;
+      color: $muted;
+      margin-right: 10px;
+      text-decoration: none;
+
+      &:hover {
+        color: $brand-color;
+      }
+    }
+  }
+}
+
+html[data-theme="dark"] .post-header .post-meta {
+  color: $muted-dark;
+}
+
+html[data-theme="dark"] .post-header .post-tags .post-tag {
+  color: $muted-dark;
+}
+
+// Home page / pagination list: drop thumbnails and icons, let the title read as an index
+.post-list {
+  .post-image {
+    display: none;
+  }
+
+  .post-item {
+    border-bottom: 1px solid $hairline;
+    padding: 24px 0;
+
+    .post-title {
+      font-size: 1.35em;
+      margin: 0 0 6px;
+    }
+
+    .post-meta {
+      font-size: 12px;
+      color: $muted;
+
+      .fa {
+        display: none;
+      }
+
+      .left-vsplit::before {
+        content: "·";
+        margin: 0 6px;
+      }
+    }
+
+    .post-excerpt {
+      .read_more {
+        display: none;
+      }
+
+      p {
+        opacity: 0.75;
+        margin: 6px 0 0;
+      }
+    }
+
+    .post-tags .post-tag {
+      font-size: 12px;
+      color: $muted;
+      margin-right: 8px;
+    }
+  }
+}
+
+html[data-theme="dark"] .post-list .post-item {
+  border-bottom-color: $hairline-dark;
+
+  .post-meta,
+  .post-tags .post-tag {
+    color: $muted-dark;
+  }
+}
+
+// Archives / categories / tags: quiet index, not boxed segments
+.page-segments {
+  .segment-name {
+    font-family: $editorial-serif;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.55;
+    border-bottom: 1px solid $hairline;
+    padding-bottom: 8px;
+    margin: 40px 0 12px;
+  }
+
+  li {
+    padding: 6px 0;
+
+    .post-meta {
+      opacity: 0.5;
+      font-size: 12px;
+      margin-right: 10px;
+    }
+  }
+}
+
+html[data-theme="dark"] .page-segments .segment-name {
+  border-bottom-color: $hairline-dark;
+}
+
+// Footer: quiet, out of the way
+.site-footer {
+  border-top: 1px solid $hairline;
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+html[data-theme="dark"] .site-footer {
+  border-top-color: $hairline-dark;
+}
