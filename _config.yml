@@ -53,6 +53,11 @@ utterances:
   theme: "github-light"                     # Use light theme
   follow_site_theme: true                   # Follow site theme (auto change based on site theme)
 
+# 글 작성 시각이 빌드 시점(UTC) 기준 "미래"로 찍히면 Jekyll이 기본값(false)으로
+# 조용히 사이트에서 빼버린다 — 에러 없이 그냥 안 보이게 됨. KST로 글을 쓰면
+# 종종 UTC 빌드 시점보다 앞서게 되므로 켜둔다.
+future: true
+
 # Build settings
 markdown: kramdown
 kramdown:
