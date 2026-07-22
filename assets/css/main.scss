@@ -313,12 +313,17 @@ html[data-theme="dark"] .site-header {
   border-bottom-color: $hairline-dark;
 }
 
+// Fixed, comfortable reading measure — independent of the outer wrapper width
+// and of whether a sidebar is present, so the article column never gets
+// squeezed by a TOC competing for space.
+$reading-width: 720px;
+
 // Single-column shell for every page without a sidebar (home/archives/categories/tags/search)
 .framework.no-sidebar {
   display: block;
 
   .main {
-    max-width: $content-width;
+    max-width: $reading-width;
     margin: 0 auto;
     width: 100%;
   }
@@ -326,9 +331,21 @@ html[data-theme="dark"] .site-header {
 
 // Post pages keep the two-column shell, but the sidebar is now a quiet margin
 // note (TOC), not a bordered widget competing with the article for attention.
+// Both columns get explicit widths so the article never shrinks to make room.
 .framework:not(.no-sidebar) {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+
+  .main {
+    flex: 0 1 $reading-width !important;
+    max-width: $reading-width !important;
+    width: 100%;
+  }
+
   .sidebar {
-    margin-left: 32px;
+    flex: 0 0 220px;
+    margin-left: 0;
   }
 }
 
