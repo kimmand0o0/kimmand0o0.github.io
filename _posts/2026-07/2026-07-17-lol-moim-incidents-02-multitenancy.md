@@ -2,7 +2,7 @@
 layout: post
 title: '[ 롤모임 운영일지 ] - 02. 모임 하나짜리 서비스를 멀티테넌시로 바꾸기'
 author: haeran
-date: 2026-07-22 22:00:00 +0900
+date: 2026-07-17 20:00:00 +0900
 categories: [Journal, Development Diary]
 tags: [운영일지, 멀티테넌시, 아키텍처, Prisma, PostgreSQL]
 ---

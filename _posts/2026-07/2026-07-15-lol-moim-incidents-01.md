@@ -2,7 +2,7 @@
 layout: post
 title: '[ 롤모임 운영일지 ] - 01. 배포하다가 겪은 사고 모음'
 author: haeran
-date: 2026-07-22 21:00:00 +0900
+date: 2026-07-15 09:30:00 +0900
 categories: [Journal, Development Diary]
 tags: [운영일지, 배포사고, GCP, Vercel, 회고]
 ---

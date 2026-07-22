@@ -2,7 +2,7 @@
 layout: post
 title: '[ 롤모임 운영일지 ] - 03. 두 서버가 같은 상태를 나눠 가지면 생기는 일 (실시간 경매 편)'
 author: haeran
-date: 2026-07-22 22:30:00 +0900
+date: 2026-07-19 21:15:00 +0900
 categories: [Journal, Development Diary]
 tags: [운영일지, 실시간, WebSocket, Redis, 동시성]
 ---
