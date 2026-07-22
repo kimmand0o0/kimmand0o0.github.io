@@ -1,0 +1,31 @@
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+  function isDarkTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark';
+  }
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: isDarkTheme() ? 'dark' : 'default',
+  });
+
+  function renderMermaidBlocks() {
+    // kramdown/rouge render ```mermaid fences as <pre><code class="language-mermaid">...</code></pre>
+    // mermaid.js only auto-scans <div class="mermaid">, so swap the markup before running it.
+    const blocks = document.querySelectorAll('pre > code.language-mermaid');
+    if (blocks.length === 0) {
+      return;
+    }
+    blocks.forEach((code) => {
+      const graphDefinition = code.textContent;
+      const container = document.createElement('div');
+      container.className = 'mermaid';
+      container.textContent = graphDefinition;
+      code.parentElement.replaceWith(container);
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  }
+
+  window.addEventListener('load', renderMermaidBlocks);
+</script>
