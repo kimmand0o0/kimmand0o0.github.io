@@ -24,7 +24,10 @@
 <script>
 // Init highlight js
 document.addEventListener('DOMContentLoaded', function(event) {
-  var els = document.querySelectorAll('pre code')
+  // mermaid 블록은 highlight.js 대상에서 제외 — hljs가 addLangData에서 class를
+  // "language-mermaid" -> "hljs mermaid"로 덮어써버려서, mermaid.html의 렌더링 스크립트가
+  // 뒤늦게(load 시점) 찾으려는 .language-mermaid 셀렉터가 항상 빈 결과를 내는 원인이었음.
+  var els = document.querySelectorAll('pre code:not(.language-mermaid)')
 
   function addLangData(block) {
     var outer = block.parentElement.parentElement.parentElement;
