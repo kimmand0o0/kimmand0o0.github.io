@@ -175,13 +175,55 @@
   const sendEl = panel.querySelector('.cw-send');
   const closeEl = panel.querySelector('.cw-header-close');
 
+  // If the visitor manually scrolls (e.g. to re-read an earlier message),
+  // stop auto-scrolling until their next question — don't yank them around.
+  let userScrolledAway = false;
+  messagesEl.addEventListener('wheel', () => { userScrolledAway = true; }, { passive: true });
+  messagesEl.addEventListener('touchmove', () => { userScrolledAway = true; }, { passive: true });
+
+  function scrollToBottom() {
+    if (userScrolledAway) return;
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  // Positions the container so `el`'s top edge is at the top of the visible
+  // area — used when a new answer arrives, so the visitor reads it from the
+  // start instead of landing on its last line. rect-diff math (not
+  // el.offsetTop) because .cw-panel is `position: fixed`, which makes it the
+  // offsetParent for everything inside — offsetTop alone would be relative
+  // to the panel, not to the scrollable .cw-messages.
+  function scrollToTop(el) {
+    if (userScrolledAway) return;
+    const elRect = el.getBoundingClientRect();
+    const containerRect = messagesEl.getBoundingClientRect();
+    messagesEl.scrollTop += elRect.top - containerRect.top - 8;
+  }
+
+  // Simulated streaming: the full answer already arrived from the API in one
+  // shot (see README — true token streaming would need the Durable Object
+  // proxy to pipe SSE through, meaningfully more moving parts), this just
+  // reveals it progressively so it *looks* like it's typing out live.
+  function typewriterReveal(el, text, speed = 16) {
+    return new Promise((resolve) => {
+      let i = 0;
+      (function step() {
+        el.textContent = text.slice(0, i);
+        if (i++ < text.length) {
+          setTimeout(step, speed);
+        } else {
+          resolve();
+        }
+      })();
+    });
+  }
+
   function addBotBubble(text) {
     const row = document.createElement('div');
     row.className = 'cw-row cw-bot';
     row.innerHTML = `<img class="cw-avatar" src="${AVATAR_SRC}" alt="" /><div class="cw-bubble"></div>`;
     row.querySelector('.cw-bubble').textContent = text;
     messagesEl.appendChild(row);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+    scrollToBottom();
     return row.querySelector('.cw-bubble');
   }
 
@@ -191,7 +233,7 @@
     row.innerHTML = `<div class="cw-bubble"></div>`;
     row.querySelector('.cw-bubble').textContent = text;
     messagesEl.appendChild(row);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+    scrollToBottom();
   }
 
   function addTypingBubble() {
@@ -199,8 +241,8 @@
     row.className = 'cw-row cw-bot';
     row.innerHTML = `<img class="cw-avatar" src="${AVATAR_SRC}" alt="" /><div class="cw-bubble"><div class="cw-typing"><span></span><span></span><span></span></div></div>`;
     messagesEl.appendChild(row);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-    return row.querySelector('.cw-bubble');
+    scrollToBottom();
+    return { row, bubble: row.querySelector('.cw-bubble') };
   }
 
   let greeted = false;
@@ -234,9 +276,10 @@
     inputEl.value = '';
     inputEl.disabled = true;
     sendEl.disabled = true;
+    userScrolledAway = false; // fresh question — resume following along
 
     addUserBubble(question);
-    const bubble = addTypingBubble();
+    const { row: botRow, bubble } = addTypingBubble();
 
     try {
       const res = await fetch(endpoint, {
@@ -247,13 +290,18 @@
 
       if (res.status === 429) {
         bubble.textContent = '요청이 너무 많아요. 잠시 후 다시 시도해주세요.';
+        scrollToBottom();
       } else if (res.status === 503) {
         bubble.textContent = '이번 달 답변 한도에 도달해서 잠시 답변이 제한돼 있어요.';
+        scrollToBottom();
       } else if (!res.ok) {
         bubble.textContent = '답변을 가져오지 못했어요.';
+        scrollToBottom();
       } else {
         const data = await res.json();
-        bubble.textContent = data.answer;
+        bubble.textContent = ''; // clear the typing dots before revealing
+        scrollToTop(botRow); // position at the answer's start, not its end
+        await typewriterReveal(bubble, data.answer);
         if (data.sources?.length) {
           const sourcesEl = document.createElement('div');
           sourcesEl.className = 'cw-sources';
@@ -265,8 +313,8 @@
       }
     } catch {
       bubble.textContent = '네트워크 오류가 발생했어요.';
+      scrollToBottom();
     } finally {
-      messagesEl.scrollTop = messagesEl.scrollHeight;
       inputEl.disabled = false;
       sendEl.disabled = false;
       inputEl.focus();
