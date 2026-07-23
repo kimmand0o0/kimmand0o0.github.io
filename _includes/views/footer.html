@@ -11,11 +11,15 @@
             | replace: '(p)', '℗'
             | replace: '(cleft)', '<span class="copyleft">&copy;</span>'
         -%}
+      <div class="footer-social">
+        <a href="https://github.com/kimmand0o0" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
+        <a href="mailto:maeran.dev.u@gmail.com" aria-label="Email"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+        <a href="{{ "/feed.xml" | relative_url }}" aria-label="RSS"><i class="fa fa-rss" aria-hidden="true"></i></a>
+      </div>
       <div>{{ copyright }}</div>
       <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
       generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
       another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
-      <div class="footer-col rss-subscribe">Subscribe <a href="{{ "/feed.xml" | relative_url }}">via RSS</a></div>
     </div>
   </div>
 </footer>

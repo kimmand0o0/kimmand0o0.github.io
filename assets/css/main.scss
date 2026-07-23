@@ -549,3 +549,24 @@ html[data-theme="dark"] .page-segments .segment-name {
 html[data-theme="dark"] .site-footer {
   border-top-color: $hairline-dark;
 }
+
+.footer-social {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 8px;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    font-size: 14px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  a:hover {
+    background-color: rgba($brand-color, 0.12);
+  }
+}
