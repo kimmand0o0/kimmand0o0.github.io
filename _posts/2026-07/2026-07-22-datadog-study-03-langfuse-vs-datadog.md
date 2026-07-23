@@ -32,19 +32,30 @@ tags: [Study, Datadog, LLM, Langfuse]
 4. **성숙도/전문성** — LLM 전용 툴은 프롬프트 평가·데이터셋 관리에 오래 특화된 만큼 그 부분은 더 세밀할 가능성이 크다(실측 전 가설). 데이터독 AI Obs는 종합 플랫폼의 신설 기능에 가까워서 그 깊이는 검증이 더 필요하다.
 5. **비용 구조** — LLM 전용 툴은 LLM 이벤트 단위 과금인 경우가 많고, 데이터독은 호스트/서비스 단위 과금이 섞인다.
 
+가로축은 좁은 범위(LLM만) → 넓은 범위(인프라+LLM+프론트), 세로축은 낮은 LLM 전문 깊이 → 높은 LLM 전문 깊이다. 아래는 가설적인 포지셔닝이며 실측 결과는 아니다.
+
 ```mermaid
-quadrantChart
-    title 범위 vs LLM 전문 깊이 (가설적 포지셔닝, 실측 아님)
-    x-axis 좁은 범위(LLM만) --> 넓은 범위(인프라+LLM+프론트)
-    y-axis 낮은 LLM 전문 깊이 --> 높은 LLM 전문 깊이
-    quadrant-1 이상적 지점 (아직 아무도 없음)
-    quadrant-2 LLM 전문 클리닉
-    quadrant-3 범용이지만 얕음
-    quadrant-4 종합병원형
-    랭퓨즈: [0.25, 0.8]
-    데이터독 AI Obs: [0.8, 0.5]
-    인프라 APM 단독: [0.75, 0.1]
+flowchart TB
+    subgraph TOP["전문 깊이 높음"]
+        direction LR
+        Q2["LLM 전문 클리닉<br/><br/>랭퓨즈"]
+        Q1["이상적 지점<br/><br/>아직 아무도 없음"]
+    end
+    subgraph BOTTOM["전문 깊이 낮음"]
+        direction LR
+        Q3["범용이지만 얕음"]
+        Q4["종합병원형<br/><br/>데이터독 AI Obs<br/>인프라 APM 단독"]
+    end
+    Q2 ~~~ Q3
+    Q1 ~~~ Q4
+
+    style Q1 fill:#f8f9fa,stroke:#adb5bd,stroke-dasharray: 5 5
+    style Q2 fill:#fff3bf
+    style Q3 fill:#f1f3f5
+    style Q4 fill:#d3f9d8
 ```
+
+왼쪽 열은 좁은 범위(LLM만), 오른쪽 열은 넓은 범위(인프라+LLM+프론트)다.
 
 ## 3. 트레이스 커버리지 차이
 
