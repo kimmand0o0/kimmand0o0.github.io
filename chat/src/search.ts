@@ -30,6 +30,16 @@ function cosineSimilarity(a: number[], b: number[]): number {
   return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
+// Abstract questions about the blog owner ("똑똑한 사람인가?", "믿을 만해?") share
+// almost no vocabulary with the About page's concrete text (skills, work
+// history, metrics) — cosine similarity between the question and About
+// chunks ends up too low to place in the top-k, so pure semantic search
+// alone loses these. There are only 4 About chunks total, so the cheap fix
+// is to always include them alongside the top-k general search results
+// (small, fixed token cost) rather than trying to keyword-detect every
+// possible way of asking "what kind of person is Haeran".
+const ABOUT_URL_SUFFIX = '/about.html';
+
 export async function searchRelevantChunks(
   env: Env,
   questionVector: number[],
@@ -40,5 +50,15 @@ export async function searchRelevantChunks(
   const scored = chunks.map((c) => ({ chunk: c, score: cosineSimilarity(questionVector, c.vector) }));
   scored.sort((a, b) => b.score - a.score);
 
-  return scored.slice(0, topK).map((s) => s.chunk);
+  const results = scored.slice(0, topK).map((s) => s.chunk);
+  const seenIds = new Set(results.map((c) => c.id));
+
+  for (const c of chunks) {
+    if (c.url.endsWith(ABOUT_URL_SUFFIX) && !seenIds.has(c.id)) {
+      results.push(c);
+      seenIds.add(c.id);
+    }
+  }
+
+  return results;
 }
