@@ -7,7 +7,7 @@ categories: [Journal, Development Diary]
 tags: [K8s, Kubernetes, 스터디, Ingress, 로드밸런서]
 ---
 
-[지난 편]({% post_url 2026-07/2026-07-22-k8s-study-05-configmap-secret %})까지는 클러스터 내부(Service)까지만 다뤘다. 이번 편은 반대 방향 — 외부 사용자의 요청이 실제로 클러스터 안까지 어떻게 들어오는지, Ingress.
+[지난 편]({% post_url 2026-07/2026-07-22-k8s-study-05-configmap-secret %})까지는 클러스터 내부(Service)까지만 다뤘다. 이번 편은 반대 방향 — 외부 사용자의 요청이 실제로 클러스터 안까지 어떻게 들어오는지, [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/).
 
 ## TL;DR
 
@@ -30,7 +30,7 @@ tags: [K8s, Kubernetes, 스터디, Ingress, 로드밸런서]
 **핵심 한 줄 요약:** Ingress는 라우팅 규칙만 선언하는 명세서이고, 실제로 트래픽을 받아 분기하는 건 별도로 설치하는 Ingress Controller(진짜 프록시/로드밸런서)가 한다.
 
 1. **Ingress 오브젝트:** "이 도메인/경로로 오면 이 Service로 보내라"는 규칙만 YAML로 선언
-2. **Ingress Controller (별도 설치 필요):** nginx-ingress, GKE Ingress 같은 실제 동작하는 컨트롤러가 클러스터에 떠서 규칙을 읽고 실제로 처리함 — 이게 없으면 Ingress를 만들어도 아무 일도 안 일어남
+2. **[Ingress Controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) (별도 설치 필요):** nginx-ingress, GKE Ingress 같은 실제 동작하는 컨트롤러가 클러스터에 떠서 규칙을 읽고 실제로 처리함 — 이게 없으면 Ingress를 만들어도 아무 일도 안 일어남
 3. **단일 진입점:** 클라우드 로드밸런서는 Ingress Controller 앞에 하나만 필요 — 그 뒤에서 도메인/경로별로 여러 Service로 나눠 보냄
 4. **Host/Path 기반 라우팅:** `api.example.com` → api-service, `/admin` → admin-service처럼 세밀하게 분기
 5. **TLS 중앙 처리:** 인증서를 Ingress 레벨에서 한 번 설정하면 그 뒤의 모든 Service에 개별 설정 없이 HTTPS 적용

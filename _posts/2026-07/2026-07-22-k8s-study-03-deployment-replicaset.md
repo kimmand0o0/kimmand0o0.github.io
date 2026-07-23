@@ -29,10 +29,10 @@ tags: [K8s, Kubernetes, 스터디, Deployment, ReplicaSet, 롤링업데이트]
 
 **핵심 한 줄 요약:** ReplicaSet은 "Pod 개수 유지"만 담당하고, Deployment는 그 위에서 "무중단으로 버전을 교체하는 절차"까지 관리한다.
 
-1. **ReplicaSet (개수 담당):** "이 Pod 스펙으로 3개가 항상 떠있어야 한다"만 지킴 — 지난 편의 관찰-조정 루프가 여기서 실제로 돎
-2. **Deployment (버전 관리 담당):** ReplicaSet을 직접 만드는 대신, Deployment가 ReplicaSet을 만들고 감독함
-3. **롤링 업데이트:** 새 버전 배포 시, 기존 ReplicaSet(v1)의 Pod를 하나씩 줄이면서 새 ReplicaSet(v2)의 Pod를 하나씩 늘림 → 항상 최소 개수는 떠있어서 무중단
-4. **리비전 기록:** Deployment는 과거 ReplicaSet들을 기록으로 남겨둠 → 문제 생기면 `kubectl rollout undo`로 즉시 되돌릴 수 있음
+1. **[ReplicaSet](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/) (개수 담당):** "이 Pod 스펙으로 3개가 항상 떠있어야 한다"만 지킴 — 지난 편의 관찰-조정 루프가 여기서 실제로 돎
+2. **[Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) (버전 관리 담당):** ReplicaSet을 직접 만드는 대신, Deployment가 ReplicaSet을 만들고 감독함
+3. **[롤링 업데이트](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-update-deployment):** 새 버전 배포 시, 기존 ReplicaSet(v1)의 Pod를 하나씩 줄이면서 새 ReplicaSet(v2)의 Pod를 하나씩 늘림 → 항상 최소 개수는 떠있어서 무중단
+4. **[리비전 기록](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-back-a-deployment):** Deployment는 과거 ReplicaSet들을 기록으로 남겨둠 → 문제 생기면 `kubectl rollout undo`로 즉시 되돌릴 수 있음
 5. **실무 규칙:** 그래서 실제로는 Pod도, ReplicaSet도 사람이 직접 안 만들고 거의 항상 Deployment만 작성함
 
 ```mermaid

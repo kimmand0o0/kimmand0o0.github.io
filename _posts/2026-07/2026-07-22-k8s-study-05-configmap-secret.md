@@ -7,7 +7,7 @@ categories: [Journal, Development Diary]
 tags: [K8s, Kubernetes, 스터디, ConfigMap, Secret]
 ---
 
-[지난 편]({% post_url 2026-07/2026-07-22-k8s-study-04-service %})까지 Pod/Deployment/Service를 정리했다. 이번 편은 조금 다른 결 — 설정값과 비밀번호를 컨테이너 이미지 안에 박아넣지 않고 어떻게 외부에서 주입하는지, ConfigMap과 Secret.
+[지난 편]({% post_url 2026-07/2026-07-22-k8s-study-04-service %})까지 Pod/Deployment/Service를 정리했다. 이번 편은 조금 다른 결 — 설정값과 비밀번호를 컨테이너 이미지 안에 박아넣지 않고 어떻게 외부에서 주입하는지, [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)과 [Secret](https://kubernetes.io/docs/concepts/configuration/secret/).
 
 ## TL;DR
 

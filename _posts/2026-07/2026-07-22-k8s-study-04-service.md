@@ -7,7 +7,7 @@ categories: [Journal, Development Diary]
 tags: [K8s, Kubernetes, 스터디, Service, 로드밸런싱]
 ---
 
-[지난 편]({% post_url 2026-07/2026-07-22-k8s-study-03-deployment-replicaset %})에서 롤링 업데이트 중에 Pod가 계속 죽고 새로 생긴다는 걸 봤다. 근데 Pod가 재생성될 때마다 IP가 바뀌는데, 그럼 다른 Pod가 얘를 어떻게 계속 찾아가는 걸까 — 이번 편은 Service.
+[지난 편]({% post_url 2026-07/2026-07-22-k8s-study-03-deployment-replicaset %})에서 롤링 업데이트 중에 Pod가 계속 죽고 새로 생긴다는 걸 봤다. 근데 Pod가 재생성될 때마다 IP가 바뀌는데, 그럼 다른 Pod가 얘를 어떻게 계속 찾아가는 걸까 — 이번 편은 [Service](https://kubernetes.io/docs/concepts/services-networking/service/).
 
 ## TL;DR
 
@@ -28,8 +28,8 @@ tags: [K8s, Kubernetes, 스터디, Service, 로드밸런싱]
 
 **핵심 한 줄 요약:** Service는 라벨로 Pod 그룹을 지정해두고, 그 그룹 안에서 살아있는 Pod에게 요청을 자동으로 분산시켜주는 고정 주소다.
 
-1. **라벨 셀렉터:** Service는 IP가 아니라 `app: web` 같은 라벨로 대상 Pod를 지정함 — Pod가 몇 개든, IP가 뭐든 라벨만 맞으면 자동으로 대상에 포함
-2. **고정 주소 발급:** Service가 생성되면 절대 안 바뀌는 가상 IP(ClusterIP)와 DNS 이름이 부여됨
+1. **[라벨 셀렉터](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/):** Service는 IP가 아니라 `app: web` 같은 라벨로 대상 Pod를 지정함 — Pod가 몇 개든, IP가 뭐든 라벨만 맞으면 자동으로 대상에 포함
+2. **고정 주소 발급:** Service가 생성되면 절대 안 바뀌는 가상 IP(ClusterIP)와 [DNS 이름](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)이 부여됨
 3. **자동 로드밸런싱:** 요청이 오면 현재 라벨이 일치하는 Pod들 중 정상 동작 중인 것에게 랜덤/순환 방식으로 분산
 4. **자동 갱신:** Pod가 죽고 새로 생겨도 Service는 라벨만 보고 대상 목록을 실시간으로 갱신
 5. **노출 범위 선택:** 클러스터 내부용(ClusterIP), 노드 포트로 외부 접근(NodePort), 클라우드 로드밸런서 연결(LoadBalancer) 등 용도별로 타입 선택
@@ -107,6 +107,8 @@ kubectl get endpoints web-service
 # 최신 클러스터에서는 아래 명령이 실무 표준:
 # kubectl get endpointslices -l kubernetes.io/service-name=web-service
 ```
+
+> 공식 문서: [EndpointSlice](https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/)
 
 ## 지금 상태 / 다음에 할 일
 
