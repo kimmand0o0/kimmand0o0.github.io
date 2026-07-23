@@ -14,7 +14,7 @@ const MAX_QUESTION_LENGTH = 500;
 // identical on purpose so a code-level block and a model-level refusal are
 // indistinguishable from the client's point of view (don't hand an attacker
 // a way to fingerprint "did I trip the filter or just go off-topic").
-const REFUSAL_MESSAGE = '이 챗봇은 블로그 글 관련 질문에만 답하도록 만들어졌어요.';
+const REFUSAL_MESSAGE = '만두봇은 블로그 글이나 혜란에 대한 질문에만 답하도록 만들어졌어요.';
 
 function corsHeaders(env: Env): Record<string, string> {
   return {

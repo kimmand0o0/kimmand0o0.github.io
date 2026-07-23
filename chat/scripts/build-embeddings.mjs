@@ -11,7 +11,7 @@
 //   node --env-file=.env scripts/build-embeddings.mjs   (Node 20.6+)
 
 import { execSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
@@ -72,7 +72,14 @@ function extractPost(filePath) {
 
   const canonicalUrl = $('link[rel="canonical"]').first().attr('href');
   const title = $('meta[property="og:title"]').first().attr('content') ?? $('title').text().split('|')[0].trim();
-  const bodyText = $('.post-content').first().text().replace(/\s+/g, ' ').trim();
+  // Strip <script>/<style> before extracting text — cheerio's .text() walks
+  // all descendant text nodes including inside these (unlike a browser,
+  // which never renders them), so raw CSS/JS otherwise leaks into the
+  // embedded content. Bit us on about.html, which has an inline <style>
+  // block for the stat-highlight class.
+  const $content = $('.post-content').first();
+  $content.find('script, style').remove();
+  const bodyText = $content.text().replace(/\s+/g, ' ').trim();
 
   return { title, url: canonicalUrl, bodyText };
 }
@@ -127,13 +134,23 @@ async function embedBatch(texts, attempt = 1) {
   return data.data.map((d) => d.embedding);
 }
 
+// Non-post pages worth indexing too — currently just About (who Haeran is,
+// contact, skills, work experience). Same .post-content structure as posts,
+// so extractPost() works unchanged; these just don't match POST_PATH_RE.
+const EXTRA_PAGES = ['about.html'];
+
 async function main() {
   console.log('Exporting gh-pages branch...');
   const tmpDir = exportGhPages();
 
   try {
     const htmlFiles = await findPostHtmlFiles(tmpDir);
-    console.log(`Found ${htmlFiles.length} post pages.`);
+    for (const extra of EXTRA_PAGES) {
+      const full = path.join(tmpDir, extra);
+      if (existsSync(full)) htmlFiles.push(full);
+      else console.warn(`  extra page not found, skipping: ${extra}`);
+    }
+    console.log(`Found ${htmlFiles.length} pages (posts + extras).`);
 
     const pending = [];
     for (const file of htmlFiles) {

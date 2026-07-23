@@ -19,7 +19,8 @@
   }
 
   const AVATAR_SRC = '/assets/images/favicon-32x32.png';
-  const GREETING = '안녕하세요! 블로그 글 내용에 대해 뭐든 물어보세요.';
+  const BOT_NAME = '만두봇';
+  const GREETING = '안녕하세요, 만두봇이에요! 블로그 글이나 혜란에 대해 뭐든 물어보세요.';
 
   const CHAT_ICON_SVG = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>`;
   const CLOSE_ICON_SVG = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
@@ -146,7 +147,7 @@
 
   const fab = document.createElement('button');
   fab.className = 'cw-fab';
-  fab.setAttribute('aria-label', '블로그에 질문하기');
+  fab.setAttribute('aria-label', '만두봇에게 질문하기');
   fab.setAttribute('aria-expanded', 'false');
   fab.innerHTML = CHAT_ICON_SVG;
 
@@ -155,7 +156,7 @@
   panel.innerHTML = `
     <div class="cw-header">
       <img src="${AVATAR_SRC}" alt="" />
-      <div class="cw-header-title">블로그 챗봇<div class="cw-header-sub">글 내용 기반으로 답해요</div></div>
+      <div class="cw-header-title">${BOT_NAME}<div class="cw-header-sub">블로그와 혜란에 대해 답해요</div></div>
       <button class="cw-header-close" type="button" aria-label="닫기">${CLOSE_ICON_SVG}</button>
     </div>
     <div class="cw-messages"></div>
