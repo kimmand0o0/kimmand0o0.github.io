@@ -134,7 +134,7 @@ async function logChatTurn(
   }
 }
 
-async function handleChat(request: Request, env: Env): Promise<Response> {
+async function handleChat(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const startedAt = Date.now();
 
   // 1. Rate limit — keyed by client IP, checked at the edge before any paid work happens.
@@ -180,18 +180,23 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
   const guard = checkAbusePatterns(question);
   if (guard.blocked) {
     await recordBlockedAttempt(env);
-    await logChatTurn(env, {
-      question,
-      answer: null,
-      sources: null,
-      blocked: true,
-      guardCategory: guard.category ?? null,
-      ip: clientIp,
-      userAgent,
-      referrer,
-      costUsd: null,
-      latencyMs: Date.now() - startedAt,
-    });
+    // waitUntil — DB write finishes after the response is already sent, so
+    // it never adds to a visitor's perceived latency (see logChatTurn's own
+    // try/catch for why a write failure still can't break the response).
+    ctx.waitUntil(
+      logChatTurn(env, {
+        question,
+        answer: null,
+        sources: null,
+        blocked: true,
+        guardCategory: guard.category ?? null,
+        ip: clientIp,
+        userAgent,
+        referrer,
+        costUsd: null,
+        latencyMs: Date.now() - startedAt,
+      })
+    );
     const responseBody: ChatResponseBody = { answer: REFUSAL_MESSAGE, sources: [] };
     return jsonResponse(responseBody, 200, env);
   }
@@ -224,25 +229,27 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
     .filter((c) => (seen.has(c.url) ? false : (seen.add(c.url), true)))
     .map((c) => ({ title: c.title, url: c.url }));
 
-  await logChatTurn(env, {
-    question,
-    answer,
-    sources,
-    blocked: false,
-    guardCategory: null,
-    ip: clientIp,
-    userAgent,
-    referrer,
-    costUsd: totalCostUsd,
-    latencyMs: Date.now() - startedAt,
-  });
+  ctx.waitUntil(
+    logChatTurn(env, {
+      question,
+      answer,
+      sources,
+      blocked: false,
+      guardCategory: null,
+      ip: clientIp,
+      userAgent,
+      referrer,
+      costUsd: totalCostUsd,
+      latencyMs: Date.now() - startedAt,
+    })
+  );
 
   const responseBody: ChatResponseBody = { answer, sources };
   return jsonResponse(responseBody, 200, env);
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: corsHeaders(env) });
     }
@@ -253,7 +260,7 @@ export default {
     }
 
     try {
-      return await handleChat(request, env);
+      return await handleChat(request, env, ctx);
     } catch (err) {
       console.error('chat handler error:', err);
       return jsonResponse({ error: 'internal_error' }, 500, env);
