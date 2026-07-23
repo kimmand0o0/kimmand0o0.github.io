@@ -1,6 +1,9 @@
+import type { OpenAiProxyDO } from './openai-proxy-do';
+
 export interface Env {
   APP_KV: KVNamespace;
   CHAT_RATE_LIMITER: RateLimit;
+  OPENAI_PROXY: DurableObjectNamespace<OpenAiProxyDO>;
   MONTHLY_BUDGET_USD: string;
   ALLOWED_ORIGIN: string;
   CHAT_MODEL: string;

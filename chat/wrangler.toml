@@ -7,8 +7,20 @@ compatibility_date = "2026-07-01"
 #   - "spend:YYYY-MM"  -> cumulative monthly LLM spend counter (see src/budget.ts)
 # Replace `id` after running: wrangler kv namespace create APP_KV
 kv_namespaces = [
-  { binding = "APP_KV", id = "REPLACE_WITH_KV_NAMESPACE_ID" }
+  { binding = "APP_KV", id = "3f6bbb9c2012432eaadb428dfd01a0f0" }
 ]
+
+# Pinned-location proxy for OpenAI calls — avoids intermittent 403s when a
+# request lands on a Cloudflare colo in an OpenAI-blocked region (see
+# src/openai-proxy-do.ts for the full explanation). SQLite-backed Durable
+# Objects are available on the Workers Free plan.
+[[durable_objects.bindings]]
+name = "OPENAI_PROXY"
+class_name = "OpenAiProxyDO"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["OpenAiProxyDO"]
 
 # Native Workers rate limiting (GA). period must be 10 or 60 (seconds).
 # 10 requests / 60s per rate-limit key (we key by request IP — see src/index.ts).

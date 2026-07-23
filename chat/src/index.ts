@@ -1,9 +1,20 @@
 import type { ChatRequestBody, ChatResponseBody, Env } from './types';
+// wrangler resolves durable_objects.bindings[].class_name against exports of
+// the main entry file — must be re-exported here even though it's unused
+// directly in this file.
+export { OpenAiProxyDO } from './openai-proxy-do';
 import { SYSTEM_PROMPT, buildUserPrompt } from './prompt';
 import { searchRelevantChunks } from './search';
-import { estimateCostUsd, isBudgetExceeded, recordSpend } from './budget';
+import { estimateCostUsd, isBudgetExceeded, recordBlockedAttempt, recordSpend } from './budget';
+import { checkAbusePatterns } from './guard';
 
 const MAX_QUESTION_LENGTH = 500;
+
+// Same wording the system prompt uses for its own off-topic refusal — kept
+// identical on purpose so a code-level block and a model-level refusal are
+// indistinguishable from the client's point of view (don't hand an attacker
+// a way to fingerprint "did I trip the filter or just go off-topic").
+const REFUSAL_MESSAGE = '이 챗봇은 블로그 글 관련 질문에만 답하도록 만들어졌어요.';
 
 function corsHeaders(env: Env): Record<string, string> {
   return {
@@ -20,18 +31,24 @@ function jsonResponse(body: unknown, status: number, env: Env): Response {
   });
 }
 
-async function embedQuestion(env: Env, question: string): Promise<{ vector: number[]; costUsd: number }> {
-  const res = await fetch('https://api.openai.com/v1/embeddings', {
+// Every OpenAI call is routed through a single Durable Object pinned to
+// western North America — see openai-proxy-do.ts for why (region-block
+// avoidance). "pinned" is an arbitrary fixed name; using the same name every
+// time means every request reuses the same DO instance/location.
+async function callOpenAi(env: Env, path: string, body: unknown): Promise<Response> {
+  const stub = env.OPENAI_PROXY.getByName('pinned', { locationHint: 'wnam' });
+  return stub.fetch('https://openai-proxy.internal/', {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.OPENAI_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: env.EMBEDDING_MODEL,
-      input: question,
-      dimensions: Number(env.EMBEDDING_DIMENSIONS),
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path, body }),
+  });
+}
+
+async function embedQuestion(env: Env, question: string): Promise<{ vector: number[]; costUsd: number }> {
+  const res = await callOpenAi(env, '/v1/embeddings', {
+    model: env.EMBEDDING_MODEL,
+    input: question,
+    dimensions: Number(env.EMBEDDING_DIMENSIONS),
   });
 
   if (!res.ok) {
@@ -51,21 +68,14 @@ async function callChatModel(
   env: Env,
   userPrompt: string
 ): Promise<{ answer: string; costUsd: number }> {
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.OPENAI_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: env.CHAT_MODEL,
-      max_tokens: 500,
-      temperature: 0.3,
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: userPrompt },
-      ],
-    }),
+  const res = await callOpenAi(env, '/v1/chat/completions', {
+    model: env.CHAT_MODEL,
+    max_tokens: 500,
+    temperature: 0.3,
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: userPrompt },
+    ],
   });
 
   if (!res.ok) {
@@ -116,14 +126,25 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
   // body.turnstileToken is accepted but not verified in v1 — reserved for
   // when abuse actually shows up (see design doc).
 
-  // 4. RAG: embed the question, retrieve relevant post excerpts.
+  // 4. Code-level abuse guard — jailbreak/OOC-injection/prompt-extraction/
+  // secret-fishing/obfuscation. Runs before any paid API call; a match short
+  // -circuits straight to the same refusal a legitimate off-topic question
+  // would get, with zero LLM spend.
+  const guard = checkAbusePatterns(question);
+  if (guard.blocked) {
+    await recordBlockedAttempt(env);
+    const responseBody: ChatResponseBody = { answer: REFUSAL_MESSAGE, sources: [] };
+    return jsonResponse(responseBody, 200, env);
+  }
+
+  // 5. RAG: embed the question, retrieve relevant post excerpts.
   let totalCostUsd = 0;
   const { vector, costUsd: embedCost } = await embedQuestion(env, question);
   totalCostUsd += embedCost;
 
   const chunks = await searchRelevantChunks(env, vector, 3);
 
-  // 5. Generate the answer grounded in retrieved excerpts.
+  // 6. Generate the answer grounded in retrieved excerpts.
   const userPrompt = buildUserPrompt(
     question,
     chunks.map((c) => ({ title: c.title, chunk: c.chunk }))
@@ -131,7 +152,7 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
   const { answer, costUsd: chatCost } = await callChatModel(env, userPrompt);
   totalCostUsd += chatCost;
 
-  // 6. Record real spend (not an estimate) for the budget cap.
+  // 7. Record real spend (not an estimate) for the budget cap.
   await recordSpend(env, totalCostUsd);
 
   // De-dupe sources — multiple retrieved chunks can come from the same post.

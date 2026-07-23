@@ -35,6 +35,15 @@ if (!OPENAI_API_KEY) {
 const POST_PATH_RE = /\/\d{4}\/\d{2}\/\d{2}\/[^/]+\.html$/;
 
 function exportGhPages() {
+  // IMPORTANT: `git fetch origin master` (or any single-ref fetch) does NOT
+  // update the local origin/gh-pages ref — it can silently go stale for the
+  // lifetime of a session/clone while gh-pages keeps deploying upstream,
+  // causing this script to embed an old snapshot of the site (missing
+  // recently-published posts) with no error or warning. Always fetch the
+  // branch explicitly right before reading it.
+  console.log('Fetching latest gh-pages...');
+  execSync('git fetch origin gh-pages', { cwd: REPO_ROOT, stdio: 'inherit' });
+
   const tmpDir = mkdtempSync(path.join(os.tmpdir(), 'ghpages-'));
   execSync(`git archive origin/gh-pages | tar -x -C "${tmpDir}"`, { cwd: REPO_ROOT, stdio: 'inherit' });
   return tmpDir;
@@ -89,7 +98,9 @@ function chunkText(text, maxChars) {
   return chunks;
 }
 
-async function embedBatch(texts) {
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function embedBatch(texts, attempt = 1) {
   const res = await fetch('https://api.openai.com/v1/embeddings', {
     method: 'POST',
     headers: {
@@ -98,6 +109,17 @@ async function embedBatch(texts) {
     },
     body: JSON.stringify({ model: EMBEDDING_MODEL, input: texts, dimensions: EMBEDDING_DIMENSIONS }),
   });
+
+  if (res.status === 429 && attempt <= 5) {
+    // Tokens-per-minute limit — back off and retry rather than aborting the
+    // whole run. Exponential backoff since the API doesn't always return a
+    // reliable Retry-After for TPM (vs RPM) limits.
+    const delayMs = attempt * 2000;
+    console.warn(`  rate limited, retrying in ${delayMs}ms (attempt ${attempt}/5)...`);
+    await sleep(delayMs);
+    return embedBatch(texts, attempt + 1);
+  }
+
   if (!res.ok) {
     throw new Error(`embeddings API error: ${res.status} ${await res.text()}`);
   }
@@ -133,6 +155,7 @@ async function main() {
       const vectors = await embedBatch(batch.map((b) => b.chunk));
       batch.forEach((b, j) => results.push({ ...b, vector: vectors[j] }));
       console.log(`  embedded ${Math.min(i + EMBED_BATCH_SIZE, pending.length)}/${pending.length}`);
+      await sleep(500); // stay comfortably under the embeddings TPM limit
     }
 
     const output = {
