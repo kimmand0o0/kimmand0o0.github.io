@@ -24,13 +24,13 @@ tags: [Study, Datadog, RUM, Frontend]
 - "이 페이지가 느리다"는 유저 체감과 서버 응답시간이 다를 수 있음 — 이미지 로딩, 폰트 깜빡임, 번들 사이즈 때문에 체감 속도가 늦어질 수 있음
 - 특정 브라우저/기기에서만 나는 버그 — 서버는 "그 사람 화면에서 뭐가 보였는지"는 모름
 
-## 2. 설치 절차 (공식 문서 기준)
+## 2. 설치 절차 ([공식 문서](https://docs.datadoghq.com/real_user_monitoring/application_monitoring/browser/setup/client/) 기준)
 
 1. **SDK 설치** — `npm install --save @datadog/browser-rum` (React 앱은 이 방식이 권장. CDN 비동기 스크립트 방식도 있음)
 2. **`datadogRum.init()`으로 초기화** — 필수 파라미터는 `applicationId`, `clientToken`, `site`(조직의 데이터독 리전). `service`, `env`, `version`은 선택
-3. **자동 수집 시작** — 페이지 로딩 성능, 유저 클릭/인터랙션, 네트워크 요청, 애플리케이션 에러가 자동으로 수집됨
+3. **자동 수집 시작** — 페이지 로딩 성능, 유저 클릭/인터랙션, 네트워크 요청, 애플리케이션 에러가 자동으로 수집됨 ([수집 항목 상세](https://docs.datadoghq.com/real_user_monitoring/application_monitoring/browser/data_collected/))
 4. **샘플링 레이트 조절** — `sessionSampleRate`(세션 자체를 몇 %나 수집할지)와 `sessionReplaySampleRate`(그중 세션 리플레이는 몇 %나 녹화할지)를 따로 지정
-5. **서버 트레이스와 연결** — `allowedTracingUrls`에 "이 도메인으로 나가는 요청은 서버 트레이스랑 이어달라"고 화이트리스트를 등록. `propagatorTypes: ["tracecontext"]`를 지정하면 W3C 표준 `traceparent` 헤더로 trace_id가 전파됨
+5. **서버 트레이스와 연결** — `allowedTracingUrls`에 "이 도메인으로 나가는 요청은 서버 트레이스랑 이어달라"고 화이트리스트를 등록. `propagatorTypes: ["tracecontext"]`를 지정하면 W3C 표준 `traceparent` 헤더로 trace_id가 전파됨 ([Connect RUM and Traces](https://docs.datadoghq.com/tracing/other_telemetry/rum/))
 
 ```javascript
 import { datadogRum } from '@datadog/browser-rum';
@@ -93,9 +93,9 @@ sequenceDiagram
     Note over DD: 같은 trace_id로<br/>클릭→서버처리→렌더링 완료까지<br/>유저 체감 전체 시간 확인 가능
 ```
 
-## 4. 비용 관련 주의사항 (공식 문서 확인)
+## 4. 비용 관련 주의사항 ([공식 문서](https://docs.datadoghq.com/tracing/other_telemetry/rum/) 확인)
 
-`allowedTracingUrls`로 RUM-Trace 연결을 켜면 **APM 유료 데이터를 RUM에서 끌어쓰는 것**이라 APM 청구액에 영향을 준다고 공식 문서에 명시되어 있다. 도입을 검토할 때 이 연결 기능을 켤지 여부도 비용 계산에 넣어야 한다.
+`allowedTracingUrls`로 RUM-Trace 연결을 켜면 **APM 유료 데이터를 RUM에서 끌어쓰는 것**이라 APM 청구액에 영향을 준다고 [공식 문서](https://docs.datadoghq.com/tracing/other_telemetry/rum/)에 명시되어 있다. 도입을 검토할 때 이 연결 기능을 켤지 여부도 비용 계산에 넣어야 한다.
 
 ## 5. 정리
 
