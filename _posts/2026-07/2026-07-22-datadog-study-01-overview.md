@@ -7,7 +7,7 @@ categories: [Study, Datadog]
 tags: [Study, Datadog, Observability]
 ---
 
-옵저버빌리티(observability) 플랫폼인 데이터독을 공부하면서 정리한 내용이다. 데이터독 자체를 처음부터 다뤄본 적이 없어서, 이번 편은 5대 핵심 개념(로그/메트릭/트레이스/모니터/대시보드)이 각각 뭘 하는지, 왜 필요한지부터 짚는다.
+옵저버빌리티(observability) 플랫폼인 데이터독을 공부하면서 정리한 내용이다. 데이터독 자체를 처음부터 다뤄본 적이 없어서, 이번 편은 5대 핵심 개념(로그/메트릭/트레이스/모니터/대시보드)이 각각 뭘 하는지, 왜 필요한지부터 짚는다. ([공식문서](https://docs.datadoghq.com/) 대조 완료)
 
 ## TL;DR
 
@@ -28,11 +28,13 @@ tags: [Study, Datadog, Observability]
 
 ## 2. 5대 핵심 개념
 
-1. **로그(Logs)** — 시스템이 남기는 일지. "몇 시 몇 분에 에러 발생, 메시지는 이러함" 같은 텍스트 기록
+데이터독 공식 문서는 이걸 "5대 개념"이 아니라 **[3 Pillars of Observability](https://docs.datadoghq.com/)**(로그·메트릭·트레이스)로 프레이밍하고, 모니터·대시보드는 이 3개 축을 소비하는 기능으로 둔다. 개념 자체는 아래 5개로 정리하는 게 이해하긴 편해서 그대로 간다.
+
+1. **로그(Logs)** — 시스템이 남기는 일지. "몇 시 몇 분에 에러 발생, 메시지는 이러함" 같은 텍스트 기록 ([Log Management](https://docs.datadoghq.com/logs/))
 2. **메트릭(Metrics)** — 시간에 따라 변하는 숫자. CPU 사용률, 응답 시간, 초당 요청 수 같은 수치가 그래프로 쌓임
-3. **APM/트레이스(Traces)** — 요청 하나가 여러 서비스를 거치는 여정 지도. A→B→C 서비스를 거칠 때 각 구간에서 얼마나 걸렸는지 추적
-4. **모니터(Monitors)** — 특정 조건(예: 에러율 5% 초과)이 되면 자동으로 알림(Slack, 이메일 등) 발송
-5. **대시보드(Dashboards)** — 지표들을 원하는 대로 배치해서 한눈에 보는 상황판
+3. **APM/트레이스(Traces)** — 요청 하나가 여러 서비스를 거치는 여정 지도. A→B→C 서비스를 거칠 때 각 구간에서 얼마나 걸렸는지 추적 ([APM](https://docs.datadoghq.com/tracing/))
+4. **모니터(Monitors)** — 3 pillar를 "이상하면 알려줘"로 소비하는 기능. 특정 조건(예: 에러율 5% 초과)이 되면 자동으로 알림(Slack, 이메일 등) 발송
+5. **대시보드(Dashboards)** — 3 pillar를 모아 보는 상황판. 지표들을 원하는 대로 배치해서 한눈에 보는 화면 ([Dashboards](https://docs.datadoghq.com/dashboards/))
 
 ```mermaid
 flowchart LR
