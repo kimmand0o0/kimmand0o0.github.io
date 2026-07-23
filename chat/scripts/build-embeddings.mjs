@@ -139,6 +139,32 @@ async function embedBatch(texts, attempt = 1) {
 // so extractPost() works unchanged; these just don't match POST_PATH_RE.
 const EXTRA_PAGES = ['about.html'];
 
+// Private, non-public content — a personality/character note that should
+// inform the bot's answers but is NEVER published as a page or committed to
+// this public repo. Lives only in the author's local Obsidian vault; this
+// script reads it straight off disk and embeds it with url: null, so
+// index.ts never cites it as a source link — the content only ever surfaces
+// inside the model's answer text, never as a clickable "here's the page".
+// Override the path via PRIVATE_NOTES_PATH if the vault moves.
+const DEFAULT_PRIVATE_NOTES_PATH = path.join(
+  os.homedir(),
+  'Documents/Obsidian Vault/기타/betty-성향노트-만두봇용.md'
+);
+const PRIVATE_NOTES_PATH = process.env.PRIVATE_NOTES_PATH || DEFAULT_PRIVATE_NOTES_PATH;
+
+function loadPrivateNoteChunks() {
+  if (!existsSync(PRIVATE_NOTES_PATH)) {
+    console.warn(`  private note not found, skipping: ${PRIVATE_NOTES_PATH}`);
+    return [];
+  }
+  const raw = readFileSync(PRIVATE_NOTES_PATH, 'utf-8');
+  // Drop the review-only sections (redaction memo, next-action checklist) —
+  // those are process notes for the human reviewer, not knowledge for the bot.
+  const contentOnly = raw.split(/\n---\n\n## 리댁션 메모/)[0];
+  const chunks = chunkText(contentOnly.replace(/\s+/g, ' ').trim(), MAX_CHUNK_CHARS);
+  return chunks.map((chunk, i) => ({ id: `private-profile#${i}`, title: '혜란 개인 정보 (비공개)', url: null, chunk }));
+}
+
 async function main() {
   console.log('Exporting gh-pages branch...');
   const tmpDir = exportGhPages();
@@ -163,6 +189,12 @@ async function main() {
       chunks.forEach((chunk, i) => {
         pending.push({ id: `${url}#${i}`, title, url, chunk });
       });
+    }
+
+    const privateChunks = loadPrivateNoteChunks();
+    if (privateChunks.length) {
+      console.log(`  + ${privateChunks.length} private profile chunks (url: null — never shown as a source link)`);
+      pending.push(...privateChunks);
     }
     console.log(`Chunked into ${pending.length} pieces. Embedding in batches of ${EMBED_BATCH_SIZE}...`);
 

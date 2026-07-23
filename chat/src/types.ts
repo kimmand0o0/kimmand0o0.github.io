@@ -19,7 +19,8 @@ export interface RateLimit {
 export interface PostChunk {
   id: string;
   title: string;
-  url: string;
+  /** null for private (non-public-page) content — no public URL exists to cite. */
+  url: string | null;
   chunk: string;
   vector: number[];
 }

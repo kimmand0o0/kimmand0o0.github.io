@@ -30,15 +30,22 @@ function cosineSimilarity(a: number[], b: number[]): number {
   return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
-// Abstract questions about the blog owner ("똑똑한 사람인가?", "믿을 만해?") share
-// almost no vocabulary with the About page's concrete text (skills, work
-// history, metrics) — cosine similarity between the question and About
-// chunks ends up too low to place in the top-k, so pure semantic search
-// alone loses these. There are only 4 About chunks total, so the cheap fix
-// is to always include them alongside the top-k general search results
-// (small, fixed token cost) rather than trying to keyword-detect every
-// possible way of asking "what kind of person is Haeran".
+// Abstract questions about the blog owner ("똑똑한 사람인가?", "취미가 뭐야?") share
+// almost no vocabulary with the About page / private profile's concrete text
+// (skills, work history, hobbies as flat facts) — cosine similarity between
+// the question and these chunks ends up too low to place in the top-k, so
+// pure semantic search alone loses these. There are only a handful of these
+// "identity" chunks total, so the cheap fix is to always include them
+// alongside the top-k general search results (small, fixed token cost)
+// rather than trying to keyword-detect every possible way of asking "what
+// kind of person is Haeran". Covers both the public About page and the
+// private (url === null) personality notes — see openai-proxy-do.ts sibling
+// comment for why private chunks have no url.
 const ABOUT_URL_SUFFIX = '/about.html';
+
+function isIdentityChunk(c: PostChunk): boolean {
+  return c.url === null || c.url.endsWith(ABOUT_URL_SUFFIX);
+}
 
 export async function searchRelevantChunks(
   env: Env,
@@ -54,7 +61,7 @@ export async function searchRelevantChunks(
   const seenIds = new Set(results.map((c) => c.id));
 
   for (const c of chunks) {
-    if (c.url.endsWith(ABOUT_URL_SUFFIX) && !seenIds.has(c.id)) {
+    if (isIdentityChunk(c) && !seenIds.has(c.id)) {
       results.push(c);
       seenIds.add(c.id);
     }

@@ -156,8 +156,12 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
   await recordSpend(env, totalCostUsd);
 
   // De-dupe sources — multiple retrieved chunks can come from the same post.
+  // Chunks with url === null are private (no public page to cite) — the
+  // model still sees their content in the prompt, but they never appear in
+  // the citation list, so a visitor can't tell there's a hidden source.
   const seen = new Set<string>();
   const sources = chunks
+    .filter((c): c is typeof c & { url: string } => c.url !== null)
     .filter((c) => (seen.has(c.url) ? false : (seen.add(c.url), true)))
     .map((c) => ({ title: c.title, url: c.url }));
 
