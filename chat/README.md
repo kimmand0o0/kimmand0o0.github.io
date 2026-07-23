@@ -80,19 +80,35 @@ curl -X POST http://localhost:8787/api/chat \
                                               5) 코사인 유사도 검색 (KV: embeddings:v1, in-memory 캐시)
                                               6) GPT-4o-mini 호출 (system prompt + 발췌 + 질문, DO 경유)
                                               7) 실사용 토큰 기준 지출 기록
+                                              8) D1에 대화 로그 기록 (성공/차단 모두)
                                             → { answer, sources[] }
 
   Worker ──(모든 OpenAI 호출)──▶ OpenAiProxyDO (Durable Object, 북미서부 wnam 고정)
                                               → OpenAI API 콜은 항상 이 고정 리전에서 나감
 ```
 
+## 대화 로그 (D1)
+
+방문자 질문/답변은 전량 `CHAT_LOGS_DB` (D1: `kimmand0o0-blog-chat-logs`) `chat_logs` 테이블에 쌓인다.
+가드에 걸려 거절된 시도도 `blocked=1`로 같이 남는다 (`answer`/`sources`는 비어있고 `guard_category`만 채워짐).
+IP는 원본 그대로 저장 — 방문자 개인정보라 DB 접근 권한·백업 관리에 주의.
+
+```bash
+# 최근 대화 확인
+npx wrangler d1 execute kimmand0o0-blog-chat-logs --remote \
+  --command "SELECT created_at, question, blocked, guard_category FROM chat_logs ORDER BY id DESC LIMIT 20"
+
+# 로컬 dev 시엔 --remote 빼면 로컬 sqlite에 씀 (원격과 별개 데이터)
+```
+
 ## 파일 구조
 
 ```
 chat/
-  wrangler.toml               # Worker 설정 (KV, rate limit, Durable Object, env vars)
+  wrangler.toml               # Worker 설정 (KV, D1, rate limit, Durable Object, env vars)
+  migrations/0001_create_chat_logs.sql  # D1 스키마 (chat_logs 테이블)
   src/
-    index.ts                  # 요청 핸들러 (CORS, rate limit, budget, guard, RAG, LLM 호출)
+    index.ts                  # 요청 핸들러 (CORS, rate limit, budget, guard, RAG, LLM 호출, D1 로깅)
     types.ts
     prompt.ts                 # 시스템 프롬프트
     guard.ts                  # 코드 레벨 어뷰징 패턴 필터
@@ -108,4 +124,4 @@ chat/
 
 - Turnstile 캡차 — `ChatRequestBody.turnstileToken` 필드만 예약, 검증 로직 없음
 - 스트리밍 응답 — 단순 JSON 응답만
-- 멀티턴 대화 기억 — 단발 Q&A만
+- 멀티턴 대화 기억 — 단발 Q&A만 (D1에 로그는 쌓이지만 다음 질문에 컨텍스트로 재사용되진 않음)

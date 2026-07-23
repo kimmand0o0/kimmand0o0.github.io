@@ -91,9 +91,56 @@ async function callChatModel(
   return { answer: data.choices[0].message.content.trim(), costUsd };
 }
 
+// Fire-and-forget insert — a logging failure must never break the chat
+// response for a visitor, so this only ever console.errors, never throws.
+async function logChatTurn(
+  env: Env,
+  fields: {
+    question: string;
+    answer: string | null;
+    sources: Array<{ title: string; url: string }> | null;
+    blocked: boolean;
+    guardCategory: string | null;
+    ip: string;
+    userAgent: string | null;
+    referrer: string | null;
+    costUsd: number | null;
+    latencyMs: number;
+  }
+): Promise<void> {
+  try {
+    await env.CHAT_LOGS_DB.prepare(
+      `INSERT INTO chat_logs
+        (question, answer, sources, blocked, guard_category, ip, user_agent, referrer, chat_model, embedding_model, cost_usd, latency_ms)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+      .bind(
+        fields.question,
+        fields.answer,
+        fields.sources ? JSON.stringify(fields.sources) : null,
+        fields.blocked ? 1 : 0,
+        fields.guardCategory,
+        fields.ip,
+        fields.userAgent,
+        fields.referrer,
+        env.CHAT_MODEL,
+        env.EMBEDDING_MODEL,
+        fields.costUsd,
+        fields.latencyMs
+      )
+      .run();
+  } catch (err) {
+    console.error('chat_logs insert failed:', err);
+  }
+}
+
 async function handleChat(request: Request, env: Env): Promise<Response> {
+  const startedAt = Date.now();
+
   // 1. Rate limit — keyed by client IP, checked at the edge before any paid work happens.
   const clientIp = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+  const userAgent = request.headers.get('User-Agent');
+  const referrer = request.headers.get('Referer');
   const rateLimitResult = await env.CHAT_RATE_LIMITER.limit({ key: clientIp });
   if (!rateLimitResult.success) {
     return jsonResponse({ error: 'rate_limited' }, 429, env);
@@ -133,6 +180,18 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
   const guard = checkAbusePatterns(question);
   if (guard.blocked) {
     await recordBlockedAttempt(env);
+    await logChatTurn(env, {
+      question,
+      answer: null,
+      sources: null,
+      blocked: true,
+      guardCategory: guard.category ?? null,
+      ip: clientIp,
+      userAgent,
+      referrer,
+      costUsd: null,
+      latencyMs: Date.now() - startedAt,
+    });
     const responseBody: ChatResponseBody = { answer: REFUSAL_MESSAGE, sources: [] };
     return jsonResponse(responseBody, 200, env);
   }
@@ -164,6 +223,19 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
     .filter((c): c is typeof c & { url: string } => c.url !== null)
     .filter((c) => (seen.has(c.url) ? false : (seen.add(c.url), true)))
     .map((c) => ({ title: c.title, url: c.url }));
+
+  await logChatTurn(env, {
+    question,
+    answer,
+    sources,
+    blocked: false,
+    guardCategory: null,
+    ip: clientIp,
+    userAgent,
+    referrer,
+    costUsd: totalCostUsd,
+    latencyMs: Date.now() - startedAt,
+  });
 
   const responseBody: ChatResponseBody = { answer, sources };
   return jsonResponse(responseBody, 200, env);
