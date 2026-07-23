@@ -7,7 +7,7 @@ categories: [Study, LLM]
 tags: [LLM, Prompt Engineering, NLP, Chain-of-Thought]
 ---
 
-시리즈 두 번째 편. 지난 편에서 다룬 [Chain-of-Thought Prompting]({% post_url 2026-07-22-llm-prompting-paper-01-chain-of-thought %})이 만든 "하나의 추론 경로"를 여러 개로 늘리고 다수결을 취하는 논문, **Self-Consistency Improves Chain of Thought Reasoning** (Wang et al., 2022)이다.
+시리즈 두 번째 편. 지난 편에서 다룬 [Chain-of-Thought Prompting]({% post_url 2026-07-22-llm-prompting-paper-01-chain-of-thought %})이 만든 "하나의 추론 경로"를 여러 개로 늘리고 다수결을 취하는 논문, [**Self-Consistency Improves Chain of Thought Reasoning**](https://arxiv.org/abs/2203.11171) (Wang et al., 2022)이다.
 
 ## 1. 기본적인 이해부터
 

@@ -7,7 +7,7 @@ categories: [Study, LLM]
 tags: [LLM, Prompt Engineering, NLP, In-Context Learning]
 ---
 
-시리즈 네 번째 편. [프롬프팅 기법 트랙]({% post_url 2026-07-22-llm-prompting-paper-03-tree-of-thoughts %})에서 다룬 CoT/Self-Consistency/ToT가 전부 전제로 깔고 가는 개념, In-Context Learning(ICL)의 뿌리인 **Language Models are Few-Shot Learners** (Brown et al., 2020, NeurIPS) — 흔히 "GPT-3 논문"이라 불리는 그 논문이다.
+시리즈 네 번째 편. [프롬프팅 기법 트랙]({% post_url 2026-07-22-llm-prompting-paper-03-tree-of-thoughts %})에서 다룬 CoT/Self-Consistency/ToT가 전부 전제로 깔고 가는 개념, In-Context Learning(ICL)의 뿌리인 [**Language Models are Few-Shot Learners**](https://arxiv.org/abs/2005.14165) (Brown et al., 2020, NeurIPS) — 흔히 "GPT-3 논문"이라 불리는 그 논문이다.
 
 ## 1. 기본적인 이해부터
 

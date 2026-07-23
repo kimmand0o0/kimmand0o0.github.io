@@ -7,7 +7,7 @@ categories: [Study, LLM]
 tags: [LLM, Prompt Engineering, NLP, Agent, Tool Use]
 ---
 
-시리즈 여섯 번째 편이자 "에이전트/툴 사용" 트랙의 첫 편. 지금까지 다룬 CoT/Self-Consistency/Tree of Thoughts가 전부 모델 "내부"에서만 추론했다면, 이번에 다룰 **ReAct: Synergizing Reasoning and Acting in Language Models** (Yao et al., 2022, ICLR 2023)는 처음으로 외부 세계(검색, 툴)와 상호작용하며 추론하는 구조다.
+시리즈 여섯 번째 편이자 "에이전트/툴 사용" 트랙의 첫 편. 지금까지 다룬 CoT/Self-Consistency/Tree of Thoughts가 전부 모델 "내부"에서만 추론했다면, 이번에 다룰 [**ReAct: Synergizing Reasoning and Acting in Language Models**](https://arxiv.org/abs/2210.03629) (Yao et al., 2022, ICLR 2023)는 처음으로 외부 세계(검색, 툴)와 상호작용하며 추론하는 구조다.
 
 ## 1. 기본적인 이해부터
 

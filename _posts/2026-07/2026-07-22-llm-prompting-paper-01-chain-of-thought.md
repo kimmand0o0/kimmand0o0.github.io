@@ -7,7 +7,7 @@ categories: [Study, LLM]
 tags: [LLM, Prompt Engineering, NLP, Chain-of-Thought]
 ---
 
-LLM/프롬프팅 관련 논문을 한 편씩 깊게 읽어보는 시리즈를 시작한다. 첫 편은 프롬프트 엔지니어링에서 가장 자주 언급되는 개념인 **Chain-of-Thought(CoT) Prompting** — Wei et al., 2022, NeurIPS — 이다.
+LLM/프롬프팅 관련 논문을 한 편씩 깊게 읽어보는 시리즈를 시작한다. 첫 편은 프롬프트 엔지니어링에서 가장 자주 언급되는 개념인 [**Chain-of-Thought(CoT) Prompting**](https://arxiv.org/abs/2201.11903) — Wei et al., 2022, NeurIPS — 이다.
 
 ## 1. 기본적인 이해부터
 

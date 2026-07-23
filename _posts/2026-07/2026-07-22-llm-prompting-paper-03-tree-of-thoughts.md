@@ -7,7 +7,7 @@ categories: [Study, LLM]
 tags: [LLM, Prompt Engineering, NLP, Chain-of-Thought]
 ---
 
-시리즈 세 번째 편이자 "프롬프팅 기법" 트랙의 마지막 편. [Self-Consistency]({% post_url 2026-07-22-llm-prompting-paper-02-self-consistency %})의 "여러 경로 다수결"을 "탐색+백트래킹이 가능한 트리"로 확장한 **Tree of Thoughts: Deliberate Problem Solving with Large Language Models** (Yao et al., 2023, NeurIPS)이다.
+시리즈 세 번째 편이자 "프롬프팅 기법" 트랙의 마지막 편. [Self-Consistency]({% post_url 2026-07-22-llm-prompting-paper-02-self-consistency %})의 "여러 경로 다수결"을 "탐색+백트래킹이 가능한 트리"로 확장한 [**Tree of Thoughts: Deliberate Problem Solving with Large Language Models**](https://arxiv.org/abs/2305.10601) (Yao et al., 2023, NeurIPS)이다.
 
 ## 1. 기본적인 이해부터
 

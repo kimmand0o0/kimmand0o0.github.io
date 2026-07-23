@@ -7,7 +7,7 @@ categories: [Study, LLM]
 tags: [LLM, Prompt Engineering, NLP, In-Context Learning]
 ---
 
-시리즈 다섯 번째 편이자 "In-Context Learning 원리" 트랙의 마지막 편. [GPT-3 논문]({% post_url 2026-07-22-llm-prompting-paper-04-gpt3-few-shot %})이 보여준 In-Context Learning이 정말 "예시에서 배우는" 건지 파고든 **Rethinking the Role of Demonstrations: What Makes In-Context Learning Work?** (Min et al., 2022, EMNLP)이다.
+시리즈 다섯 번째 편이자 "In-Context Learning 원리" 트랙의 마지막 편. [GPT-3 논문]({% post_url 2026-07-22-llm-prompting-paper-04-gpt3-few-shot %})이 보여준 In-Context Learning이 정말 "예시에서 배우는" 건지 파고든 [**Rethinking the Role of Demonstrations: What Makes In-Context Learning Work?**](https://arxiv.org/abs/2202.12837) (Min et al., 2022, EMNLP)이다.
 
 ## 1. 기본적인 이해부터
 
