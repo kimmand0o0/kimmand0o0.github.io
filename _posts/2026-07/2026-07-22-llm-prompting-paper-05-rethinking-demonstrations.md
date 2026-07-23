@@ -89,21 +89,26 @@ flowchart TD
 ```
 
 ```mermaid
-quadrantChart
-    title 데모의 각 요소가 ICL 성능에 미치는 실제 영향
-    x-axis 영향 적음 --> 영향 큼
-    y-axis 실험으로 낮게 확인됨 --> 실험으로 높게 확인됨
-    quadrant-1 핵심 요인 (진짜 중요)
-    quadrant-2 예상보다 덜 중요
-    quadrant-3 무관에 가까움
-    quadrant-4 과대평가된 통념
-    "정답 레이블의 정확성": [0.25, 0.3]
-    "레이블 공간(가능한 답 종류)": [0.85, 0.85]
-    "입력 텍스트 분포 유사성": [0.8, 0.8]
-    "input-output 포맷 일관성": [0.75, 0.75]
+flowchart TB
+    subgraph Real["실험으로 확인된 핵심 요인 (영향 큼)"]
+        direction TB
+        R1["레이블 공간<br/>(가능한 답 종류)"]
+        R2["입력 텍스트<br/>분포 유사성"]
+        R3["input-output<br/>포맷 일관성"]
+    end
+
+    subgraph Myth["과대평가된 통념 (실제 영향 적음)"]
+        direction TB
+        M1["정답 레이블의<br/>정확성"]
+    end
+
+    Real ~~~ Myth
+
+    style Real fill:#1e3a24,stroke:#27ae60,color:#fff
+    style Myth fill:#4a1e1e,stroke:#c0392b,color:#fff
 ```
 
-위쪽 flowchart는 세 가지 ablation 실험 결과를, 아래쪽 quadrant는 통념(레이블 정확성이 제일 중요할 것)과 실제 실험 결과(레이블 공간·입력 분포·포맷이 더 중요)가 정반대라는 걸 한눈에 보여준다.
+위쪽 flowchart는 세 가지 ablation 실험 결과를, 아래쪽 flowchart는 통념(레이블 정확성이 제일 중요할 것)과 실제 실험 결과(레이블 공간·입력 분포·포맷이 더 중요)가 정반대라는 걸 한눈에 보여준다.
 
 ## 6. 결과/장점
 
