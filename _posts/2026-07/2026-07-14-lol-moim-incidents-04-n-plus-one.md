@@ -2,7 +2,7 @@
 layout: post
 title: '[ 롤모임 운영일지 ] - 04. 동시접속 100명도 안 되는 서비스에서 "렉"이 걸린 이유'
 author: haeran
-date: 2026-07-21 19:45:00 +0900
+date: 2026-07-14 20:00:00 +0900
 categories: [Journal, Development Diary]
 tags: [운영일지, 성능최적화, N+1, PostgreSQL, Prisma]
 ---

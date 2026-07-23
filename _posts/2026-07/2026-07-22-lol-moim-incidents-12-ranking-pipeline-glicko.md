@@ -2,7 +2,7 @@
 layout: post
 title: '[ 롤모임 운영일지 ] - 12. 랭킹 공식을 하드코딩에서 조립식으로 — Glicko-2까지'
 author: haeran
-date: 2026-07-18 21:30:00 +0900
+date: 2026-07-22 20:00:00 +0900
 categories: [Journal, Development Diary]
 tags: [운영일지, 랭킹, 아키텍처, Glicko-2]
 ---

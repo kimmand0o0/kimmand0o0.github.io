@@ -2,7 +2,7 @@
 layout: post
 title: '[ 롤모임 운영일지 ] - 06. 프로덕트 대시보드 스냅샷 — 지금 이 순간의 숫자들'
 author: haeran
-date: 2026-07-22 21:00:00 +0900
+date: 2026-07-16 20:00:00 +0900
 categories: [Journal, Development Diary]
 tags: [운영일지, 프로덕트분석, DAU, 리텐션, 회고]
 ---

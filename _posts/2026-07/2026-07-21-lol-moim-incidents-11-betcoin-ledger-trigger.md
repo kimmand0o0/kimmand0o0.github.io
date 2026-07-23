@@ -2,7 +2,7 @@
 layout: post
 title: '[ 롤모임 운영일지 ] - 11. 로그를 코드가 아니라 DB에게 맡기기로 한 이유'
 author: haeran
-date: 2026-07-18 10:00:00 +0900
+date: 2026-07-21 20:00:00 +0900
 categories: [Journal, Development Diary]
 tags: [운영일지, PostgreSQL, 아키텍처, BetCoin]
 ---
@@ -65,7 +65,7 @@ CREATE TRIGGER betcoin_ledger_trg
 // delta>0 발행, delta<0 소비. (사유는 트리거가 알 수 없어 미기록 — 총량 추적용)
 ```
 
-세션 변수나 `pg_trigger_depth()` 같은 걸로 호출 맥락을 트리거에 흘려보내는 방법도 있긴 하지만, 그렇게까지 복잡하게 만들지 않기로 했다. 이 원장의 목적을 "이 유저가 왜 이렇게 됐는지 감사(audit)하는 것"이 아니라 "포인트가 전체적으로 얼마나 발행되고 소비되는지 총량을 추적하는 것"으로 명확히 좁혔기 때문이다. 실제로 이 `delta` 합계는 [06편]({% post_url 2026-07/2026-07-22-lol-moim-incidents-06-dashboard-snapshot %})에서 다룬 주간 포인트 발행/소비 그래프의 데이터 소스가 됐다.
+세션 변수나 `pg_trigger_depth()` 같은 걸로 호출 맥락을 트리거에 흘려보내는 방법도 있긴 하지만, 그렇게까지 복잡하게 만들지 않기로 했다. 이 원장의 목적을 "이 유저가 왜 이렇게 됐는지 감사(audit)하는 것"이 아니라 "포인트가 전체적으로 얼마나 발행되고 소비되는지 총량을 추적하는 것"으로 명확히 좁혔기 때문이다. 실제로 이 `delta` 합계는 [06편]({% post_url 2026-07/2026-07-16-lol-moim-incidents-06-dashboard-snapshot %})에서 다룬 주간 포인트 발행/소비 그래프의 데이터 소스가 됐다.
 
 <br/>
 

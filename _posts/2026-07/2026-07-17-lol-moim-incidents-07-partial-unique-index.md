@@ -2,7 +2,7 @@
 layout: post
 title: '[ 롤모임 운영일지 ] - 07. 3분 만에 되돌린 인덱스 — partial unique의 함정'
 author: haeran
-date: 2026-07-14 09:00:00 +0900
+date: 2026-07-17 20:00:00 +0900
 categories: [Journal, Development Diary]
 tags: [운영일지, PostgreSQL, Prisma, 아키텍처]
 ---

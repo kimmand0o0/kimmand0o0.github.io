@@ -2,12 +2,12 @@
 layout: post
 title: '[ 롤모임 운영일지 ] - 10. 격리 설계가 우려했던 바로 그 사고 — 크로스테넌트 누출 실전편'
 author: haeran
-date: 2026-07-16 21:00:00 +0900
+date: 2026-07-20 20:00:00 +0900
 categories: [Journal, Development Diary]
 tags: [운영일지, 멀티테넌시, 보안, PostgreSQL]
 ---
 
-[02편]({% post_url 2026-07/2026-07-17-lol-moim-incidents-02-multitenancy %})에서 "설계 문서는 Postgres RLS를 원했지만 실제로는 Prisma Client Extension으로 테넌트 격리를 구현했고, 이후 크로스그룹 누출이 몇 차례 났다"고 짧게 언급했었다. 이번 편은 그 사고의 실제 내용이다. 같은 날 아침 20분 사이에 연달아 발견되고 고쳐진 세 커밋 이야기다.
+[02편]({% post_url 2026-07/2026-07-12-lol-moim-incidents-02-multitenancy %})에서 "설계 문서는 Postgres RLS를 원했지만 실제로는 Prisma Client Extension으로 테넌트 격리를 구현했고, 이후 크로스그룹 누출이 몇 차례 났다"고 짧게 언급했었다. 이번 편은 그 사고의 실제 내용이다. 같은 날 아침 20분 사이에 연달아 발견되고 고쳐진 세 커밋 이야기다.
 
 ## Tier 1 — raw SQL은 자동 격리를 안 받는다
 

@@ -2,7 +2,7 @@
 layout: post
 title: '[ 롤모임 운영일지 ] - 09. 딱 이틀 버틴 워크어라운드 — Riot API 키 전환기'
 author: haeran
-date: 2026-07-16 09:30:00 +0900
+date: 2026-07-19 20:00:00 +0900
 categories: [Journal, Development Diary]
 tags: [운영일지, 성능최적화, Riot API, 회고]
 ---

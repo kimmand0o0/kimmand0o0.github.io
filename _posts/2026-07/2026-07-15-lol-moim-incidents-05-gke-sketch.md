@@ -2,12 +2,12 @@
 layout: post
 title: '[ 롤모임 운영일지 ] - 05. Cloud Run 서비스를 GKE로 옮긴다면 — 매니페스트 스케치'
 author: haeran
-date: 2026-07-22 08:00:00 +0900
+date: 2026-07-15 20:00:00 +0900
 categories: [Journal, Development Diary]
 tags: [운영일지, Kubernetes, GKE, 인프라, 학습]
 ---
 
-> **연습/학습 목적 기록.** 실제 클러스터에 적용하지 않았고, 프로덕션 코드도 건드리지 않았다. 지금 서비스는 Cloud Run(API) + GCE VM(WS, pm2) + Supabase(Postgres+Auth) 조합으로 잘 돌아가고 있고, [지난 성능 조사]({% post_url 2026-07/2026-07-21-lol-moim-incidents-04-n-plus-one %})에서 확인했듯 지금 규모(DAU 50~70명)의 병목은 인프라가 아니라 애플리케이션 레벨 N+1 쿼리였다. 이 글은 "만약 k8s로 관리한다면"이라는 학습용 사고 실험이다.
+> **연습/학습 목적 기록.** 실제 클러스터에 적용하지 않았고, 프로덕션 코드도 건드리지 않았다. 지금 서비스는 Cloud Run(API) + GCE VM(WS, pm2) + Supabase(Postgres+Auth) 조합으로 잘 돌아가고 있고, [지난 성능 조사]({% post_url 2026-07/2026-07-14-lol-moim-incidents-04-n-plus-one %})에서 확인했듯 지금 규모(DAU 50~70명)의 병목은 인프라가 아니라 애플리케이션 레벨 N+1 쿼리였다. 이 글은 "만약 k8s로 관리한다면"이라는 학습용 사고 실험이다.
 
 <br/>
 

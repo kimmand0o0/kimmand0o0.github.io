@@ -2,7 +2,7 @@
 layout: post
 title: '[ 롤모임 운영일지 ] - 08. 같은 버그를 두 번 고친 이야기 — 9티어 오분류'
 author: haeran
-date: 2026-07-14 20:30:00 +0900
+date: 2026-07-18 20:00:00 +0900
 categories: [Journal, Development Diary]
 tags: [운영일지, 버그, 랭킹, 동시성]
 ---
