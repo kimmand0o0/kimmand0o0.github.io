@@ -74,3 +74,7 @@ plugins:
   - jekyll-sitemap
   - jekyll-paginate
   - jekyll-spaceship
+
+# chat/ 는 별도 Cloudflare Worker 프로젝트(RAG 챗봇 백엔드) — Jekyll 빌드 대상 아님
+exclude:
+  - chat

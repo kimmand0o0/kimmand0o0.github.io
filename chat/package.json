@@ -1,0 +1,20 @@
+{
+  "name": "kimmand0o0-blog-chat",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "build-embeddings": "node scripts/build-embeddings.mjs",
+    "upload-embeddings": "wrangler kv key put --binding=APP_KV embeddings:v1 --path=data/embeddings.json --remote"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260701.0",
+    "typescript": "^5.6.0",
+    "wrangler": "^4.113.0"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0"
+  }
+}

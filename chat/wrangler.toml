@@ -1,0 +1,39 @@
+name = "kimmand0o0-blog-chat"
+main = "src/index.ts"
+compatibility_date = "2026-07-01"
+
+# KV namespace used for two purposes (different key prefixes):
+#   - "embeddings:v1"  -> precomputed post chunk embeddings (see scripts/build-embeddings.mjs)
+#   - "spend:YYYY-MM"  -> cumulative monthly LLM spend counter (see src/budget.ts)
+# Replace `id` after running: wrangler kv namespace create APP_KV
+kv_namespaces = [
+  { binding = "APP_KV", id = "REPLACE_WITH_KV_NAMESPACE_ID" }
+]
+
+# Native Workers rate limiting (GA). period must be 10 or 60 (seconds).
+# 10 requests / 60s per rate-limit key (we key by request IP — see src/index.ts).
+[[ratelimits]]
+name = "CHAT_RATE_LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 10
+  period = 60
+
+[vars]
+# Hard monthly spend cap in USD. Once exceeded, the Worker stops calling the
+# LLM and returns a friendly "temporarily limited" response until the month
+# rolls over (see src/budget.ts).
+MONTHLY_BUDGET_USD = "5"
+
+# Only this origin may call the chat endpoint (blog's own domain).
+ALLOWED_ORIGIN = "https://kimmand0o0.github.io"
+
+# Chat + embedding models. gpt-4o-mini chosen for cost (~7x cheaper than
+# Claude Haiku 4.5 per the design discussion). Swap here if you change providers.
+CHAT_MODEL = "gpt-4o-mini"
+EMBEDDING_MODEL = "text-embedding-3-small"
+EMBEDDING_DIMENSIONS = "512"
+
+# Secret — set with: wrangler secret put OPENAI_API_KEY
+# (not defined here; wrangler.toml is committed to git)

@@ -1,0 +1,155 @@
+#!/usr/bin/env node
+// Builds chat/data/embeddings.json from the *built* site (gh-pages branch),
+// not the raw markdown in _posts/. This guarantees the URLs and text we
+// embed exactly match what's actually live — Jekyll's permalink algorithm
+// (categories → lowercased path segments, Korean-safe percent-encoding) is
+// non-trivial to reimplement correctly, so we let Jekyll do it once and read
+// the result instead of guessing.
+//
+// Usage:
+//   OPENAI_API_KEY=sk-... node scripts/build-embeddings.mjs
+//   node --env-file=.env scripts/build-embeddings.mjs   (Node 20.6+)
+
+import { execSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { readdir } from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
+import * as cheerio from 'cheerio';
+
+const REPO_ROOT = path.resolve(import.meta.dirname, '..', '..');
+const OUTPUT_PATH = path.resolve(import.meta.dirname, '..', 'data', 'embeddings.json');
+const EMBEDDING_MODEL = 'text-embedding-3-small';
+const EMBEDDING_DIMENSIONS = 512;
+const MAX_CHUNK_CHARS = 1000;
+const EMBED_BATCH_SIZE = 20;
+
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+if (!OPENAI_API_KEY) {
+  console.error('OPENAI_API_KEY is not set. Export it or use `node --env-file=.env ...`.');
+  process.exit(1);
+}
+
+// Post pages live at .../YYYY/MM/DD/slug.html — this pattern excludes
+// non-post pages (about.html, tags.html, archives.html, index.html, etc.).
+const POST_PATH_RE = /\/\d{4}\/\d{2}\/\d{2}\/[^/]+\.html$/;
+
+function exportGhPages() {
+  const tmpDir = mkdtempSync(path.join(os.tmpdir(), 'ghpages-'));
+  execSync(`git archive origin/gh-pages | tar -x -C "${tmpDir}"`, { cwd: REPO_ROOT, stdio: 'inherit' });
+  return tmpDir;
+}
+
+async function findPostHtmlFiles(dir) {
+  const results = [];
+  async function walk(current) {
+    const entries = await readdir(current, { withFileTypes: true });
+    for (const entry of entries) {
+      const full = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        await walk(full);
+      } else if (entry.isFile() && entry.name.endsWith('.html') && POST_PATH_RE.test(full)) {
+        results.push(full);
+      }
+    }
+  }
+  await walk(dir);
+  return results;
+}
+
+function extractPost(filePath) {
+  const html = readFileSync(filePath, 'utf-8');
+  const $ = cheerio.load(html);
+
+  const canonicalUrl = $('link[rel="canonical"]').first().attr('href');
+  const title = $('meta[property="og:title"]').first().attr('content') ?? $('title').text().split('|')[0].trim();
+  const bodyText = $('.post-content').first().text().replace(/\s+/g, ' ').trim();
+
+  return { title, url: canonicalUrl, bodyText };
+}
+
+/** Greedy paragraph packing — avoids cutting mid-sentence where possible. */
+function chunkText(text, maxChars) {
+  const paragraphs = text
+    .split(/(?<=[.!?다요]\s)|\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  const chunks = [];
+  let current = '';
+  for (const p of paragraphs) {
+    if ((current + ' ' + p).length > maxChars && current) {
+      chunks.push(current.trim());
+      current = p;
+    } else {
+      current = current ? `${current} ${p}` : p;
+    }
+  }
+  if (current) chunks.push(current.trim());
+  return chunks;
+}
+
+async function embedBatch(texts) {
+  const res = await fetch('https://api.openai.com/v1/embeddings', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ model: EMBEDDING_MODEL, input: texts, dimensions: EMBEDDING_DIMENSIONS }),
+  });
+  if (!res.ok) {
+    throw new Error(`embeddings API error: ${res.status} ${await res.text()}`);
+  }
+  const data = await res.json();
+  return data.data.map((d) => d.embedding);
+}
+
+async function main() {
+  console.log('Exporting gh-pages branch...');
+  const tmpDir = exportGhPages();
+
+  try {
+    const htmlFiles = await findPostHtmlFiles(tmpDir);
+    console.log(`Found ${htmlFiles.length} post pages.`);
+
+    const pending = [];
+    for (const file of htmlFiles) {
+      const { title, url, bodyText } = extractPost(file);
+      if (!url || !bodyText) {
+        console.warn(`  skip (no url/body): ${file}`);
+        continue;
+      }
+      const chunks = chunkText(bodyText, MAX_CHUNK_CHARS);
+      chunks.forEach((chunk, i) => {
+        pending.push({ id: `${url}#${i}`, title, url, chunk });
+      });
+    }
+    console.log(`Chunked into ${pending.length} pieces. Embedding in batches of ${EMBED_BATCH_SIZE}...`);
+
+    const results = [];
+    for (let i = 0; i < pending.length; i += EMBED_BATCH_SIZE) {
+      const batch = pending.slice(i, i + EMBED_BATCH_SIZE);
+      const vectors = await embedBatch(batch.map((b) => b.chunk));
+      batch.forEach((b, j) => results.push({ ...b, vector: vectors[j] }));
+      console.log(`  embedded ${Math.min(i + EMBED_BATCH_SIZE, pending.length)}/${pending.length}`);
+    }
+
+    const output = {
+      model: EMBEDDING_MODEL,
+      dimensions: EMBEDDING_DIMENSIONS,
+      generatedAt: new Date().toISOString(),
+      chunks: results,
+    };
+    writeFileSync(OUTPUT_PATH, JSON.stringify(output));
+    console.log(`Wrote ${OUTPUT_PATH} (${results.length} chunks, ${(JSON.stringify(output).length / 1024).toFixed(0)} KB)`);
+    console.log('Next: npm run upload-embeddings');
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
