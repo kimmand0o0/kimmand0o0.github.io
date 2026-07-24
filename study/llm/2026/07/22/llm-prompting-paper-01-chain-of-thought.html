@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Native cross-document page transitions (progressive enhancement, Chromium only) -->
+  <meta name="view-transition" content="same-origin">
+
+  <!-- Google Translate Customization (if needed) -->
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+
+  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>LLM 프롬프팅 논문 스터디 - 01. Chain-of-Thought Prompting | Haeran’s blog</title>
+<meta name="generator" content="Jekyll v4.4.1">
+<meta property="og:title" content="LLM 프롬프팅 논문 스터디 - 01. Chain-of-Thought Prompting">
+<meta name="author" content="haeran">
+<meta property="og:locale" content="ko">
+<meta name="description" content="LLM/프롬프팅 관련 논문을 한 편씩 깊게 읽어보는 시리즈를 시작한다. 첫 편은 프롬프트 엔지니어링에서 가장 자주 언급되는 개념인 Chain-of-Thought(CoT) Prompting — Wei et al., 2022, NeurIPS — 이다.">
+<meta property="og:description" content="LLM/프롬프팅 관련 논문을 한 편씩 깊게 읽어보는 시리즈를 시작한다. 첫 편은 프롬프트 엔지니어링에서 가장 자주 언급되는 개념인 Chain-of-Thought(CoT) Prompting — Wei et al., 2022, NeurIPS — 이다.">
+<link rel="canonical" href="https://kimmand0o0.github.io/study/llm/2026/07/22/llm-prompting-paper-01-chain-of-thought.html">
+<meta property="og:url" content="https://kimmand0o0.github.io/study/llm/2026/07/22/llm-prompting-paper-01-chain-of-thought.html">
+<meta property="og:site_name" content="Haeran’s blog">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2026-07-22T01:00:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="LLM 프롬프팅 논문 스터디 - 01. Chain-of-Thought Prompting">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"haeran"},"dateModified":"2026-07-22T01:00:00+00:00","datePublished":"2026-07-22T01:00:00+00:00","description":"LLM/프롬프팅 관련 논문을 한 편씩 깊게 읽어보는 시리즈를 시작한다. 첫 편은 프롬프트 엔지니어링에서 가장 자주 언급되는 개념인 Chain-of-Thought(CoT) Prompting — Wei et al., 2022, NeurIPS — 이다.","headline":"LLM 프롬프팅 논문 스터디 - 01. Chain-of-Thought Prompting","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/study/llm/2026/07/22/llm-prompting-paper-01-chain-of-thought.html"},"url":"https://kimmand0o0.github.io/study/llm/2026/07/22/llm-prompting-paper-01-chain-of-thought.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- Favicon -->
+  <link rel="icon" href="/assets/images/favicon.ico">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kimmand0o0.github.io/study/llm/2026/07/22/llm-prompting-paper-01-chain-of-thought.html">
+
+  <!-- Social Media (Open Graph, Twitter Card) -->
+  <meta property="og:title" content="LLM 프롬프팅 논문 스터디 - 01. Chain-of-Thought Prompting">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+  <meta property="og:url" content="https://kimmand0o0.github.io/study/llm/2026/07/22/llm-prompting-paper-01-chain-of-thought.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="LLM 프롬프팅 논문 스터디 - 01. Chain-of-Thought Prompting">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+
+  <!-- Stylesheets and External Resources -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+
+  <!-- Editorial display typeface for headings only; body stays Noto Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- JavaScript -->
+  <script src="/assets/js/main.js"></script>
+
+  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
+<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
+<script>
+  function initGoogleAnalytics() {
+    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
+      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
+    var enableDNT = "false" == "true";
+
+    if (!enableDNT || !doNotTrack) {
+      var measurementId = 'G-ZNXE6HSKMS';
+
+      (function(src) {
+        var tag = document.createElement('script');
+        tag.src = src;
+        tag.async = true;
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', measurementId);
+    }
+  }
+  window.addEventListener("load", initGoogleAnalytics);
+</script>
+
+<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  // mermaid 블록은 highlight.js 대상에서 제외 — hljs가 addLangData에서 class를
+  // "language-mermaid" -> "hljs mermaid"로 덮어써버려서, mermaid.html의 렌더링 스크립트가
+  // 뒤늦게(load 시점) 찾으려는 .language-mermaid 셀렉터가 항상 빈 결과를 내는 원인이었음.
+  var els = document.querySelectorAll('pre code:not(.language-mermaid)')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
+<style>
+  .pswp .pswp__container .pswp__img {
+    background-color: white;
+  }
+</style>
+
+<script>
+  function initPhotoSwipe() {
+    let customOptions = {};
+
+    try {
+      const data = ``.replaceAll("=>", ":");
+      customOptions = JSON.parse(data);
+    } catch (e) {
+      console.info("Invalid custom photo previewer options! " + e.message);
+    }
+
+    // Define object and gallery options
+    const options = Object.assign(
+      {
+        gallery: "section.main",
+        children: "a.photo-swipe",
+        photo_scale: 2,
+        // dynamic import is not supported in UMD version
+        pswpModule: PhotoSwipe,
+      },
+      customOptions
+    );
+
+    const galleryEl = document.querySelector(options.gallery);
+    if (!galleryEl) {
+      return;
+    }
+
+    const imgEls = [];
+    const els = galleryEl.querySelectorAll("img:not(.emoji)");
+    els.forEach((el) => {
+      if (el.src.trim() == "") {
+        return;
+      }
+      if (!imgEls.includes(el)) {
+        imgEls.push(el);
+      }
+    });
+
+    if (imgEls.length === 0) {
+      return;
+    }
+
+    imgEls.forEach((imgEl) => {
+      imgEl.outerHTML = `
+      <a class="photo-swipe"
+        href="${imgEl.src}"
+        data-pswp-width="${
+          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
+        }"
+        data-pswp-height="${
+          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
+        }"
+        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
+        target="_blank">
+        ${imgEl.outerHTML}
+      </a>`;
+    });
+
+    // Initialize PhotoSwipe 5
+    var lightbox = new PhotoSwipeLightbox(options);
+
+    lightbox.init();
+  }
+
+  window.addEventListener("load", initPhotoSwipe);
+</script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+  function isDarkTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark';
+  }
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: isDarkTheme() ? 'dark' : 'default',
+  });
+
+  function renderMermaidBlocks() {
+    // kramdown/rouge render ```mermaid fences as <pre><code class="language-mermaid">...</code></pre>
+    // mermaid.js only auto-scans <div class="mermaid">, so swap the markup before running it.
+    const blocks = document.querySelectorAll('pre > code.language-mermaid');
+    if (blocks.length === 0) {
+      return;
+    }
+    blocks.forEach((code) => {
+      const graphDefinition = code.textContent;
+      const container = document.createElement('div');
+      container.className = 'mermaid';
+      container.textContent = graphDefinition;
+      code.parentElement.replaceWith(container);
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  }
+
+  window.addEventListener('load', renderMermaidBlocks);
+</script>
+<!-- Custom Head HTML (if any) -->
+
+<!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 assets/js/chat-widget.js -->
+<script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
+  Haeran's blog
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/search.html">SEARCH</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<div class="page-link" style="display: inline;">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<div class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="fr">
+          
+          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="zh-CN">
+          
+          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ja">
+          
+          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ko">
+          
+          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ru">
+          
+          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
+          
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ko',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+</div>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    // 항상 localStorage를 사용 — 'auto' 모드에서도 유저가 직접 누른 토글이
+    // 브라우저 세션이 끝났다고 사라지지 않고, 다음 예약된 자동 전환 시점까지 유지된다.
+    var storage = localStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var blocks = document.querySelectorAll('pre');
+
+  function addCopyButton(pre) {
+    if (pre.querySelector('.code-copy-btn')) return;
+    var code = pre.querySelector('code');
+    if (!code) return;
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'code-copy-btn';
+    btn.textContent = 'Copy';
+    pre.appendChild(btn);
+
+    btn.addEventListener('click', function () {
+      var text = code.textContent;
+
+      function done(ok) {
+        btn.textContent = ok ? 'Copied!' : 'Failed';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+        return;
+      }
+
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        done(document.execCommand('copy'));
+      } catch (e) {
+        done(false);
+      }
+      document.body.removeChild(ta);
+    });
+  }
+
+  for (var i = 0; i < blocks.length; i++) {
+    addCopyButton(blocks[i]);
+  }
+});
+</script>
+<main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <div class="framework">
+  <section class="main">
+
+     <div class="reading-progress" aria-hidden="true">
+  <div class="reading-progress-bar" id="reading-progress-bar"></div>
+</div>
+
+<script>
+(function () {
+  var bar = document.getElementById('reading-progress-bar');
+  var article = document.querySelector('.post-content');
+  if (!bar || !article) return;
+
+  function update() {
+    var rect = article.getBoundingClientRect();
+    var articleTop = rect.top + window.pageYOffset;
+    var total = article.offsetHeight - window.innerHeight;
+    var scrolled = window.pageYOffset - articleTop;
+    var pct = total > 0 ? Math.min(100, Math.max(0, (scrolled / total) * 100)) : 100;
+    bar.style.width = pct + '%';
+  }
+
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+</script>
+<div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">LLM 프롬프팅 논문 스터디 - 01. Chain-of-Thought Prompting</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <div class="post-meta">
+    <time class="dt-published" datetime="2026-07-22T01:00:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Jul 22, 2026
+    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 12 mins</span>
+  </div>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#LLM">#LLM</a><a class="post-tag" href="/tags.html#Prompt%20Engineering">#Prompt Engineering</a><a class="post-tag" href="/tags.html#NLP">#NLP</a><a class="post-tag" href="/tags.html#Chain-of-Thought">#Chain-of-Thought</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <p>LLM/프롬프팅 관련 논문을 한 편씩 깊게 읽어보는 시리즈를 시작한다. 첫 편은 프롬프트 엔지니어링에서 가장 자주 언급되는 개념인 <a href="https://arxiv.org/abs/2201.11903"><strong>Chain-of-Thought(CoT) Prompting</strong></a> — Wei et al., 2022, NeurIPS — 이다.</p>
+
+<h2 id="1-기본적인-이해부터">1. 기본적인 이해부터</h2>
+
+<p>쉽게 말하면, CoT(Chain-of-Thought) 프롬프팅은 <strong>모델에게 “정답만 말고 풀이 과정도 보여줘”라고 예시로 가르치는 방법</strong>이다. Few-shot 프롬프트에 넣는 예시(exemplar)를 <code class="language-plaintext highlighter-rouge">질문 → 정답</code> 쌍이 아니라 <code class="language-plaintext highlighter-rouge">질문 → 중간 추론 단계들 → 정답</code> 형태로 바꾸는 게 전부다. 이 단순한 변화가 대형 모델의 다단계 추론 성능을 크게 끌어올린다.</p>
+
+<h2 id="2-문제점배경">2. 문제점/배경</h2>
+
+<p>2022년 당시 GPT-3류 모델은 few-shot 프롬프팅(예시 몇 개 보여주고 패턴 따라하게 하기)으로 번역·분류 같은 태스크는 잘 풀었지만, <strong>산수 문제·상식 추론·기호 조작처럼 여러 단계를 거쳐야 하는 문제</strong>에서는 모델 크기를 키워도 성능이 잘 안 늘었다. 예시를 <code class="language-plaintext highlighter-rouge">Q: 로저는 테니스공 5개가 있다... A: 11</code>처럼 답만 보여주면, 모델도 중간 계산 없이 바로 답을 뱉으려다 틀리는 패턴이 반복됐다.</p>
+
+<h2 id="3-해결책의-핵심-아이디어">3. 해결책의 핵심 아이디어</h2>
+
+<p><strong>핵심 한 줄 요약:</strong> 정답 이전에 사람이 문제를 풀 때 쓰는 것 같은 자연어 추론 과정을 예시에 넣어주면, 모델이 추론에 이어 답을 생성하면서 다단계 문제를 스스로 분해해 푼다.</p>
+
+<p><strong>단계별 설명:</strong></p>
+<ol>
+  <li>Few-shot 예시를 <code class="language-plaintext highlighter-rouge">Q → A</code>가 아니라 <code class="language-plaintext highlighter-rouge">Q → (추론 문장들) → A</code> 형태로 구성</li>
+  <li>모델이 새 문제를 받으면 이 패턴을 따라 <strong>중간 추론을 먼저 생성</strong>한 뒤 답을 냄</li>
+  <li>각 추론 스텝이 이전 스텝의 결과를 이어받는 식으로 문제가 작은 조각으로 분해됨</li>
+  <li>계산량(토큰 단위 “생각할 시간”)이 늘어나는 효과가 생겨 복잡한 문제에서 정확도가 오름</li>
+  <li>
+<strong>모델 스케일이 일정 수준(대략 100B 파라미터 안팎, 논문에서는 PaLM 540B·GPT-3 175B급) 이상일 때만 이 효과가 뚜렷하게 나타남</strong> — 작은 모델에서는 CoT를 넣어도 이득이 거의 없거나 오히려 앞뒤 안 맞는 추론을 생성해 손해를 봄. 저자들은 이를 <strong>emergent ability</strong>라고 부름</li>
+</ol>
+
+<h2 id="4-비유예시">4. 비유/예시</h2>
+
+<p><strong>신입 개발자에게 코드 리뷰를 부탁하는 상황에 비유하면:</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>CoT 없음 (표준 few-shot)</th>
+      <th>CoT 있음</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>“이 PR 승인해도 돼?” → “네”</td>
+      <td>“이 PR 승인해도 돼?” → “1. 이 함수가 null을 리턴할 수 있는지 봤고 2. 호출부에서 가드하고 있는지 확인했고 3. 테스트가 그 케이스를 커버하네요 → 네, 승인해도 됩니다”</td>
+    </tr>
+    <tr>
+      <td>답은 빠르지만 근거가 없어서 틀려도 왜 틀렸는지 모름</td>
+      <td>중간 판단 과정이 드러나서 어디서 틀렸는지 추적 가능, 그리고 과정을 밟다 보니 애초에 덜 틀림</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>CoT는 모델에게 “결론만 말고 근거를 단계별로 대라”고 시키는 것과 같고, 그 근거를 만드는 과정 자체가 정답률을 올린다.</p>
+
+<h2 id="5-실제-동작-과정">5. 실제 동작 과정</h2>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[표준 Few-shot 프롬프트]
+Q: 로저는 테니스공 5개를 갖고 있다. 캔 2개를 더 샀고, 캔마다 공이 3개씩 들어있다.
+   로저는 지금 테니스공을 몇 개 갖고 있나?
+A: 11
+
+Q: 급식실에 사과가 23개 있었다. 20개를 요리에 쓰고 6개를 더 샀다.
+   지금 사과는 몇 개인가?
+A: [모델이 바로 답을 생성 → 다단계 연산에서 오답 확률 높음]
+
+
+[Chain-of-Thought 프롬프트]
+Q: 로저는 테니스공 5개를 갖고 있다. 캔 2개를 더 샀고, 캔마다 공이 3개씩 들어있다.
+   로저는 지금 테니스공을 몇 개 갖고 있나?
+A: 로저는 처음에 공 5개가 있었다. 캔 2개 × 공 3개 = 6개를 더 샀다.
+   5 + 6 = 11. 답은 11개다.
+
+Q: 급식실에 사과가 23개 있었다. 20개를 요리에 쓰고 6개를 더 샀다.
+   지금 사과는 몇 개인가?
+A: [모델이 "23개에서 20개를 써서 3개가 남았다. 6개를 더 사서 3+6=9개다"
+   같은 중간 단계를 먼저 생성한 뒤 답에 도달 → 정답률 대폭 상승]
+</code></pre></div></div>
+
+<p>논문은 이 효과를 GSM8K(초등 수준 서술형 산수), SVAMP·ASDiv·AQuA(산수), CommonsenseQA·StrategyQA(상식), last-letter-concatenation·coin-flip(기호 조작) 등 여러 벤치마크에서 확인했고, PaLM 540B + CoT가 당시 fine-tuned 모델의 기존 SOTA를 뛰어넘는 결과를 GSM8K에서 보였다.</p>
+
+<blockquote>
+  <p>위 구체 수치는 이 글에서 의도적으로 뭉뚱그렸다 — 정확한 인용이 필요하면 원문 표와 대조할 것.</p>
+</blockquote>
+
+<p>흥미로운 ablation도 있었는데, “추론 없이 수식만 보여주기”나 “정답 뒤에 추론 넣기” 같은 변형은 CoT만큼 효과가 없었다. 즉 이득은 단순히 “관련 텍스트가 더 있어서”가 아니라 <strong>정답 전에 순차적으로 계산이 일어나는 구조</strong> 자체에서 나온다는 뜻이다.</p>
+
+<h2 id="그림으로-보기">그림으로 보기</h2>
+
+<pre><code class="language-mermaid">flowchart TD
+    Q["질문: 급식실 사과 23개, 20개 사용, 6개 구매 → 지금 몇 개?"]
+
+    Q --&gt; A1["표준 Few-shot 프롬프트&lt;br/&gt;예시 = 질문 → 정답만"]
+    A1 --&gt; B1["모델이 중간 계산 없이 바로 답 생성"]
+    B1 --&gt; C1["다단계 연산일수록 오답 확률 높음"]
+
+    Q --&gt; A2["Chain-of-Thought 프롬프트&lt;br/&gt;예시 = 질문 → 추론 → 정답"]
+    A2 --&gt; B2["1단계: 23 - 20 = 3개 남음"]
+    B2 --&gt; C2["2단계: 3 + 6 = 9개"]
+    C2 --&gt; D2["정답: 9개"]
+
+    style C1 fill:#4a1e1e,stroke:#c0392b,color:#fff
+    style D2 fill:#1e3a24,stroke:#27ae60,color:#fff
+</code></pre>
+
+<p>왼쪽 가지(표준 프롬프트)는 계산을 한 번에 건너뛰고, 오른쪽 가지(CoT)는 중간 단계를 거쳐서 답에 도달한다 — 이 “거쳐가는 단계”가 정확도를 올리는 핵심.</p>
+
+<h2 id="6-결과장점">6. 결과/장점</h2>
+
+<ul>
+  <li>
+<strong>파인튜닝 없이 성능 향상</strong>: 모델 가중치를 하나도 안 건드리고 프롬프트만 바꿔서 다단계 추론 정확도를 크게 올림 — 이게 이 논문이 임팩트가 컸던 이유</li>
+  <li>
+<strong>해석 가능성</strong>: 모델이 왜 그 답을 냈는지 추론 과정이 텍스트로 남아서, 어디서 틀렸는지 사후 분석이 쉬워짐</li>
+  <li>
+<strong>후속 연구의 출발점</strong>: 다음 편에서 다룰 Self-Consistency(같은 질문에 CoT를 여러 번 샘플링해서 다수결로 답 결정)와 Tree of Thoughts(추론을 트리로 확장해 백트래킹·탐색까지 허용)가 전부 이 논문의 “추론 경로를 명시적으로 생성한다”는 아이디어 위에 세워짐</li>
+</ul>
+
+<h2 id="실무-적용-아이디어">실무 적용 아이디어</h2>
+
+<p>캐릭터 기반 대화형 서비스라면, 답변을 생성하기 전에 “상황 판단 → 톤 결정” 같은 내부 추론 단계를 프롬프트에 넣어두고 사용자에게는 최종 답변만 노출하는 구조(hidden scratchpad)에 CoT를 응용해볼 수 있다. 다만 이 논문의 결론(효과가 모델 스케일에 크게 의존한다)을 감안하면, 작은/저가 모델에 무리하게 CoT를 걸면 오히려 장황하고 부정확한 응답이 나올 수 있어 실측이 필요하다.</p>
+
+<hr>
+
+<p>다음 편은 CoT의 “한 번 풀이”를 “여러 번 풀고 다수결”로 바꾸는 <strong>Self-Consistency (Wang et al., 2022)</strong>.</p>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/journal/development%20diary/2026/07/22/k8s-study-04-service.html" title="[ K8s 스터디 ] - 04. Service, Pod가 죽어도 안 바뀌는 주소">[ K8s 스터디 ] - 04....</a><a class="next" href="/study/llm/2026/07/22/llm-prompting-paper-02-self-consistency.html" title="LLM 프롬프팅 논문 스터디 - 02. Self-Consistency">LLM 프롬프팅 논문 스터디 - 02....</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li class="">
+          <a class="post-link" href="/study/llm/2026/07/22/llm-prompting-paper-01-chain-of-thought.html" title="LLM 프롬프팅 논문 스터디 - 01. Chain-of-Thought Prompting">
+            LLM 프롬프팅 논문 스터디 - 01. Chain-of-Thought Prompting<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/10/22/grokking-simplicity-03.html" title="쏙쏙 들어오는 함수형 코딩 [CHAPTER 5, 6]">
+            쏙쏙 들어오는 함수형 코딩 [CHAPTER 5, 6]<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/2025/02/25/next_middleware.html" title="Next.js - middleware로 유저 인증하기">
+            Next.js - middleware로 유저 인증하기<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/journal/development%20diary/2026/07/16/lol-moim-incidents-06-dashboard-snapshot.html" title="[ 롤모임 운영일지 ] - 06. 프로덕트 대시보드 스냅샷 — 지금 이 순간의 숫자들">
+            [ 롤모임 운영일지 ] - 06. 프로덕트 대시보드 스냅샷 — 지금 이...<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+</ul>
+    </div>
+<div class="post-comments">
+<div id="utterances-placeholder"></div>
+<script>
+  const utterancesThemeFromDataTheme = () => {
+    const dataTheme = document.documentElement.getAttribute('data-theme');
+    return `github-${dataTheme}`;
+  };
+
+  const setUtterancesTheme = () => {
+    const iframe = document.querySelector('.utterances-frame');
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: utterancesThemeFromDataTheme()
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  // dynamic change
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        setUtterancesTheme();
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
+
+  let utterancesScript = document.createElement('script');
+  utterancesScript.async = true;
+  utterancesScript.src = 'https://utteranc.es/client.js';
+  utterancesScript.crossOrigin = 'anonymous';
+  utterancesScript.setAttribute('issue-term', 'title');
+  utterancesScript.setAttribute('label', 'utterances comment');
+  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
+  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
+
+  const placeholder = document.getElementById('utterances-placeholder');
+  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
+</script>
+</div></section>
+</div>
+
+  </section><section class="sidebar"><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+    </div>
+  </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div class="footer-social">
+        <a href="https://github.com/kimmand0o0" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
+        <a href="mailto:maeran.dev.u@gmail.com" aria-label="Email"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+        <a href="/feed.xml" aria-label="RSS"><i class="fa fa-rss" aria-hidden="true"></i></a>
+      </div>
+      <div>Unpublished Work <span class="copyleft">©</span> 2017-2026 Haeran</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>

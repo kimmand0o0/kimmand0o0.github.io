@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Native cross-document page transitions (progressive enhancement, Chromium only) -->
+  <meta name="view-transition" content="same-origin">
+
+  <!-- Google Translate Customization (if needed) -->
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+
+  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>[ K8s 스터디 ] - 04. Service, Pod가 죽어도 안 바뀌는 주소 | Haeran’s blog</title>
+<meta name="generator" content="Jekyll v4.4.1">
+<meta property="og:title" content="[ K8s 스터디 ] - 04. Service, Pod가 죽어도 안 바뀌는 주소">
+<meta name="author" content="haeran">
+<meta property="og:locale" content="ko">
+<meta name="description" content="지난 편에서 롤링 업데이트 중에 Pod가 계속 죽고 새로 생긴다는 걸 봤다. 근데 Pod가 재생성될 때마다 IP가 바뀌는데, 그럼 다른 Pod가 얘를 어떻게 계속 찾아가는 걸까 — 이번 편은 Service.">
+<meta property="og:description" content="지난 편에서 롤링 업데이트 중에 Pod가 계속 죽고 새로 생긴다는 걸 봤다. 근데 Pod가 재생성될 때마다 IP가 바뀌는데, 그럼 다른 Pod가 얘를 어떻게 계속 찾아가는 걸까 — 이번 편은 Service.">
+<link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/22/k8s-study-04-service.html">
+<meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/22/k8s-study-04-service.html">
+<meta property="og:site_name" content="Haeran’s blog">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2026-07-22T01:00:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="[ K8s 스터디 ] - 04. Service, Pod가 죽어도 안 바뀌는 주소">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"haeran"},"dateModified":"2026-07-22T01:00:00+00:00","datePublished":"2026-07-22T01:00:00+00:00","description":"지난 편에서 롤링 업데이트 중에 Pod가 계속 죽고 새로 생긴다는 걸 봤다. 근데 Pod가 재생성될 때마다 IP가 바뀌는데, 그럼 다른 Pod가 얘를 어떻게 계속 찾아가는 걸까 — 이번 편은 Service.","headline":"[ K8s 스터디 ] - 04. Service, Pod가 죽어도 안 바뀌는 주소","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/22/k8s-study-04-service.html"},"url":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/22/k8s-study-04-service.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- Favicon -->
+  <link rel="icon" href="/assets/images/favicon.ico">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/22/k8s-study-04-service.html">
+
+  <!-- Social Media (Open Graph, Twitter Card) -->
+  <meta property="og:title" content="[ K8s 스터디 ] - 04. Service, Pod가 죽어도 안 바뀌는 주소">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+  <meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/22/k8s-study-04-service.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="[ K8s 스터디 ] - 04. Service, Pod가 죽어도 안 바뀌는 주소">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+
+  <!-- Stylesheets and External Resources -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+
+  <!-- Editorial display typeface for headings only; body stays Noto Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- JavaScript -->
+  <script src="/assets/js/main.js"></script>
+
+  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
+<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
+<script>
+  function initGoogleAnalytics() {
+    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
+      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
+    var enableDNT = "false" == "true";
+
+    if (!enableDNT || !doNotTrack) {
+      var measurementId = 'G-ZNXE6HSKMS';
+
+      (function(src) {
+        var tag = document.createElement('script');
+        tag.src = src;
+        tag.async = true;
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', measurementId);
+    }
+  }
+  window.addEventListener("load", initGoogleAnalytics);
+</script>
+
+<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  // mermaid 블록은 highlight.js 대상에서 제외 — hljs가 addLangData에서 class를
+  // "language-mermaid" -> "hljs mermaid"로 덮어써버려서, mermaid.html의 렌더링 스크립트가
+  // 뒤늦게(load 시점) 찾으려는 .language-mermaid 셀렉터가 항상 빈 결과를 내는 원인이었음.
+  var els = document.querySelectorAll('pre code:not(.language-mermaid)')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
+<style>
+  .pswp .pswp__container .pswp__img {
+    background-color: white;
+  }
+</style>
+
+<script>
+  function initPhotoSwipe() {
+    let customOptions = {};
+
+    try {
+      const data = ``.replaceAll("=>", ":");
+      customOptions = JSON.parse(data);
+    } catch (e) {
+      console.info("Invalid custom photo previewer options! " + e.message);
+    }
+
+    // Define object and gallery options
+    const options = Object.assign(
+      {
+        gallery: "section.main",
+        children: "a.photo-swipe",
+        photo_scale: 2,
+        // dynamic import is not supported in UMD version
+        pswpModule: PhotoSwipe,
+      },
+      customOptions
+    );
+
+    const galleryEl = document.querySelector(options.gallery);
+    if (!galleryEl) {
+      return;
+    }
+
+    const imgEls = [];
+    const els = galleryEl.querySelectorAll("img:not(.emoji)");
+    els.forEach((el) => {
+      if (el.src.trim() == "") {
+        return;
+      }
+      if (!imgEls.includes(el)) {
+        imgEls.push(el);
+      }
+    });
+
+    if (imgEls.length === 0) {
+      return;
+    }
+
+    imgEls.forEach((imgEl) => {
+      imgEl.outerHTML = `
+      <a class="photo-swipe"
+        href="${imgEl.src}"
+        data-pswp-width="${
+          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
+        }"
+        data-pswp-height="${
+          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
+        }"
+        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
+        target="_blank">
+        ${imgEl.outerHTML}
+      </a>`;
+    });
+
+    // Initialize PhotoSwipe 5
+    var lightbox = new PhotoSwipeLightbox(options);
+
+    lightbox.init();
+  }
+
+  window.addEventListener("load", initPhotoSwipe);
+</script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+  function isDarkTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark';
+  }
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: isDarkTheme() ? 'dark' : 'default',
+  });
+
+  function renderMermaidBlocks() {
+    // kramdown/rouge render ```mermaid fences as <pre><code class="language-mermaid">...</code></pre>
+    // mermaid.js only auto-scans <div class="mermaid">, so swap the markup before running it.
+    const blocks = document.querySelectorAll('pre > code.language-mermaid');
+    if (blocks.length === 0) {
+      return;
+    }
+    blocks.forEach((code) => {
+      const graphDefinition = code.textContent;
+      const container = document.createElement('div');
+      container.className = 'mermaid';
+      container.textContent = graphDefinition;
+      code.parentElement.replaceWith(container);
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  }
+
+  window.addEventListener('load', renderMermaidBlocks);
+</script>
+<!-- Custom Head HTML (if any) -->
+
+<!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 assets/js/chat-widget.js -->
+<script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
+  Haeran's blog
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/search.html">SEARCH</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<div class="page-link" style="display: inline;">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<div class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="fr">
+          
+          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="zh-CN">
+          
+          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ja">
+          
+          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ko">
+          
+          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ru">
+          
+          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
+          
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ko',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+</div>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    // 항상 localStorage를 사용 — 'auto' 모드에서도 유저가 직접 누른 토글이
+    // 브라우저 세션이 끝났다고 사라지지 않고, 다음 예약된 자동 전환 시점까지 유지된다.
+    var storage = localStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var blocks = document.querySelectorAll('pre');
+
+  function addCopyButton(pre) {
+    if (pre.querySelector('.code-copy-btn')) return;
+    var code = pre.querySelector('code');
+    if (!code) return;
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'code-copy-btn';
+    btn.textContent = 'Copy';
+    pre.appendChild(btn);
+
+    btn.addEventListener('click', function () {
+      var text = code.textContent;
+
+      function done(ok) {
+        btn.textContent = ok ? 'Copied!' : 'Failed';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+        return;
+      }
+
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        done(document.execCommand('copy'));
+      } catch (e) {
+        done(false);
+      }
+      document.body.removeChild(ta);
+    });
+  }
+
+  for (var i = 0; i < blocks.length; i++) {
+    addCopyButton(blocks[i]);
+  }
+});
+</script>
+<main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <div class="framework">
+  <section class="main">
+
+     <div class="reading-progress" aria-hidden="true">
+  <div class="reading-progress-bar" id="reading-progress-bar"></div>
+</div>
+
+<script>
+(function () {
+  var bar = document.getElementById('reading-progress-bar');
+  var article = document.querySelector('.post-content');
+  if (!bar || !article) return;
+
+  function update() {
+    var rect = article.getBoundingClientRect();
+    var articleTop = rect.top + window.pageYOffset;
+    var total = article.offsetHeight - window.innerHeight;
+    var scrolled = window.pageYOffset - articleTop;
+    var pct = total > 0 ? Math.min(100, Math.max(0, (scrolled / total) * 100)) : 100;
+    bar.style.width = pct + '%';
+  }
+
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+</script>
+<div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">[ K8s 스터디 ] - 04. Service, Pod가 죽어도 안 바뀌는 주소</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <div class="post-meta">
+    <time class="dt-published" datetime="2026-07-22T01:00:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Jul 22, 2026
+    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 10 mins</span>
+  </div>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#K8s">#K8s</a><a class="post-tag" href="/tags.html#Kubernetes">#Kubernetes</a><a class="post-tag" href="/tags.html#%EC%8A%A4%ED%84%B0%EB%94%94">#스터디</a><a class="post-tag" href="/tags.html#Service">#Service</a><a class="post-tag" href="/tags.html#%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%8B%B1">#로드밸런싱</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <p><a href="/journal/development%20diary/2026/07/22/k8s-study-03-deployment-replicaset.html">지난 편</a>에서 롤링 업데이트 중에 Pod가 계속 죽고 새로 생긴다는 걸 봤다. 근데 Pod가 재생성될 때마다 IP가 바뀌는데, 그럼 다른 Pod가 얘를 어떻게 계속 찾아가는 걸까 — 이번 편은 <a href="https://kubernetes.io/docs/concepts/services-networking/service/">Service</a>.</p>
+
+<h2 id="tldr">TL;DR</h2>
+
+<ul>
+  <li>Service는 “Pod들 앞에 붙는 변하지 않는 대표 주소”</li>
+  <li>IP가 아니라 라벨(Label)로 대상 Pod를 지정해서, Pod가 몇 개든 IP가 뭐든 자동으로 대상에 포함시킴</li>
+  <li>Service가 생성되면 절대 안 바뀌는 가상 IP와 DNS 이름이 부여되고, 살아있는 Pod들에게 요청을 자동 분산함</li>
+  <li>Pod가 죽고 새로 생겨도 Service는 라벨만 보고 대상 목록을 실시간 갱신 — 호출하는 쪽은 아무것도 몰라도 됨</li>
+</ul>
+
+<p><br></p>
+
+<h2 id="1-pod의-ip를-직접-쓴다면">1. Pod의 IP를 직접 쓴다면</h2>
+
+<ul>
+  <li>Pod A가 Pod B(IP: 10.0.0.5)를 직접 호출하도록 하드코딩 → B가 재배포되면서 IP가 10.0.0.9로 바뀜 → A는 계속 옛날 IP로 요청을 보내다 실패함</li>
+  <li>B가 3개 복제되어 떠있음(지난 편의 ReplicaSet) → A는 3개 중 어떤 IP로 보내야 할지, 그중 하나가 죽으면 어떻게 알고 다른 걸로 바꿔야 할지 스스로 처리해야 함</li>
+  <li>롤링 업데이트 중 → 옛 버전 Pod들이 사라지고 새 버전 Pod들이 생기는 그 순간, IP 목록이 계속 바뀜 → 호출하는 쪽이 그 변화를 실시간으로 추적해야 함</li>
+</ul>
+
+<h2 id="2-핵심-아이디어">2. 핵심 아이디어</h2>
+
+<p><strong>핵심 한 줄 요약:</strong> Service는 라벨로 Pod 그룹을 지정해두고, 그 그룹 안에서 살아있는 Pod에게 요청을 자동으로 분산시켜주는 고정 주소다.</p>
+
+<ol>
+  <li>
+<strong><a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/">라벨 셀렉터</a>:</strong> Service는 IP가 아니라 <code class="language-plaintext highlighter-rouge">app: web</code> 같은 라벨로 대상 Pod를 지정함 — Pod가 몇 개든, IP가 뭐든 라벨만 맞으면 자동으로 대상에 포함</li>
+  <li>
+<strong>고정 주소 발급:</strong> Service가 생성되면 절대 안 바뀌는 가상 IP(ClusterIP)와 <a href="https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/">DNS 이름</a>이 부여됨</li>
+  <li>
+<strong>자동 로드밸런싱:</strong> 요청이 오면 현재 라벨이 일치하는 Pod들 중 정상 동작 중인 것에게 랜덤/순환 방식으로 분산</li>
+  <li>
+<strong>자동 갱신:</strong> Pod가 죽고 새로 생겨도 Service는 라벨만 보고 대상 목록을 실시간으로 갱신</li>
+  <li>
+<strong>노출 범위 선택:</strong> 클러스터 내부용(ClusterIP), 노드 포트로 외부 접근(NodePort), 클라우드 로드밸런서 연결(LoadBalancer) 등 용도별로 타입 선택</li>
+</ol>
+
+<pre><code class="language-mermaid">flowchart LR
+    Caller["호출하는 Pod"] -- "web-service (고정 DNS)" --&gt; SVC["Service: web-service&lt;br/&gt;selector: app=web"]
+    SVC -.자동 분산.-&gt; P1["Pod #1&lt;br/&gt;app=web"]
+    SVC -.자동 분산.-&gt; P2["Pod #2&lt;br/&gt;app=web"]
+    SVC -.자동 분산.-&gt; P3["Pod #3&lt;br/&gt;app=web"]
+</code></pre>
+
+<p>Pod #2가 죽고 새 IP로 재생성돼도, 호출하는 쪽이 보는 건 여전히 <code class="language-plaintext highlighter-rouge">web-service</code> 하나뿐이다.</p>
+
+<h2 id="3-비유--대표-전화번호콜센터">3. 비유 — 대표 전화번호(콜센터)</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>상황</th>
+      <th>비유</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Pod의 개별 IP</td>
+      <td>상담원 개개인의 직통 번호 (계속 바뀜 — 퇴사/입사)</td>
+    </tr>
+    <tr>
+      <td>Service</td>
+      <td>“1588-XXXX” 같은 대표 전화번호 (절대 안 바뀜)</td>
+    </tr>
+    <tr>
+      <td>라벨 셀렉터</td>
+      <td>“상담팀 소속”이라는 조건 — 그 조건에 맞는 사람이면 누구든 응대 대상</td>
+    </tr>
+    <tr>
+      <td>로드밸런싱</td>
+      <td>전화하면 지금 비어있는 상담원에게 자동 연결</td>
+    </tr>
+    <tr>
+      <td>Pod 재배포(직원 교체)</td>
+      <td>상담원이 바뀌어도 대표번호는 그대로라 발신자는 전혀 신경 안 씀</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="4-실제로-이렇게-쓴다">4. 실제로 이렇게 쓴다</h2>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 지난 편 Deployment로 Pod 3개가 떠있다고 가정 — 라벨: app=web</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">apps/v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Deployment</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">web</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">replicas</span><span class="pi">:</span> <span class="m">3</span>
+  <span class="na">selector</span><span class="pi">:</span>
+    <span class="na">matchLabels</span><span class="pi">:</span>
+      <span class="na">app</span><span class="pi">:</span> <span class="s">web</span>
+  <span class="na">template</span><span class="pi">:</span>
+    <span class="na">metadata</span><span class="pi">:</span>
+      <span class="na">labels</span><span class="pi">:</span>
+        <span class="na">app</span><span class="pi">:</span> <span class="s">web</span>        <span class="c1"># &lt;- 이 라벨이 핵심</span>
+    <span class="na">spec</span><span class="pi">:</span>
+      <span class="na">containers</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">nginx</span>
+        <span class="na">image</span><span class="pi">:</span> <span class="s">nginx:1.25</span>
+        <span class="na">ports</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">80</span>
+</code></pre></div></div>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Service가 같은 라벨(app: web)을 가진 Pod들을 자동으로 대상에 포함</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Service</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">web-service</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">selector</span><span class="pi">:</span>
+    <span class="na">app</span><span class="pi">:</span> <span class="s">web</span>             <span class="c1"># 이 라벨과 일치하는 Pod만 찾아서 연결</span>
+  <span class="na">ports</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">port</span><span class="pi">:</span> <span class="m">80</span>
+    <span class="na">targetPort</span><span class="pi">:</span> <span class="m">80</span>
+  <span class="na">type</span><span class="pi">:</span> <span class="s">ClusterIP</span>          <span class="c1"># 클러스터 내부에서만 접근 가능한 고정 IP</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 다른 Pod에서는 IP 대신 이 이름으로 호출</span>
+curl http://web-service        <span class="c"># DNS 이름 하나로 끝 — IP 몰라도 됨</span>
+
+kubectl get endpoints web-service
+<span class="c"># NAME           ENDPOINTS</span>
+<span class="c"># web-service    10.0.0.5:80,10.0.0.9:80,10.0.0.12:80</span>
+<span class="c">#                ^-- 지금 살아있는 Pod IP 3개가 자동으로 연결됨 (Pod 바뀌면 이 목록도 자동 갱신)</span>
+
+<span class="c"># 참고: Endpoints는 공식 문서상 EndpointSlice로 대체되는 추세.</span>
+<span class="c"># 최신 클러스터에서는 아래 명령이 실무 표준:</span>
+<span class="c"># kubectl get endpointslices -l kubernetes.io/service-name=web-service</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>공식 문서: <a href="https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/">EndpointSlice</a></p>
+</blockquote>
+
+<h2 id="지금-상태--다음에-할-일">지금 상태 / 다음에 할 일</h2>
+
+<p>Service가 라벨 기반으로 Pod의 생명주기와 호출자를 분리해준다는 걸 정리했다. 다음 편은 <strong>ConfigMap &amp; Secret</strong> — 설정값이나 비밀번호를 컨테이너 이미지 안에 박아넣지 않고 어떻게 외부에서 주입하는지.</p>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/journal/development%20diary/2026/07/22/k8s-study-03-deployment-replicaset.html" title="[ K8s 스터디 ] - 03. Deployment와 ReplicaSet, 무중단 배포는 어떻게 되는가">[ K8s 스터디 ] - 03....</a><a class="next" href="/study/llm/2026/07/22/llm-prompting-paper-01-chain-of-thought.html" title="LLM 프롬프팅 논문 스터디 - 01. Chain-of-Thought Prompting">LLM 프롬프팅 논문 스터디 - 01....</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li class="">
+          <a class="post-link" href="/study/javascript/2025/01/02/buffer.html" title="JavaScript에서 버퍼란?">
+            JavaScript에서 버퍼란?<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/datadog/2026/07/22/datadog-study-03-langfuse-vs-datadog.html" title="데이터독(Datadog) 학습 정리 (3) - 랭퓨즈 vs 데이터독 Agent Observability, 뭐가 다를까">
+            데이터독(Datadog) 학습 정리 (3) - 랭퓨즈 vs 데이터독 Agent Observability, 뭐가 다를까...<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/journal/development%20diary/2026/07/20/lol-moim-incidents-10-cross-tenant-leak.html" title="[ 롤모임 운영일지 ] - 10. 격리 설계가 우려했던 바로 그 사고 — 크로스테넌트 누출 실전편">
+            [ 롤모임 운영일지 ] - 10. 격리 설계가 우려했던 바로 그 사고...<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/10/22/grokking-simplicity-03.html" title="쏙쏙 들어오는 함수형 코딩 [CHAPTER 5, 6]">
+            쏙쏙 들어오는 함수형 코딩 [CHAPTER 5, 6]<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+</ul>
+    </div>
+<div class="post-comments">
+<div id="utterances-placeholder"></div>
+<script>
+  const utterancesThemeFromDataTheme = () => {
+    const dataTheme = document.documentElement.getAttribute('data-theme');
+    return `github-${dataTheme}`;
+  };
+
+  const setUtterancesTheme = () => {
+    const iframe = document.querySelector('.utterances-frame');
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: utterancesThemeFromDataTheme()
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  // dynamic change
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        setUtterancesTheme();
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
+
+  let utterancesScript = document.createElement('script');
+  utterancesScript.async = true;
+  utterancesScript.src = 'https://utteranc.es/client.js';
+  utterancesScript.crossOrigin = 'anonymous';
+  utterancesScript.setAttribute('issue-term', 'title');
+  utterancesScript.setAttribute('label', 'utterances comment');
+  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
+  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
+
+  const placeholder = document.getElementById('utterances-placeholder');
+  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
+</script>
+</div></section>
+</div>
+
+  </section><section class="sidebar"><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+    </div>
+  </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div class="footer-social">
+        <a href="https://github.com/kimmand0o0" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
+        <a href="mailto:maeran.dev.u@gmail.com" aria-label="Email"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+        <a href="/feed.xml" aria-label="RSS"><i class="fa fa-rss" aria-hidden="true"></i></a>
+      </div>
+      <div>Unpublished Work <span class="copyleft">©</span> 2017-2026 Haeran</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>

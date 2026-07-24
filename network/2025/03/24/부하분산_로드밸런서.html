@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Native cross-document page transitions (progressive enhancement, Chromium only) -->
+  <meta name="view-transition" content="same-origin">
+
+  <!-- Google Translate Customization (if needed) -->
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+
+  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>로드 밸런싱(Load balancing) 종류와 알고리즘 | Haeran’s blog</title>
+<meta name="generator" content="Jekyll v4.4.1">
+<meta property="og:title" content="로드 밸런싱(Load balancing) 종류와 알고리즘">
+<meta name="author" content="haeran">
+<meta property="og:locale" content="ko">
+<meta name="description" content="로드 밸런싱(load balancing)과 로드 밸런서(Load Balancer)">
+<meta property="og:description" content="로드 밸런싱(load balancing)과 로드 밸런서(Load Balancer)">
+<link rel="canonical" href="https://kimmand0o0.github.io/network/2025/03/24/%EB%B6%80%ED%95%98%EB%B6%84%EC%82%B0_%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%84%9C.html">
+<meta property="og:url" content="https://kimmand0o0.github.io/network/2025/03/24/%EB%B6%80%ED%95%98%EB%B6%84%EC%82%B0_%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%84%9C.html">
+<meta property="og:site_name" content="Haeran’s blog">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2025-03-24T12:07:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="로드 밸런싱(Load balancing) 종류와 알고리즘">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"haeran"},"dateModified":"2025-03-24T12:07:00+00:00","datePublished":"2025-03-24T12:07:00+00:00","description":"로드 밸런싱(load balancing)과 로드 밸런서(Load Balancer)","headline":"로드 밸런싱(Load balancing) 종류와 알고리즘","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/network/2025/03/24/%EB%B6%80%ED%95%98%EB%B6%84%EC%82%B0_%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%84%9C.html"},"url":"https://kimmand0o0.github.io/network/2025/03/24/%EB%B6%80%ED%95%98%EB%B6%84%EC%82%B0_%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%84%9C.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- Favicon -->
+  <link rel="icon" href="/assets/images/favicon.ico">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kimmand0o0.github.io/network/2025/03/24/%EB%B6%80%ED%95%98%EB%B6%84%EC%82%B0_%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%84%9C.html">
+
+  <!-- Social Media (Open Graph, Twitter Card) -->
+  <meta property="og:title" content="로드 밸런싱(Load balancing) 종류와 알고리즘">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+  <meta property="og:url" content="https://kimmand0o0.github.io/network/2025/03/24/%EB%B6%80%ED%95%98%EB%B6%84%EC%82%B0_%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%84%9C.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="로드 밸런싱(Load balancing) 종류와 알고리즘">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+
+  <!-- Stylesheets and External Resources -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+
+  <!-- Editorial display typeface for headings only; body stays Noto Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- JavaScript -->
+  <script src="/assets/js/main.js"></script>
+
+  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
+<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
+<script>
+  function initGoogleAnalytics() {
+    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
+      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
+    var enableDNT = "false" == "true";
+
+    if (!enableDNT || !doNotTrack) {
+      var measurementId = 'G-ZNXE6HSKMS';
+
+      (function(src) {
+        var tag = document.createElement('script');
+        tag.src = src;
+        tag.async = true;
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', measurementId);
+    }
+  }
+  window.addEventListener("load", initGoogleAnalytics);
+</script>
+
+<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  // mermaid 블록은 highlight.js 대상에서 제외 — hljs가 addLangData에서 class를
+  // "language-mermaid" -> "hljs mermaid"로 덮어써버려서, mermaid.html의 렌더링 스크립트가
+  // 뒤늦게(load 시점) 찾으려는 .language-mermaid 셀렉터가 항상 빈 결과를 내는 원인이었음.
+  var els = document.querySelectorAll('pre code:not(.language-mermaid)')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
+<style>
+  .pswp .pswp__container .pswp__img {
+    background-color: white;
+  }
+</style>
+
+<script>
+  function initPhotoSwipe() {
+    let customOptions = {};
+
+    try {
+      const data = ``.replaceAll("=>", ":");
+      customOptions = JSON.parse(data);
+    } catch (e) {
+      console.info("Invalid custom photo previewer options! " + e.message);
+    }
+
+    // Define object and gallery options
+    const options = Object.assign(
+      {
+        gallery: "section.main",
+        children: "a.photo-swipe",
+        photo_scale: 2,
+        // dynamic import is not supported in UMD version
+        pswpModule: PhotoSwipe,
+      },
+      customOptions
+    );
+
+    const galleryEl = document.querySelector(options.gallery);
+    if (!galleryEl) {
+      return;
+    }
+
+    const imgEls = [];
+    const els = galleryEl.querySelectorAll("img:not(.emoji)");
+    els.forEach((el) => {
+      if (el.src.trim() == "") {
+        return;
+      }
+      if (!imgEls.includes(el)) {
+        imgEls.push(el);
+      }
+    });
+
+    if (imgEls.length === 0) {
+      return;
+    }
+
+    imgEls.forEach((imgEl) => {
+      imgEl.outerHTML = `
+      <a class="photo-swipe"
+        href="${imgEl.src}"
+        data-pswp-width="${
+          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
+        }"
+        data-pswp-height="${
+          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
+        }"
+        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
+        target="_blank">
+        ${imgEl.outerHTML}
+      </a>`;
+    });
+
+    // Initialize PhotoSwipe 5
+    var lightbox = new PhotoSwipeLightbox(options);
+
+    lightbox.init();
+  }
+
+  window.addEventListener("load", initPhotoSwipe);
+</script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+  function isDarkTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark';
+  }
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: isDarkTheme() ? 'dark' : 'default',
+  });
+
+  function renderMermaidBlocks() {
+    // kramdown/rouge render ```mermaid fences as <pre><code class="language-mermaid">...</code></pre>
+    // mermaid.js only auto-scans <div class="mermaid">, so swap the markup before running it.
+    const blocks = document.querySelectorAll('pre > code.language-mermaid');
+    if (blocks.length === 0) {
+      return;
+    }
+    blocks.forEach((code) => {
+      const graphDefinition = code.textContent;
+      const container = document.createElement('div');
+      container.className = 'mermaid';
+      container.textContent = graphDefinition;
+      code.parentElement.replaceWith(container);
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  }
+
+  window.addEventListener('load', renderMermaidBlocks);
+</script>
+<!-- Custom Head HTML (if any) -->
+
+<!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 assets/js/chat-widget.js -->
+<script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
+  Haeran's blog
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/search.html">SEARCH</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<div class="page-link" style="display: inline;">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<div class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="fr">
+          
+          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="zh-CN">
+          
+          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ja">
+          
+          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ko">
+          
+          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ru">
+          
+          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
+          
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ko',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+</div>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;documentElement.setAttribute("data-header-transparent", "");var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    // 항상 localStorage를 사용 — 'auto' 모드에서도 유저가 직접 누른 토글이
+    // 브라우저 세션이 끝났다고 사라지지 않고, 다음 예약된 자동 전환 시점까지 유지된다.
+    var storage = localStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var blocks = document.querySelectorAll('pre');
+
+  function addCopyButton(pre) {
+    if (pre.querySelector('.code-copy-btn')) return;
+    var code = pre.querySelector('code');
+    if (!code) return;
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'code-copy-btn';
+    btn.textContent = 'Copy';
+    pre.appendChild(btn);
+
+    btn.addEventListener('click', function () {
+      var text = code.textContent;
+
+      function done(ok) {
+        btn.textContent = ok ? 'Copied!' : 'Failed';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+        return;
+      }
+
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        done(document.execCommand('copy'));
+      } catch (e) {
+        done(false);
+      }
+      document.body.removeChild(ta);
+    });
+  }
+
+  for (var i = 0; i < blocks.length; i++) {
+    addCopyButton(blocks[i]);
+  }
+});
+</script>
+<main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <div class="framework">
+  <section class="main">
+
+     <div class="reading-progress" aria-hidden="true">
+  <div class="reading-progress-bar" id="reading-progress-bar"></div>
+</div>
+
+<script>
+(function () {
+  var bar = document.getElementById('reading-progress-bar');
+  var article = document.querySelector('.post-content');
+  if (!bar || !article) return;
+
+  function update() {
+    var rect = article.getBoundingClientRect();
+    var articleTop = rect.top + window.pageYOffset;
+    var total = article.offsetHeight - window.innerHeight;
+    var scrolled = window.pageYOffset - articleTop;
+    var pct = total > 0 ? Math.min(100, Math.max(0, (scrolled / total) * 100)) : 100;
+    bar.style.width = pct + '%';
+  }
+
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+</script>
+<div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">로드 밸런싱(Load balancing) 종류와 알고리즘</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <div class="post-meta">
+    <time class="dt-published" datetime="2025-03-24T12:07:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Mar 24, 2025
+    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 16 mins</span>
+  </div>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#NETWORK">#NETWORK</a><a class="post-tag" href="/tags.html#LoadBalancer">#LoadBalancer</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <h2 id="로드-밸런싱load-balancing과-로드-밸런서load-balancer">로드 밸런싱(load balancing)과 로드 밸런서(Load Balancer)</h2>
+
+<p>부하분산 또는 로드 밸런싱(load balancing)은 컴퓨터 네트워크 기술의 일종으로 둘 혹은 셋 이상의 중앙처리장치 혹은 저장장치와 같은 컴퓨터 자원들에게 네트워크 트래픽을 여러 서버로 분산하여 작업해 시스템의 성능과 가용성을 높이는 것을 의미합니다.</p>
+
+<p><strong>그럼 로드 밸런서는 뭘까?</strong></p>
+
+<p>로드 밸런서는 로드 밸런싱의 트래픽을 여러 서버로 분배하는 기술을 제공하는 서비스 또는 장치(하드웨어, 소프트웨어)입니다.</p>
+
+<p>주요 역할은 다음과 같습니다:</p>
+
+<ol>
+  <li>클라이언트 요청을 분산 → 여러 서버가 균등하게 트래픽을 처리하도록 조정</li>
+  <li>서버 상태 모니터링 → 특정 서버가 다운되면 트래픽을 정상적인 서버로 우회</li>
+  <li>세션 유지 (Sticky Session) → 동일 사용자의 요청을 동일한 서버로 전달 가능</li>
+  <li>SSL 종료 (SSL Termination) → HTTPS 트래픽을 해석하여 서버 부하 감소</li>
+</ol>
+
+<h2 id="로드-밸런싱-방식">로드 밸런싱 방식</h2>
+
+<ul>
+  <li>
+<strong>라운드 로빈 (Round Robin)</strong>: 순차적으로 각 서버에 요청을 배분</li>
+  <li>
+<strong>가중 라운드 로빈 (Weighted Round Robin)</strong>: 서버의 성능에 따라 가중치를 설정하고 트래픽을 배분</li>
+  <li>
+<strong>최소 연결 (Least Connection)</strong>: 현재 연결 수가 가장 적은 서버로 요청을 보냄</li>
+  <li>
+<strong>IP 해시 (IP Hash)</strong>: 사용자의 IP를 해싱하여 특정 서버로 고정 매핑</li>
+</ul>
+
+<h2 id="로드-밸런싱의-종류">로드 밸런싱의 종류</h2>
+
+<p>로드 밸런싱의 종류는 OSI 7계층에 따라 나뉩니다.</p>
+
+<ul>
+  <li>
+<strong>L4 (Layer 4) 로드 밸런서</strong>: 네트워크 계층(전송 Transport 계층, TCP/UDP)을 기반으로 IP 주소와 포트 번호 부하 분산</li>
+  <li>
+<strong>L7 (Layer 7) 로드 밸런서</strong>: 애플리케이션 Application 계층(HTTP, HTTPS)에서 URL, 쿠키, 헤더 등을 분석하여 트래픽을 분산</li>
+</ul>
+
+<blockquote>
+  <p><strong>OSI 7 계층이란?</strong></p>
+
+  <p>OSI 7 계층은 네트워크 통신이 어떻게 이루어지는지를 설명하는 계층화된 모델입니다.<br>
+각 계층은 특정한 역할을 수행하며, 하위 계층에서 상위 계층으로 데이터를 전달합니다.</p>
+
+  <ol>
+    <li>
+      <p><strong>물리 계층 (Physical Layer)</strong><br>
+데이터를 0과 1의 전기 신호, 빛, 전파 형태로 변환하여 전달<br>
+네트워크 장비: LAN 케이블, 리피터, 허브<br>
+데이터 단위: 비트(Bit)<br>
+🛠 예제: UTP 케이블, 광케이블, Wi-Fi 신호, RS-232 (시리얼 통신), 이더넷</p>
+    </li>
+    <li>
+      <p><strong>데이터 링크 계층 (Data Link Layer)</strong><br>
+MAC 주소를 기반으로 데이터 전송<br>
+같은 네트워크(브로드캐스트 도메인) 내에서 통신 담당<br>
+네트워크 장비: 스위치, 브리지<br>
+데이터 단위: 프레임(Frame)<br>
+🛠 예제: 이더넷 (Ethernet), MAC 주소 기반의 통신, VLAN</p>
+    </li>
+    <li>
+      <p><strong>네트워크 계층 (Network Layer)</strong><br>
+IP 주소를 기반으로 패킷을 목적지까지 라우팅<br>
+서로 다른 네트워크 간 통신 가능 (인터넷 통신)<br>
+네트워크 장비: 라우터, L3 스위치<br>
+데이터 단위: 패킷(Packet)<br>
+🛠 예제: IPv4, IPv6, ICMP (핑), 라우팅 프로토콜 (OSPF, BGP)</p>
+    </li>
+    <li>
+      <p><strong>전송 계층 (Transport Layer)</strong><br>
+포트 번호를 사용하여 프로세스 간 통신<br>
+신뢰성 보장 (TCP) vs 속도 우선 (UDP)<br>
+데이터 단위: 세그먼트(Segment, TCP) / 데이터그램(Datagram, UDP)<br>
+🛠 예제: TCP (신뢰성 있는 연결, 흐름 제어, 오류 검출), UDP (빠른 전송, 실시간 스트리밍), 포트 번호 (예: HTTP - 80, HTTPS - 443)</p>
+    </li>
+    <li>
+      <p><strong>세션 계층 (Session Layer)</strong><br>
+클라이언트와 서버 간의 세션(연결) 관리<br>
+연결 유지, 인증, 재연결 기능 제공<br>
+🛠 예제: 로그인 세션 유지 (예: 웹사이트 로그인), RPC (원격 프로시저 호출), 소켓 통신 (WebSocket)</p>
+    </li>
+    <li>
+      <p><strong>표현 계층 (Presentation Layer)</strong><br>
+데이터의 인코딩, 암호화, 압축 처리<br>
+서로 다른 데이터 형식을 변환하여 이해 가능하게 만듦<br>
+🛠 예제: JPEG, PNG (이미지 포맷 변환), TLS/SSL (데이터 암호화), UTF-8, ASCII (문자 인코딩)</p>
+    </li>
+    <li>
+      <p><strong>응용 계층 (Application Layer)</strong><br>
+사용자가 직접 접하는 계층<br>
+웹 브라우저, 이메일 클라이언트, 파일 전송 등이 해당됨<br>
+🛠 예제: HTTP, HTTPS (웹 브라우징), FTP (파일 전송), SMTP (이메일 전송), DNS (도메인 네임 시스템)</p>
+    </li>
+  </ol>
+</blockquote>
+
+<p><img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/10_%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%8B%B1%EC%9D%98_%EC%A2%85%EB%A5%98.png" alt="로드밸런싱의_종류"></p>
+
+<h2 id="nlb와-alb">NLB와 ALB</h2>
+
+<p>「여러 서버가 분산 처리 하는것을 로드 밸런싱이라고 한다」 까지는 알겠는데, 그럼 대체 로드 밸런서 L4와 L7의 차이는 무엇일까요?</p>
+
+<p>먼저, 로드 밸런서는 몇 계층에서 분산작업을 수행하느냐에 따라 NLB(Network LoadBalancer)와 ALB(Application LoadBalancer)로 나눌 수 있습니다. 기존에는 CLB(Classic LoadBalancer)라고 하는 여러 EC2 인스턴스간에 간단한 트래픽 부하 분산 하는 로드 밸런서도 있었지만, 최근에는 잘 사용하지 않습니다.</p>
+
+<h3 id="nlbnetwork-loadbalancer"><strong>NLB(Network LoadBalancer)</strong></h3>
+
+<p><img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/10_NLB.png" alt="NLB"></p>
+
+<ul>
+  <li>Client IP와 서버사이에 서버로 들어오는 트래픽은 Load Balancer를 통하고 나가는 트래픽은 Client IP와 직접 통신합니다.</li>
+  <li>NLB는 Security Group 적용이 되지 않아서 서버에 적용된 Security Group 에서 보안이 가능합니다.</li>
+  <li>Client → Server에서 Access 제한 가능</li>
+  <li>NLB는 할당한 Elastic IP 를 Static IP로 사용이 가능하여 DNS Name과 IP주소 모두 사용이 가능합니다.</li>
+  <li>Name Server 또는 Route 53에서 A Record 사용이 가능합니다.</li>
+</ul>
+
+<h3 id="albapplication-loadbalancer"><strong>ALB(Application LoadBalancer)</strong></h3>
+
+<p><img src="https://github.com/samgak-kimbap/fe-study/blob/main/NETWORK/images/10_ALB.png" alt="ALB"></p>
+
+<ul>
+  <li>Reverse Proxy 대로 Client IP와 서버사이에 들어오고 나가는 트래픽이 모두 Load Balancer 와 통신합니다.</li>
+  <li>CLB/ALB는 Security Group 을 통한 보안이 가능합니다.</li>
+  <li>Client → Load Balancer의 Access 제한 가능</li>
+  <li>ALB/CLB는 IP 주소가 변동되기 때문에 Client 에서 Access 할 ELB의 DNS Name을 이용해야 합니다.</li>
+  <li>Name Server 또는 Route 53에서 CNAME 을 사용해야 Domain Name 연동이 가능합니다.</li>
+</ul>
+
+<h2 id="load-balancing-algorithm-종류">Load Balancing algorithm 종류</h2>
+
+<p>로드 밸런싱의 알고리즘 종류는 어떤 것이 있을까요. 로드 밸런싱의 알고리즘은 여러가지가 있지만 그 중에서 몇가지만 정리 해봤습니다.</p>
+
+<h3 id="라운드-로빈-방식">라운드 로빈 방식</h3>
+
+<p>라운드 로빈(Round Robin Method)은 클라이언트로부터 받은 요청을 로드밸런싱 대상 서버에 순서대로 할당받는 방식입니다. 첫 번째 요청은 첫 번째 서버, 두 번째 요청은 두 번째 서버, 세 번째 요청은 세 번째 서버에 할당합니다. 로드밸러닝 대상 서버의 성능이 동일하고 처리 시간이 짧은 애플리케이션의 경우, 균등하게 분산이 이루어지기 때문에 이 방식을 사용합니다.</p>
+
+<h3 id="가중-라운드-로빈-방식">가중 라운드 로빈 방식</h3>
+
+<p>가중 라운드 로빈 방식(Weighted Round Robin Method)은 실제 서버에 서로 다른 처리 용량을 지정할 수 있습니다. 각 서버에 가중치를 부여할 수 있으며, 여기서 지정한 정숫값을 통해 처리 용량을 정합니다.</p>
+
+<h3 id="최소-연결-방식">최소 연결 방식</h3>
+
+<p>최소 연결 방식은 연결 수가 가장 적은 서버에 네트워크 연결방향을 정합니다. 동적인 분산 알고리즘으로 각 서버에 대한 현재 연결 수를 동적으로 카운트할 수 있고, 동적으로 변하는 요청에 대한 부하를 분산시킬 수 있습니다.</p>
+
+<h2 id="로드-밸런서의-종류와-비교">로드 밸런서의 종류와 비교</h2>
+
+<ul>
+  <li>
+<strong>AWS ELB</strong>: 클라우드 환경에서 자동 확장 및 관리 편의성이 필요할 때 적합.</li>
+  <li>
+<strong>Nginx</strong>: 웹 서버와 함께 리버스 프록시 및 L7 로드밸런서 역할을 할 때 유용.</li>
+  <li>
+<strong>HAProxy</strong>: 고성능, 저지연이 필요한 환경에서 효율적인 로드밸런싱을 원할 때 선택.</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>구분</strong></th>
+      <th><strong>AWS ELB</strong></th>
+      <th><strong>Nginx</strong></th>
+      <th><strong>HAProxy</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>유형</strong></td>
+      <td>클라우드 기반 로드밸런서</td>
+      <td>소프트웨어 기반 리버스 프록시 &amp; 로드밸런서</td>
+      <td>소프트웨어 기반 로드밸런서</td>
+    </tr>
+    <tr>
+      <td><strong>설치 방식</strong></td>
+      <td>AWS 관리형 서비스 (설치 불필요)</td>
+      <td>수동 설치 (서버에서 실행)</td>
+      <td>수동 설치 (서버에서 실행)</td>
+    </tr>
+    <tr>
+      <td><strong>지원 계층</strong></td>
+      <td>L4 (NLB), L7 (ALB)</td>
+      <td>L7 (HTTP/HTTPS) + 일부 L4</td>
+      <td>L4, L7 (완벽 지원)</td>
+    </tr>
+    <tr>
+      <td><strong>로드밸런싱 알고리즘</strong></td>
+      <td>라운드 로빈, Least Outstanding Requests, IP 해시</td>
+      <td>라운드 로빈, Least Connections, IP 해시</td>
+      <td>라운드 로빈, Least Connections, IP 해시, 가중 라운드 로빈</td>
+    </tr>
+    <tr>
+      <td><strong>SSL 종료</strong></td>
+      <td>지원 (ALB, NLB)</td>
+      <td>지원 (단, 별도 설정 필요)</td>
+      <td>지원 (단, 별도 설정 필요)</td>
+    </tr>
+    <tr>
+      <td><strong>세션 유지 (Sticky Session)</strong></td>
+      <td>지원</td>
+      <td>쿠키 기반 설정 가능</td>
+      <td>지원</td>
+    </tr>
+    <tr>
+      <td><strong>헬스 체크 (Health Check)</strong></td>
+      <td>기본 제공</td>
+      <td>별도 설정 필요</td>
+      <td>기본 제공</td>
+    </tr>
+    <tr>
+      <td><strong>고가용성</strong></td>
+      <td>AWS가 자동으로 관리</td>
+      <td>Active-Passive 설정 가능</td>
+      <td>Active-Passive 및 Active-Active 설정 가능</td>
+    </tr>
+    <tr>
+      <td><strong>확장성</strong></td>
+      <td>자동 스케일링 지원</td>
+      <td>수동 확장 필요</td>
+      <td>수동 확장 필요</td>
+    </tr>
+    <tr>
+      <td><strong>사용 사례</strong></td>
+      <td>클라우드 환경에서 확장성과 관리 편의성을 중시하는 경우</td>
+      <td>웹 서버와 함께 사용하는 리버스 프록시 &amp; 로드밸런서</td>
+      <td>고성능, 저지연이 필요한 로드밸런싱 환경</td>
+    </tr>
+    <tr>
+      <td><strong>주요 특징</strong></td>
+      <td>AWS 서비스와 통합, 자동 확장 및 복원력 제공</td>
+      <td>정적 콘텐츠 캐싱, 리버스 프록시 기능 포함</td>
+      <td>높은 성능과 낮은 리소스 사용량</td>
+    </tr>
+  </tbody>
+</table>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/network/2025/03/24/%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC_%EC%A3%BC%EC%86%8C_%EB%B3%80%ED%99%98.html" title="Network Address Translation, 네트워크 주소 변환">Network Address Translation, 네트워크 주소 변환...</a><a class="next" href="/journal/development%20diary/2026/07/11/lol-moim-incidents-01.html" title="[ 롤모임 운영일지 ] - 01. 배포하다가 겪은 사고 모음">[ 롤모임 운영일지 ] - 01....</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li class="">
+          <a class="post-link" href="/journal/development%20diary/2026/07/12/lol-moim-incidents-02-multitenancy.html" title="[ 롤모임 운영일지 ] - 02. 모임 하나짜리 서비스를 멀티테넌시로 바꾸기">
+            [ 롤모임 운영일지 ] - 02. 모임 하나짜리 서비스를 멀티테넌시로 바꾸기<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/llm/2026/07/22/llm-prompting-paper-01-chain-of-thought.html" title="LLM 프롬프팅 논문 스터디 - 01. Chain-of-Thought Prompting">
+            LLM 프롬프팅 논문 스터디 - 01. Chain-of-Thought Prompting<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/llm/2026/07/22/llm-prompting-paper-04-gpt3-few-shot.html" title="LLM 프롬프팅 논문 스터디 - 04. GPT-3, Language Models are Few-Shot Learners">
+            LLM 프롬프팅 논문 스터디 - 04. GPT-3, Language Models are Few-Shot Learners...<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/journal/development%20diary/2026/07/15/lol-moim-incidents-05-gke-sketch.html" title="[ 롤모임 운영일지 ] - 05. Cloud Run 서비스를 GKE로 옮긴다면 — 매니페스트 스케치">
+            [ 롤모임 운영일지 ] - 05. Cloud Run 서비스를 GKE로 옮긴다면 —...<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+</ul>
+    </div>
+<div class="post-comments">
+<div id="utterances-placeholder"></div>
+<script>
+  const utterancesThemeFromDataTheme = () => {
+    const dataTheme = document.documentElement.getAttribute('data-theme');
+    return `github-${dataTheme}`;
+  };
+
+  const setUtterancesTheme = () => {
+    const iframe = document.querySelector('.utterances-frame');
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: utterancesThemeFromDataTheme()
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  // dynamic change
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        setUtterancesTheme();
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
+
+  let utterancesScript = document.createElement('script');
+  utterancesScript.async = true;
+  utterancesScript.src = 'https://utteranc.es/client.js';
+  utterancesScript.crossOrigin = 'anonymous';
+  utterancesScript.setAttribute('issue-term', 'title');
+  utterancesScript.setAttribute('label', 'utterances comment');
+  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
+  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
+
+  const placeholder = document.getElementById('utterances-placeholder');
+  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
+</script>
+</div></section>
+</div>
+
+  </section><section class="sidebar"><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+    </div>
+  </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div class="footer-social">
+        <a href="https://github.com/kimmand0o0" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
+        <a href="mailto:maeran.dev.u@gmail.com" aria-label="Email"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+        <a href="/feed.xml" aria-label="RSS"><i class="fa fa-rss" aria-hidden="true"></i></a>
+      </div>
+      <div>Unpublished Work <span class="copyleft">©</span> 2017-2026 Haeran</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>

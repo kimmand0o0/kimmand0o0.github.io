@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Native cross-document page transitions (progressive enhancement, Chromium only) -->
+  <meta name="view-transition" content="same-origin">
+
+  <!-- Google Translate Customization (if needed) -->
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+
+  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>[ 롤모임 운영일지 ] - 02. 모임 하나짜리 서비스를 멀티테넌시로 바꾸기 | Haeran’s blog</title>
+<meta name="generator" content="Jekyll v4.4.1">
+<meta property="og:title" content="[ 롤모임 운영일지 ] - 02. 모임 하나짜리 서비스를 멀티테넌시로 바꾸기">
+<meta name="author" content="haeran">
+<meta property="og:locale" content="ko">
+<meta name="description" content="원래 이 서비스는 딱 하나의 롤 내전 모임(“이세계롤모임”)만을 위한 앱이었다. 그런데 다른 모임에서도 써보고 싶다는 얘기가 나오면서, 같은 코드베이스와 DB로 여러 “모임”을 동시에 운영하는 멀티테넌트 구조로 바꾸는 작업을 시작했다. 이번 편은 그 과정에서 세운 원칙, 실제로 짠 구조, 그리고 원칙과 다르게 흘러간 지점을 기록한다.">
+<meta property="og:description" content="원래 이 서비스는 딱 하나의 롤 내전 모임(“이세계롤모임”)만을 위한 앱이었다. 그런데 다른 모임에서도 써보고 싶다는 얘기가 나오면서, 같은 코드베이스와 DB로 여러 “모임”을 동시에 운영하는 멀티테넌트 구조로 바꾸는 작업을 시작했다. 이번 편은 그 과정에서 세운 원칙, 실제로 짠 구조, 그리고 원칙과 다르게 흘러간 지점을 기록한다.">
+<link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/12/lol-moim-incidents-02-multitenancy.html">
+<meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/12/lol-moim-incidents-02-multitenancy.html">
+<meta property="og:site_name" content="Haeran’s blog">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2026-07-12T11:00:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="[ 롤모임 운영일지 ] - 02. 모임 하나짜리 서비스를 멀티테넌시로 바꾸기">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"haeran"},"dateModified":"2026-07-12T11:00:00+00:00","datePublished":"2026-07-12T11:00:00+00:00","description":"원래 이 서비스는 딱 하나의 롤 내전 모임(“이세계롤모임”)만을 위한 앱이었다. 그런데 다른 모임에서도 써보고 싶다는 얘기가 나오면서, 같은 코드베이스와 DB로 여러 “모임”을 동시에 운영하는 멀티테넌트 구조로 바꾸는 작업을 시작했다. 이번 편은 그 과정에서 세운 원칙, 실제로 짠 구조, 그리고 원칙과 다르게 흘러간 지점을 기록한다.","headline":"[ 롤모임 운영일지 ] - 02. 모임 하나짜리 서비스를 멀티테넌시로 바꾸기","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/12/lol-moim-incidents-02-multitenancy.html"},"url":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/12/lol-moim-incidents-02-multitenancy.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- Favicon -->
+  <link rel="icon" href="/assets/images/favicon.ico">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/12/lol-moim-incidents-02-multitenancy.html">
+
+  <!-- Social Media (Open Graph, Twitter Card) -->
+  <meta property="og:title" content="[ 롤모임 운영일지 ] - 02. 모임 하나짜리 서비스를 멀티테넌시로 바꾸기">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+  <meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/12/lol-moim-incidents-02-multitenancy.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="[ 롤모임 운영일지 ] - 02. 모임 하나짜리 서비스를 멀티테넌시로 바꾸기">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+
+  <!-- Stylesheets and External Resources -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+
+  <!-- Editorial display typeface for headings only; body stays Noto Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- JavaScript -->
+  <script src="/assets/js/main.js"></script>
+
+  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
+<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
+<script>
+  function initGoogleAnalytics() {
+    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
+      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
+    var enableDNT = "false" == "true";
+
+    if (!enableDNT || !doNotTrack) {
+      var measurementId = 'G-ZNXE6HSKMS';
+
+      (function(src) {
+        var tag = document.createElement('script');
+        tag.src = src;
+        tag.async = true;
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', measurementId);
+    }
+  }
+  window.addEventListener("load", initGoogleAnalytics);
+</script>
+
+<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  // mermaid 블록은 highlight.js 대상에서 제외 — hljs가 addLangData에서 class를
+  // "language-mermaid" -> "hljs mermaid"로 덮어써버려서, mermaid.html의 렌더링 스크립트가
+  // 뒤늦게(load 시점) 찾으려는 .language-mermaid 셀렉터가 항상 빈 결과를 내는 원인이었음.
+  var els = document.querySelectorAll('pre code:not(.language-mermaid)')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
+<style>
+  .pswp .pswp__container .pswp__img {
+    background-color: white;
+  }
+</style>
+
+<script>
+  function initPhotoSwipe() {
+    let customOptions = {};
+
+    try {
+      const data = ``.replaceAll("=>", ":");
+      customOptions = JSON.parse(data);
+    } catch (e) {
+      console.info("Invalid custom photo previewer options! " + e.message);
+    }
+
+    // Define object and gallery options
+    const options = Object.assign(
+      {
+        gallery: "section.main",
+        children: "a.photo-swipe",
+        photo_scale: 2,
+        // dynamic import is not supported in UMD version
+        pswpModule: PhotoSwipe,
+      },
+      customOptions
+    );
+
+    const galleryEl = document.querySelector(options.gallery);
+    if (!galleryEl) {
+      return;
+    }
+
+    const imgEls = [];
+    const els = galleryEl.querySelectorAll("img:not(.emoji)");
+    els.forEach((el) => {
+      if (el.src.trim() == "") {
+        return;
+      }
+      if (!imgEls.includes(el)) {
+        imgEls.push(el);
+      }
+    });
+
+    if (imgEls.length === 0) {
+      return;
+    }
+
+    imgEls.forEach((imgEl) => {
+      imgEl.outerHTML = `
+      <a class="photo-swipe"
+        href="${imgEl.src}"
+        data-pswp-width="${
+          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
+        }"
+        data-pswp-height="${
+          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
+        }"
+        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
+        target="_blank">
+        ${imgEl.outerHTML}
+      </a>`;
+    });
+
+    // Initialize PhotoSwipe 5
+    var lightbox = new PhotoSwipeLightbox(options);
+
+    lightbox.init();
+  }
+
+  window.addEventListener("load", initPhotoSwipe);
+</script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+  function isDarkTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark';
+  }
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: isDarkTheme() ? 'dark' : 'default',
+  });
+
+  function renderMermaidBlocks() {
+    // kramdown/rouge render ```mermaid fences as <pre><code class="language-mermaid">...</code></pre>
+    // mermaid.js only auto-scans <div class="mermaid">, so swap the markup before running it.
+    const blocks = document.querySelectorAll('pre > code.language-mermaid');
+    if (blocks.length === 0) {
+      return;
+    }
+    blocks.forEach((code) => {
+      const graphDefinition = code.textContent;
+      const container = document.createElement('div');
+      container.className = 'mermaid';
+      container.textContent = graphDefinition;
+      code.parentElement.replaceWith(container);
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  }
+
+  window.addEventListener('load', renderMermaidBlocks);
+</script>
+<!-- Custom Head HTML (if any) -->
+
+<!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 assets/js/chat-widget.js -->
+<script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
+  Haeran's blog
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/search.html">SEARCH</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<div class="page-link" style="display: inline;">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<div class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="fr">
+          
+          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="zh-CN">
+          
+          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ja">
+          
+          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ko">
+          
+          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ru">
+          
+          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
+          
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ko',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+</div>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    // 항상 localStorage를 사용 — 'auto' 모드에서도 유저가 직접 누른 토글이
+    // 브라우저 세션이 끝났다고 사라지지 않고, 다음 예약된 자동 전환 시점까지 유지된다.
+    var storage = localStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var blocks = document.querySelectorAll('pre');
+
+  function addCopyButton(pre) {
+    if (pre.querySelector('.code-copy-btn')) return;
+    var code = pre.querySelector('code');
+    if (!code) return;
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'code-copy-btn';
+    btn.textContent = 'Copy';
+    pre.appendChild(btn);
+
+    btn.addEventListener('click', function () {
+      var text = code.textContent;
+
+      function done(ok) {
+        btn.textContent = ok ? 'Copied!' : 'Failed';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+        return;
+      }
+
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        done(document.execCommand('copy'));
+      } catch (e) {
+        done(false);
+      }
+      document.body.removeChild(ta);
+    });
+  }
+
+  for (var i = 0; i < blocks.length; i++) {
+    addCopyButton(blocks[i]);
+  }
+});
+</script>
+<main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <div class="framework">
+  <section class="main">
+
+     <div class="reading-progress" aria-hidden="true">
+  <div class="reading-progress-bar" id="reading-progress-bar"></div>
+</div>
+
+<script>
+(function () {
+  var bar = document.getElementById('reading-progress-bar');
+  var article = document.querySelector('.post-content');
+  if (!bar || !article) return;
+
+  function update() {
+    var rect = article.getBoundingClientRect();
+    var articleTop = rect.top + window.pageYOffset;
+    var total = article.offsetHeight - window.innerHeight;
+    var scrolled = window.pageYOffset - articleTop;
+    var pct = total > 0 ? Math.min(100, Math.max(0, (scrolled / total) * 100)) : 100;
+    bar.style.width = pct + '%';
+  }
+
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+</script>
+<div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">[ 롤모임 운영일지 ] - 02. 모임 하나짜리 서비스를 멀티테넌시로 바꾸기</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <div class="post-meta">
+    <time class="dt-published" datetime="2026-07-12T11:00:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Jul 12, 2026
+    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 28 mins</span>
+  </div>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#%EC%9A%B4%EC%98%81%EC%9D%BC%EC%A7%80">#운영일지</a><a class="post-tag" href="/tags.html#%EB%A9%80%ED%8B%B0%ED%85%8C%EB%84%8C%EC%8B%9C">#멀티테넌시</a><a class="post-tag" href="/tags.html#%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98">#아키텍처</a><a class="post-tag" href="/tags.html#Prisma">#Prisma</a><a class="post-tag" href="/tags.html#PostgreSQL">#PostgreSQL</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <p>원래 이 서비스는 딱 하나의 롤 내전 모임(“이세계롤모임”)만을 위한 앱이었다. 그런데 다른 모임에서도 써보고 싶다는 얘기가 나오면서, 같은 코드베이스와 DB로 여러 “모임”을 동시에 운영하는 멀티테넌트 구조로 바꾸는 작업을 시작했다. 이번 편은 그 과정에서 세운 원칙, 실제로 짠 구조, 그리고 원칙과 다르게 흘러간 지점을 기록한다.</p>
+
+<h2 id="시작하기-전-세운-원칙-함부로-시작하지-않기">시작하기 전 세운 원칙: 함부로 시작하지 않기</h2>
+
+<p>멀티테넌시는 손대는 범위가 앱 전체라 잘못하면 기존 모임(이하 “원조 모임”)의 데이터가 새는 사고로 직결된다. 그래서 사전 산정 문서(<code class="language-plaintext highlighter-rouge">docs/MULTITENANCY_ESTIMATE.md</code>)에 이런 게이트를 박아뒀다.</p>
+
+<blockquote>
+  <p>“두 번째 모임이 실제로 들어오기로 확정되면 그때 Phase 1 시작”</p>
+</blockquote>
+
+<p>즉 확정되지 않은 미래를 위해 미리 만들지 않는다는 것. 그리고 실제 Phase 1 진행 문서(<code class="language-plaintext highlighter-rouge">docs/PHASE1_MULTITENANCY.md</code>)에는 이렇게 적어뒀다.</p>
+
+<blockquote>
+  <p>“한 번에 main 배포 금지. 각 하위 단계는 ‘기존 동작 불변’을 보장한 채 점진 적용.”</p>
+</blockquote>
+
+<p>이 두 문장이 이후 모든 결정의 기준이 됐다.</p>
+
+<p><br></p>
+
+<h2 id="1-테넌트-모델--기존-데이터를-group-1로-만드는-트릭">1. 테넌트 모델 — 기존 데이터를 “group 1”로 만드는 트릭</h2>
+
+<p><code class="language-plaintext highlighter-rouge">Group</code>을 새로 만들고, 모임에 종속되는 54개 모델 전부에 <code class="language-plaintext highlighter-rouge">groupId</code>를 추가했다.</p>
+
+<pre><code class="language-prisma">// packages/api/prisma/schema.prisma
+// 멀티테넌시 토대 — 하나의 "모임"(테넌트). 기존 데이터는 모두 group 1(원조 모임)에 속한다.
+model Group {
+  id                Int       @id @default(autoincrement())
+  name              String
+  slug              String    @unique
+  subscriptionUntil DateTime?
+  createdAt         DateTime  @default(now())
+  deletedAt         DateTime?
+}
+</code></pre>
+
+<p>핵심은 <code class="language-plaintext highlighter-rouge">groupId Int @default(1)</code>이라는 기본값이다. 이 컬럼을 추가하는 순간, 이미 존재하던 모든 로우가 자동으로 “group 1”(원조 모임)에 속하게 된다. 별도의 백필 스크립트나 다운타임 없이, 스키마 변경 한 번으로 기존 서비스를 그대로 첫 번째 테넌트로 편입시킨 셈이다.</p>
+
+<p><br></p>
+
+<h2 id="2-테넌트-구분--서브도메인-대신-헤더">2. 테넌트 구분 — 서브도메인 대신 헤더</h2>
+
+<p>모임마다 서브도메인을 따로 파는 대신, 프론트가 현재 보고 있는 모임의 slug를 헤더로 실어 보내는 경로 방식을 택했다.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/api/src/middleware/group.ts</span>
+<span class="c1">// 경로 방식 멀티테넌시: 프론트가 현재 모임 slug를 헤더(X-Group-Slug)로 보낸다.</span>
+<span class="c1">//   /g/isegye/... 화면 → 모든 API 호출에 X-Group-Slug: isegye</span>
+<span class="c1">// 헤더가 없으면 'default'(원조 모임 group 1) → 기존 동작 유지(점진 적용).</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">groupMiddleware</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">_res</span><span class="p">,</span> <span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">slug</span> <span class="o">=</span> <span class="p">(</span><span class="nx">req</span><span class="p">.</span><span class="nf">header</span><span class="p">(</span><span class="dl">"</span><span class="s2">X-Group-Slug</span><span class="dl">"</span><span class="p">)</span> <span class="o">||</span> <span class="dl">"</span><span class="s2">default</span><span class="dl">"</span><span class="p">).</span><span class="nf">toLowerCase</span><span class="p">();</span>
+  <span class="nf">resolveGroupId</span><span class="p">(</span><span class="nx">slug</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">then</span><span class="p">((</span><span class="nx">groupId</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nf">runWithGroup</span><span class="p">(</span><span class="nx">groupId</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">next</span><span class="p">()))</span>
+    <span class="p">.</span><span class="k">catch</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="nf">runWithGroup</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">next</span><span class="p">()));</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>알 수 없는 slug가 들어오면 무조건 group 1로 폴백한다. “점진 적용”이라는 원칙을 코드 레벨에서 지키기 위한 안전장치다. 이렇게 정해진 <code class="language-plaintext highlighter-rouge">groupId</code>는 요청 전체에서 <code class="language-plaintext highlighter-rouge">AsyncLocalStorage</code>로 들고 다닌다.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/api/src/lib/group-context.ts</span>
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">groupContext</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AsyncLocalStorage</span><span class="o">&lt;</span><span class="p">{</span> <span class="na">groupId</span><span class="p">:</span> <span class="kr">number</span> <span class="p">}</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">getGroupId</span><span class="p">():</span> <span class="kr">number</span> <span class="o">|</span> <span class="kc">null</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">groupContext</span><span class="p">.</span><span class="nf">getStore</span><span class="p">()?.</span><span class="nx">groupId</span> <span class="o">??</span> <span class="kc">null</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>cron이나 WS 서버처럼 요청 컨텍스트 바깥에서는 <code class="language-plaintext highlighter-rouge">getGroupId()</code>가 그냥 <code class="language-plaintext highlighter-rouge">null</code>을 반환한다 — 여기서 스코핑을 억지로 흉내내지 않고, 필요하면 각자 알아서 <code class="language-plaintext highlighter-rouge">groupId</code>를 명시하도록 한 것도 의도적인 선택이다.</p>
+
+<p><br></p>
+
+<h2 id="3-격리-방식--계획은-rls였는데-실제로는-prisma-extension">3. 격리 방식 — 계획은 RLS였는데, 실제로는 Prisma Extension</h2>
+
+<p>여기가 이번 작업에서 계획과 결과가 가장 크게 갈린 지점이다. Phase 1 문서의 “핵심 결정” 항목에는 이렇게 적혀 있었다.</p>
+
+<blockquote>
+  <p>“격리 방식: Postgres RLS (Prisma client extension 대비 누락 원천 차단).”</p>
+</blockquote>
+
+<p>즉 원래는 Postgres의 Row Level Security로 DB 레벨에서 강제하려 했다. 이유도 명확히 적어뒀다 — RLS는 “쿼리 하나가 격리 로직을 빠뜨리는” 실수를 원천 차단할 수 있기 때문이다.</p>
+
+<p>그런데 실제로 짠 건 앱 레벨의 Prisma Client Extension이다.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/api/src/lib/prisma.ts</span>
+<span class="kd">function</span> <span class="nf">scopeWhere</span><span class="p">(</span><span class="nx">args</span><span class="p">,</span> <span class="nx">model</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="nf">hasSoftDelete</span><span class="p">(</span><span class="nx">model</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">args</span><span class="p">.</span><span class="nx">where</span><span class="p">?.</span><span class="nx">deletedAt</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">args</span><span class="p">.</span><span class="nx">where</span> <span class="o">=</span> <span class="p">{</span> <span class="p">...(</span><span class="nx">args</span><span class="p">.</span><span class="nx">where</span> <span class="o">??</span> <span class="p">{}),</span> <span class="na">deletedAt</span><span class="p">:</span> <span class="kc">null</span> <span class="p">};</span>
+  <span class="p">}</span>
+  <span class="kd">const</span> <span class="nx">gid</span> <span class="o">=</span> <span class="nf">getGroupId</span><span class="p">();</span>
+  <span class="k">if </span><span class="p">(</span><span class="nf">hasTenant</span><span class="p">(</span><span class="nx">model</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">gid</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="nx">args</span><span class="p">.</span><span class="nx">where</span><span class="p">?.</span><span class="nx">groupId</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">args</span><span class="p">.</span><span class="nx">where</span> <span class="o">=</span> <span class="p">{</span> <span class="p">...(</span><span class="nx">args</span><span class="p">.</span><span class="nx">where</span> <span class="o">??</span> <span class="p">{}),</span> <span class="na">groupId</span><span class="p">:</span> <span class="nx">gid</span> <span class="p">};</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">findMany</code>/<code class="language-plaintext highlighter-rouge">findFirst</code>/<code class="language-plaintext highlighter-rouge">count</code>/<code class="language-plaintext highlighter-rouge">aggregate</code>/<code class="language-plaintext highlighter-rouge">groupBy</code> 같은 조회는 <code class="language-plaintext highlighter-rouge">where</code>에 <code class="language-plaintext highlighter-rouge">groupId</code>가 자동으로 끼워지고, <code class="language-plaintext highlighter-rouge">create</code>/<code class="language-plaintext highlighter-rouge">upsert</code>는 <code class="language-plaintext highlighter-rouge">groupId</code>가 자동 태깅되고, <code class="language-plaintext highlighter-rouge">delete</code>는 아예 soft-delete <code class="language-plaintext highlighter-rouge">update</code>로 바뀐다. <code class="language-plaintext highlighter-rouge">findUnique</code>처럼 Prisma가 <code class="language-plaintext highlighter-rouge">where</code>에 유니크 컬럼만 허용하는 경우는 결과를 받은 뒤 코드에서 다시 필터링한다. 정말 어쩔 수 없이 격리를 우회해야 하는 경우를 위해 <code class="language-plaintext highlighter-rouge">basePrisma</code>라는 탈출구도 만들어뒀는데, 이건 호출하는 쪽이 직접 <code class="language-plaintext highlighter-rouge">groupId</code>/<code class="language-plaintext highlighter-rouge">deletedAt</code>을 챙겨야 한다는 경고 주석과 함께 export된다.</p>
+
+<p><strong>그리고 문서가 걱정했던 바로 그 문제가 실제로 터졌다.</strong> 이후 커밋 로그에 이런 게 남아있다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>a63c8940 fix(tenant): 크로스그룹 누출 2건 차단 (Tier 1)
+d7a86cdc feat(tenant): 유니크/BetCoin/파이프라인/알림 모임별 스코프 (Tier 3-5)
+cb9f2df6 fix(multitenancy): 시즌 조회 groupId 누락 전수 수정 + 크로스테넌트 캐시 누출 수정
+</code></pre></div></div>
+
+<p>Extension이 자동으로 못 걸러주는 경로 — <code class="language-plaintext highlighter-rouge">basePrisma</code>를 쓴 곳, raw SQL, 캐시에 저장된 값 등 — 에서 <code class="language-plaintext highlighter-rouge">groupId</code>를 깜빡한 채로 다른 모임의 데이터가 새는 사고가 몇 차례 있었고, 그때마다 하나씩 찾아서 막았다. RLS였다면 DB가 강제로 막아줬을 실수를, 지금 구조에서는 “빠짐없이 짜는 사람의 주의력”에 의존하고 있는 셈이다. 왜 RLS 대신 Extension을 택했는지는 기록에 남아있지 않지만, 결과적으로 “설계에서 우려했던 리스크가 그대로 실현된 뒤 하나씩 두더지 잡기로 막은” 사례라서 남겨둔다.</p>
+
+<p><br></p>
+
+<h2 id="4-플러그인-시스템--기능을-모임별로-켜고-끄기">4. 플러그인 시스템 — 기능을 모임별로 켜고 끄기</h2>
+
+<p>멀티테넌시와 별개로, 모임마다 필요한 기능이 다를 수 있다는 전제 하에 기능 자체를 플러그인화했다.</p>
+
+<pre><code class="language-prisma">model Plugin {          // 전역 카탈로그
+  key            String  @unique   // "mentoring", "league", "streak-bet" ...
+  active         Boolean @default(true)   // 플랫폼 전체 킬스위치
+  hidden         Boolean @default(false)  // 베타: 스토어엔 안 보이지만 켜져있으면 게이트 통과
+  requiresPlugin String?                  // 하위 플러그인 의존성
+  price          Int     @default(0)      // 아직 결제는 미구현, 가격만 존재
+}
+
+model GroupPlugin {     // 모임별 설치/on-off 상태
+  groupId  Int
+  pluginId Int
+  enabled  Boolean @default(true)
+  @@unique([groupId, pluginId])
+}
+</code></pre>
+
+<p>라우터 단위로 게이트를 건다.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/api/src/middleware/plugin.ts</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">requirePlugin</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">async </span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">next</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">account</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">extractAccount</span><span class="p">(</span><span class="nx">req</span><span class="p">);</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">account</span><span class="p">?.</span><span class="nx">platformAdmin</span><span class="p">)</span> <span class="k">return</span> <span class="nf">next</span><span class="p">();</span>       <span class="c1">// 플랫폼 관리자는 항상 통과</span>
+    <span class="kd">const</span> <span class="nx">meta</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">pluginMetaByKey</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">meta</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="k">return</span> <span class="nf">next</span><span class="p">();</span>                   <span class="c1">// 모르는 키는 fail-open</span>
+    <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">meta</span><span class="p">.</span><span class="nx">active</span><span class="p">)</span> <span class="k">return</span> <span class="nx">res</span><span class="p">.</span><span class="nf">status</span><span class="p">(</span><span class="mi">403</span><span class="p">).</span><span class="nf">json</span><span class="p">({</span> <span class="na">pluginDisabled</span><span class="p">:</span> <span class="nx">key</span> <span class="p">});</span>
+    <span class="kd">const</span> <span class="nx">gid</span> <span class="o">=</span> <span class="nf">getGroupId</span><span class="p">()</span> <span class="o">??</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">if </span><span class="p">((</span><span class="k">await</span> <span class="nf">enabledIds</span><span class="p">(</span><span class="nx">gid</span><span class="p">)).</span><span class="nf">has</span><span class="p">(</span><span class="nx">meta</span><span class="p">.</span><span class="nx">id</span><span class="p">))</span> <span class="k">return</span> <span class="nf">next</span><span class="p">();</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nf">status</span><span class="p">(</span><span class="mi">403</span><span class="p">).</span><span class="nf">json</span><span class="p">({</span> <span class="na">pluginDisabled</span><span class="p">:</span> <span class="nx">key</span> <span class="p">});</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/api/src/index.ts</span>
+<span class="nx">app</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="dl">"</span><span class="s2">/api/streak-bets</span><span class="dl">"</span><span class="p">,</span> <span class="nx">requireMember</span><span class="p">,</span> <span class="nf">requirePlugin</span><span class="p">(</span><span class="dl">"</span><span class="s2">streak-bet</span><span class="dl">"</span><span class="p">),</span> <span class="nx">streakBetsRouter</span><span class="p">);</span>
+<span class="nx">app</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="dl">"</span><span class="s2">/api/season-pass</span><span class="dl">"</span><span class="p">,</span> <span class="nx">requireMember</span><span class="p">,</span> <span class="nf">requirePlugin</span><span class="p">(</span><span class="dl">"</span><span class="s2">season-pass</span><span class="dl">"</span><span class="p">),</span> <span class="nx">seasonPassRouter</span><span class="p">);</span>
+<span class="nx">app</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="dl">"</span><span class="s2">/api/mentoring</span><span class="dl">"</span><span class="p">,</span> <span class="nx">requireMember</span><span class="p">,</span> <span class="nf">requirePlugin</span><span class="p">(</span><span class="dl">"</span><span class="s2">mentoring</span><span class="dl">"</span><span class="p">),</span> <span class="nx">mentoringRouter</span><span class="p">);</span>
+<span class="c1">// ...</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">Plugin.active</code>(플랫폼 전체 스위치)와 <code class="language-plaintext highlighter-rouge">GroupPlugin.enabled</code>(모임별 스위치)를 이중으로 두어서, “아직 베타라 전체 배포는 안 했지만 특정 모임에서만 테스트하고 싶다”거나 반대로 “장애가 나서 전 모임에서 즉시 꺼야 한다” 같은 상황을 둘 다 커버한다. <code class="language-plaintext highlighter-rouge">requiresPlugin</code>으로 <code class="language-plaintext highlighter-rouge">season-pass-name-effect</code> 같은 하위 기능이 <code class="language-plaintext highlighter-rouge">season-pass</code>에 의존하는 체인도 표현할 수 있다.</p>
+
+<p>한 가지 눈에 띄는 점: <code class="language-plaintext highlighter-rouge">requirePlugin</code>은 라우터를 마운트하는 순간에만 걸려있고, 정작 가장 먼저 만들어진 핵심 기능인 경매(auction)에는 이 게이트가 안 걸려 있다. 플러그인 시스템이 생기기 전부터 있던 기능이라 “코어”로 취급하고 있어서인데, 나중에 경매도 모임별로 켜고 끌 수 있어야 한다면 이 지점부터 손대야 한다.</p>
+
+<p><br></p>
+
+<h2 id="5-권한-2축-모델--그리고-이걸-바꾸다가-운영진-권한을-다-날려먹은-사건">5. 권한 2축 모델 — 그리고 이걸 바꾸다가 운영진 권한을 다 날려먹은 사건</h2>
+
+<p>권한을 두 축으로 나눴다.</p>
+
+<ul>
+  <li>
+<strong>플랫폼 축</strong> (<code class="language-plaintext highlighter-rouge">Account</code> 레벨): <code class="language-plaintext highlighter-rouge">platformAdmin</code>(슈퍼관리자), <code class="language-plaintext highlighter-rouge">group_creator</code>(모임 생성 권한, <code class="language-plaintext highlighter-rouge">AccountPermission</code>에 저장), <code class="language-plaintext highlighter-rouge">Group.subscriptionUntil</code>(모임 구독 만료일 — 신규 모임은 30일 체험)</li>
+  <li>
+<strong>모임 축</strong> (<code class="language-plaintext highlighter-rouge">Membership</code> 레벨): 모임마다 <code class="language-plaintext highlighter-rouge">user &lt; admin &lt; sub_owner(최대 3명) &lt; owner</code> 계층의 역할</li>
+</ul>
+
+<p>문제는 기존 코드 전체가 글로벌 <code class="language-plaintext highlighter-rouge">Account.role</code>(모임 구분 없는 단일 역할 필드) 하나로 관리자 여부를 판단하고 있었다는 것. 멀티테넌시를 위해 이 글로벌 role을 없애고 모든 역할 판단을 “현재 모임 기준”으로 바꾸는 작업을 하다가, 다음 사고가 났다.</p>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">d286da3b</code> — “fix(roles): account.role을 현재 모임 역할로 치환 — 글로벌 역할 폐지로 끊긴 운영진 권한 복구”</p>
+
+  <p>“글로벌 Account.role을 user로 내리면서 account.role===admin으로 운영진을 판정하던 경매 진행(requireAuctionHost)·LFG·미션·리그·토너먼트 등이 모두 끊김.”</p>
+</blockquote>
+
+<p>글로벌 <code class="language-plaintext highlighter-rouge">role</code>을 손대는 순간, 그 필드를 직접 참조하던 곳들이 전부 조용히 권한을 잃었다. 경매 진행, LFG, 미션, 리그, 토너먼트 — 운영에 쓰이는 기능 대부분이었다.</p>
+
+<p>해결은 <code class="language-plaintext highlighter-rouge">account.role</code> 자체를 매 요청마다 “현재 모임의 Membership.role”로 치환해서 내려주는 방식이었다.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/api/src/middleware/auth.ts (scopeRoleToGroup)</span>
+<span class="c1">// account.role/permissions를 "현재 모임 기준"으로 치환 — 모임별 운영진·세부권한 판정의 단일 소스.</span>
+<span class="c1">// 토큰 캐시(60초)가 다른 모임의 권한을 새어 나가게 하지 않도록 매 요청마다 현재 모임 기준으로 다시 조회</span>
+<span class="k">async</span> <span class="kd">function</span> <span class="nf">scopeRoleToGroup</span><span class="p">(</span><span class="nx">base</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">gid</span> <span class="o">=</span> <span class="nf">getGroupId</span><span class="p">()</span> <span class="o">??</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">m</span><span class="p">,</span> <span class="nx">permissions</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="nb">Promise</span><span class="p">.</span><span class="nf">all</span><span class="p">([</span>
+    <span class="nx">prisma</span><span class="p">.</span><span class="nx">membership</span><span class="p">.</span><span class="nf">findFirst</span><span class="p">({</span> <span class="na">where</span><span class="p">:</span> <span class="p">{</span> <span class="na">accountId</span><span class="p">:</span> <span class="nx">base</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="na">groupId</span><span class="p">:</span> <span class="nx">gid</span><span class="p">,</span> <span class="na">approved</span><span class="p">:</span> <span class="kc">true</span> <span class="p">},</span> <span class="na">select</span><span class="p">:</span> <span class="p">{</span> <span class="na">role</span><span class="p">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">}),</span>
+    <span class="nf">fetchPermissions</span><span class="p">(</span><span class="nx">base</span><span class="p">.</span><span class="nx">id</span><span class="p">),</span>
+  <span class="p">]);</span>
+  <span class="k">return</span> <span class="p">{</span> <span class="p">...</span><span class="nx">base</span><span class="p">,</span> <span class="na">role</span><span class="p">:</span> <span class="nx">m</span><span class="p">?.</span><span class="nx">role</span> <span class="o">??</span> <span class="dl">"</span><span class="s2">user</span><span class="dl">"</span><span class="p">,</span> <span class="nx">permissions</span> <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>기존에 <code class="language-plaintext highlighter-rouge">account.role === "admin"</code>을 체크하던 코드는 단 한 줄도 안 바꿔도 됐다 — <code class="language-plaintext highlighter-rouge">account.role</code>이라는 이름은 그대로 두고, 그 값을 채워 넣는 방식만 “글로벌 필드 읽기”에서 “현재 모임의 Membership 조회 결과”로 바꿨기 때문이다. 여기서 60초짜리 토큰 캐시가 다른 모임의 권한을 새어 보내지 않도록 매 요청마다 다시 조회하게 만든 것도 포인트 — 캐시와 멀티테넌시를 같이 쓸 때 흔히 나는 실수를 미리 막아둔 셈이다.</p>
+
+<p><br></p>
+
+<h2 id="6-진행-순서--커밋-메시지로-남긴-phase-로그">6. 진행 순서 — 커밋 메시지로 남긴 Phase 로그</h2>
+
+<p>별도 티켓 시스템 없이, 커밋 메시지 prefix로만 진행 단계를 추적했다.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>커밋</th>
+      <th>내용</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">multitenancy 1-1</code></td>
+      <td>Group(테넌트) 토대 추가</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">multitenancy 1-2</code></td>
+      <td>모임 종속 54개 모델에 groupId 추가</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">multitenancy 1-3a</code></td>
+      <td>Prisma extension 기반 groupId 자동 주입</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">multitenancy 1-4a</code></td>
+      <td>Membership(계정-모임 다대다) 토대</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">multitenancy 1-4b</code></td>
+      <td>미들웨어 slug 기반 모임 컨텍스트 (경로 방식)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>이후 첫 입장 화면(<code class="language-plaintext highlighter-rouge">/g/:slug</code> 모임 홈), 모임 생성/설정 플로우, 크로스그룹 누출 수정들이 순서대로 이어졌다.</p>
+
+<p><br></p>
+
+<h2 id="정리--배운-것">정리 — 배운 것</h2>
+
+<ol>
+  <li>
+<strong>“확정되지 않은 미래를 위해 미리 만들지 않는다”는 원칙이 실제로 지켜졌다.</strong> 두 번째 모임이 확정되기 전까지 멀티테넌시에 손대지 않은 덕분에, 정말 필요해졌을 때 명확한 목표(경로 방식, X-Group-Slug)를 갖고 시작할 수 있었다.</li>
+  <li>
+<strong>설계 문서의 우려는 대개 맞다.</strong> RLS를 포기하고 Prisma Extension을 택한 뒤, 문서가 정확히 예견했던 “격리 누락”이 실제로 여러 번 터졌다. 설계 단계에서 “이 방식은 이런 실수를 못 막는다”고 적어뒀다면, 그 실수가 날 걸 각오하고 가는 것이다.</li>
+  <li>
+<strong>이름을 유지한 채 값을 채우는 방식을 바꾸면, 파급 범위를 최소화할 수 있다.</strong> <code class="language-plaintext highlighter-rouge">account.role</code>이라는 필드명과 그걸 참조하는 코드는 그대로 두고, 값을 계산하는 로직만 “글로벌 → 모임별”로 바꿔서 기존 권한 체크 코드를 하나도 안 건드리고 마이그레이션할 수 있었다. (물론 그 전환 자체는 한 번 사고를 내고서야 제대로 됐지만.)</li>
+  <li>
+<strong><code class="language-plaintext highlighter-rouge">groupId Int @default(1)</code>처럼 디폴트값을 이용하면 다운타임 없이 기존 데이터를 새 모델에 편입시킬 수 있다.</strong> 스키마 변경 한 번으로 “기존 서비스 = 첫 번째 테넌트”가 자동으로 성립했다.</li>
+</ol>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/journal/development%20diary/2026/07/11/lol-moim-incidents-01.html" title="[ 롤모임 운영일지 ] - 01. 배포하다가 겪은 사고 모음">[ 롤모임 운영일지 ] - 01....</a><a class="next" href="/journal/development%20diary/2026/07/13/lol-moim-incidents-03-auction-phase.html" title="[ 롤모임 운영일지 ] - 03. 두 서버가 같은 상태를 나눠 가지면 생기는 일 (실시간 경매 편)">[ 롤모임 운영일지 ] - 03....</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li class="">
+          <a class="post-link" href="/study/llm/2026/07/23/llm-prompting-paper-06-react.html" title="LLM 프롬프팅 논문 스터디 - 06. ReAct, Synergizing Reasoning and Acting">
+            LLM 프롬프팅 논문 스터디 - 06. ReAct, Synergizing Reasoning and Acting<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/javascript/2025/01/09/promises-callback-sync.html" title="Promises API, Callback API, Synchronous API">
+            Promises API, Callback API, Synchronous API<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/journal/development%20diary/2026/07/22/k8s-study-04-service.html" title="[ K8s 스터디 ] - 04. Service, Pod가 죽어도 안 바뀌는 주소">
+            [ K8s 스터디 ] - 04. Service, Pod가 죽어도 안 바뀌는 주소...<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/javascript/2025/01/24/OOP.html" title="객체지향 프로그래밍 (Object-Oriented Programming, OOP)">
+            객체지향 프로그래밍 (Object-Oriented Programming, OOP)<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+</ul>
+    </div>
+<div class="post-comments">
+<div id="utterances-placeholder"></div>
+<script>
+  const utterancesThemeFromDataTheme = () => {
+    const dataTheme = document.documentElement.getAttribute('data-theme');
+    return `github-${dataTheme}`;
+  };
+
+  const setUtterancesTheme = () => {
+    const iframe = document.querySelector('.utterances-frame');
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: utterancesThemeFromDataTheme()
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  // dynamic change
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        setUtterancesTheme();
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
+
+  let utterancesScript = document.createElement('script');
+  utterancesScript.async = true;
+  utterancesScript.src = 'https://utteranc.es/client.js';
+  utterancesScript.crossOrigin = 'anonymous';
+  utterancesScript.setAttribute('issue-term', 'title');
+  utterancesScript.setAttribute('label', 'utterances comment');
+  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
+  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
+
+  const placeholder = document.getElementById('utterances-placeholder');
+  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
+</script>
+</div></section>
+</div>
+
+  </section><section class="sidebar"><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+    </div>
+  </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div class="footer-social">
+        <a href="https://github.com/kimmand0o0" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
+        <a href="mailto:maeran.dev.u@gmail.com" aria-label="Email"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+        <a href="/feed.xml" aria-label="RSS"><i class="fa fa-rss" aria-hidden="true"></i></a>
+      </div>
+      <div>Unpublished Work <span class="copyleft">©</span> 2017-2026 Haeran</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>

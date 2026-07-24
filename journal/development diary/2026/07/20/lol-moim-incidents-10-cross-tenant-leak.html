@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Native cross-document page transitions (progressive enhancement, Chromium only) -->
+  <meta name="view-transition" content="same-origin">
+
+  <!-- Google Translate Customization (if needed) -->
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+
+  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>[ 롤모임 운영일지 ] - 10. 격리 설계가 우려했던 바로 그 사고 — 크로스테넌트 누출 실전편 | Haeran’s blog</title>
+<meta name="generator" content="Jekyll v4.4.1">
+<meta property="og:title" content="[ 롤모임 운영일지 ] - 10. 격리 설계가 우려했던 바로 그 사고 — 크로스테넌트 누출 실전편">
+<meta name="author" content="haeran">
+<meta property="og:locale" content="ko">
+<meta name="description" content="02편에서 “설계 문서는 Postgres RLS를 원했지만 실제로는 Prisma Client Extension으로 테넌트 격리를 구현했고, 이후 크로스그룹 누출이 몇 차례 났다”고 짧게 언급했었다. 이번 편은 그 사고의 실제 내용이다. 같은 날 아침 20분 사이에 연달아 발견되고 고쳐진 세 커밋 이야기다.">
+<meta property="og:description" content="02편에서 “설계 문서는 Postgres RLS를 원했지만 실제로는 Prisma Client Extension으로 테넌트 격리를 구현했고, 이후 크로스그룹 누출이 몇 차례 났다”고 짧게 언급했었다. 이번 편은 그 사고의 실제 내용이다. 같은 날 아침 20분 사이에 연달아 발견되고 고쳐진 세 커밋 이야기다.">
+<link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/20/lol-moim-incidents-10-cross-tenant-leak.html">
+<meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/20/lol-moim-incidents-10-cross-tenant-leak.html">
+<meta property="og:site_name" content="Haeran’s blog">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2026-07-20T11:00:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="[ 롤모임 운영일지 ] - 10. 격리 설계가 우려했던 바로 그 사고 — 크로스테넌트 누출 실전편">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"haeran"},"dateModified":"2026-07-20T11:00:00+00:00","datePublished":"2026-07-20T11:00:00+00:00","description":"02편에서 “설계 문서는 Postgres RLS를 원했지만 실제로는 Prisma Client Extension으로 테넌트 격리를 구현했고, 이후 크로스그룹 누출이 몇 차례 났다”고 짧게 언급했었다. 이번 편은 그 사고의 실제 내용이다. 같은 날 아침 20분 사이에 연달아 발견되고 고쳐진 세 커밋 이야기다.","headline":"[ 롤모임 운영일지 ] - 10. 격리 설계가 우려했던 바로 그 사고 — 크로스테넌트 누출 실전편","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/20/lol-moim-incidents-10-cross-tenant-leak.html"},"url":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/20/lol-moim-incidents-10-cross-tenant-leak.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- Favicon -->
+  <link rel="icon" href="/assets/images/favicon.ico">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/20/lol-moim-incidents-10-cross-tenant-leak.html">
+
+  <!-- Social Media (Open Graph, Twitter Card) -->
+  <meta property="og:title" content="[ 롤모임 운영일지 ] - 10. 격리 설계가 우려했던 바로 그 사고 — 크로스테넌트 누출 실전편">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+  <meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/20/lol-moim-incidents-10-cross-tenant-leak.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="[ 롤모임 운영일지 ] - 10. 격리 설계가 우려했던 바로 그 사고 — 크로스테넌트 누출 실전편">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+
+  <!-- Stylesheets and External Resources -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+
+  <!-- Editorial display typeface for headings only; body stays Noto Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- JavaScript -->
+  <script src="/assets/js/main.js"></script>
+
+  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
+<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
+<script>
+  function initGoogleAnalytics() {
+    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
+      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
+    var enableDNT = "false" == "true";
+
+    if (!enableDNT || !doNotTrack) {
+      var measurementId = 'G-ZNXE6HSKMS';
+
+      (function(src) {
+        var tag = document.createElement('script');
+        tag.src = src;
+        tag.async = true;
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', measurementId);
+    }
+  }
+  window.addEventListener("load", initGoogleAnalytics);
+</script>
+
+<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  // mermaid 블록은 highlight.js 대상에서 제외 — hljs가 addLangData에서 class를
+  // "language-mermaid" -> "hljs mermaid"로 덮어써버려서, mermaid.html의 렌더링 스크립트가
+  // 뒤늦게(load 시점) 찾으려는 .language-mermaid 셀렉터가 항상 빈 결과를 내는 원인이었음.
+  var els = document.querySelectorAll('pre code:not(.language-mermaid)')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
+<style>
+  .pswp .pswp__container .pswp__img {
+    background-color: white;
+  }
+</style>
+
+<script>
+  function initPhotoSwipe() {
+    let customOptions = {};
+
+    try {
+      const data = ``.replaceAll("=>", ":");
+      customOptions = JSON.parse(data);
+    } catch (e) {
+      console.info("Invalid custom photo previewer options! " + e.message);
+    }
+
+    // Define object and gallery options
+    const options = Object.assign(
+      {
+        gallery: "section.main",
+        children: "a.photo-swipe",
+        photo_scale: 2,
+        // dynamic import is not supported in UMD version
+        pswpModule: PhotoSwipe,
+      },
+      customOptions
+    );
+
+    const galleryEl = document.querySelector(options.gallery);
+    if (!galleryEl) {
+      return;
+    }
+
+    const imgEls = [];
+    const els = galleryEl.querySelectorAll("img:not(.emoji)");
+    els.forEach((el) => {
+      if (el.src.trim() == "") {
+        return;
+      }
+      if (!imgEls.includes(el)) {
+        imgEls.push(el);
+      }
+    });
+
+    if (imgEls.length === 0) {
+      return;
+    }
+
+    imgEls.forEach((imgEl) => {
+      imgEl.outerHTML = `
+      <a class="photo-swipe"
+        href="${imgEl.src}"
+        data-pswp-width="${
+          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
+        }"
+        data-pswp-height="${
+          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
+        }"
+        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
+        target="_blank">
+        ${imgEl.outerHTML}
+      </a>`;
+    });
+
+    // Initialize PhotoSwipe 5
+    var lightbox = new PhotoSwipeLightbox(options);
+
+    lightbox.init();
+  }
+
+  window.addEventListener("load", initPhotoSwipe);
+</script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+  function isDarkTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark';
+  }
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: isDarkTheme() ? 'dark' : 'default',
+  });
+
+  function renderMermaidBlocks() {
+    // kramdown/rouge render ```mermaid fences as <pre><code class="language-mermaid">...</code></pre>
+    // mermaid.js only auto-scans <div class="mermaid">, so swap the markup before running it.
+    const blocks = document.querySelectorAll('pre > code.language-mermaid');
+    if (blocks.length === 0) {
+      return;
+    }
+    blocks.forEach((code) => {
+      const graphDefinition = code.textContent;
+      const container = document.createElement('div');
+      container.className = 'mermaid';
+      container.textContent = graphDefinition;
+      code.parentElement.replaceWith(container);
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  }
+
+  window.addEventListener('load', renderMermaidBlocks);
+</script>
+<!-- Custom Head HTML (if any) -->
+
+<!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 assets/js/chat-widget.js -->
+<script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
+  Haeran's blog
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/search.html">SEARCH</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<div class="page-link" style="display: inline;">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<div class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="fr">
+          
+          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="zh-CN">
+          
+          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ja">
+          
+          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ko">
+          
+          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ru">
+          
+          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
+          
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ko',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+</div>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    // 항상 localStorage를 사용 — 'auto' 모드에서도 유저가 직접 누른 토글이
+    // 브라우저 세션이 끝났다고 사라지지 않고, 다음 예약된 자동 전환 시점까지 유지된다.
+    var storage = localStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var blocks = document.querySelectorAll('pre');
+
+  function addCopyButton(pre) {
+    if (pre.querySelector('.code-copy-btn')) return;
+    var code = pre.querySelector('code');
+    if (!code) return;
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'code-copy-btn';
+    btn.textContent = 'Copy';
+    pre.appendChild(btn);
+
+    btn.addEventListener('click', function () {
+      var text = code.textContent;
+
+      function done(ok) {
+        btn.textContent = ok ? 'Copied!' : 'Failed';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+        return;
+      }
+
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        done(document.execCommand('copy'));
+      } catch (e) {
+        done(false);
+      }
+      document.body.removeChild(ta);
+    });
+  }
+
+  for (var i = 0; i < blocks.length; i++) {
+    addCopyButton(blocks[i]);
+  }
+});
+</script>
+<main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <div class="framework">
+  <section class="main">
+
+     <div class="reading-progress" aria-hidden="true">
+  <div class="reading-progress-bar" id="reading-progress-bar"></div>
+</div>
+
+<script>
+(function () {
+  var bar = document.getElementById('reading-progress-bar');
+  var article = document.querySelector('.post-content');
+  if (!bar || !article) return;
+
+  function update() {
+    var rect = article.getBoundingClientRect();
+    var articleTop = rect.top + window.pageYOffset;
+    var total = article.offsetHeight - window.innerHeight;
+    var scrolled = window.pageYOffset - articleTop;
+    var pct = total > 0 ? Math.min(100, Math.max(0, (scrolled / total) * 100)) : 100;
+    bar.style.width = pct + '%';
+  }
+
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+</script>
+<div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">[ 롤모임 운영일지 ] - 10. 격리 설계가 우려했던 바로 그 사고 — 크로스테넌트 누출 실전편</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <div class="post-meta">
+    <time class="dt-published" datetime="2026-07-20T11:00:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Jul 20, 2026
+    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 9 mins</span>
+  </div>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#%EC%9A%B4%EC%98%81%EC%9D%BC%EC%A7%80">#운영일지</a><a class="post-tag" href="/tags.html#%EB%A9%80%ED%8B%B0%ED%85%8C%EB%84%8C%EC%8B%9C">#멀티테넌시</a><a class="post-tag" href="/tags.html#%EB%B3%B4%EC%95%88">#보안</a><a class="post-tag" href="/tags.html#PostgreSQL">#PostgreSQL</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <p><a href="/journal/development%20diary/2026/07/12/lol-moim-incidents-02-multitenancy.html">02편</a>에서 “설계 문서는 Postgres RLS를 원했지만 실제로는 Prisma Client Extension으로 테넌트 격리를 구현했고, 이후 크로스그룹 누출이 몇 차례 났다”고 짧게 언급했었다. 이번 편은 그 사고의 실제 내용이다. 같은 날 아침 20분 사이에 연달아 발견되고 고쳐진 세 커밋 이야기다.</p>
+
+<h2 id="tier-1--raw-sql은-자동-격리를-안-받는다">Tier 1 — raw SQL은 자동 격리를 안 받는다</h2>
+
+<p>멀티테넌시용 Prisma Extension은 <code class="language-plaintext highlighter-rouge">findMany</code>, <code class="language-plaintext highlighter-rouge">findFirst</code> 같은 <strong>Prisma Client의 메서드</strong>를 가로채서 <code class="language-plaintext highlighter-rouge">groupId</code>를 자동으로 끼워 넣는 방식이다. 그런데 <code class="language-plaintext highlighter-rouge">prisma.$queryRaw</code>로 직접 짠 SQL은 이 가로채기 대상이 아니다 — Extension이 붙는 지점 자체가 다르기 때문에, raw SQL을 쓰는 순간 격리는 개발자가 직접 챙겨야 하는 일이 된다.</p>
+
+<p>이 원칙 하나를 놓친 곳이 두 군데 있었다.</p>
+
+<ul>
+  <li>
+<strong>확성기(megaphone) <code class="language-plaintext highlighter-rouge">GET /active</code></strong>: raw SQL로 활성 확성기를 조회하면서 <code class="language-plaintext highlighter-rouge">groupId</code> 조건이 빠져 있었다. 어느 모임에 들어가든 group 1(원조 모임)의 확성기 배너가 그대로 보였다.</li>
+  <li>
+<strong>경매 <code class="language-plaintext highlighter-rouge">fetchEvalsByUser</code></strong>: 역시 raw SQL로 유저 평가 점수/코멘트를 조회하는데, 경매 화면에서 다른 모임의 평가 데이터가 섞여 나왔다.</li>
+</ul>
+
+<p>수정은 각 쿼리에 <code class="language-plaintext highlighter-rouge">AND "groupId" = ${getGroupId() ?? 1}</code> 한 줄을 추가하는 것으로 끝났다. 문제는 이런 raw SQL이 코드베이스 어디에 몇 개나 더 있는지 매번 찾아야 한다는 점이다.</p>
+
+<p><br></p>
+
+<h2 id="tier-2--권한도-모임별로-스코프해야-한다">Tier 2 — 권한도 모임별로 스코프해야 한다</h2>
+
+<p>세부 권한(<code class="language-plaintext highlighter-rouge">AccountPermission</code>: 평가자, 배팅 관리자, 경매 진행자, 멘토 등)도 <code class="language-plaintext highlighter-rouge">groupId</code> 없이 저장되고 있었다. 즉 한 모임에서 평가자 권한을 받은 사람이 다른 모임에서도 그 권한을 그대로 갖게 되는 구조였다. <code class="language-plaintext highlighter-rouge">groupId</code> 컬럼을 추가하고 <code class="language-plaintext highlighter-rouge">(accountId, permission, groupId)</code> 복합 유니크로 바꿨다.</p>
+
+<p><br></p>
+
+<h2 id="tier-3-5--돈-파이프라인-알림">Tier 3-5 — 돈, 파이프라인, 알림</h2>
+
+<p>가장 큰 파장은 여기였다. <code class="language-plaintext highlighter-rouge">BetCoin.userId</code>가 시스템 전체에서 유니크였다 — 즉 유저 한 명당 지갑이 <strong>모임과 무관하게 딱 하나</strong>만 존재했다. 경매·상점 구매·복권 등 <code class="language-plaintext highlighter-rouge">BetCoin</code> 잔액을 바꾸는 raw SQL이 전부 <code class="language-plaintext highlighter-rouge">userId</code>만으로 그 지갑을 찾고 있었으니, 다른 모임에서 발생한 배팅이나 구매가 같은 유저의 (모임 구분 없는) 지갑 잔액을 그대로 건드릴 수 있는 구조였다.</p>
+
+<p>고치는 방법도 신경 썼다. 유니크 제약을 <code class="language-plaintext highlighter-rouge">userId</code> 단독에서 <code class="language-plaintext highlighter-rouge">(groupId, userId)</code> 복합으로 바꾸는 작업을, 배포 창에서도 안전하도록 2단계로 나눴다.</p>
+
+<ol>
+  <li>
+<strong>1단계(additive)</strong>: 기존 유니크 인덱스는 그대로 둔 채, 새 복합 유니크 인덱스를 나란히 만든다.</li>
+  <li>
+<strong>2단계(drop old)</strong>: 새 백엔드가 배포된 걸 확인한 뒤에야 기존 인덱스를 제거한다.</li>
+</ol>
+
+<p>1단계와 2단계 사이에 일부러 간격을 둔 이유가 명확했다 — 이 순서를 지키지 않고 옛 인덱스를 먼저 지워버리면, 아직 재배포 전인 이전 코드가 그 인덱스를 참조하고 있어서 그 자체로 장애가 난다.</p>
+
+<p>여기에 더해:</p>
+<ul>
+  <li>
+<strong>파이프라인(cron)</strong>: cron 작업은 요청 컨텍스트가 없어서 <code class="language-plaintext highlighter-rouge">getGroupId()</code>가 항상 <code class="language-plaintext highlighter-rouge">null</code>이다. 티어 재계산·미션 진행도·베팅 정산 같은 cron 로직이 전부 모임 구분 없이 시스템 전체를 한 번에 처리하고 있었다. <code class="language-plaintext highlighter-rouge">forEachGroup()</code> 헬퍼를 만들어 각 모임 컨텍스트(<code class="language-plaintext highlighter-rouge">runWithGroup(groupId, fn)</code>)로 감싸 모임별로 따로 돌게 고쳤다.</li>
+  <li>
+<strong>알림</strong>: MVP 확정 cron이 보너스 지급과 푸시 알림을 보내는 로직도 같은 이유로 모임 컨텍스트 없이 실행되고 있어서 같은 방식으로 감쌌다.</li>
+</ul>
+
+<p><br></p>
+
+<h2 id="하루-뒤--랭킹-페이지에서도-새어-나왔다">하루 뒤 — 랭킹 페이지에서도 새어 나왔다</h2>
+
+<p>다음 날, 랭킹 페이지의 승/패 집계 쿼리에서도 같은 클래스의 버그가 발견됐다 — <code class="language-plaintext highlighter-rouge">groupId</code> 필터 없이 전체 모임의 경기 수를 합산하고 있었다. 유저 화면에 직접 보이는 버그였다는 점에서 앞의 것들보다 더 무거웠다.</p>
+
+<p>같은 커밋에서 구조적인 문제도 하나 더 발견됐다: 새 모임을 만들 때 초기 시즌(<code class="language-plaintext highlighter-rouge">Season</code>) row 자체를 생성하지 않고 있었다. 그래서 새로 생긴 모임 2~5번은 랭킹·시즌 리포트·시즌 보상이 아예 없는 상태였고, 뒤늦게 수동으로 백필해야 했다.</p>
+
+<p><br></p>
+
+<h2 id="정리">정리</h2>
+
+<ul>
+  <li>
+<strong>02편에서 언급했던 우려가 정확히 이 형태로 실현됐다.</strong> Postgres RLS였다면 DB가 강제로 막아줬을 실수를, Prisma Extension 구조에서는 “raw SQL을 쓰는 모든 곳에 groupId를 빠짐없이 챙기는” 사람의 주의력에 의존해야 했다.</li>
+  <li>
+<strong>유니크 제약을 바꾸는 마이그레이션은 순서가 생명이다.</strong> additive(새 인덱스 추가) → 배포 확인 → destructive(옛 인덱스 제거) 순서를 지킨 덕에, 이미 무거운 사고였던 이 작업이 배포 중단 사고로까지 번지진 않았다.</li>
+  <li>
+<strong>cron처럼 요청 컨텍스트가 없는 코드는 테넌시 격리에서 잊히기 쉽다.</strong> <code class="language-plaintext highlighter-rouge">getGroupId()</code>가 <code class="language-plaintext highlighter-rouge">null</code>을 반환하는 게 “격리 안 해도 됨”이 아니라 “직접 반복문으로 처리해야 함”이라는 신호라는 걸, 이 사고를 겪고 나서야 코드 전체에 일관되게 적용했다.</li>
+  <li>
+<strong>버그를 고치다 보면 구조적 결함(새 모임에 초기 시즌이 없던 문제)도 같이 드러난다.</strong> 이런 건 발견 즉시 백필하고, 근본 원인(생성 로직 누락)도 같이 고쳐야 다음 모임에서 반복되지 않는다.</li>
+</ul>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/journal/development%20diary/2026/07/19/lol-moim-incidents-09-riot-api-key.html" title="[ 롤모임 운영일지 ] - 09. 딱 이틀 버틴 워크어라운드 — Riot API 키 전환기">[ 롤모임 운영일지 ] - 09....</a><a class="next" href="/journal/development%20diary/2026/07/21/lol-moim-incidents-11-betcoin-ledger-trigger.html" title="[ 롤모임 운영일지 ] - 11. 로그를 코드가 아니라 DB에게 맡기기로 한 이유">[ 롤모임 운영일지 ] - 11....</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li class="">
+          <a class="post-link" href="/journal/development%20diary/2026/07/21/lol-moim-incidents-11-betcoin-ledger-trigger.html" title="[ 롤모임 운영일지 ] - 11. 로그를 코드가 아니라 DB에게 맡기기로 한 이유">
+            [ 롤모임 운영일지 ] - 11. 로그를 코드가 아니라 DB에게 맡기기로 한...<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/2025/03/01/toss_payments_api.html" title="Toss Payments 연동하면서 만난 이슈들">
+            Toss Payments 연동하면서 만난 이슈들<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/journal/development%20diary/2026/07/21/biker-app-devlog-01-scaffold.html" title="[ 바이커 앱 개발일지 ] - 01. 모노레포부터 GKE 배포 설계까지, 스캐폴딩 기록">
+            [ 바이커 앱 개발일지 ] - 01. 모노레포부터 GKE 배포 설계까지, 스캐폴딩...<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/10/22/grokking-simplicity-03.html" title="쏙쏙 들어오는 함수형 코딩 [CHAPTER 5, 6]">
+            쏙쏙 들어오는 함수형 코딩 [CHAPTER 5, 6]<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+</ul>
+    </div>
+<div class="post-comments">
+<div id="utterances-placeholder"></div>
+<script>
+  const utterancesThemeFromDataTheme = () => {
+    const dataTheme = document.documentElement.getAttribute('data-theme');
+    return `github-${dataTheme}`;
+  };
+
+  const setUtterancesTheme = () => {
+    const iframe = document.querySelector('.utterances-frame');
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: utterancesThemeFromDataTheme()
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  // dynamic change
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        setUtterancesTheme();
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
+
+  let utterancesScript = document.createElement('script');
+  utterancesScript.async = true;
+  utterancesScript.src = 'https://utteranc.es/client.js';
+  utterancesScript.crossOrigin = 'anonymous';
+  utterancesScript.setAttribute('issue-term', 'title');
+  utterancesScript.setAttribute('label', 'utterances comment');
+  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
+  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
+
+  const placeholder = document.getElementById('utterances-placeholder');
+  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
+</script>
+</div></section>
+</div>
+
+  </section><section class="sidebar"><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+    </div>
+  </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div class="footer-social">
+        <a href="https://github.com/kimmand0o0" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
+        <a href="mailto:maeran.dev.u@gmail.com" aria-label="Email"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+        <a href="/feed.xml" aria-label="RSS"><i class="fa fa-rss" aria-hidden="true"></i></a>
+      </div>
+      <div>Unpublished Work <span class="copyleft">©</span> 2017-2026 Haeran</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>

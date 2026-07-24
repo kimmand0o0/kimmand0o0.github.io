@@ -1,0 +1,669 @@
+[
+
+  {
+    "title": "데이터독(Datadog) 학습 정리 (6) - 모니터 알림 조건 설계",
+    "url": "/study/datadog/2026/07/23/datadog-study-06-monitor-alert-design.html",
+    "date": "2026-07-23",
+    "categories": ["Study","Datadog"],
+    "tags": ["Study","Datadog","Monitors","Alerting"],
+    "excerpt": "1편에서 “모니터는 임계값 초과 시 알림을 보내는 감시자”라고만 짚었는데, 실제로 쓸모 있는 알림을 만들려면 그보다 훨씬 세밀한 설계가 필요하다. 공식 문서(docs.datadoghq.com/monitors)를 대조해서 정확한 용어까지 정리했다."
+  },
+
+  {
+    "title": "LLM 프롬프팅 논문 스터디 - 06. ReAct, Synergizing Reasoning and Acting",
+    "url": "/study/llm/2026/07/23/llm-prompting-paper-06-react.html",
+    "date": "2026-07-23",
+    "categories": ["Study","LLM"],
+    "tags": ["LLM","Prompt Engineering","NLP","Agent","Tool Use"],
+    "excerpt": "시리즈 여섯 번째 편이자 “에이전트/툴 사용” 트랙의 첫 편. 지금까지 다룬 CoT/Self-Consistency/Tree of Thoughts가 전부 모델 “내부”에서만 추론했다면, 이번에 다룰 ReAct: Synergizing Reasoning and Acting in Lang..."
+  },
+
+  {
+    "title": "[ K8s 스터디 ] - 06. Ingress, 외부 트래픽은 어떻게 들어오는가",
+    "url": "/journal/development%20diary/2026/07/23/k8s-study-06-ingress.html",
+    "date": "2026-07-23",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["K8s","Kubernetes","스터디","Ingress","로드밸런서"],
+    "excerpt": "지난 편까지는 클러스터 내부(Service)까지만 다뤘다. 이번 편은 반대 방향 — 외부 사용자의 요청이 실제로 클러스터 안까지 어떻게 들어오는지, Ingress."
+  },
+
+  {
+    "title": "데이터독(Datadog) 학습 정리 (5) - APM 트레이스 계측(Instrumentation) 원리",
+    "url": "/study/datadog/2026/07/22/datadog-study-05-apm-instrumentation.html",
+    "date": "2026-07-22",
+    "categories": ["Study","Datadog"],
+    "tags": ["Study","Datadog","APM","OpenTelemetry"],
+    "excerpt": "1편에서 “trace_id 하나로 여러 서비스를 이어붙인다”고 정리했는데, 이번 편은 그게 실제로 어떻게 이어지는지 — 계측(instrumentation)의 원리를 다룬다."
+  },
+
+  {
+    "title": "데이터독(Datadog) 학습 정리 (4) - RUM (Real User Monitoring)",
+    "url": "/study/datadog/2026/07/22/datadog-study-04-rum.html",
+    "date": "2026-07-22",
+    "categories": ["Study","Datadog"],
+    "tags": ["Study","Datadog","RUM","Frontend"],
+    "excerpt": "지금까지는 서버 쪽 관측(로그/메트릭/APM, AI Obs)을 봤는데, 이번 편은 유저 브라우저 안에서 벌어지는 일을 보는 RUM(Real User Monitoring)을 정리한다. 공식 문서(docs.datadoghq.com)를 대조해서 정확한 파라미터명까지 확인했다."
+  },
+
+  {
+    "title": "데이터독(Datadog) 학습 정리 (3) - 랭퓨즈 vs 데이터독 Agent Observability, 뭐가 다를까",
+    "url": "/study/datadog/2026/07/22/datadog-study-03-langfuse-vs-datadog.html",
+    "date": "2026-07-22",
+    "categories": ["Study","Datadog"],
+    "tags": ["Study","Datadog","LLM","Langfuse"],
+    "excerpt": "지난 편에서 데이터독의 Agent Observability가 LLM 호출을 관측·평가하는 기능이라는 걸 봤다. 이번 편은 LLM 전용 관측 툴인 랭퓨즈(Langfuse)와 비교했을 때 어떤 차이가 있는지 정리한다."
+  },
+
+  {
+    "title": "데이터독(Datadog) 학습 정리 (2) - Agent Observability (구 AI Obs)란",
+    "url": "/study/datadog/2026/07/22/datadog-study-02-ai-observability.html",
+    "date": "2026-07-22",
+    "categories": ["Study","Datadog"],
+    "tags": ["Study","Datadog","LLM","Observability"],
+    "excerpt": "지난 편에서 로그·메트릭·트레이스·모니터·대시보드라는 데이터독의 기본 5대 개념을 봤다. 이번 편은 LLM(챗봇 등)을 쓰는 서비스에 특화된 Agent Observability(공식 명칭. URL은 여전히 /llm_observability/ 하위 — 예전 명칭이 LLM Observ..."
+  },
+
+  {
+    "title": "[ 롤모임 운영일지 ] - 12. 랭킹 공식을 하드코딩에서 조립식으로 — Glicko-2까지",
+    "url": "/journal/development%20diary/2026/07/22/lol-moim-incidents-12-ranking-pipeline-glicko.html",
+    "date": "2026-07-22",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["운영일지","랭킹","아키텍처","Glicko-2"],
+    "excerpt": "내전 랭킹 점수는 원래 하드코딩된 공식 하나였다. 평가 점수 평균에 승패 기록으로 가중치를 곱하는 식. 문제는 모임마다 원하는 랭킹 방식이 다를 수 있다는 것 — 어떤 모임은 평가 없이 순수 배치(레이팅) 시스템만 쓰고 싶어할 수도 있다. 그래서 공식 자체를 모임별로 조립할 수 있..."
+  },
+
+  {
+    "title": "데이터독(Datadog) 학습 정리 (1) - 로그·메트릭·트레이스·모니터·대시보드",
+    "url": "/study/datadog/2026/07/22/datadog-study-01-overview.html",
+    "date": "2026-07-22",
+    "categories": ["Study","Datadog"],
+    "tags": ["Study","Datadog","Observability"],
+    "excerpt": "옵저버빌리티(observability) 플랫폼인 데이터독을 공부하면서 정리한 내용이다. 데이터독 자체를 처음부터 다뤄본 적이 없어서, 이번 편은 5대 핵심 개념(로그/메트릭/트레이스/모니터/대시보드)이 각각 뭘 하는지, 왜 필요한지부터 짚는다. (공식문서 대조 완료)"
+  },
+
+  {
+    "title": "LLM 프롬프팅 논문 스터디 - 05. Rethinking the Role of Demonstrations",
+    "url": "/study/llm/2026/07/22/llm-prompting-paper-05-rethinking-demonstrations.html",
+    "date": "2026-07-22",
+    "categories": ["Study","LLM"],
+    "tags": ["LLM","Prompt Engineering","NLP","In-Context Learning"],
+    "excerpt": "시리즈 다섯 번째 편이자 “In-Context Learning 원리” 트랙의 마지막 편. GPT-3 논문이 보여준 In-Context Learning이 정말 “예시에서 배우는” 건지 파고든 Rethinking the Role of Demonstrations: What Makes I..."
+  },
+
+  {
+    "title": "LLM 프롬프팅 논문 스터디 - 04. GPT-3, Language Models are Few-Shot Learners",
+    "url": "/study/llm/2026/07/22/llm-prompting-paper-04-gpt3-few-shot.html",
+    "date": "2026-07-22",
+    "categories": ["Study","LLM"],
+    "tags": ["LLM","Prompt Engineering","NLP","In-Context Learning"],
+    "excerpt": "시리즈 네 번째 편. 프롬프팅 기법 트랙에서 다룬 CoT/Self-Consistency/ToT가 전부 전제로 깔고 가는 개념, In-Context Learning(ICL)의 뿌리인 Language Models are Few-Shot Learners (Brown et al., 202..."
+  },
+
+  {
+    "title": "LLM 프롬프팅 논문 스터디 - 03. Tree of Thoughts",
+    "url": "/study/llm/2026/07/22/llm-prompting-paper-03-tree-of-thoughts.html",
+    "date": "2026-07-22",
+    "categories": ["Study","LLM"],
+    "tags": ["LLM","Prompt Engineering","NLP","Chain-of-Thought"],
+    "excerpt": "시리즈 세 번째 편이자 “프롬프팅 기법” 트랙의 마지막 편. Self-Consistency의 “여러 경로 다수결”을 “탐색+백트래킹이 가능한 트리”로 확장한 Tree of Thoughts: Deliberate Problem Solving with Large Language Mode..."
+  },
+
+  {
+    "title": "[ K8s 스터디 ] - 05. ConfigMap과 Secret, 설정값을 이미지 밖으로",
+    "url": "/journal/development%20diary/2026/07/22/k8s-study-05-configmap-secret.html",
+    "date": "2026-07-22",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["K8s","Kubernetes","스터디","ConfigMap","Secret"],
+    "excerpt": "지난 편까지 Pod/Deployment/Service를 정리했다. 이번 편은 조금 다른 결 — 설정값과 비밀번호를 컨테이너 이미지 안에 박아넣지 않고 어떻게 외부에서 주입하는지, ConfigMap과 Secret."
+  },
+
+  {
+    "title": "LLM 프롬프팅 논문 스터디 - 02. Self-Consistency",
+    "url": "/study/llm/2026/07/22/llm-prompting-paper-02-self-consistency.html",
+    "date": "2026-07-22",
+    "categories": ["Study","LLM"],
+    "tags": ["LLM","Prompt Engineering","NLP","Chain-of-Thought"],
+    "excerpt": "시리즈 두 번째 편. 지난 편에서 다룬 Chain-of-Thought Prompting이 만든 “하나의 추론 경로”를 여러 개로 늘리고 다수결을 취하는 논문, Self-Consistency Improves Chain of Thought Reasoning (Wang et al., 2..."
+  },
+
+  {
+    "title": "LLM 프롬프팅 논문 스터디 - 01. Chain-of-Thought Prompting",
+    "url": "/study/llm/2026/07/22/llm-prompting-paper-01-chain-of-thought.html",
+    "date": "2026-07-22",
+    "categories": ["Study","LLM"],
+    "tags": ["LLM","Prompt Engineering","NLP","Chain-of-Thought"],
+    "excerpt": "LLM/프롬프팅 관련 논문을 한 편씩 깊게 읽어보는 시리즈를 시작한다. 첫 편은 프롬프트 엔지니어링에서 가장 자주 언급되는 개념인 Chain-of-Thought(CoT) Prompting — Wei et al., 2022, NeurIPS — 이다."
+  },
+
+  {
+    "title": "[ K8s 스터디 ] - 04. Service, Pod가 죽어도 안 바뀌는 주소",
+    "url": "/journal/development%20diary/2026/07/22/k8s-study-04-service.html",
+    "date": "2026-07-22",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["K8s","Kubernetes","스터디","Service","로드밸런싱"],
+    "excerpt": "지난 편에서 롤링 업데이트 중에 Pod가 계속 죽고 새로 생긴다는 걸 봤다. 근데 Pod가 재생성될 때마다 IP가 바뀌는데, 그럼 다른 Pod가 얘를 어떻게 계속 찾아가는 걸까 — 이번 편은 Service."
+  },
+
+  {
+    "title": "[ K8s 스터디 ] - 03. Deployment와 ReplicaSet, 무중단 배포는 어떻게 되는가",
+    "url": "/journal/development%20diary/2026/07/22/k8s-study-03-deployment-replicaset.html",
+    "date": "2026-07-22",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["K8s","Kubernetes","스터디","Deployment","ReplicaSet","롤링업데이트"],
+    "excerpt": "지난 편에서 Pod는 죽으면 재활용이 아니라 완전히 새로 교체되는 일회성 자원이라고 정리했다. 그럼 “항상 3개 떠있어야 한다”는 걸 누가 지켜주고, 새 버전 배포는 어떻게 무중단으로 되는 걸까 — 이번 편은 Deployment와 ReplicaSet."
+  },
+
+  {
+    "title": "[ K8s 스터디 ] - 02. Pod, 컨테이너를 담는 박스",
+    "url": "/journal/development%20diary/2026/07/22/k8s-study-02-pod.html",
+    "date": "2026-07-22",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["K8s","Kubernetes","스터디","Pod","사이드카"],
+    "excerpt": "지난 편에서 K8s가 “선언 + reconcile 루프”로 상태를 유지한다는 걸 봤다. 그런데 그 루프가 실제로 관리하는 최소 단위가 뭔지 짚고 넘어가야 한다 — 놀랍게도 컨테이너가 아니라 Pod다."
+  },
+
+  {
+    "title": "[ K8s 스터디 ] - 01. Kubernetes가 왜 필요한가",
+    "url": "/journal/development%20diary/2026/07/22/k8s-study-01-why-k8s.html",
+    "date": "2026-07-22",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["K8s","Kubernetes","스터디","컨테이너 오케스트레이션","인프라"],
+    "excerpt": "컨테이너/Docker는 그럭저럭 다뤄봤지만 Kubernetes는 제대로 공부해본 적이 없어서, 개념부터 순서대로 정리해보기로 했다. 첫 편은 가장 기본적인 질문부터 — Docker만으로는 왜 부족하고, K8s가 정확히 어떤 문제를 풀어주는가."
+  },
+
+  {
+    "title": "[ 바이커 앱 개발일지 ] - 01. 모노레포부터 GKE 배포 설계까지, 스캐폴딩 기록",
+    "url": "/journal/development%20diary/2026/07/21/biker-app-devlog-01-scaffold.html",
+    "date": "2026-07-21",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["개발일지","pnpm monorepo","Fastify","Drizzle","Supabase","GKE"],
+    "excerpt": "새 프로젝트를 시작했다. 오토바이 라이더를 위한 앱 — 내 바이크를 등록하고 정비 이력을 기록하면서, 동시에 사진/글을 올리는 SNS 피드도 갖춘 서비스다. 아직 기능은 거의 없고 골격(모노레포, API, 인증, 배포 설계)만 잡은 상태지만, 나중에 “왜 이렇게 짰더라”를 되짚어볼..."
+  },
+
+  {
+    "title": "[ 롤모임 운영일지 ] - 11. 로그를 코드가 아니라 DB에게 맡기기로 한 이유",
+    "url": "/journal/development%20diary/2026/07/21/lol-moim-incidents-11-betcoin-ledger-trigger.html",
+    "date": "2026-07-21",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["운영일지","PostgreSQL","아키텍처","BetCoin"],
+    "excerpt": "BetCoin(포인트 재화)이 오갈 때마다 원장을 남기고 싶었다. 그런데 이 잔액을 바꾸는 코드가 생각보다 많았다."
+  },
+
+  {
+    "title": "[ 롤모임 운영일지 ] - 10. 격리 설계가 우려했던 바로 그 사고 — 크로스테넌트 누출 실전편",
+    "url": "/journal/development%20diary/2026/07/20/lol-moim-incidents-10-cross-tenant-leak.html",
+    "date": "2026-07-20",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["운영일지","멀티테넌시","보안","PostgreSQL"],
+    "excerpt": "02편에서 “설계 문서는 Postgres RLS를 원했지만 실제로는 Prisma Client Extension으로 테넌트 격리를 구현했고, 이후 크로스그룹 누출이 몇 차례 났다”고 짧게 언급했었다. 이번 편은 그 사고의 실제 내용이다. 같은 날 아침 20분 사이에 연달아 발견되고 ..."
+  },
+
+  {
+    "title": "[ 롤모임 운영일지 ] - 09. 딱 이틀 버틴 워크어라운드 — Riot API 키 전환기",
+    "url": "/journal/development%20diary/2026/07/19/lol-moim-incidents-09-riot-api-key.html",
+    "date": "2026-07-19",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["운영일지","성능최적화","Riot API","회고"],
+    "excerpt": "지금 것보다 훨씬 이전, 이 서비스가 아직 지금의 모노레포 구조(packages/api)로 옮겨오기 전 — Next.js 앱 하나로 다 하던 시절 이야기다. Riot API 연동을 처음 붙인 지 딱 이틀 만에 벽에 부딪혔다."
+  },
+
+  {
+    "title": "[ 롤모임 운영일지 ] - 08. 같은 버그를 두 번 고친 이야기 — 9티어 오분류",
+    "url": "/journal/development%20diary/2026/07/18/lol-moim-incidents-08-tier-misclassification.html",
+    "date": "2026-07-18",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["운영일지","버그","랭킹","동시성"],
+    "excerpt": "한 번 고쳤다고 생각했는데, 45분 뒤 “진짜 원인은 따로 있었다”는 걸 알게 된 이야기다."
+  },
+
+  {
+    "title": "[ 롤모임 운영일지 ] - 07. 3분 만에 되돌린 인덱스 — partial unique의 함정",
+    "url": "/journal/development%20diary/2026/07/17/lol-moim-incidents-07-partial-unique-index.html",
+    "date": "2026-07-17",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["운영일지","PostgreSQL","Prisma","아키텍처"],
+    "excerpt": "가장 짧게 산 결정 이야기다. 도입하고 되돌리기까지 딱 3분 걸렸다."
+  },
+
+  {
+    "title": "[ 롤모임 운영일지 ] - 06. 프로덕트 대시보드 스냅샷 — 지금 이 순간의 숫자들",
+    "url": "/journal/development%20diary/2026/07/16/lol-moim-incidents-06-dashboard-snapshot.html",
+    "date": "2026-07-16",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["운영일지","프로덕트분석","DAU","리텐션","회고"],
+    "excerpt": "지금까지는 배포 사고나 성능 조사, 아키텍처 이야기를 기록했는데, 이번엔 조금 다르게 — 지금 이 순간 서비스가 실제로 어떻게 쓰이고 있는지를 숫자로 남겨두려 한다. 나중에 “그때보다 나아졌나”를 비교할 기준점이 필요해서 만든 프로덕트 대시보드의 스냅샷이다."
+  },
+
+  {
+    "title": "[ 롤모임 운영일지 ] - 05. Cloud Run 서비스를 GKE로 옮긴다면 — 매니페스트 스케치",
+    "url": "/journal/development%20diary/2026/07/15/lol-moim-incidents-05-gke-sketch.html",
+    "date": "2026-07-15",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["운영일지","Kubernetes","GKE","인프라","학습"],
+    "excerpt": "연습/학습 목적 기록. 실제 클러스터에 적용하지 않았고, 프로덕션 코드도 건드리지 않았다. 지금 서비스는 Cloud Run(API) + GCE VM(WS, pm2) + Supabase(Postgres+Auth) 조합으로 잘 돌아가고 있고, 지난 성능 조사에서 확인했듯 지금 규모(D..."
+  },
+
+  {
+    "title": "[ 롤모임 운영일지 ] - 04. 동시접속 100명도 안 되는 서비스에서 \"렉\"이 걸린 이유",
+    "url": "/journal/development%20diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html",
+    "date": "2026-07-14",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["운영일지","성능최적화","N+1","PostgreSQL","Prisma"],
+    "excerpt": "이번 편은 배포 사고나 아키텍처 이야기가 아니라 성능 조사 이야기다. “시즌패스 출시 이후로 서버가 느려졌다”는 유저 신고 하나로 시작해서, 전혀 예상치 못한 곳에서 진짜 원인을 찾은 과정을 기록해둔다."
+  },
+
+  {
+    "title": "[ 롤모임 운영일지 ] - 03. 두 서버가 같은 상태를 나눠 가지면 생기는 일 (실시간 경매 편)",
+    "url": "/journal/development%20diary/2026/07/13/lol-moim-incidents-03-auction-phase.html",
+    "date": "2026-07-13",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["운영일지","실시간","WebSocket","Redis","동시성"],
+    "excerpt": "내전 팀을 짤 때 쓰는 실시간 경매(드래프트) 기능은 이 서비스에서 가장 손이 많이 간 실시간 로직이다. 이번 편은 “왜 경매를 다시 시작할 수 없다”는 버그가 반복해서 나던 이유와, 그걸 잡아가는 과정을 기록한다."
+  },
+
+  {
+    "title": "[ 롤모임 운영일지 ] - 02. 모임 하나짜리 서비스를 멀티테넌시로 바꾸기",
+    "url": "/journal/development%20diary/2026/07/12/lol-moim-incidents-02-multitenancy.html",
+    "date": "2026-07-12",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["운영일지","멀티테넌시","아키텍처","Prisma","PostgreSQL"],
+    "excerpt": "원래 이 서비스는 딱 하나의 롤 내전 모임(“이세계롤모임”)만을 위한 앱이었다. 그런데 다른 모임에서도 써보고 싶다는 얘기가 나오면서, 같은 코드베이스와 DB로 여러 “모임”을 동시에 운영하는 멀티테넌트 구조로 바꾸는 작업을 시작했다. 이번 편은 그 과정에서 세운 원칙, 실제로 짠..."
+  },
+
+  {
+    "title": "[ 롤모임 운영일지 ] - 01. 배포하다가 겪은 사고 모음",
+    "url": "/journal/development%20diary/2026/07/11/lol-moim-incidents-01.html",
+    "date": "2026-07-11",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["운영일지","배포사고","GCP","Vercel","회고"],
+    "excerpt": "사이드 프로젝트로 만든 롤 내전 모임 서비스(모노레포: packages/frontend - Vite/React, packages/api - Express/Prisma)를 실제로 운영하면서 크고 작은 사고를 겪었다. 코드 몇 줄 잘못 짜서 나는 버그와는 결이 다른, 배포 프로세스 자..."
+  },
+
+  {
+    "title": "로드 밸런싱(Load balancing) 종류와 알고리즘",
+    "url": "/network/2025/03/24/%EB%B6%80%ED%95%98%EB%B6%84%EC%82%B0_%EB%A1%9C%EB%93%9C%EB%B0%B8%EB%9F%B0%EC%84%9C.html",
+    "date": "2025-03-24",
+    "categories": ["NETWORK"],
+    "tags": ["NETWORK","LoadBalancer"],
+    "excerpt": "로드 밸런싱(load balancing)과 로드 밸런서(Load Balancer)"
+  },
+
+  {
+    "title": "Network Address Translation, 네트워크 주소 변환",
+    "url": "/network/2025/03/24/%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC_%EC%A3%BC%EC%86%8C_%EB%B3%80%ED%99%98.html",
+    "date": "2025-03-24",
+    "categories": ["NETWORK"],
+    "tags": ["NETWORK","NAT"],
+    "excerpt": "NAT (Network Address Translation, 네트워크 주소 변환)"
+  },
+
+  {
+    "title": "MAC 주소와 ARP 프로토콜",
+    "url": "/network/2025/03/24/MAC_%EC%A3%BC%EC%86%8C%EC%99%80_ARP_%ED%94%84%EB%A1%9C%ED%86%A0%EC%BD%9C.html",
+    "date": "2025-03-24",
+    "categories": ["NETWORK"],
+    "tags": ["NETWORK","MAC","ARP"],
+    "excerpt": "MAC 주소 (Media Access Control Address, 물리적 주소)"
+  },
+
+  {
+    "title": "Prisma database와 연결 끊어주기",
+    "url": "/study/2025/03/02/prisma_disconnect.html",
+    "date": "2025-03-02",
+    "categories": ["Study"],
+    "tags": ["Prisma"],
+    "excerpt": "작업을 하던 중 Database와 연결이 계속해서 끊어지는 상황이 발생…"
+  },
+
+  {
+    "title": "vitest 'mockResolvedValue' 속성 없음",
+    "url": "/study/2025/03/02/vitest_mock_type_error.html",
+    "date": "2025-03-02",
+    "categories": ["Study"],
+    "tags": ["Test_code"],
+    "excerpt": "Jest에 대한 블로그 게시글은 많았지만 Vitest의 해당 에러에 대한 내용을 찾기 어려워 블로그 글로 남깁니다…"
+  },
+
+  {
+    "title": "Toss Payments 연동하면서 만난 이슈들",
+    "url": "/study/2025/03/01/toss_payments_api.html",
+    "date": "2025-03-01",
+    "categories": ["Study"],
+    "tags": ["TossAPI"],
+    "excerpt": "Toss payments에 대하여"
+  },
+
+  {
+    "title": "Zustand의 Slice 패턴",
+    "url": "/study/2025/02/28/justand_slice_pattern.html",
+    "date": "2025-02-28",
+    "categories": ["Study"],
+    "tags": ["Zustand"],
+    "excerpt": "💻 우리 프로젝트에서 Zustand 사용 방식"
+  },
+
+  {
+    "title": "TypeScript `Partial`과 `Omit` 차이점",
+    "url": "/study/2025/02/27/typescript_omit_partial.html",
+    "date": "2025-02-27",
+    "categories": ["Study"],
+    "tags": ["Study","Typescript"],
+    "excerpt": "TypeScript Partial과 Omit 차이점"
+  },
+
+  {
+    "title": "Dto와 type은 다른건가?",
+    "url": "/study/2025/02/26/dto_type.html",
+    "date": "2025-02-26",
+    "categories": ["Study"],
+    "tags": ["Study","Typescript"],
+    "excerpt": "DTO란? (Data Transfer Object)DTO(Data Transfer Object)는 계층 간 데이터 전송을 위해 사용하는 객체입니다. 주로 컨트롤러 ↔ 서비스 ↔ 데이터베이스 간에 데이터를 주고받을 때 사용됩니다."
+  },
+
+  {
+    "title": "Next.js server와 client의 다른 fetch...",
+    "url": "/study/2025/02/26/next_fetch.html",
+    "date": "2025-02-26",
+    "categories": ["Study"],
+    "tags": ["Study","Next.js"],
+    "excerpt": "🚀 서버(Server)에서는 URL이 필요 없는 이유Next.js 서버는 배코드 환경(Node.js)에서 실행되기 때문에, 서버 내부에서 API를 호출할 때는 절대 URL이 필요하지 않음.상대 경로(/api/something)만 사용해도 요청을 처리할 수 있다."
+  },
+
+  {
+    "title": "Next.js - middleware로 유저 인증하기",
+    "url": "/study/2025/02/25/next_middleware.html",
+    "date": "2025-02-25",
+    "categories": ["Study"],
+    "tags": ["Study","Next.js"],
+    "excerpt": "📌 Middleware 개요Next.js의 Middleware는 사용자의 요청(Request)을 처리하기 전에 실행되는 코드로, 요청을 변경하거나 특정 조건에 따라 다른 응답을 반환하는 데 사용됩니다. Next.js Middleware는 Edge Runtime에서 실행되며, 서버리..."
+  },
+
+  {
+    "title": "다이나믹 라우트(Dynamic Route)의 슬러그(Slug)가 뭐지?",
+    "url": "/study/2025/02/24/dynamic_route_slug.html",
+    "date": "2025-02-24",
+    "categories": ["Study"],
+    "tags": ["Study","Next.js"],
+    "excerpt": "Next.js에서 다이나믹 라우트(Dynamic Route)에서 슬러그(Slug)Next.js에서 다이나믹 라우트에서 슬러그(Slug) 는 URL의 특정 부분을 변수처럼 다루는 역할을 합니다."
+  },
+
+  {
+    "title": "waitForTimeout 매서드를 꼭 써야할까?",
+    "url": "/study/2025/02/22/test_code_waitForTimeout.html",
+    "date": "2025-02-22",
+    "categories": ["Study"],
+    "tags": ["Study","Test_code"],
+    "excerpt": "Playwright vs Vitest에서 waitForTimeout(500) 사용에 대한 비교"
+  },
+
+  {
+    "title": "테스트 코드를 왜 해야하는가",
+    "url": "/study/2025/02/21/test_code_study.html",
+    "date": "2025-02-21",
+    "categories": ["Study"],
+    "tags": ["Study","Test_code"],
+    "excerpt": "테스트 코드란 무엇인가? (link)"
+  },
+
+  {
+    "title": "yaml파일과 yml파일의 차이점",
+    "url": "/study/2025/02/20/yaml.html",
+    "date": "2025-02-20",
+    "categories": ["Study"],
+    "tags": ["알쓸개잡-알아두면 쓸모있는 개발 잡지식"],
+    "excerpt": "yaml과 yml 파일은 완전히 동일한 YAML 형식의 파일이며, 확장자만 다를 뿐입니다."
+  },
+
+  {
+    "title": "Zustand를 use_store로 중앙 집중식 상태 관리",
+    "url": "/zustand/2025/02/18/zustand__use_store.html",
+    "date": "2025-02-18",
+    "categories": ["Zustand"],
+    "tags": ["Zustand"],
+    "excerpt": "zustand를 그냥 사용했을 때 문제점"
+  },
+
+  {
+    "title": "next image와 blur_image를 이용한 이미지 최적화",
+    "url": "/next.js/2025/02/17/next_image__blur.html",
+    "date": "2025-02-17",
+    "categories": ["Next.js"],
+    "tags": ["Next.js"],
+    "excerpt": "쇼핑몰의 단점, 많은 이미지"
+  },
+
+  {
+    "title": "Direction을 통한 dnd관리",
+    "url": "/dnd-kit/typescript/2025/02/16/dnd_direction.html",
+    "date": "2025-02-16",
+    "categories": ["dnd-kit","Typescript"],
+    "tags": ["dnd-kit","Typescript"],
+    "excerpt": "여러 형태의 컴포넌트를 서로 드래그 앤 드랍하여 작업하기 위해서는 드래그가 가능한 것과 드랍이 가능한 컴포넌트를 분리하고, 방향을 정해주는 게 중요하다고 생각했습니다."
+  },
+
+  {
+    "title": "객체지향 프로그래밍 (Object-Oriented Programming, OOP)",
+    "url": "/study/javascript/2025/01/24/OOP.html",
+    "date": "2025-01-24",
+    "categories": ["Study","JavaScript"],
+    "tags": ["JavaScript"],
+    "excerpt": "객체지향 프로그래밍 (Object-Oriented Programming, OOP)"
+  },
+
+  {
+    "title": "JSX와 Babel",
+    "url": "/study/javascript/2025/01/22/jsx-babel.html",
+    "date": "2025-01-22",
+    "categories": ["Study","JavaScript"],
+    "tags": ["JavaScript"],
+    "excerpt": "JSX와 Babel"
+  },
+
+  {
+    "title": "MVC와 MVW",
+    "url": "/study/javascript/2025/01/20/mvc-mvw.html",
+    "date": "2025-01-20",
+    "categories": ["Study","JavaScript"],
+    "tags": ["JavaScript"],
+    "excerpt": "MVC와 MVW"
+  },
+
+  {
+    "title": "AngularJS",
+    "url": "/study/javascript/2025/01/15/angularjs.html",
+    "date": "2025-01-15",
+    "categories": ["Study","JavaScript"],
+    "tags": ["JavaScript"],
+    "excerpt": "AngularJS"
+  },
+
+  {
+    "title": "모듈, 고립화와 지역화",
+    "url": "/study/javascript/2025/01/14/module.html",
+    "date": "2025-01-14",
+    "categories": ["Study","JavaScript"],
+    "tags": ["JavaScript"],
+    "excerpt": "모듈, 고립화와 지역화"
+  },
+
+  {
+    "title": "Ajax",
+    "url": "/study/javascript/2025/01/13/ajax.html",
+    "date": "2025-01-13",
+    "categories": ["Study","JavaScript"],
+    "tags": ["JavaScript"],
+    "excerpt": "Ajax"
+  },
+
+  {
+    "title": "비동기화를 위한 두 가지 방법 - 스레드(Thread)와 버퍼(Buffer)",
+    "url": "/study/javascript/2025/01/10/thread-buffer.html",
+    "date": "2025-01-10",
+    "categories": ["Study","JavaScript"],
+    "tags": ["JavaScript"],
+    "excerpt": "1. 스레드(Thread)스레드는 프로그램 내에서 병렬 처리를 가능하게 만드는 실행 단위입니다. 각 스레드는 독립적인 작업을 수행할 수 있어, 동시에 여러 작업을 실행하는 데 사용됩니다."
+  },
+
+  {
+    "title": "Promises API, Callback API, Synchronous API",
+    "url": "/study/javascript/2025/01/09/promises-callback-sync.html",
+    "date": "2025-01-09",
+    "categories": ["Study","JavaScript"],
+    "tags": ["JavaScript"],
+    "excerpt": "1. Promises API"
+  },
+
+  {
+    "title": "위임 함수 (Delegation Function)와 역제어 (Inversion of Control, IoC)",
+    "url": "/study/javascript/2025/01/08/delegation-function.html",
+    "date": "2025-01-08",
+    "categories": ["Study","JavaScript"],
+    "tags": ["JavaScript"],
+    "excerpt": "위임 함수 (Delegation Function)"
+  },
+
+  {
+    "title": "Function과 Arrow Function",
+    "url": "/study/javascript/2025/01/07/function-arrow-function.html",
+    "date": "2025-01-07",
+    "categories": ["Study","JavaScript"],
+    "tags": ["JavaScript"],
+    "excerpt": "1. 등장 배경 JS Function: 전통적인 방식의 함수 정의로, ECMAScript 초창기부터 존재했습니다. 가독성과 재사용성을 높이는 데 초점이 맞춰졌습니다. Arrow Function: ES6(2015)에서 도입된 새로운 함수 표기법으로, 짧고 간결한 문법과 더불어 thi..."
+  },
+
+  {
+    "title": "JSON(JavaScript Object Notation)",
+    "url": "/study/javascript/2025/01/06/JSON.html",
+    "date": "2025-01-06",
+    "categories": ["Study","JavaScript"],
+    "tags": ["JavaScript"],
+    "excerpt": "1. JSON의 등장 배경JSON(JavaScript Object Notation)은 2000년대 초반, 웹 애플리케이션이 점점 복잡해지고 데이터 교환이 중요해지면서 등장했습니다. 당시 XML이 데이터 교환의 표준으로 사용되고 있었지만, XML은 문법이 복잡하고 사람이 읽고 쓰기에..."
+  },
+
+  {
+    "title": "DOM과 Visual DOM",
+    "url": "/study/react/2025/01/04/DOM-VisualDOM.html",
+    "date": "2025-01-04",
+    "categories": ["Study","React"],
+    "tags": ["React"],
+    "excerpt": "1. DOM (Document Object Model)"
+  },
+
+  {
+    "title": "참조(Reference)와 클로저(Closure)",
+    "url": "/study/javascript/2025/01/03/reference-closure.html",
+    "date": "2025-01-03",
+    "categories": ["Study","JavaScript"],
+    "tags": ["JavaScript"],
+    "excerpt": "참조(Reference)와 클로저(Closure)는 둘 다 변수와 데이터의 접근 방식에 관련이 있지만, 완전히 다른 개념입니다. 아래에서 둘의 핵심적인 차이와 역할을 설명합니다."
+  },
+
+  {
+    "title": "JavaScript에서 버퍼란?",
+    "url": "/study/javascript/2025/01/02/buffer.html",
+    "date": "2025-01-02",
+    "categories": ["Study","JavaScript"],
+    "tags": ["JavaScript"],
+    "excerpt": "버퍼(Buffer)는 임시 데이터 저장 공간을 의미하며, 데이터를 한 곳에서 다른 곳으로 전송하거나 처리할 때 중간 단계로 데이터를 임시로 저장하는 데 사용됩니다. 특히, 생산자와 소비자의 데이터 처리 속도가 다를 때 효율적으로 데이터를 관리하는 데 중요한 역할을 합니다."
+  },
+
+  {
+    "title": "truthy & falsy (true가 되는 값 false가 되는 값)",
+    "url": "/study/javascript/2025/01/01/truthy-falsy.html",
+    "date": "2025-01-01",
+    "categories": ["Study","JavaScript"],
+    "tags": ["JavaScript"],
+    "excerpt": "JavaScript에서 true 또는 false로 평가되는 값은 Truthy와 Falsy라는 두 개념으로 나뉩니다. 이 값들은 논리적 문맥(예: 조건문 if)에서 암시적으로 형변환되어 평가됩니다."
+  },
+
+  {
+    "title": "javascript의 for는 함수가 아니야?",
+    "url": "/study/javascript/2024/12/31/for.html",
+    "date": "2024-12-31",
+    "categories": ["Study","JavaScript"],
+    "tags": ["JavaScript"],
+    "excerpt": "JavaScript에서 for는 함수가 아닙니다. for는 JavaScript의 문(statement) 중 하나로, 특정 조건이 충족되는 동안 반복 실행하는 구조를 제공합니다."
+  },
+
+  {
+    "title": "쏙쏙 들어오는 함수형 코딩 [CHAPTER 7, 8, 9]",
+    "url": "/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/11/26/grokking-simplicity-04.html",
+    "date": "2024-11-26",
+    "categories": ["Study","Book","쏙쏙 들어오는 함수형 코딩"],
+    "tags": ["Book","쏙쏙 들어오는 함수형 코딩"],
+    "excerpt": "CHAPTER 7. 신뢰할 수 없는 코드를 쓰면서 불변성 지키기"
+  },
+
+  {
+    "title": "쏙쏙 들어오는 함수형 코딩 [CHAPTER 5, 6]",
+    "url": "/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/10/22/grokking-simplicity-03.html",
+    "date": "2024-10-22",
+    "categories": ["Study","Book","쏙쏙 들어오는 함수형 코딩"],
+    "tags": ["Book","쏙쏙 들어오는 함수형 코딩"],
+    "excerpt": "💡 이번 회차의 포인트는 `원칙 세우기` 입니다."
+  },
+
+  {
+    "title": "쏙쏙 들어오는 함수형 코딩 [CHAPTER 3, 4]",
+    "url": "/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/10/01/grokking-simplicity-02.html",
+    "date": "2024-10-01",
+    "categories": ["Study","Book","쏙쏙 들어오는 함수형 코딩"],
+    "tags": ["Book","쏙쏙 들어오는 함수형 코딩"],
+    "excerpt": "CHAPTER 3. 액션과 계산, 데이터의 차이를 알기"
+  },
+
+  {
+    "title": "쏙쏙 들어오는 함수형 코딩 [CHAPTER 1, 2]",
+    "url": "/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/09/20/grokking-simplicity-01.html",
+    "date": "2024-09-20",
+    "categories": ["Study","Book","쏙쏙 들어오는 함수형 코딩"],
+    "tags": ["Book","쏙쏙 들어오는 함수형 코딩"],
+    "excerpt": "CHAPTER 1. 쏙쏙 들어오는 함수형 코딩에 오신 것을 환영합니다."
+  },
+
+  {
+    "title": "넷플릭스의 영상은 어디에 저장돼있을까? (CDN)",
+    "url": "/dev/infra/2024/03/06/cdn.html",
+    "date": "2024-03-06",
+    "categories": ["Dev","Infra"],
+    "tags": ["Infra","CDN"],
+    "excerpt": "넷플릭스같은 OTT가 유행하고 있다. 다양한 위치에서 OTT 사이트와 앱에 접속하게 되는데, 이때 공유되는 동영상은 어디서 오는 것일까?"
+  },
+
+  {
+    "title": "React - 이벤트 전달을 막아주는 e.preventDefault()와 e.stopPropagation()",
+    "url": "/dev/react/2024/03/04/e.preventDefault_and_e.stopPropagation.html",
+    "date": "2024-03-04",
+    "categories": ["Dev","React"],
+    "tags": ["React","Event"],
+    "excerpt": "회사에서 버튼 이벤트 버그를 해결하던 중 이벤트의 동작 원리와, 전파에 대해 더 깊이 공부하게 되었다."
+  },
+
+  {
+    "title": "2024년 2월 회고 - 게을러지지 않기 위하여",
+    "url": "/journal/retrospect/2024/02/26/Retrospect_in_2024_february.html",
+    "date": "2024-02-26",
+    "categories": ["Journal","Retrospect"],
+    "tags": ["회고"],
+    "excerpt": ""
+  },
+
+  {
+    "title": "[ 스타트업 | 신입 개발 일기 ] - 01. 첫번째 업무, 소스 코드 분석하기",
+    "url": "/journal/development%20diary/2024/02/26/source_code.html",
+    "date": "2024-02-26",
+    "categories": ["Journal","Development Diary"],
+    "tags": ["개발일기","신입개발자","스타트업"],
+    "excerpt": "신입의 첫번째 ‘업무’ 소스 코드 분석하기"
+  },
+
+  {
+    "title": "깃모지 사용 할까?",
+    "url": "/dev/git/2024/02/25/gitmoji.html",
+    "date": "2024-02-25",
+    "categories": ["Dev","Git"],
+    "tags": ["gitmoji"],
+    "excerpt": "Gitmoji 란?"
+  }
+
+]

@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Native cross-document page transitions (progressive enhancement, Chromium only) -->
+  <meta name="view-transition" content="same-origin">
+
+  <!-- Google Translate Customization (if needed) -->
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+
+  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>[ 롤모임 운영일지 ] - 04. 동시접속 100명도 안 되는 서비스에서 “렉”이 걸린 이유 | Haeran’s blog</title>
+<meta name="generator" content="Jekyll v4.4.1">
+<meta property="og:title" content="[ 롤모임 운영일지 ] - 04. 동시접속 100명도 안 되는 서비스에서 “렉”이 걸린 이유">
+<meta name="author" content="haeran">
+<meta property="og:locale" content="ko">
+<meta name="description" content="이번 편은 배포 사고나 아키텍처 이야기가 아니라 성능 조사 이야기다. “시즌패스 출시 이후로 서버가 느려졌다”는 유저 신고 하나로 시작해서, 전혀 예상치 못한 곳에서 진짜 원인을 찾은 과정을 기록해둔다.">
+<meta property="og:description" content="이번 편은 배포 사고나 아키텍처 이야기가 아니라 성능 조사 이야기다. “시즌패스 출시 이후로 서버가 느려졌다”는 유저 신고 하나로 시작해서, 전혀 예상치 못한 곳에서 진짜 원인을 찾은 과정을 기록해둔다.">
+<link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html">
+<meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html">
+<meta property="og:site_name" content="Haeran’s blog">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2026-07-14T11:00:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="[ 롤모임 운영일지 ] - 04. 동시접속 100명도 안 되는 서비스에서 “렉”이 걸린 이유">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"haeran"},"dateModified":"2026-07-14T11:00:00+00:00","datePublished":"2026-07-14T11:00:00+00:00","description":"이번 편은 배포 사고나 아키텍처 이야기가 아니라 성능 조사 이야기다. “시즌패스 출시 이후로 서버가 느려졌다”는 유저 신고 하나로 시작해서, 전혀 예상치 못한 곳에서 진짜 원인을 찾은 과정을 기록해둔다.","headline":"[ 롤모임 운영일지 ] - 04. 동시접속 100명도 안 되는 서비스에서 “렉”이 걸린 이유","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html"},"url":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- Favicon -->
+  <link rel="icon" href="/assets/images/favicon.ico">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html">
+
+  <!-- Social Media (Open Graph, Twitter Card) -->
+  <meta property="og:title" content='[ 롤모임 운영일지 ] - 04. 동시접속 100명도 안 되는 서비스에서 "렉"이 걸린 이유'>
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+  <meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content='[ 롤모임 운영일지 ] - 04. 동시접속 100명도 안 되는 서비스에서 "렉"이 걸린 이유'>
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+
+  <!-- Stylesheets and External Resources -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+
+  <!-- Editorial display typeface for headings only; body stays Noto Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- JavaScript -->
+  <script src="/assets/js/main.js"></script>
+
+  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
+<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
+<script>
+  function initGoogleAnalytics() {
+    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
+      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
+    var enableDNT = "false" == "true";
+
+    if (!enableDNT || !doNotTrack) {
+      var measurementId = 'G-ZNXE6HSKMS';
+
+      (function(src) {
+        var tag = document.createElement('script');
+        tag.src = src;
+        tag.async = true;
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', measurementId);
+    }
+  }
+  window.addEventListener("load", initGoogleAnalytics);
+</script>
+
+<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  // mermaid 블록은 highlight.js 대상에서 제외 — hljs가 addLangData에서 class를
+  // "language-mermaid" -> "hljs mermaid"로 덮어써버려서, mermaid.html의 렌더링 스크립트가
+  // 뒤늦게(load 시점) 찾으려는 .language-mermaid 셀렉터가 항상 빈 결과를 내는 원인이었음.
+  var els = document.querySelectorAll('pre code:not(.language-mermaid)')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
+<style>
+  .pswp .pswp__container .pswp__img {
+    background-color: white;
+  }
+</style>
+
+<script>
+  function initPhotoSwipe() {
+    let customOptions = {};
+
+    try {
+      const data = ``.replaceAll("=>", ":");
+      customOptions = JSON.parse(data);
+    } catch (e) {
+      console.info("Invalid custom photo previewer options! " + e.message);
+    }
+
+    // Define object and gallery options
+    const options = Object.assign(
+      {
+        gallery: "section.main",
+        children: "a.photo-swipe",
+        photo_scale: 2,
+        // dynamic import is not supported in UMD version
+        pswpModule: PhotoSwipe,
+      },
+      customOptions
+    );
+
+    const galleryEl = document.querySelector(options.gallery);
+    if (!galleryEl) {
+      return;
+    }
+
+    const imgEls = [];
+    const els = galleryEl.querySelectorAll("img:not(.emoji)");
+    els.forEach((el) => {
+      if (el.src.trim() == "") {
+        return;
+      }
+      if (!imgEls.includes(el)) {
+        imgEls.push(el);
+      }
+    });
+
+    if (imgEls.length === 0) {
+      return;
+    }
+
+    imgEls.forEach((imgEl) => {
+      imgEl.outerHTML = `
+      <a class="photo-swipe"
+        href="${imgEl.src}"
+        data-pswp-width="${
+          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
+        }"
+        data-pswp-height="${
+          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
+        }"
+        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
+        target="_blank">
+        ${imgEl.outerHTML}
+      </a>`;
+    });
+
+    // Initialize PhotoSwipe 5
+    var lightbox = new PhotoSwipeLightbox(options);
+
+    lightbox.init();
+  }
+
+  window.addEventListener("load", initPhotoSwipe);
+</script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+  function isDarkTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark';
+  }
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: isDarkTheme() ? 'dark' : 'default',
+  });
+
+  function renderMermaidBlocks() {
+    // kramdown/rouge render ```mermaid fences as <pre><code class="language-mermaid">...</code></pre>
+    // mermaid.js only auto-scans <div class="mermaid">, so swap the markup before running it.
+    const blocks = document.querySelectorAll('pre > code.language-mermaid');
+    if (blocks.length === 0) {
+      return;
+    }
+    blocks.forEach((code) => {
+      const graphDefinition = code.textContent;
+      const container = document.createElement('div');
+      container.className = 'mermaid';
+      container.textContent = graphDefinition;
+      code.parentElement.replaceWith(container);
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  }
+
+  window.addEventListener('load', renderMermaidBlocks);
+</script>
+<!-- Custom Head HTML (if any) -->
+
+<!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 assets/js/chat-widget.js -->
+<script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
+  Haeran's blog
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/search.html">SEARCH</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<div class="page-link" style="display: inline;">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<div class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="fr">
+          
+          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="zh-CN">
+          
+          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ja">
+          
+          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ko">
+          
+          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ru">
+          
+          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
+          
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ko',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+</div>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    // 항상 localStorage를 사용 — 'auto' 모드에서도 유저가 직접 누른 토글이
+    // 브라우저 세션이 끝났다고 사라지지 않고, 다음 예약된 자동 전환 시점까지 유지된다.
+    var storage = localStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var blocks = document.querySelectorAll('pre');
+
+  function addCopyButton(pre) {
+    if (pre.querySelector('.code-copy-btn')) return;
+    var code = pre.querySelector('code');
+    if (!code) return;
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'code-copy-btn';
+    btn.textContent = 'Copy';
+    pre.appendChild(btn);
+
+    btn.addEventListener('click', function () {
+      var text = code.textContent;
+
+      function done(ok) {
+        btn.textContent = ok ? 'Copied!' : 'Failed';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+        return;
+      }
+
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        done(document.execCommand('copy'));
+      } catch (e) {
+        done(false);
+      }
+      document.body.removeChild(ta);
+    });
+  }
+
+  for (var i = 0; i < blocks.length; i++) {
+    addCopyButton(blocks[i]);
+  }
+});
+</script>
+<main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <div class="framework">
+  <section class="main">
+
+     <div class="reading-progress" aria-hidden="true">
+  <div class="reading-progress-bar" id="reading-progress-bar"></div>
+</div>
+
+<script>
+(function () {
+  var bar = document.getElementById('reading-progress-bar');
+  var article = document.querySelector('.post-content');
+  if (!bar || !article) return;
+
+  function update() {
+    var rect = article.getBoundingClientRect();
+    var articleTop = rect.top + window.pageYOffset;
+    var total = article.offsetHeight - window.innerHeight;
+    var scrolled = window.pageYOffset - articleTop;
+    var pct = total > 0 ? Math.min(100, Math.max(0, (scrolled / total) * 100)) : 100;
+    bar.style.width = pct + '%';
+  }
+
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+</script>
+<div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">[ 롤모임 운영일지 ] - 04. 동시접속 100명도 안 되는 서비스에서 "렉"이 걸린 이유</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <div class="post-meta">
+    <time class="dt-published" datetime="2026-07-14T11:00:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Jul 14, 2026
+    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 32 mins</span>
+  </div>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#%EC%9A%B4%EC%98%81%EC%9D%BC%EC%A7%80">#운영일지</a><a class="post-tag" href="/tags.html#%EC%84%B1%EB%8A%A5%EC%B5%9C%EC%A0%81%ED%99%94">#성능최적화</a><a class="post-tag" href="/tags.html#N+1">#N+1</a><a class="post-tag" href="/tags.html#PostgreSQL">#PostgreSQL</a><a class="post-tag" href="/tags.html#Prisma">#Prisma</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <p>이번 편은 배포 사고나 아키텍처 이야기가 아니라 성능 조사 이야기다. “시즌패스 출시 이후로 서버가 느려졌다”는 유저 신고 하나로 시작해서, 전혀 예상치 못한 곳에서 진짜 원인을 찾은 과정을 기록해둔다.</p>
+
+<h2 id="tldr">TL;DR</h2>
+
+<ul>
+  <li>“시즌패스 출시 이후로 서버가 느려졌다”는 유저 신고로 조사를 시작했다.</li>
+  <li>실측(<code class="language-plaintext highlighter-rouge">pg_stat_statements</code>) 결과, 시즌패스 자체의 DB 부하는 무시할 수준이었다 — 처음 세운 가설은 <strong>틀렸다</strong>.</li>
+  <li>대신 완전히 무관한 곳에서 진짜 문제 두 개를 찾았다: 한 페이지가 유저 수만큼 쿼리를 쏘는 <strong>N+1 버그</strong> 두 건.</li>
+  <li>핵심 교훈: 이 규모(DAU 50~70명) 서비스에서 “렉”의 원인은 거의 항상 <strong>트래픽 총량이 아니라, 요청 하나가 몇 개의 쿼리로 터지느냐</strong>다.</li>
+</ul>
+
+<p><br></p>
+
+<h2 id="1-시작--시즌패스-이후로-렉이-심해졌어요">1. 시작 — “시즌패스 이후로 렉이 심해졌어요”</h2>
+
+<p>새 시즌패스 기능(“함께하는 여름방학”)을 출시한 뒤, 유저들 사이에서 “요즘 서버가 렉 걸린다”는 말이 돌기 시작했다. 타이밍이 시즌패스 출시와 겹친다는 게 유일한 단서였다.</p>
+
+<p>가장 먼저 의심한 건 당연히 시즌패스 자체였다. 미션 진행도 계산 로직(<code class="language-plaintext highlighter-rouge">countMissionSignal</code>)이 미션 조회마다 여러 테이블을 실시간으로 카운트하는 구조라, 이게 무겁지 않을까 생각했다.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/api/src/lib/season-pass.ts</span>
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">countMissionSignal</span><span class="p">(</span><span class="nx">userId</span><span class="p">,</span> <span class="nx">signal</span><span class="p">,</span> <span class="nx">cadence</span><span class="p">,</span> <span class="nx">periodKey</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">switch </span><span class="p">(</span><span class="nx">signal</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="dl">"</span><span class="s2">BET_STORE_BUY</span><span class="dl">"</span><span class="p">:</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="p">[</span><span class="nx">purchases</span><span class="p">,</span> <span class="nx">megaphones</span><span class="p">,</span> <span class="nx">bubbleSkins</span><span class="p">,</span> <span class="nx">customizations</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="nb">Promise</span><span class="p">.</span><span class="nf">all</span><span class="p">([</span>
+        <span class="nx">prisma</span><span class="p">.</span><span class="nx">betStorePurchase</span><span class="p">.</span><span class="nf">count</span><span class="p">({</span> <span class="na">where</span><span class="p">:</span> <span class="p">{</span> <span class="nx">groupId</span><span class="p">,</span> <span class="nx">userId</span><span class="p">,</span> <span class="na">createdAt</span><span class="p">:</span> <span class="p">{</span> <span class="nx">gte</span><span class="p">,</span> <span class="nx">lt</span> <span class="p">}</span> <span class="p">}</span> <span class="p">}),</span>
+        <span class="nx">prisma</span><span class="p">.</span><span class="nx">megaphone</span><span class="p">.</span><span class="nf">count</span><span class="p">({</span> <span class="p">...</span> <span class="p">}),</span>
+        <span class="nx">prisma</span><span class="p">.</span><span class="nx">bubbleSkinPurchase</span><span class="p">.</span><span class="nf">count</span><span class="p">({</span> <span class="p">...</span> <span class="p">}),</span>
+        <span class="nx">prisma</span><span class="p">.</span><span class="nx">customizationPurchase</span><span class="p">.</span><span class="nf">count</span><span class="p">({</span> <span class="p">...</span> <span class="p">}),</span>
+      <span class="p">]);</span>
+      <span class="k">return</span> <span class="nx">purchases</span> <span class="o">+</span> <span class="nx">megaphones</span> <span class="o">+</span> <span class="nx">bubbleSkins</span> <span class="o">+</span> <span class="nx">customizations</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="c1">// ...</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><br></p>
+
+<h2 id="2-첫-번째-반증--감이-아니라-실측으로-확인하기">2. 첫 번째 반증 — 감이 아니라 실측으로 확인하기</h2>
+
+<p>Supabase Postgres에는 <code class="language-plaintext highlighter-rouge">pg_stat_statements</code> 확장이 이미 켜져 있었다. 실제 쿼리 비용을 직접 뜯어봤다.</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="n">round</span><span class="p">(</span><span class="n">total_exec_time</span><span class="p">::</span><span class="nb">numeric</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="k">AS</span> <span class="n">total_ms</span><span class="p">,</span> <span class="n">calls</span><span class="p">,</span> <span class="n">round</span><span class="p">(</span><span class="n">mean_exec_time</span><span class="p">::</span><span class="nb">numeric</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="k">AS</span> <span class="n">mean_ms</span><span class="p">,</span> <span class="k">left</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="mi">140</span><span class="p">)</span>
+<span class="k">FROM</span> <span class="n">pg_stat_statements</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">total_exec_time</span> <span class="k">DESC</span> <span class="k">LIMIT</span> <span class="mi">25</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>결과: 시즌패스 관련 쿼리(<code class="language-plaintext highlighter-rouge">PassMissionSlot</code>, <code class="language-plaintext highlighter-rouge">BetStorePurchase</code>, <code class="language-plaintext highlighter-rouge">StreakBet</code>, <code class="language-plaintext highlighter-rouge">ScrimBet</code>, <code class="language-plaintext highlighter-rouge">Megaphone</code> 등)는 상위 25개 안에 단 하나도 없었다. 개별 쿼리 비용도 1~10ms 수준으로 가벼웠다.</p>
+
+<p>DAU도 확인했다 — 시즌패스 출시(7/7) 전후로 특별한 변화가 없었다.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>날짜</th>
+      <th>DAU</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>06/22</td>
+      <td>48</td>
+    </tr>
+    <tr>
+      <td>06/29</td>
+      <td>64</td>
+    </tr>
+    <tr>
+      <td><strong>07/03</strong></td>
+      <td>75</td>
+    </tr>
+    <tr>
+      <td><strong>07/07 (시즌패스 출시)</strong></td>
+      <td>59</td>
+    </tr>
+    <tr>
+      <td>07/13</td>
+      <td>55</td>
+    </tr>
+    <tr>
+      <td>07/17</td>
+      <td>54</td>
+    </tr>
+    <tr>
+      <td>07/20</td>
+      <td>69</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>결론: 시즌패스의 DB 부하는 죄가 없었다.</strong> 트래픽도 안 늘었다. 첫 가설은 폐기.</p>
+
+<p>그래도 소득은 있었다 — 조사 중에 시즌패스와 함께 배포된 전역 배경 컴포넌트(<code class="language-plaintext highlighter-rouge">SeasonAtmosphereBackground</code>/<code class="language-plaintext highlighter-rouge">SeasonAtmosphereBanner</code>)가 페이지마다 같은 API를 <strong>2번씩 중복 호출</strong>하는 race condition을 발견해 고쳤다. 사소했지만 진짜 버그였다.</p>
+
+<p><br></p>
+
+<h2 id="3-진짜-원인을-찾아서--연승배팅-페이지의-n1">3. 진짜 원인을 찾아서 — 연승배팅 페이지의 N+1</h2>
+
+<p>“진짜 무거운 쿼리가 뭔지 보자”며 <code class="language-plaintext highlighter-rouge">pg_stat_statements</code> 상위 목록을 다시 훑다가, <code class="language-plaintext highlighter-rouge">RiotMatchParticipant</code> 조회가 압도적으로 많다는 걸 발견했다. 추적해보니 <code class="language-plaintext highlighter-rouge">GET /streak-bets/targets</code>(연승배팅 페이지)가 범인이었다.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 수정 전 — packages/api/src/routes/streak-bets.ts</span>
+<span class="kd">const</span> <span class="nx">users</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">prisma</span><span class="p">.</span><span class="nx">user</span><span class="p">.</span><span class="nf">findMany</span><span class="p">({</span>
+  <span class="na">where</span><span class="p">:</span> <span class="p">{</span> <span class="na">isGuest</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span> <span class="na">deletedAt</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="na">puuid</span><span class="p">:</span> <span class="p">{</span> <span class="na">not</span><span class="p">:</span> <span class="dl">""</span> <span class="p">}</span> <span class="p">},</span>
+<span class="p">});</span>
+<span class="kd">const</span> <span class="nx">enriched</span> <span class="o">=</span> <span class="k">await</span> <span class="nb">Promise</span><span class="p">.</span><span class="nf">all</span><span class="p">(</span>
+  <span class="nx">users</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="k">async </span><span class="p">(</span><span class="nx">u</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">({</span>
+    <span class="p">...</span><span class="nx">u</span><span class="p">,</span>
+    <span class="na">streak</span><span class="p">:</span> <span class="p">(</span><span class="k">await</span> <span class="nf">getCurrentStreak</span><span class="p">(</span><span class="nx">u</span><span class="p">.</span><span class="nx">id</span><span class="p">)).</span><span class="nx">streak</span><span class="p">,</span>   <span class="c1">// 유저 1명당 쿼리 1개</span>
+  <span class="p">})),</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">getCurrentStreak()</code>는 유저 한 명의 최근 30경기를 조회해서 연승/연패를 계산하는 함수다. 문제는 이걸 <strong>전체 유저(130명)에 대해 각각</strong> 호출하고 있었다는 것 — 페이지 한 번 열 때마다 DB 쿼리 130개가 동시에 나갔다.</p>
+
+<pre><code class="language-mermaid">flowchart TB
+    subgraph before["수정 전 — 유저 1명이 페이지를 열면"]
+        U1["유저가 연승배팅 페이지 접속"] --&gt; R1["GET /streak-bets/targets"]
+        R1 --&gt; Q1["유저 #1 매치 조회"]
+        R1 --&gt; Q2["유저 #2 매치 조회"]
+        R1 --&gt; Q3["유저 #3 매치 조회"]
+        R1 --&gt; Qd["... 총 130개 쿼리"]
+    end
+</code></pre>
+
+<pre><code class="language-mermaid">flowchart TB
+    subgraph after["수정 후"]
+        U2["유저가 연승배팅 페이지 접속"] --&gt; R2["GET /streak-bets/targets"]
+        R2 --&gt; W["윈도우 함수 쿼리 1개&lt;br/&gt;(전체 유저 스트릭 한번에 계산)"]
+    end
+</code></pre>
+
+<p>수정: window function으로 130개 쿼리를 1개로 합쳤다.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 수정 후 — packages/api/src/lib/streak-bets.ts</span>
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">getCurrentStreaksBatch</span><span class="p">(</span><span class="nx">userIds</span><span class="p">:</span> <span class="kr">number</span><span class="p">[])</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">rows</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">prisma</span><span class="p">.</span><span class="nx">$queryRaw</span><span class="s2">`
+    SELECT rmp."userId", rmp.win, rmp."gameEndAt" FROM (
+      SELECT rmp."userId", rmp.win, rmp."gameEndAt",
+        ROW_NUMBER() OVER (PARTITION BY rmp."userId" ORDER BY rmp."gameEndAt" DESC) AS rn
+      FROM "RiotMatchParticipant" rmp
+      JOIN "RiotMatch" rm ON rm.id = rmp."matchId"
+      WHERE rmp."userId" = ANY(</span><span class="p">${</span><span class="nx">userIds</span><span class="p">}</span><span class="s2">) AND rm."queueId" = </span><span class="p">${</span><span class="nx">SOLO_QUEUE</span><span class="p">}</span><span class="s2">
+    ) rmp
+    WHERE rn &lt;= </span><span class="p">${</span><span class="nx">STREAK_LOOKBACK</span><span class="p">}</span><span class="s2">
+    ORDER BY rmp."userId", rmp."gameEndAt" DESC
+  `</span><span class="p">;</span>
+  <span class="c1">// ... JS에서 유저별로 그룹핑 후 연승/연패 계산</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><br></p>
+
+<h2 id="4-정직한-반전--근데-이게-진짜-원인이-맞아">4. 정직한 반전 — “근데 이게 진짜 원인이 맞아?”</h2>
+
+<p>수정하고 나서 뿌듯해하고 있었는데, 확인 질문 하나가 들어왔다. <strong>“그거 진짜 근본 원인이 맞아?”</strong></p>
+
+<p>다시 검증했다. 타임라인을 대조해보니:</p>
+
+<pre><code class="language-mermaid">timeline
+    title 타임라인 — 가설이 무너진 순간
+    2026-05-03 : 연승배팅 기능 출시 (N+1 버그가 이때부터 존재)
+    2026-07-07 : 시즌패스 출시
+    2026-07-21 : "렉 심하다" 신고
+</code></pre>
+
+<p><strong>연승배팅 N+1 버그는 시즌패스보다 2개월 이상 먼저 존재했다.</strong> “시즌패스 이후로 렉이 심해졌다”는 관찰과 시점이 안 맞았다. “시즌패스가 연승배팅 미션을 만들어서 이 페이지 방문이 늘었을 것”이라는 간접 연결고리도 확인해봤지만, 실제 배팅 건수는 시즌패스 출시 이후 <strong>오히려 줄어 있었다</strong>.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>주</th>
+      <th>StreakBet 건수</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>05/11</td>
+      <td>229</td>
+    </tr>
+    <tr>
+      <td>05/25</td>
+      <td>220</td>
+    </tr>
+    <tr>
+      <td>06/29</td>
+      <td>58</td>
+    </tr>
+    <tr>
+      <td><strong>07/06 (시즌패스 출시)</strong></td>
+      <td>46</td>
+    </tr>
+    <tr>
+      <td>07/13</td>
+      <td>81</td>
+    </tr>
+    <tr>
+      <td>07/20</td>
+      <td>8 (진행중)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>솔직하게 인정했다: N+1은 실제 버그고 고친 건 낭비가 아니지만, <strong>“시즌패스 이후 렉 심해짐”이라는 신고의 근본 원인이라고 확신할 근거는 없었다.</strong></p>
+
+<p><br></p>
+
+<h2 id="5-동시접속-100도-안-되는데-왜-렉이-걸려">5. “동시접속 100도 안 되는데 왜 렉이 걸려?”</h2>
+
+<p>여기서 나온 질문이 이 조사 전체를 관통하는 진짜 인사이트를 끌어냈다.</p>
+
+<blockquote>
+  <p>“끽해봤자 동시 접속이 100 정도도 안 될 만한 이런 서비스에 왜 렉이 걸린다는 건지 이해할 수 없어.”</p>
+</blockquote>
+
+<p>이 질문에 대한 답이 바로 3번에서 고친 버그의 진짜 의미였다. <strong>“동시 접속자 수”가 문제가 아니라, “요청 1개가 몇 개의 DB 쿼리로 터지느냐”가 문제다.</strong></p>
+
+<p>커넥션 구조를 직접 확인했다.</p>
+
+<pre><code class="language-mermaid">flowchart TB
+    subgraph CloudRun["Cloud Run — 최대 10 인스턴스"]
+        I1["인스턴스 #1&lt;br/&gt;Node pg.Pool"]
+        I2["인스턴스 #2&lt;br/&gt;Node pg.Pool"]
+        I3["... 최대 10개"]
+    end
+    I1 &amp; I2 &amp; I3 --&gt; SV["Supavisor&lt;br/&gt;(Transaction Pooler, :6543)"]
+    SV --&gt; PG[("Postgres&lt;br/&gt;max_connections = 60")]
+    Infra["Supabase 내부 인프라&lt;br/&gt;(Auth·Realtime·pg_cron·모니터링 등)&lt;br/&gt;고정 소모 ≈ 25개"] -.-&gt; PG
+</code></pre>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SHOW</span> <span class="n">max_connections</span><span class="p">;</span>              <span class="c1">-- 60</span>
+<span class="k">SELECT</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="k">FROM</span> <span class="n">pg_stat_activity</span><span class="p">;</span>  <span class="c1">-- 36 (그중 ~25는 Supabase 내부 인프라)</span>
+</code></pre></div></div>
+
+<p>Postgres 서버 전체의 <strong>하드 리밋이 60개</strong>였고, 그중 약 25개는 Supabase 자체 인프라(Auth, Realtime, pg_cron, 모니터링)가 고정으로 물고 있었다. 우리 앱(Node <code class="language-plaintext highlighter-rouge">pg.Pool</code>)은 기본값 10개짜리 풀을 쓰고 있었는데 — 여기서 3번의 버그가 왜 위험한지 명확해진다:</p>
+
+<p><strong>유저 1명이 연승배팅 페이지를 여는 순간, 그 요청 하나가 10개짜리 풀을 통째로 점유해버린다.</strong> 그 순간 같은 Cloud Run 인스턴스에서 처리되던 다른 유저의 요청은 전부 커넥션이 빌 때까지 대기열에 걸린다. <strong>동시접속자가 100명이든 5명이든 상관없다 — 트래픽이 적을수록 오히려 한 사람의 실수가 풀 전체를 독점하기 쉽다.</strong></p>
+
+<p>조치: 풀 크기를 10 → 30으로 올렸다. Supavisor(트랜잭션 풀러)가 중간에서 초과분을 큐잉/멀티플렉싱해주기 때문에 Postgres의 하드 리밋(60)을 직접 위협하지 않으면서 여유를 확보할 수 있었다.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/api/src/lib/prisma.ts</span>
+<span class="kd">const</span> <span class="nx">adapter</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PrismaPg</span><span class="p">({</span> <span class="na">connectionString</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">DATABASE_URL</span><span class="o">!</span><span class="p">,</span> <span class="na">max</span><span class="p">:</span> <span class="mi">30</span> <span class="p">});</span>
+</code></pre></div></div>
+
+<p><br></p>
+
+<h2 id="6-진짜-큰-놈--코스메틱-n1-전체-db-호출의-54">6. 진짜 큰 놈 — 코스메틱 N+1 (전체 DB 호출의 5.4%)</h2>
+
+<p>“DB를 과호출하는 API가 더 있는지 확인해봐”라는 요청에 배포 직후 실시간 로그를 보다가 이상한 패턴을 발견했다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /api/season-pass/cosmetics/user/273
+GET /api/season-pass/cosmetics/user/214
+GET /api/season-pass/cosmetics/user/146
+GET /api/season-pass/cosmetics/user/161
+GET /api/season-pass/cosmetics/user/204
+...
+</code></pre></div></div>
+
+<p>유저 ID별로 같은 엔드포인트가 연달아 호출되고 있었다. 범인은 <code class="language-plaintext highlighter-rouge">Nickname</code> 컴포넌트 — <strong>22개 페이지</strong>(대부분 유저 목록을 <code class="language-plaintext highlighter-rouge">.map()</code>으로 그리는 랭킹·멤버 목록·채팅·배팅 내역)에서 재사용되는 공용 컴포넌트인데, 각 인스턴스가 자기 유저의 시즌 코스메틱을 <strong>개별적으로</strong> fetch하고 있었다.</p>
+
+<p>이미 배치 엔드포인트(<code class="language-plaintext highlighter-rouge">/cosmetics/users?ids=...</code>)가 존재했고, 코드 주석에도 “N+1 방지”라고 명시돼 있었다. 그런데 정작 가장 많이 쓰이는 컴포넌트가 그 배치 엔드포인트를 안 쓰고 있었던 것.</p>
+
+<p><code class="language-plaintext highlighter-rouge">pg_stat_statements</code>로 실제 규모를 확인했다:</p>
+
+<pre><code class="language-mermaid">pie showData
+    title 전체 DB 호출(1억 630만 회, 3.5개월 누적) 중 코스메틱 N+1의 비중
+    "코스메틱 N+1 (UserCosmeticEquip + UserActiveEffect)" : 5692147
+    "나머지 전체" : 100618403
+</code></pre>
+
+<table>
+  <thead>
+    <tr>
+      <th>쿼리</th>
+      <th style="text-align: right">호출 횟수</th>
+      <th style="text-align: right">비중</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+<code class="language-plaintext highlighter-rouge">UserCosmeticEquip</code> findMany</td>
+      <td style="text-align: right">2,846,330회</td>
+      <td style="text-align: right">—</td>
+    </tr>
+    <tr>
+      <td>
+<code class="language-plaintext highlighter-rouge">UserActiveEffect</code> findMany</td>
+      <td style="text-align: right">2,845,817회</td>
+      <td style="text-align: right">—</td>
+    </tr>
+    <tr>
+      <td><strong>합계</strong></td>
+      <td style="text-align: right"><strong>5,692,147회</strong></td>
+      <td style="text-align: right"><strong>전체의 5.4%</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>개별 쿼리는 0.01~0.015ms로 극히 가벼워서 눈에 안 띄었지만, <strong>호출 횟수 자체가 이번 조사 전체에서 발견한 어떤 문제보다 컸다</strong> — 알림 폴링의 5배 이상.</p>
+
+<p><strong>수정 방식</strong>: 22개 호출부를 다 고치는 대신, 재사용되는 훅(<code class="language-plaintext highlighter-rouge">useSeasonCosmetic</code>) 내부에서 같은 렌더 tick에 요청된 userId들을 모아 microtask 경계에서 배치 요청 1번으로 합치도록 바꿨다. DataLoader 패턴과 동일한 아이디어다.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/frontend/src/hooks/useSeasonCosmetics.ts</span>
+<span class="kd">const</span> <span class="nx">cosmeticsCache</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Map</span><span class="o">&lt;</span><span class="kr">number</span><span class="p">,</span> <span class="nx">SeasonCosmeticState</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="kd">let</span> <span class="nx">cosmeticsPendingIds</span><span class="p">:</span> <span class="kr">number</span><span class="p">[]</span> <span class="o">=</span> <span class="p">[];</span>
+<span class="kd">let</span> <span class="nx">cosmeticsFlushScheduled</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+
+<span class="kd">function</span> <span class="nf">scheduleCosmeticsFlush</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">cosmeticsFlushScheduled</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+  <span class="nx">cosmeticsFlushScheduled</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+  <span class="nf">queueMicrotask</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">cosmeticsFlushScheduled</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">ids</span> <span class="o">=</span> <span class="nx">cosmeticsPendingIds</span><span class="p">;</span>
+    <span class="nx">cosmeticsPendingIds</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">ids</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+    <span class="c1">// 배치 엔드포인트 1번 호출 → 캐시에 저장 → 대기 중인 모든 컴포넌트에 알림</span>
+    <span class="nf">apiFetch</span><span class="p">(</span><span class="s2">`/api/season-pass/cosmetics/users?ids=</span><span class="p">${</span><span class="nx">ids</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="dl">"</span><span class="s2">,</span><span class="dl">"</span><span class="p">)}</span><span class="s2">`</span><span class="p">)</span>
+      <span class="p">.</span><span class="nf">then</span><span class="p">((</span><span class="nx">r</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">r</span><span class="p">.</span><span class="nf">json</span><span class="p">())</span>
+      <span class="p">.</span><span class="nf">then</span><span class="p">((</span><span class="nx">d</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="k">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">id</span> <span class="k">of</span> <span class="nx">ids</span><span class="p">)</span> <span class="nx">cosmeticsCache</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span> <span class="nx">d</span><span class="p">[</span><span class="nx">id</span><span class="p">]</span> <span class="o">??</span> <span class="nx">EMPTY_STATE</span><span class="p">);</span> <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">useSeasonCosmetic</span><span class="p">(</span><span class="nx">userId</span><span class="p">?:</span> <span class="kr">number</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nf">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">cosmeticsCache</span><span class="p">.</span><span class="nf">has</span><span class="p">(</span><span class="nx">userId</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">cosmeticsPendingIds</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="nx">userId</span><span class="p">);</span>
+      <span class="nf">scheduleCosmeticsFlush</span><span class="p">();</span>   <span class="c1">// 여러 컴포넌트가 동시에 호출해도 microtask당 1번만 flush</span>
+    <span class="p">}</span>
+    <span class="c1">// ... 구독 등록</span>
+  <span class="p">},</span> <span class="p">[</span><span class="nx">userId</span><span class="p">]);</span>
+  <span class="k">return</span> <span class="nx">cosmeticsCache</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="nx">userId</span><span class="p">)</span> <span class="o">??</span> <span class="nx">EMPTY_STATE</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>호출부 코드(22곳)는 단 한 줄도 바꾸지 않았다. 유저 50명짜리 목록 페이지가 이제 요청 1번으로 끝난다.</p>
+
+<p><br></p>
+
+<h2 id="7-전수조사--진짜-없는지-한-번-더">7. 전수조사 — “진짜 없는지 한 번 더”</h2>
+
+<p>마지막으로 정말 더 없는지 <code class="language-plaintext highlighter-rouge">pg_stat_statements</code> 호출 횟수 상위 40개를 전부 훑으며 하나씩 판정했다. <strong>의심 → 기각의 과정 자체가 이 조사에서 가장 중요한 부분이었다.</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>의심 대상</th>
+      <th>실제 판정</th>
+      <th>근거</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+<code class="language-plaintext highlighter-rouge">RiotMatchParticipant</code> 나머지 무거운 쿼리들</td>
+      <td>정상</td>
+      <td>Riot 동기화 cron(전체 유저 순회는 원래 배치 작업) + 단일 유저 “전적 새로고침” 액션. N+1 아님</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ChampionPool WHERE userId IN (...)</code></td>
+      <td>정상</td>
+      <td>Prisma가 <code class="language-plaintext highlighter-rouge">include: { championPool: true }</code> 관계 로드 시 <strong>자동으로</strong> 만들어주는 배치 쿼리. Prisma 자체의 N+1 방지 메커니즘</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Evaluation DISTINCT ON</code></td>
+      <td>정상</td>
+      <td>SQL 자체가 이미 <code class="language-plaintext highlighter-rouge">targetId = ANY($1)</code>로 배치 처리 중</td>
+    </tr>
+    <tr>
+      <td>
+<code class="language-plaintext highlighter-rouge">useCosmeticSkinById</code> (칭호테두리 등)</td>
+      <td>정상</td>
+      <td>해당 테이블(<code class="language-plaintext highlighter-rouge">RadarSkin</code>/<code class="language-plaintext highlighter-rouge">TitleFrameSkin</code>/<code class="language-plaintext highlighter-rouge">NameEffectSkin</code>) 쿼리가 실측상 <strong>0건</strong> — 대부분 레거시 기본 스킨이라 fetch 자체가 거의 안 일어남</td>
+    </tr>
+    <tr>
+      <td>WS 서버(<code class="language-plaintext highlighter-rouge">server-ws.ts</code>) watchdog</td>
+      <td>정상</td>
+      <td>5초마다 돌지만 Postgres가 아니라 <strong>Redis만</strong> 조회</td>
+    </tr>
+    <tr>
+      <td>
+<code class="language-plaintext highlighter-rouge">Membership</code>/<code class="language-plaintext highlighter-rouge">AccountPermission</code>/<code class="language-plaintext highlighter-rouge">Ban</code> 등</td>
+      <td>정상</td>
+      <td>호출 수는 수천만 건으로 제일 많지만 건당 0.02ms — 매 요청 공통 권한 체크 비용, 최적화 대상 아님</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><br></p>
+
+<h2 id="8-정리--배운-것">8. 정리 — 배운 것</h2>
+
+<ol>
+  <li>
+<strong>“타이밍이 겹친다”는 상관관계일 뿐 인과관계가 아니다.</strong> 처음 세운 가설(시즌패스가 원인)은 실측으로 반증됐다. 감이 아니라 <code class="language-plaintext highlighter-rouge">pg_stat_statements</code> 같은 실측 도구로 확인해야 한다.</li>
+  <li>
+<strong>작은 서비스일수록 “트래픽 양”보다 “요청 1개의 쿼리 팬아웃”이 문제다.</strong> 동시접속 100명이 아니라, 유저 1명이 잘못 만들어진 페이지 하나를 여는 것만으로 커넥션 풀 전체를 잠깐 독점할 수 있다.</li>
+  <li>
+<strong>“이게 진짜 원인 맞아?”라는 검증 질문이 결정적이었다.</strong> 첫 수정(연승배팅 N+1)은 실제 버그였지만 타임라인상 신고의 근본 원인은 아니었을 가능성이 크다 — 정직하게 인정하고 계속 파야 진짜 원인(코스메틱 N+1, 전체 DB 호출의 5.4%)을 찾을 수 있었다.</li>
+  <li>
+<strong>이미 만들어둔 배치 엔드포인트도 실제로 쓰이는지 확인해야 한다.</strong> “N+1 방지”라는 주석과 배치 API가 이미 있었는데도, 가장 많이 쓰이는 컴포넌트가 그걸 안 쓰고 있었다.</li>
+  <li>
+<strong>N+1을 고칠 때 호출부를 다 바꿀 필요는 없다.</strong> 공용 훅/함수 내부에 배칭 레이어를 한 겹 넣으면 22곳을 건드리지 않고도 문제를 해결할 수 있다.</li>
+</ol>
+
+<p><br></p>
+
+<p><em>이 글은 실제 프로덕션 서비스(리그 오브 레전드 사설 내전 커뮤니티, DAU 50~70명)에서 진행된 조사를 정리한 것입니다. 모든 수치는 <code class="language-plaintext highlighter-rouge">pg_stat_statements</code>(Postgres 확장, 2026-04-12부터 누적)를 통해 직접 측정했습니다.</em></p>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/journal/development%20diary/2026/07/13/lol-moim-incidents-03-auction-phase.html" title="[ 롤모임 운영일지 ] - 03. 두 서버가 같은 상태를 나눠 가지면 생기는 일 (실시간 경매 편)">[ 롤모임 운영일지 ] - 03....</a><a class="next" href="/journal/development%20diary/2026/07/15/lol-moim-incidents-05-gke-sketch.html" title="[ 롤모임 운영일지 ] - 05. Cloud Run 서비스를 GKE로 옮긴다면 — 매니페스트 스케치">[ 롤모임 운영일지 ] - 05....</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li class="">
+          <a class="post-link" href="/study/llm/2026/07/22/llm-prompting-paper-02-self-consistency.html" title="LLM 프롬프팅 논문 스터디 - 02. Self-Consistency">
+            LLM 프롬프팅 논문 스터디 - 02. Self-Consistency<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/zustand/2025/02/18/zustand__use_store.html" title="Zustand를 use_store로 중앙 집중식 상태 관리">
+            Zustand를 use_store로 중앙 집중식 상태 관리<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/javascript/2025/01/07/function-arrow-function.html" title="Function과 Arrow Function">
+            Function과 Arrow Function<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/11/26/grokking-simplicity-04.html" title="쏙쏙 들어오는 함수형 코딩 [CHAPTER 7, 8, 9]">
+            쏙쏙 들어오는 함수형 코딩 [CHAPTER 7, 8, 9]<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+</ul>
+    </div>
+<div class="post-comments">
+<div id="utterances-placeholder"></div>
+<script>
+  const utterancesThemeFromDataTheme = () => {
+    const dataTheme = document.documentElement.getAttribute('data-theme');
+    return `github-${dataTheme}`;
+  };
+
+  const setUtterancesTheme = () => {
+    const iframe = document.querySelector('.utterances-frame');
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: utterancesThemeFromDataTheme()
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  // dynamic change
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        setUtterancesTheme();
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
+
+  let utterancesScript = document.createElement('script');
+  utterancesScript.async = true;
+  utterancesScript.src = 'https://utteranc.es/client.js';
+  utterancesScript.crossOrigin = 'anonymous';
+  utterancesScript.setAttribute('issue-term', 'title');
+  utterancesScript.setAttribute('label', 'utterances comment');
+  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
+  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
+
+  const placeholder = document.getElementById('utterances-placeholder');
+  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
+</script>
+</div></section>
+</div>
+
+  </section><section class="sidebar"><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+    </div>
+  </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div class="footer-social">
+        <a href="https://github.com/kimmand0o0" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
+        <a href="mailto:maeran.dev.u@gmail.com" aria-label="Email"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+        <a href="/feed.xml" aria-label="RSS"><i class="fa fa-rss" aria-hidden="true"></i></a>
+      </div>
+      <div>Unpublished Work <span class="copyleft">©</span> 2017-2026 Haeran</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>
