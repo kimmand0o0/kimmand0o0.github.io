@@ -29,7 +29,7 @@ const olderHref = `/page${page + 1}/`;
           </a>
           <span class="reading tip" data-tip={readingTip(post)}>{readingLabel(post)}</span>
         </div>
-        <p class="excerpt">{excerptOf(post, 150)}</p>
+        <p class="excerpt">{excerptOf(post, 320)}</p>
         <div class="meta">
           <span class="chip">{categoriesOf(post).at(-1)}</span>
           <span class="views" data-views-path={postPath(post)} hidden />

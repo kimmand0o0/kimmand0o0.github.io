@@ -76,7 +76,7 @@ export function formatDate(post: Post): string {
 /** 마크다운/HTML을 벗겨낸 본문 발췌 (목록 미리보기·검색용) */
 export function excerptOf(post: Post, length = 160): string {
   const body = post.body ?? '';
-  return body
+  const text = body
     .replace(/```[\s\S]*?```/g, ' ')
     .replace(/{%[\s\S]*?%}/g, ' ')
     .replace(/<[^>]+>/g, ' ')
@@ -84,8 +84,9 @@ export function excerptOf(post: Post, length = 160): string {
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
     .replace(/[#>*_`|]/g, ' ')
     .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, length);
+    .trim();
+  // 잘렸다는 걸 문장 끝에서 알 수 있게 — CSS line-clamp 가 먹지 않는 경우의 대비
+  return text.length > length ? text.slice(0, length).trimEnd() + '…' : text;
 }
 
 /**

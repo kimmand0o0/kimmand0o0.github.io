@@ -18,7 +18,7 @@ export async function GET() {
       date: `${y}-${m}-${d}`,
       categories: categoriesOf(post),
       tags: tagsOf(post),
-      excerpt: excerptOf(post),
+      excerpt: excerptOf(post, 320),
       // 홈 무한 스크롤이 서버 렌더 목록과 같은 모양으로 이어붙이기 위해 필요
       minutes: readingMinutes(post),
     };
