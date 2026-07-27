@@ -622,20 +622,27 @@ html[data-theme='dark'] .astro-code span {
   #nav-toggle {
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
     justify-content: center;
     gap: 4px;
-    width: 26px; height: 26px;
+    /* 테마 토글과 눈높이를 맞춘 작은 크기 */
+    width: 17px; height: 17px;
     padding: 0;
     border: none; background: none; cursor: pointer;
+    color: var(--muted);
   }
   #nav-toggle span {
-    display: block; height: 2px; width: 100%;
-    background: var(--fg); border-radius: 2px;
-    transition: transform 0.2s ease, opacity 0.15s ease;
+    display: block; height: 1.5px; width: 100%;
+    background: currentColor; border-radius: 2px;
+    transition: transform 0.22s ease, opacity 0.15s ease, width 0.22s ease;
   }
-  #nav-toggle.is-open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  /* 가운데 줄만 짧게 — 균일한 막대 세 개보다 덜 투박하다 */
+  #nav-toggle span:nth-child(2) { width: 70%; }
+  #nav-toggle:hover { color: var(--accent); }
+  #nav-toggle:hover span:nth-child(2) { width: 100%; }
+  #nav-toggle.is-open span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
   #nav-toggle.is-open span:nth-child(2) { opacity: 0; }
-  #nav-toggle.is-open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+  #nav-toggle.is-open span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); width: 100%; }
 
   .site-header nav {
     position: absolute;
