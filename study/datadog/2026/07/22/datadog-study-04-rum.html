@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.1YxWbaY6.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">데이터독(Datadog) 학습 정리 (4) - RUM (Real User Monitoring)</h1><div class="post-meta"><time>2026.07.22</time><span class="chip">Datadog</span><span class="reading">6분 읽기</span><span class="tags"><a href="/tags.html#Study">#Study</a><a href="/tags.html#Datadog">#Datadog</a><a href="/tags.html#RUM">#RUM</a><a href="/tags.html#Frontend">#Frontend</a></span></div></header><div class="prose"><p>지금까지는 서버 쪽 관측(로그/메트릭/APM, AI Obs)을 봤는데, 이번 편은 <strong>유저 브라우저 안</strong>에서 벌어지는 일을 보는 RUM(Real User Monitoring)을 정리한다. 공식 문서(<a href="https://docs.datadoghq.com/real_user_monitoring/">docs.datadoghq.com</a>)를 대조해서 정확한 파라미터명까지 확인했다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">데이터독(Datadog) 학습 정리 (4) - RUM (Real User Monitoring)</h1><div class="post-meta"><time>2026.07.22</time><span class="chip">Datadog</span><span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span><span class="views" data-views-path="/study/datadog/2026/07/22/datadog-study-04-rum.html" hidden></span><span class="tags"><a href="/tags.html#Study">#Study</a><a href="/tags.html#Datadog">#Datadog</a><a href="/tags.html#RUM">#RUM</a><a href="/tags.html#Frontend">#Frontend</a></span></div></header><div class="prose"><p>지금까지는 서버 쪽 관측(로그/메트릭/APM, AI Obs)을 봤는데, 이번 편은 <strong>유저 브라우저 안</strong>에서 벌어지는 일을 보는 RUM(Real User Monitoring)을 정리한다. 공식 문서(<a href="https://docs.datadoghq.com/real_user_monitoring/">docs.datadoghq.com</a>)를 대조해서 정확한 파라미터명까지 확인했다.</p>
 <h2 id="tldr">TL;DR</h2>
 <ul>
 <li>RUM은 React 등 프론트엔드 앱에 SDK를 심어서, 유저의 클릭·페이지 로딩·에러·성능을 서버 트레이스와 같은 trace_id로 이어붙이는 기능이다.</li>
@@ -110,6 +110,35 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           keepalive: true,
         }).catch(function () {});
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#tldr">TL;DR</a></li><li class="depth-2"><a href="#1-왜-필요한가">1. 왜 필요한가</a></li><li class="depth-2"><a href="#2-설치-절차-공식-문서-기준">2. 설치 절차 (공식 문서 기준)</a></li><li class="depth-2"><a href="#3-실제-동작-과정">3. 실제 동작 과정</a></li><li class="depth-2"><a href="#4-비용-관련-주의사항-공식-문서-확인">4. 비용 관련 주의사항 (공식 문서 확인)</a></li><li class="depth-2"><a href="#5-정리">5. 정리</a></li><li class="depth-3"><a href="#참고-공식문서">참고 (공식문서)</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+      // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
+      // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
+      window.__viewsReady = fetch(
+        'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
+      )
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (json) {
+          var map = {};
+          if (json && json.items) {
+            json.items.forEach(function (i) { map[i.path] = i.views; });
+          }
+          window.__views = map;
+          fillViews(document);
+          return map;
+        })
+        .catch(function () { window.__views = {}; return {}; });
+
+      function fillViews(root) {
+        var map = window.__views;
+        if (!map) return;
+        root.querySelectorAll('[data-views-path]').forEach(function (el) {
+          var n = map[el.dataset.viewsPath];
+          if (!n) return;
+          el.textContent = '조회 ' + n.toLocaleString();
+          el.hidden = false;
+        });
+      }
+      window.fillViews = fillViews;
+
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
       (function () {
         var root = document.documentElement;

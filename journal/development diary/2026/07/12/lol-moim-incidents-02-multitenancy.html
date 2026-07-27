@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.1YxWbaY6.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 02. 모임 하나짜리 서비스를 멀티테넌시로 바꾸기</h1><div class="post-meta"><time>2026.07.12</time><span class="chip">Development Diary</span><span class="reading">14분 읽기</span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#멀티테넌시">#멀티테넌시</a><a href="/tags.html#아키텍처">#아키텍처</a><a href="/tags.html#Prisma">#Prisma</a><a href="/tags.html#PostgreSQL">#PostgreSQL</a></span></div></header><div class="prose"><p>원래 이 서비스는 딱 하나의 롤 내전 모임(“이세계롤모임”)만을 위한 앱이었다. 그런데 다른 모임에서도 써보고 싶다는 얘기가 나오면서, 같은 코드베이스와 DB로 여러 “모임”을 동시에 운영하는 멀티테넌트 구조로 바꾸는 작업을 시작했다. 이번 편은 그 과정에서 세운 원칙, 실제로 짠 구조, 그리고 원칙과 다르게 흘러간 지점을 기록한다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 02. 모임 하나짜리 서비스를 멀티테넌시로 바꾸기</h1><div class="post-meta"><time>2026.07.12</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/12/lol-moim-incidents-02-multitenancy.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#멀티테넌시">#멀티테넌시</a><a href="/tags.html#아키텍처">#아키텍처</a><a href="/tags.html#Prisma">#Prisma</a><a href="/tags.html#PostgreSQL">#PostgreSQL</a></span></div></header><div class="prose"><p>원래 이 서비스는 딱 하나의 롤 내전 모임(“이세계롤모임”)만을 위한 앱이었다. 그런데 다른 모임에서도 써보고 싶다는 얘기가 나오면서, 같은 코드베이스와 DB로 여러 “모임”을 동시에 운영하는 멀티테넌트 구조로 바꾸는 작업을 시작했다. 이번 편은 그 과정에서 세운 원칙, 실제로 짠 구조, 그리고 원칙과 다르게 흘러간 지점을 기록한다.</p>
 <h2 id="시작하기-전-세운-원칙-함부로-시작하지-않기">시작하기 전 세운 원칙: 함부로 시작하지 않기</h2>
 <p>멀티테넌시는 손대는 범위가 앱 전체라 잘못하면 기존 모임(이하 “원조 모임”)의 데이터가 새는 사고로 직결된다. 그래서 사전 산정 문서(<code>docs/MULTITENANCY_ESTIMATE.md</code>)에 이런 게이트를 박아뒀다.</p>
 <blockquote>
@@ -195,6 +195,35 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           keepalive: true,
         }).catch(function () {});
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#시작하기-전-세운-원칙-함부로-시작하지-않기">시작하기 전 세운 원칙: 함부로 시작하지 않기</a></li><li class="depth-2"><a href="#1-테넌트-모델--기존-데이터를-group-1로-만드는-트릭">1. 테넌트 모델 — 기존 데이터를 “group 1”로 만드는 트릭</a></li><li class="depth-2"><a href="#2-테넌트-구분--서브도메인-대신-헤더">2. 테넌트 구분 — 서브도메인 대신 헤더</a></li><li class="depth-2"><a href="#3-격리-방식--계획은-rls였는데-실제로는-prisma-extension">3. 격리 방식 — 계획은 RLS였는데, 실제로는 Prisma Extension</a></li><li class="depth-2"><a href="#4-플러그인-시스템--기능을-모임별로-켜고-끄기">4. 플러그인 시스템 — 기능을 모임별로 켜고 끄기</a></li><li class="depth-2"><a href="#5-권한-2축-모델--그리고-이걸-바꾸다가-운영진-권한을-다-날려먹은-사건">5. 권한 2축 모델 — 그리고 이걸 바꾸다가 운영진 권한을 다 날려먹은 사건</a></li><li class="depth-2"><a href="#6-진행-순서--커밋-메시지로-남긴-phase-로그">6. 진행 순서 — 커밋 메시지로 남긴 Phase 로그</a></li><li class="depth-2"><a href="#정리--배운-것">정리 — 배운 것</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+      // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
+      // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
+      window.__viewsReady = fetch(
+        'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
+      )
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (json) {
+          var map = {};
+          if (json && json.items) {
+            json.items.forEach(function (i) { map[i.path] = i.views; });
+          }
+          window.__views = map;
+          fillViews(document);
+          return map;
+        })
+        .catch(function () { window.__views = {}; return {}; });
+
+      function fillViews(root) {
+        var map = window.__views;
+        if (!map) return;
+        root.querySelectorAll('[data-views-path]').forEach(function (el) {
+          var n = map[el.dataset.viewsPath];
+          if (!n) return;
+          el.textContent = '조회 ' + n.toLocaleString();
+          el.hidden = false;
+        });
+      }
+      window.fillViews = fillViews;
+
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
       (function () {
         var root = document.documentElement;

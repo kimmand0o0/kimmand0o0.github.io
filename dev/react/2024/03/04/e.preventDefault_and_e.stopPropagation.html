@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.1YxWbaY6.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">React - 이벤트 전달을 막아주는 e.preventDefault()와 e.stopPropagation()</h1><div class="post-meta"><time>2024.03.04</time><span class="chip">React</span><span class="reading">3분 읽기</span><span class="tags"><a href="/tags.html#React">#React</a><a href="/tags.html#Event">#Event</a></span></div></header><div class="prose"><p>회사에서 버튼 이벤트 버그를 해결하던 중 이벤트의 동작 원리와, 전파에 대해 더 깊이 공부하게 되었다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">React - 이벤트 전달을 막아주는 e.preventDefault()와 e.stopPropagation()</h1><div class="post-meta"><time>2024.03.04</time><span class="chip">React</span><span class="reading tip" data-tip="이 게시글을 읽는 데 2분 정도 걸릴 것 같아요!">2분 분량</span><span class="views" data-views-path="/dev/react/2024/03/04/e.preventDefault_and_e.stopPropagation.html" hidden></span><span class="tags"><a href="/tags.html#React">#React</a><a href="/tags.html#Event">#Event</a></span></div></header><div class="prose"><p>회사에서 버튼 이벤트 버그를 해결하던 중 이벤트의 동작 원리와, 전파에 대해 더 깊이 공부하게 되었다.</p>
 <p>그 과정에서 두가지 매서드의 차이점에 대해 알게 된 부분이 있다.</p>
 <h2 id="epreventdefault와-estoppropagation">e.preventDefault()와 e.stopPropagation()</h2>
 <p>두 메서드는 이벤트의 전파 혹은 동작 호출을 막아준다.</p>
@@ -68,6 +68,35 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           keepalive: true,
         }).catch(function () {});
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#epreventdefault와-estoppropagation">e.preventDefault()와 e.stopPropagation()</a></li><li class="depth-3"><a href="#이벤트-버블링과-이벤트-캡처링">이벤트 버블링과 이벤트 캡처링</a></li><li class="depth-3"><a href="#epreventdefault">e.preventDefault()</a></li><li class="depth-3"><a href="#estoppropagation">e.stopPropagation()</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+      // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
+      // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
+      window.__viewsReady = fetch(
+        'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
+      )
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (json) {
+          var map = {};
+          if (json && json.items) {
+            json.items.forEach(function (i) { map[i.path] = i.views; });
+          }
+          window.__views = map;
+          fillViews(document);
+          return map;
+        })
+        .catch(function () { window.__views = {}; return {}; });
+
+      function fillViews(root) {
+        var map = window.__views;
+        if (!map) return;
+        root.querySelectorAll('[data-views-path]').forEach(function (el) {
+          var n = map[el.dataset.viewsPath];
+          if (!n) return;
+          el.textContent = '조회 ' + n.toLocaleString();
+          el.hidden = false;
+        });
+      }
+      window.fillViews = fillViews;
+
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
       (function () {
         var root = document.documentElement;

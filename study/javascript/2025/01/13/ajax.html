@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.1YxWbaY6.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">Ajax</h1><div class="post-meta"><time>2025.01.13</time><span class="chip">JavaScript</span><span class="reading">2분 읽기</span><span class="tags"><a href="/tags.html#JavaScript">#JavaScript</a></span></div></header><div class="prose"><h1 id="ajax">Ajax</h1>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">Ajax</h1><div class="post-meta"><time>2025.01.13</time><span class="chip">JavaScript</span><span class="reading tip" data-tip="이 게시글을 읽는 데 2분 정도 걸릴 것 같아요!">2분 분량</span><span class="views" data-views-path="/study/javascript/2025/01/13/ajax.html" hidden></span><span class="tags"><a href="/tags.html#JavaScript">#JavaScript</a></span></div></header><div class="prose"><h1 id="ajax">Ajax</h1>
 <h2 id="ajax의-탄생">Ajax의 탄생</h2>
 <p>Ajax(Asynchronous JavaScript and XML)는 2005년 Google이 Google Maps와 Gmail을 선보이면서 대중적으로 주목받았습니다. 웹 애플리케이션에서 <strong>서버와 클라이언트 간 비동기 통신</strong>을 가능하게 하여, 페이지 전체를 다시 로드하지 않고도 데이터를 주고받을 수 있게 한 기술입니다.</p>
 <p>Ajax의 핵심 기술은 새로 개발된 것이 아니라, 기존 기술(JavaScript, XML, HTTP 요청 등)을 조합하여 사용한 것입니다. “Ajax”라는 용어는 Jesse James Garrett가 처음 제안했습니다.</p>
@@ -63,6 +63,35 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           keepalive: true,
         }).catch(function () {});
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#ajax의-탄생">Ajax의 탄생</a></li><li class="depth-2"><a href="#ajax의-구성-요소">Ajax의 구성 요소</a></li><li class="depth-2"><a href="#ajax의-장단점">Ajax의 장단점</a></li><li class="depth-3"><a href="#장점">장점</a></li><li class="depth-3"><a href="#단점">단점</a></li><li class="depth-2"><a href="#ajax-정리">Ajax 정리</a></li><li class="depth-3"><a href="#요약">요약</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+      // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
+      // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
+      window.__viewsReady = fetch(
+        'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
+      )
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (json) {
+          var map = {};
+          if (json && json.items) {
+            json.items.forEach(function (i) { map[i.path] = i.views; });
+          }
+          window.__views = map;
+          fillViews(document);
+          return map;
+        })
+        .catch(function () { window.__views = {}; return {}; });
+
+      function fillViews(root) {
+        var map = window.__views;
+        if (!map) return;
+        root.querySelectorAll('[data-views-path]').forEach(function (el) {
+          var n = map[el.dataset.viewsPath];
+          if (!n) return;
+          el.textContent = '조회 ' + n.toLocaleString();
+          el.hidden = false;
+        });
+      }
+      window.fillViews = fillViews;
+
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
       (function () {
         var root = document.documentElement;

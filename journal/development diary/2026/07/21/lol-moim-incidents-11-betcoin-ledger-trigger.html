@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.1YxWbaY6.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 11. 로그를 코드가 아니라 DB에게 맡기기로 한 이유</h1><div class="post-meta"><time>2026.07.21</time><span class="chip">Development Diary</span><span class="reading">4분 읽기</span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#PostgreSQL">#PostgreSQL</a><a href="/tags.html#아키텍처">#아키텍처</a><a href="/tags.html#BetCoin">#BetCoin</a></span></div></header><div class="prose"><p>BetCoin(포인트 재화)이 오갈 때마다 원장을 남기고 싶었다. 그런데 이 잔액을 바꾸는 코드가 생각보다 많았다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 11. 로그를 코드가 아니라 DB에게 맡기기로 한 이유</h1><div class="post-meta"><time>2026.07.21</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 3분 정도 걸릴 것 같아요!">3분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/21/lol-moim-incidents-11-betcoin-ledger-trigger.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#PostgreSQL">#PostgreSQL</a><a href="/tags.html#아키텍처">#아키텍처</a><a href="/tags.html#BetCoin">#BetCoin</a></span></div></header><div class="prose"><p>BetCoin(포인트 재화)이 오갈 때마다 원장을 남기고 싶었다. 그런데 이 잔액을 바꾸는 코드가 생각보다 많았다.</p>
 <h2 id="문제--잔액을-바꾸는-곳이-15개-파일-30곳-넘게-흩어져-있다">문제 — 잔액을 바꾸는 곳이 15개 파일, 30곳 넘게 흩어져 있다</h2>
 <p>경매 낙찰, 배팅 정산, 상점 구매, 출석 보상, 확성기 구매, 멘토링 사례, 연승·내전 베팅… <code>BetCoin</code> 잔액을 바꾸는 코드를 찾아보니 15개 파일에 30곳 넘게 흩어져 있었다. 각 호출부에서 잔액을 바꿀 때마다 “언제, 얼마나, 왜 바뀌었는지”를 로그로 남기려면, 그 30곳 전부에 로깅 코드를 추가해야 한다는 뜻이었다. 그리고 그중 하나라도 빠뜨리면, 그 경로로 일어난 변동은 원장에 절대 안 남는다.</p>
 <br>
@@ -66,6 +66,35 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           keepalive: true,
         }).catch(function () {});
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#문제--잔액을-바꾸는-곳이-15개-파일-30곳-넘게-흩어져-있다">문제 — 잔액을 바꾸는 곳이 15개 파일, 30곳 넘게 흩어져 있다</a></li><li class="depth-2"><a href="#해결--애플리케이션이-아니라-db가-기록하게-만들기">해결 — 애플리케이션이 아니라 DB가 기록하게 만들기</a></li><li class="depth-2"><a href="#검증은-트랜잭션-롤백으로">검증은 트랜잭션 롤백으로</a></li><li class="depth-2"><a href="#트레이드오프--왜는-포기했다">트레이드오프 — “왜”는 포기했다</a></li><li class="depth-2"><a href="#정리">정리</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+      // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
+      // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
+      window.__viewsReady = fetch(
+        'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
+      )
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (json) {
+          var map = {};
+          if (json && json.items) {
+            json.items.forEach(function (i) { map[i.path] = i.views; });
+          }
+          window.__views = map;
+          fillViews(document);
+          return map;
+        })
+        .catch(function () { window.__views = {}; return {}; });
+
+      function fillViews(root) {
+        var map = window.__views;
+        if (!map) return;
+        root.querySelectorAll('[data-views-path]').forEach(function (el) {
+          var n = map[el.dataset.viewsPath];
+          if (!n) return;
+          el.textContent = '조회 ' + n.toLocaleString();
+          el.hidden = false;
+        });
+      }
+      window.fillViews = fillViews;
+
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
       (function () {
         var root = document.documentElement;

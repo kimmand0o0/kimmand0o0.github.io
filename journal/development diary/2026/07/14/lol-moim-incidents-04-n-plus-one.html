@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.1YxWbaY6.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 04. 동시접속 100명도 안 되는 서비스에서 &quot;렉&quot;이 걸린 이유</h1><div class="post-meta"><time>2026.07.14</time><span class="chip">Development Diary</span><span class="reading">16분 읽기</span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#성능최적화">#성능최적화</a><a href="/tags.html#N+1">#N+1</a><a href="/tags.html#PostgreSQL">#PostgreSQL</a><a href="/tags.html#Prisma">#Prisma</a></span></div></header><div class="prose"><p>이번 편은 배포 사고나 아키텍처 이야기가 아니라 성능 조사 이야기다. “시즌패스 출시 이후로 서버가 느려졌다”는 유저 신고 하나로 시작해서, 전혀 예상치 못한 곳에서 진짜 원인을 찾은 과정을 기록해둔다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 04. 동시접속 100명도 안 되는 서비스에서 &quot;렉&quot;이 걸린 이유</h1><div class="post-meta"><time>2026.07.14</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#성능최적화">#성능최적화</a><a href="/tags.html#N+1">#N+1</a><a href="/tags.html#PostgreSQL">#PostgreSQL</a><a href="/tags.html#Prisma">#Prisma</a></span></div></header><div class="prose"><p>이번 편은 배포 사고나 아키텍처 이야기가 아니라 성능 조사 이야기다. “시즌패스 출시 이후로 서버가 느려졌다”는 유저 신고 하나로 시작해서, 전혀 예상치 못한 곳에서 진짜 원인을 찾은 과정을 기록해둔다.</p>
 <h2 id="tldr">TL;DR</h2>
 <ul>
 <li>“시즌패스 출시 이후로 서버가 느려졌다”는 유저 신고로 조사를 시작했다.</li>
@@ -337,6 +337,35 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           keepalive: true,
         }).catch(function () {});
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#tldr">TL;DR</a></li><li class="depth-2"><a href="#1-시작--시즌패스-이후로-렉이-심해졌어요">1. 시작 — “시즌패스 이후로 렉이 심해졌어요”</a></li><li class="depth-2"><a href="#2-첫-번째-반증--감이-아니라-실측으로-확인하기">2. 첫 번째 반증 — 감이 아니라 실측으로 확인하기</a></li><li class="depth-2"><a href="#3-진짜-원인을-찾아서--연승배팅-페이지의-n1">3. 진짜 원인을 찾아서 — 연승배팅 페이지의 N+1</a></li><li class="depth-2"><a href="#4-정직한-반전--근데-이게-진짜-원인이-맞아">4. 정직한 반전 — “근데 이게 진짜 원인이 맞아?”</a></li><li class="depth-2"><a href="#5-동시접속-100도-안-되는데-왜-렉이-걸려">5. “동시접속 100도 안 되는데 왜 렉이 걸려?”</a></li><li class="depth-2"><a href="#6-진짜-큰-놈--코스메틱-n1-전체-db-호출의-54">6. 진짜 큰 놈 — 코스메틱 N+1 (전체 DB 호출의 5.4%)</a></li><li class="depth-2"><a href="#7-전수조사--진짜-없는지-한-번-더">7. 전수조사 — “진짜 없는지 한 번 더”</a></li><li class="depth-2"><a href="#8-정리--배운-것">8. 정리 — 배운 것</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+      // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
+      // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
+      window.__viewsReady = fetch(
+        'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
+      )
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (json) {
+          var map = {};
+          if (json && json.items) {
+            json.items.forEach(function (i) { map[i.path] = i.views; });
+          }
+          window.__views = map;
+          fillViews(document);
+          return map;
+        })
+        .catch(function () { window.__views = {}; return {}; });
+
+      function fillViews(root) {
+        var map = window.__views;
+        if (!map) return;
+        root.querySelectorAll('[data-views-path]').forEach(function (el) {
+          var n = map[el.dataset.viewsPath];
+          if (!n) return;
+          el.textContent = '조회 ' + n.toLocaleString();
+          el.hidden = false;
+        });
+      }
+      window.fillViews = fillViews;
+
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
       (function () {
         var root = document.documentElement;

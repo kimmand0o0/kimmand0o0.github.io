@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.1YxWbaY6.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">LLM 프롬프팅 논문 스터디 - 07. Toolformer</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">LLM</span><span class="reading">8분 읽기</span><span class="tags"><a href="/tags.html#LLM">#LLM</a><a href="/tags.html#Prompt Engineering">#Prompt Engineering</a><a href="/tags.html#NLP">#NLP</a><a href="/tags.html#Agent">#Agent</a><a href="/tags.html#Tool Use">#Tool Use</a><a href="/tags.html#Fine-tuning">#Fine-tuning</a></span></div></header><div class="prose"><p>시리즈 일곱 번째 편이자 “에이전트/툴 사용” 트랙의 마지막 편. 지난 편에서 다룬 <a href="/study/llm/2026/07/23/llm-prompting-paper-06-react.html">ReAct</a>가 프롬프트로 “언제 툴을 쓸지” 예시를 보여주는 방식이었다면, 이번에 다룰 <a href="https://arxiv.org/abs/2302.04761"><strong>Toolformer: Language Models Can Teach Themselves to Use Tools</strong></a> (Schick et al., 2023, NeurIPS)는 그 판단 자체를 모델 가중치에 학습시키는 접근이라 흥미로운 대조가 된다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">LLM 프롬프팅 논문 스터디 - 07. Toolformer</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">LLM</span><span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span><span class="views" data-views-path="/study/llm/2026/07/27/llm-prompting-paper-07-toolformer.html" hidden></span><span class="tags"><a href="/tags.html#LLM">#LLM</a><a href="/tags.html#Prompt Engineering">#Prompt Engineering</a><a href="/tags.html#NLP">#NLP</a><a href="/tags.html#Agent">#Agent</a><a href="/tags.html#Tool Use">#Tool Use</a><a href="/tags.html#Fine-tuning">#Fine-tuning</a></span></div></header><div class="prose"><p>시리즈 일곱 번째 편이자 “에이전트/툴 사용” 트랙의 마지막 편. 지난 편에서 다룬 <a href="/study/llm/2026/07/23/llm-prompting-paper-06-react.html">ReAct</a>가 프롬프트로 “언제 툴을 쓸지” 예시를 보여주는 방식이었다면, 이번에 다룰 <a href="https://arxiv.org/abs/2302.04761"><strong>Toolformer: Language Models Can Teach Themselves to Use Tools</strong></a> (Schick et al., 2023, NeurIPS)는 그 판단 자체를 모델 가중치에 학습시키는 접근이라 흥미로운 대조가 된다.</p>
 <h2 id="1-기본적인-이해부터">1. 기본적인 이해부터</h2>
 <p>쉽게 말하면, Toolformer는 <strong>“언제 계산기를 쓰고, 언제 검색을 해야 하는지”를 모델이 스스로 학습하게 만드는 방법</strong>이다. ReAct처럼 프롬프트에 “이럴 땐 이렇게 검색해라”라는 예시를 매번 손으로 써주는 대신, 모델이 텍스트를 만들다가 필요한 순간에 <strong>스스로 API 호출 토큰을 생성</strong>하도록 파인튜닝한다. 그러면 이후엔 별도 프롬프트 지시 없이도 모델이 알아서 “여기선 계산기가 필요하다”고 판단한다.</p>
 <h2 id="2-문제점배경">2. 문제점/배경</h2>
@@ -124,6 +124,35 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           keepalive: true,
         }).catch(function () {});
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#1-기본적인-이해부터">1. 기본적인 이해부터</a></li><li class="depth-2"><a href="#2-문제점배경">2. 문제점/배경</a></li><li class="depth-2"><a href="#3-해결책의-핵심-아이디어">3. 해결책의 핵심 아이디어</a></li><li class="depth-2"><a href="#4-비유예시">4. 비유/예시</a></li><li class="depth-2"><a href="#5-실제-동작-과정">5. 실제 동작 과정</a></li><li class="depth-2"><a href="#그림으로-보기">그림으로 보기</a></li><li class="depth-2"><a href="#6-결과장점">6. 결과/장점</a></li><li class="depth-2"><a href="#실무-적용-아이디어">실무 적용 아이디어</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+      // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
+      // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
+      window.__viewsReady = fetch(
+        'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
+      )
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (json) {
+          var map = {};
+          if (json && json.items) {
+            json.items.forEach(function (i) { map[i.path] = i.views; });
+          }
+          window.__views = map;
+          fillViews(document);
+          return map;
+        })
+        .catch(function () { window.__views = {}; return {}; });
+
+      function fillViews(root) {
+        var map = window.__views;
+        if (!map) return;
+        root.querySelectorAll('[data-views-path]').forEach(function (el) {
+          var n = map[el.dataset.viewsPath];
+          if (!n) return;
+          el.textContent = '조회 ' + n.toLocaleString();
+          el.hidden = false;
+        });
+      }
+      window.fillViews = fillViews;
+
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
       (function () {
         var root = document.documentElement;

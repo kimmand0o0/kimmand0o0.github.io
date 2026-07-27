@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.1YxWbaY6.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">Next.js - middleware로 유저 인증하기</h1><div class="post-meta"><time>2025.02.25</time><span class="chip">Study</span><span class="reading">5분 읽기</span><span class="tags"><a href="/tags.html#Study">#Study</a><a href="/tags.html#Next.js">#Next.js</a></span></div></header><div class="prose"><h2 id="-middleware-개요">📌 Middleware 개요</h2>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">Next.js - middleware로 유저 인증하기</h1><div class="post-meta"><time>2025.02.25</time><span class="chip">Study</span><span class="reading tip" data-tip="이 게시글을 읽는 데 2분 정도 걸릴 것 같아요!">2분 분량</span><span class="views" data-views-path="/study/2025/02/25/next_middleware.html" hidden></span><span class="tags"><a href="/tags.html#Study">#Study</a><a href="/tags.html#Next.js">#Next.js</a></span></div></header><div class="prose"><h2 id="-middleware-개요">📌 Middleware 개요</h2>
 <p>Next.js의 <strong>Middleware</strong>는 사용자의 요청(Request)을 처리하기 전에 실행되는 코드로, 요청을 변경하거나 특정 조건에 따라 다른 응답을 반환하는 데 사용됩니다. Next.js Middleware는 <strong>Edge Runtime</strong>에서 실행되며, 서버리스 환경에서도 작동할 수 있습니다.</p>
 <hr>
 <h2 id="-middleware-기본-구조">📌 Middleware 기본 구조</h2>
@@ -157,6 +157,35 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           keepalive: true,
         }).catch(function () {});
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#-middleware-개요">📌 Middleware 개요</a></li><li class="depth-2"><a href="#-middleware-기본-구조">📌 Middleware 기본 구조</a></li><li class="depth-3"><a href="#1️⃣-기본-예제">1️⃣ 기본 예제</a></li><li class="depth-2"><a href="#-middleware-실행-흐름">📌 Middleware 실행 흐름</a></li><li class="depth-2"><a href="#-middleware-주요-기능">📌 Middleware 주요 기능</a></li><li class="depth-3"><a href="#-1-리디렉션-redirect">✅ 1. 리디렉션 (Redirect)</a></li><li class="depth-3"><a href="#-2-url-재작성-rewrite">✅ 2. URL 재작성 (Rewrite)</a></li><li class="depth-3"><a href="#-3-헤더-변경">✅ 3. 헤더 변경</a></li><li class="depth-3"><a href="#-4-쿠키-조작">✅ 4. 쿠키 조작</a></li><li class="depth-2"><a href="#-특정-경로에만-middleware-적용-matcher">📌 특정 경로에만 Middleware 적용 (Matcher)</a></li><li class="depth-2"><a href="#-middleware-vs-api-route-vs-server-components">📌 Middleware vs API Route vs Server Components</a></li><li class="depth-2"><a href="#-실제-사용-예시-로그인-체크-및-리디렉트">✅ 실제 사용 예시: 로그인 체크 및 리디렉트</a></li><li class="depth-2"><a href="#-정리">📌 정리</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+      // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
+      // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
+      window.__viewsReady = fetch(
+        'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
+      )
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (json) {
+          var map = {};
+          if (json && json.items) {
+            json.items.forEach(function (i) { map[i.path] = i.views; });
+          }
+          window.__views = map;
+          fillViews(document);
+          return map;
+        })
+        .catch(function () { window.__views = {}; return {}; });
+
+      function fillViews(root) {
+        var map = window.__views;
+        if (!map) return;
+        root.querySelectorAll('[data-views-path]').forEach(function (el) {
+          var n = map[el.dataset.viewsPath];
+          if (!n) return;
+          el.textContent = '조회 ' + n.toLocaleString();
+          el.hidden = false;
+        });
+      }
+      window.fillViews = fillViews;
+
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
       (function () {
         var root = document.documentElement;
