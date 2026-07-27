@@ -167,6 +167,43 @@ html[data-scrolled='true'] .site-header {
   overflow: hidden;
 }
 .reading { color: var(--faint); font-size: 0.95em; }
+.views {
+  color: var(--faint);
+  font-size: 0.95em;
+  font-variant-numeric: tabular-nums;
+}
+/* 아카이브형 목록에서는 오른쪽 끝에 붙인다 */
+.archive-list li .views { margin-left: auto; flex: none; }
+
+/* ── 툴팁 ─────────────────────────────── */
+.tip { position: relative; cursor: help; }
+.tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  z-index: 50;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--bg);
+  background: var(--fg);
+  padding: 0.4em 0.7em;
+  border-radius: 7px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.tip:hover::after,
+.tip:focus-visible::after {
+  opacity: 0.95;
+  transform: translateX(-50%) translateY(0);
+}
+@media (max-width: 560px) {
+  /* 좁은 화면에서 툴팁이 화면 밖으로 나가지 않게 */
+  .tip::after { white-space: normal; width: max-content; max-width: 60vw; }
+}
 
 .chip {
   display: inline-block;

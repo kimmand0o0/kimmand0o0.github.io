@@ -226,11 +226,46 @@ const tagData = Object.fromEntries(
         box.addEventListener('focusout', release);
       }
 
+      // 조회수가 도착하면 크기를 다시 매긴다 —
+      // 빌드 시점 크기는 글 수 기준이고, 여기서 "글 수 + 조회수"로 갱신한다.
+      function resizeByViews(map) {
+        if (!map) return;
+        var data = JSON.parse(document.getElementById('tag-data').textContent);
+        var scores = [];
+        dots.forEach(function (el) {
+          var posts = data[el.dataset.tag] || [];
+          var views = posts.reduce(function (sum, p) { return sum + (map[p.url] || 0); }, 0);
+          // 글 수와 조회수를 반반 — 조회수가 0인 초기에도 배치가 무너지지 않는다
+          scores.push({ el: el, count: posts.length, views: views });
+        });
+
+        var maxCount = Math.max.apply(null, scores.map(function (s) { return s.count; }));
+        var minCount = Math.min.apply(null, scores.map(function (s) { return s.count; }));
+        var maxViews = Math.max.apply(null, scores.map(function (s) { return s.views; }));
+
+        scores.forEach(function (s) {
+          var byCount = maxCount === minCount ? 1 : (s.count - minCount) / (maxCount - minCount);
+          var byViews = maxViews > 0 ? s.views / maxViews : 0;
+          var t = maxViews > 0 ? byCount * 0.5 + byViews * 0.5 : byCount;
+          s.el.style.fontSize = (0.8 + t * 1.1).toFixed(3) + 'rem';
+          s.el.style.fontWeight = t > 0.55 ? 700 : t > 0.25 ? 600 : 500;
+          s.el.style.setProperty('--tone', t.toFixed(3));
+          if (s.views > 0) s.el.title = s.tag + ' — 글 ' + s.count + '개 · 조회 ' + s.views;
+        });
+        layout(); // 크기가 바뀌었으니 겹침을 다시 푼다
+      }
+
       // 폰트 로드 후 측정해야 폭이 정확하다
       if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(layout);
+        document.fonts.ready.then(function () {
+          layout();
+          if (window.__viewsReady) window.__viewsReady.then(resizeByViews);
+        });
       } else {
-        window.addEventListener('load', layout);
+        window.addEventListener('load', function () {
+          layout();
+          if (window.__viewsReady) window.__viewsReady.then(resizeByViews);
+        });
       }
       var t;
       window.addEventListener('resize', function () {
@@ -259,11 +294,13 @@ const tagData = Object.fromEntries(
           .map(function (p) {
             return (
               '<li><time>' + p.date + '</time><a href="' + p.url + '">' +
-              p.title.replace(/</g, '&lt;') + '</a></li>'
+              p.title.replace(/</g, '&lt;') + '</a>' +
+              '<span class="views" data-views-path="' + p.url + '" hidden></span></li>'
             );
           })
           .join('');
         section.hidden = false;
+        if (window.fillViews) window.fillViews(listEl);
         if (scroll) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         history.replaceState(null, '', '#' + tag);
       }

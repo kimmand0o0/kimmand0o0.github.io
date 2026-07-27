@@ -1,5 +1,13 @@
 ---
-import { formatDate, postPath, categoriesOf, excerptOf, readingMinutes, type Post } from '../lib/posts';
+import {
+  formatDate,
+  postPath,
+  categoriesOf,
+  excerptOf,
+  readingLabel,
+  readingTip,
+  type Post,
+} from '../lib/posts';
 
 interface Props {
   posts: Post[];
@@ -22,7 +30,8 @@ const olderHref = `/page${page + 1}/`;
         <div class="meta">
           <time>{formatDate(post)}</time>
           <span class="chip">{categoriesOf(post).at(-1)}</span>
-          <span class="reading">{readingMinutes(post)}분</span>
+          <span class="reading tip" data-tip={readingTip(post)}>{readingLabel(post)}</span>
+          <span class="views" data-views-path={postPath(post)} hidden />
         </div>
       </li>
     ))

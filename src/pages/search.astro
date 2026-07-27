@@ -43,12 +43,14 @@ import { SITE } from '../lib/posts';
       function row(p) {
         return (
           '<li><time>' + p.date + '</time><a href="' + p.url + '">' +
-          p.title.replace(/</g, '&lt;') + '</a></li>'
+          p.title.replace(/</g, '&lt;') + '</a>' +
+          '<span class="views" data-views-path="' + p.url + '" hidden></span></li>'
         );
       }
 
       function render(el, list) {
         el.innerHTML = list.map(row).join('');
+        if (window.fillViews) window.fillViews(el);
       }
 
       function search(q) {

@@ -270,7 +270,8 @@ async function handleViewPing(request: Request, env: Env): Promise<Response> {
 }
 
 async function handleTopViews(url: URL, env: Env): Promise<Response> {
-  const limit = Math.min(Math.max(Number(url.searchParams.get('limit')) || 10, 1), 50);
+  // 목록/글 페이지가 조회수를 한 번에 받아 채우므로 전체 글 수(수백)까지 허용한다
+  const limit = Math.min(Math.max(Number(url.searchParams.get('limit')) || 10, 1), 1000);
   const { results } = await env.CHAT_LOGS_DB.prepare(
     'SELECT path, views FROM post_views ORDER BY views DESC, path ASC LIMIT ?'
   )

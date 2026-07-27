@@ -88,10 +88,26 @@ export function excerptOf(post: Post, length = 160): string {
     .slice(0, length);
 }
 
-/** 한국어 기준 대략적인 읽는 시간 (분당 500자) */
+/**
+ * 한국어 기준 대략적인 읽는 시간 (분당 500자).
+ * 코드 블록·표는 눈으로 훑는 속도가 산문과 달라 글자 수에서 뺀다.
+ */
 export function readingMinutes(post: Post): number {
-  const chars = (post.body ?? '').replace(/\s+/g, '').length;
+  const prose = (post.body ?? '')
+    .replace(/```[\s\S]*?```/g, ' ') // 코드 블록
+    .replace(/^\s*\|.*\|\s*$/gm, ' '); // 표 행
+  const chars = prose.replace(/\s+/g, '').length;
   return Math.max(1, Math.round(chars / 500));
+}
+
+/** 목록·헤더에 쓰는 짧은 표기 */
+export function readingLabel(post: Post): string {
+  return `${readingMinutes(post)}분 분량`;
+}
+
+/** 마우스를 올렸을 때 뜨는 설명 */
+export function readingTip(post: Post): string {
+  return `이 게시글을 읽는 데 ${readingMinutes(post)}분 정도 걸릴 것 같아요!`;
 }
 
 export async function allPosts(): Promise<Post[]> {

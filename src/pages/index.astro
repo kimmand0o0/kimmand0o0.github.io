@@ -7,6 +7,8 @@ import {
   categoriesOf,
   excerptOf,
   readingMinutes,
+  readingLabel,
+  readingTip,
 } from '../lib/posts';
 
 const posts = await allPosts();
@@ -30,7 +32,8 @@ const initial = posts.slice(0, INITIAL);
           <div class="meta">
             <time>{formatDate(post)}</time>
             <span class="chip">{categoriesOf(post).at(-1)}</span>
-            <span class="reading">{readingMinutes(post)}분</span>
+            <span class="reading tip" data-tip={readingTip(post)}>{readingLabel(post)}</span>
+            <span class="views" data-views-path={postPath(post)} hidden />
           </div>
         </li>
       ))
@@ -73,12 +76,16 @@ const initial = posts.slice(0, INITIAL);
               '<div class="meta">' +
               '<time>' + esc(p.date.replace(/-/g, '.')) + '</time>' +
               (cat ? '<span class="chip">' + esc(cat) + '</span>' : '') +
-              '<span class="reading">' + (p.minutes || 1) + '분</span>' +
+              '<span class="reading tip" data-tip="이 게시글을 읽는 데 ' + (p.minutes || 1) +
+                '분 정도 걸릴 것 같아요!">' + (p.minutes || 1) + '분 분량</span>' +
+              '<span class="views" data-views-path="' + p.url + '" hidden></span>' +
               '</div></li>'
             );
           })
           .join('');
         list.insertAdjacentHTML('beforeend', html);
+        // 새로 붙은 항목에도 조회수를 채운다
+        if (window.fillViews) window.fillViews(list);
       }
 
       function loadMore() {
