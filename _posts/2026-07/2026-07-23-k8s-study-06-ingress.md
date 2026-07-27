@@ -108,6 +108,8 @@ kubectl get ingress my-ingress
 # my-ingress    nginx   api.example.com,www.example.com  34.120.1.1      80, 443
 ```
 
+> **최신 동향 (공식문서 검증):** [공식 문서](https://kubernetes.io/docs/concepts/services-networking/ingress/)는 현재 "Ingress API가 **frozen**(기능 동결) 상태이며, K8s 프로젝트는 신규 프로젝트에 [Gateway API](https://gateway-api.sigs.k8s.io/)를 권장한다"고 명시한다. Ingress 자체는 여전히 stable이고 당장 없어지진 않지만, 새로 설계하는 클러스터라면 Gateway API도 검토 대상.
+
 ## 지금 상태 / 다음에 할 일
 
 Service(내부 라우팅)에 이어 Ingress(외부 진입점)까지 정리했다. 다음 편은 **Namespace & RBAC** — 클러스터 하나 안에서 여러 팀/환경을 어떻게 나누는지.
