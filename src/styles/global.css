@@ -258,9 +258,19 @@ html[data-scrolled='true'] .site-header {
   opacity: 0.95;
   transform: translateX(-50%) translateY(0);
 }
+/* 분량 배지는 줄 오른쪽 끝에 있어서, 가운데 정렬 툴팁은 화면 밖으로 나간다.
+   오른쪽 모서리를 기준으로 왼쪽으로 펼쳐 잘리지 않게 한다. */
+.reading.tip::after {
+  left: auto;
+  right: 0;
+  transform: translateY(4px);
+}
+.reading.tip:hover::after,
+.reading.tip:focus-visible::after { transform: translateY(0); }
+
 @media (max-width: 560px) {
-  /* 좁은 화면에서 툴팁이 화면 밖으로 나가지 않게 */
-  .tip::after { white-space: normal; width: max-content; max-width: 60vw; }
+  /* 좁은 화면에서는 줄바꿈을 허용하고 폭도 화면 안으로 묶는다 */
+  .tip::after { white-space: normal; width: max-content; max-width: min(70vw, 17rem); }
 }
 
 .chip {
