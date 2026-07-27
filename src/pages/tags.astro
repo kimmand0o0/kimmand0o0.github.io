@@ -62,12 +62,10 @@ const tagData = Object.fromEntries(
           data-tag={s.tag}
           data-seed-left={s.left}
           data-seed-top={s.top}
+          title={`${s.tag} — 글 ${s.count}개`}
           style={`left:${s.left}%; top:${s.top}%; font-size:${s.size}rem; font-weight:${s.weight}; --tone:${s.tone.toFixed(3)}; --dur:${s.dur}s; --delay:${s.delay}s;`}
         >
-          <span class="tag-label">
-            {s.tag}
-            <span class="tag-count">{s.count}</span>
-          </span>
+          <span class="tag-label">{s.tag}</span>
         </button>
       ))
     }
@@ -166,8 +164,8 @@ const tagData = Object.fromEntries(
         if (bindRepel.done) return;
         bindRepel.done = true;
 
-        const REACH = 165; // 커서 영향 반경(px)
-        const STRENGTH = 34; // 최대 밀림(px)
+        const REACH = 210; // 커서 영향 반경(px) — 태그가 크게 확대되므로 넉넉히
+        const STRENGTH = 52; // 최대 밀림(px)
         let pending = false;
         let cursor = null;
 
@@ -382,34 +380,30 @@ const tagData = Object.fromEntries(
     .tag-label { animation: none; }
   }
 
-  .tag-dot .tag-count {
-    font-size: 0.6em;
-    margin-left: 0.32em;
-    vertical-align: super;
-    font-weight: 500;
-    opacity: 0.5;
-  }
-
+  /* 강조는 색과 크기로만 — 배경·테두리는 쓰지 않는다 */
   .tag-dot:hover,
   .tag-dot:focus-visible,
   .tag-dot.selected {
     color: var(--accent);
     opacity: 1;
-    background: var(--accent-soft);
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
+    background: none;
   }
   .tag-dot:hover,
   .tag-dot:focus-visible {
-    transform: translate(-50%, -50%) translate(var(--px, 0px), var(--py, 0px)) scale(1.4);
+    transform: translate(-50%, -50%) translate(var(--px, 0px), var(--py, 0px)) scale(2.1);
     z-index: 5;
+  }
+  .tag-dot.selected {
+    font-weight: 800;
+    transform: translate(-50%, -50%) translate(var(--px, 0px), var(--py, 0px)) scale(1.6);
+    z-index: 4;
   }
   /* 커진 상태에서 위아래로 흔들리면 산만해진다 */
   .tag-dot:hover .tag-label,
   .tag-dot:focus-visible .tag-label {
     animation-play-state: paused;
   }
-  .tag-dot:hover .tag-count,
-  .tag-dot.selected .tag-count { opacity: 0.75; }
+
   /* sticky 헤더에 제목이 가리지 않도록 */
   .tag-posts {
     margin-top: 1rem;
