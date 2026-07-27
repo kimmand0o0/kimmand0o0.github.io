@@ -31,6 +31,10 @@ const scatter = entries.map(([tag, list], i) => {
     top: 50 + radius * Math.sin(angle),
     size: 0.8 + t * 1.1, // rem
     weight: t > 0.55 ? 700 : t > 0.25 ? 600 : 500,
+    tone: t, // 글 수에 따른 농담 — 큰 태그일수록 진하게
+    // 태그마다 다른 주기로 떠다니게 (난수 없이 인덱스에서 파생)
+    dur: 6 + ((i * 7) % 5),
+    delay: -((i * 13) % 60) / 10,
   };
 });
 
@@ -54,10 +58,12 @@ const tagData = Object.fromEntries(
           data-tag={s.tag}
           data-seed-left={s.left}
           data-seed-top={s.top}
-          style={`left:${s.left}%; top:${s.top}%; font-size:${s.size}rem; font-weight:${s.weight};`}
+          style={`left:${s.left}%; top:${s.top}%; font-size:${s.size}rem; font-weight:${s.weight}; --tone:${s.tone.toFixed(3)}; --dur:${s.dur}s; --delay:${s.delay}s;`}
         >
-          {s.tag}
-          <span class="tag-count">{s.count}</span>
+          <span class="tag-label">
+            {s.tag}
+            <span class="tag-count">{s.count}</span>
+          </span>
         </button>
       ))
     }
@@ -267,37 +273,63 @@ const tagData = Object.fromEntries(
     transform: translate(-50%, -50%) translate(var(--px, 0px), var(--py, 0px));
     border: none;
     background: none;
-    padding: 0.1em 0.25em;
+    padding: 0.18em 0.5em;
     cursor: pointer;
-    color: var(--muted);
+    /* 글 수가 많을수록 진하게 — 자연스러운 원근감 */
+    color: var(--fg);
+    opacity: calc(0.42 + var(--tone, 0.5) * 0.58);
     font-family: inherit;
     line-height: 1.2;
     white-space: nowrap;
-    border-radius: 6px;
+    border-radius: 999px;
     transition:
-      color 0.18s ease,
-      background 0.18s ease,
+      color 0.2s ease,
+      opacity 0.2s ease,
+      background 0.2s ease,
+      box-shadow 0.2s ease,
       transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   }
+  /* 부유 애니메이션은 안쪽 span 에만 — 바깥 transform(위치/밀림)과 충돌하지 않게 */
+  .tag-label {
+    display: inline-block;
+    animation: tag-float var(--dur, 7s) ease-in-out var(--delay, 0s) infinite;
+  }
+  @keyframes tag-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tag-label { animation: none; }
+  }
+
   .tag-dot .tag-count {
-    font-size: 0.62em;
-    margin-left: 0.3em;
-    color: var(--faint);
+    font-size: 0.6em;
+    margin-left: 0.32em;
     vertical-align: super;
     font-weight: 500;
+    opacity: 0.5;
+  }
+
+  .tag-dot:hover,
+  .tag-dot:focus-visible,
+  .tag-dot.selected {
+    color: var(--accent);
+    opacity: 1;
+    background: var(--accent-soft);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
   }
   .tag-dot:hover,
   .tag-dot:focus-visible {
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translate(-50%, -50%) scale(1.4);
+    transform: translate(-50%, -50%) translate(var(--px, 0px), var(--py, 0px)) scale(1.4);
     z-index: 5;
   }
-  .tag-dot:hover .tag-count { color: var(--accent); }
-  .tag-dot.selected {
-    color: var(--accent);
-    background: var(--accent-soft);
+  /* 커진 상태에서 위아래로 흔들리면 산만해진다 */
+  .tag-dot:hover .tag-label,
+  .tag-dot:focus-visible .tag-label {
+    animation-play-state: paused;
   }
+  .tag-dot:hover .tag-count,
+  .tag-dot.selected .tag-count { opacity: 0.75; }
   /* sticky 헤더에 제목이 가리지 않도록 */
   .tag-posts { margin-top: 1rem; scroll-margin-top: 5rem; }
 
