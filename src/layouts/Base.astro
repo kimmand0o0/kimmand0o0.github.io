@@ -8,6 +8,15 @@ interface Props {
 }
 const { title, description } = Astro.props;
 const pageTitle = title ? `${title} | ${SITE.title}` : SITE.title;
+
+// 현재 탭 표시 — 글 페이지에서는 어느 탭도 활성이 아니다
+const path = Astro.url.pathname;
+const NAV = [
+  { href: '/archives.html', label: 'Archives' },
+  { href: '/tags.html', label: 'Tags' },
+  { href: '/about.html', label: 'About' },
+  { href: '/search.html', label: 'Search' },
+];
 ---
 
 <!doctype html>
@@ -55,10 +64,17 @@ const pageTitle = title ? `${title} | ${SITE.title}` : SITE.title;
       <div class="header-inner">
         <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a>
         <nav>
-          <a href="/archives.html">Archives</a>
-          <a href="/tags.html">Tags</a>
-          <a href="/about.html">About</a>
-          <a href="/search.html">Search</a>
+          {
+            NAV.map((item) => (
+              <a
+                href={item.href}
+                class={path === item.href ? 'active' : undefined}
+                aria-current={path === item.href ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            ))
+          }
           <button id="theme-toggle" aria-label="테마 전환">◐</button>
         </nav>
       </div>

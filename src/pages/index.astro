@@ -1,15 +1,141 @@
 ---
 import Base from '../layouts/Base.astro';
-import PostListPage from '../components/PostListPage.astro';
-import { allPosts, PER_PAGE } from '../lib/posts';
+import {
+  allPosts,
+  formatDate,
+  postPath,
+  categoriesOf,
+  excerptOf,
+  readingMinutes,
+} from '../lib/posts';
 
 const posts = await allPosts();
-const totalPages = Math.ceil(posts.length / PER_PAGE);
+const INITIAL = 10; // 나머지는 스크롤하며 search.json 에서 이어붙인다
+const initial = posts.slice(0, INITIAL);
 ---
 
 <Base>
   <p class="home-intro">
     실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.
   </p>
-  <PostListPage posts={posts.slice(0, PER_PAGE)} page={1} totalPages={totalPages} />
+
+  <ul class="post-list" id="post-list">
+    {
+      initial.map((post) => (
+        <li>
+          <a class="title" href={postPath(post)}>
+            {post.data.title}
+          </a>
+          <p class="excerpt">{excerptOf(post, 150)}</p>
+          <div class="meta">
+            <time>{formatDate(post)}</time>
+            <span class="chip">{categoriesOf(post).at(-1)}</span>
+            <span class="reading">{readingMinutes(post)}분</span>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div id="scroll-sentinel" aria-hidden="true"></div>
+  <p id="list-end" class="list-end muted" hidden>마지막 글까지 다 봤어요.</p>
+
+  <script is:inline define:vars={{ initialCount: INITIAL, total: posts.length }}>
+    (function () {
+      var list = document.getElementById('post-list');
+      var sentinel = document.getElementById('scroll-sentinel');
+      var endMsg = document.getElementById('list-end');
+      var offset = initialCount;
+      var STEP = 10;
+      var all = null;
+      var loading = false;
+
+      if (offset >= total) {
+        sentinel.remove();
+        endMsg.hidden = false;
+        return;
+      }
+
+      function esc(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+
+      function append(items) {
+        var html = items
+          .map(function (p) {
+            var cat = (p.categories && p.categories.length)
+              ? p.categories[p.categories.length - 1]
+              : '';
+            return (
+              '<li>' +
+              '<a class="title" href="' + p.url + '">' + esc(p.title) + '</a>' +
+              '<p class="excerpt">' + esc(p.excerpt || '') + '</p>' +
+              '<div class="meta">' +
+              '<time>' + esc(p.date.replace(/-/g, '.')) + '</time>' +
+              (cat ? '<span class="chip">' + esc(cat) + '</span>' : '') +
+              '<span class="reading">' + (p.minutes || 1) + '분</span>' +
+              '</div></li>'
+            );
+          })
+          .join('');
+        list.insertAdjacentHTML('beforeend', html);
+      }
+
+      function loadMore() {
+        if (loading || offset >= total) return;
+        loading = true;
+
+        var ready = all
+          ? Promise.resolve(all)
+          : fetch('/search.json').then(function (r) { return r.json(); });
+
+        ready
+          .then(function (json) {
+            all = json;
+            append(all.slice(offset, offset + STEP));
+            offset += STEP;
+            loading = false;
+            if (offset >= total) {
+              io.disconnect();
+              sentinel.remove();
+              endMsg.hidden = false;
+              return;
+            }
+            // IntersectionObserver 는 "교차 상태가 바뀔 때"만 부르므로,
+            // 한 번 더 붙여도 sentinel 이 계속 보이는 화면(긴 뷰포트)에서는 멈춰버린다.
+            // 아직 트리거 영역 안이면 직접 이어서 부른다.
+            requestAnimationFrame(function () {
+              var r = sentinel.getBoundingClientRect();
+              if (r.top < window.innerHeight + 500) loadMore();
+            });
+          })
+          .catch(function () {
+            // 실패하면 무한 스크롤만 포기하고, 기존 페이지 목록으로 안내
+            loading = false;
+            io.disconnect();
+            sentinel.remove();
+            endMsg.textContent = '목록을 더 불러오지 못했어요.';
+            endMsg.hidden = false;
+          });
+      }
+
+      // 화면 아래 500px 전에 미리 불러온다
+      var io = new IntersectionObserver(
+        function (entries) {
+          if (entries[0].isIntersecting) loadMore();
+        },
+        { rootMargin: '500px 0px' }
+      );
+      io.observe(sentinel);
+    })();
+  </script>
 </Base>
+
+<style is:global>
+  #scroll-sentinel { height: 1px; }
+  .list-end {
+    margin: 3rem 0 0;
+    text-align: center;
+    font-size: 0.85rem;
+  }
+</style>

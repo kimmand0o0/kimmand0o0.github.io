@@ -22,7 +22,8 @@ function remarkMermaid() {
 
 export default defineConfig({
   site: 'https://kimmand0o0.github.io',
-  trailingSlash: 'never',
+  // /page2 와 /page2/ 둘 다 받아야 한다 — 예전 Jekyll 링크가 슬래시 붙은 형태였다
+  trailingSlash: 'ignore',
   // Jekyll의 /path/name.html URL 구조를 그대로 재현하기 위한 file 포맷
   build: { format: 'file' },
   markdown: {

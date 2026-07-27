@@ -95,7 +95,26 @@ html[data-scrolled='true'] .site-header {
   font-weight: 500;
   color: var(--muted);
 }
+.site-header nav a {
+  position: relative;
+  padding-bottom: 0.3rem;
+}
 .site-header nav a:hover { color: var(--accent); }
+/* 현재 보고 있는 탭 */
+.site-header nav a.active {
+  color: var(--fg);
+  font-weight: 650;
+}
+.site-header nav a.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
 #theme-toggle {
   border: none; background: none; cursor: pointer; padding: 0;
   font-size: 1rem; line-height: 1; color: var(--faint);
