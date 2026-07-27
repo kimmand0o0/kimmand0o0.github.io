@@ -12,7 +12,7 @@ for (const post of posts) {
 const categories = [...byCategory.entries()].sort((a, b) => b[1].length - a[1].length);
 ---
 
-<Base title="Categories">
+<Base title="Categories" description="카테고리별로 정리한 전체 글 목록.">
   <h1 class="page-title">Categories</h1>
   <ul class="chips">
     {categories.map(([name, list]) => (

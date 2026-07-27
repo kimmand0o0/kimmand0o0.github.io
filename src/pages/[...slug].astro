@@ -10,6 +10,8 @@ import {
   tagsOf,
   readingLabel,
   readingTip,
+  excerptOf,
+  postDate,
   seriesNavFor,
   PER_PAGE,
   type Post,
@@ -62,7 +64,15 @@ if (kind === 'post' && post) {
 
 {
   kind === 'post' && post ? (
-    <Base title={post.data.title} width="wide">
+    <Base
+      title={post.data.title}
+      description={excerptOf(post, 155)}
+      width="wide"
+      article={{
+        published: postDate(post).toISOString(),
+        tags: tagsOf(post),
+      }}
+    >
       <div class="post-layout">
       <article class="post">
         <header>

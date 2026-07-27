@@ -10,9 +10,43 @@ interface Props {
    * 단일 칼럼 화면은 'narrow' — 넓은 셸에 한 칼럼만 두면 폭이 들쭉날쭉해 보인다.
    */
   width?: 'narrow' | 'wide';
+  /** 글 페이지용 SEO 정보 — 넘기면 og:type=article 과 JSON-LD 를 함께 낸다 */
+  article?: { published: string; modified?: string; tags?: string[] };
 }
-const { title, description, width = 'narrow' } = Astro.props;
+const { title, description, width = 'narrow', article } = Astro.props;
 const pageTitle = title ? `${title} | ${SITE.title}` : SITE.title;
+
+// SEO — Jekyll 시절 jekyll-seo-tag 가 넣어주던 것들을 직접 낸다.
+// canonical 이 없으면 같은 글이 여러 주소로 색인될 수 있고,
+// 페이지마다 다른 description 이 없으면 검색 결과 요약이 전부 똑같아진다.
+const canonical = new URL(Astro.url.pathname, SITE.url).href;
+const metaDescription = description ?? SITE.description;
+const ogImage = new URL('/assets/images/default-image.jpeg', SITE.url).href;
+
+const jsonLd = article
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: title,
+      description: metaDescription,
+      url: canonical,
+      datePublished: article.published,
+      dateModified: article.modified ?? article.published,
+      author: { '@type': 'Person', name: SITE.author, url: SITE.url },
+      publisher: { '@type': 'Person', name: SITE.author },
+      keywords: article.tags?.join(', '),
+      inLanguage: 'ko-KR',
+      mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+    }
+  : {
+      '@context': 'https://schema.org',
+      '@type': 'Blog',
+      name: SITE.title,
+      description: SITE.description,
+      url: SITE.url,
+      author: { '@type': 'Person', name: SITE.author },
+      inLanguage: 'ko-KR',
+    };
 
 // 현재 탭 표시 — 글 페이지에서는 어느 탭도 활성이 아니다
 const path = Astro.url.pathname;
@@ -30,7 +64,28 @@ const NAV = [
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
-    <meta name="description" content={description ?? SITE.description} />
+    <meta name="description" content={metaDescription} />
+    <link rel="canonical" href={canonical} />
+
+    {/* Open Graph — 카카오톡·슬랙·페이스북 등에서 링크를 펼칠 때 쓰인다 */}
+    <meta property="og:type" content={article ? 'article' : 'website'} />
+    <meta property="og:site_name" content={SITE.title} />
+    <meta property="og:title" content={title ?? SITE.title} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="ko_KR" />
+    {article && <meta property="article:published_time" content={article.published} />}
+    {article?.modified && <meta property="article:modified_time" content={article.modified} />}
+    {article?.tags?.map((t) => <meta property="article:tag" content={t} />)}
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title ?? SITE.title} />
+    <meta name="twitter:description" content={metaDescription} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
     <link rel="icon" href="/assets/images/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png" />

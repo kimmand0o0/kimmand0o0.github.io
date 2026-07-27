@@ -12,7 +12,7 @@ for (const post of posts) {
 const years = [...byYear.entries()].sort((a, b) => Number(b[0]) - Number(a[0]));
 ---
 
-<Base title="Archives">
+<Base title="Archives" description="연도별로 정리한 전체 글 목록.">
   <h1 class="page-title">Archives</h1>
   {
     years.map(([year, list]) => (
