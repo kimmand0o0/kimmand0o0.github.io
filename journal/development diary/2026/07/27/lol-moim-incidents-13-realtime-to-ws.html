@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Native cross-document page transitions (progressive enhancement, Chromium only) -->
+  <meta name="view-transition" content="same-origin">
+
+  <!-- Google Translate Customization (if needed) -->
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+
+  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>[ 롤모임 운영일지 ] - 13. 실시간 채널을 하나로 합쳤더니, 조용히 새고 있던 게 보였다 | Haeran’s blog</title>
+<meta name="generator" content="Jekyll v4.4.1">
+<meta property="og:title" content="[ 롤모임 운영일지 ] - 13. 실시간 채널을 하나로 합쳤더니, 조용히 새고 있던 게 보였다">
+<meta name="author" content="haeran">
+<meta property="og:locale" content="ko">
+<meta name="description" content="Supabase 요금이 예상보다 크게 나왔다. 파고들어보니 원인이 두 가지였다 — 하나는 RiotMatch.rawInfo(전적 원본 JSON)가 DB 용량의 대부분을 먹고 있던 것, 다른 하나는 Supabase Realtime이 백그라운드에서 계속 WAL을 폴링하며 리소스를 쓰고 있던 것. 앞의 것은 “Cloudflare R2 같은 데 따로 저장해서 필요할 때만 가져다 쓰면 어떨까”라는 설계만 해두고 아직 실행에 옮기진 않았다(별도 글감이다). 오늘 다룰 건 뒤의 것 — Realtime을 끄기로 한 결정과, 그 결정이 실행되고 나서 며칠 뒤에 발견한 예상 밖의 여파다.">
+<meta property="og:description" content="Supabase 요금이 예상보다 크게 나왔다. 파고들어보니 원인이 두 가지였다 — 하나는 RiotMatch.rawInfo(전적 원본 JSON)가 DB 용량의 대부분을 먹고 있던 것, 다른 하나는 Supabase Realtime이 백그라운드에서 계속 WAL을 폴링하며 리소스를 쓰고 있던 것. 앞의 것은 “Cloudflare R2 같은 데 따로 저장해서 필요할 때만 가져다 쓰면 어떨까”라는 설계만 해두고 아직 실행에 옮기진 않았다(별도 글감이다). 오늘 다룰 건 뒤의 것 — Realtime을 끄기로 한 결정과, 그 결정이 실행되고 나서 며칠 뒤에 발견한 예상 밖의 여파다.">
+<link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-13-realtime-to-ws.html">
+<meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-13-realtime-to-ws.html">
+<meta property="og:site_name" content="Haeran’s blog">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2026-07-27T11:00:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="[ 롤모임 운영일지 ] - 13. 실시간 채널을 하나로 합쳤더니, 조용히 새고 있던 게 보였다">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"haeran"},"dateModified":"2026-07-27T11:00:00+00:00","datePublished":"2026-07-27T11:00:00+00:00","description":"Supabase 요금이 예상보다 크게 나왔다. 파고들어보니 원인이 두 가지였다 — 하나는 RiotMatch.rawInfo(전적 원본 JSON)가 DB 용량의 대부분을 먹고 있던 것, 다른 하나는 Supabase Realtime이 백그라운드에서 계속 WAL을 폴링하며 리소스를 쓰고 있던 것. 앞의 것은 “Cloudflare R2 같은 데 따로 저장해서 필요할 때만 가져다 쓰면 어떨까”라는 설계만 해두고 아직 실행에 옮기진 않았다(별도 글감이다). 오늘 다룰 건 뒤의 것 — Realtime을 끄기로 한 결정과, 그 결정이 실행되고 나서 며칠 뒤에 발견한 예상 밖의 여파다.","headline":"[ 롤모임 운영일지 ] - 13. 실시간 채널을 하나로 합쳤더니, 조용히 새고 있던 게 보였다","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-13-realtime-to-ws.html"},"url":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-13-realtime-to-ws.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- Favicon -->
+  <link rel="icon" href="/assets/images/favicon.ico">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-13-realtime-to-ws.html">
+
+  <!-- Social Media (Open Graph, Twitter Card) -->
+  <meta property="og:title" content="[ 롤모임 운영일지 ] - 13. 실시간 채널을 하나로 합쳤더니, 조용히 새고 있던 게 보였다">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+  <meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-13-realtime-to-ws.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="[ 롤모임 운영일지 ] - 13. 실시간 채널을 하나로 합쳤더니, 조용히 새고 있던 게 보였다">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+
+  <!-- Stylesheets and External Resources -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+
+  <!-- Editorial display typeface for headings only; body stays Noto Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- JavaScript -->
+  <script src="/assets/js/main.js"></script>
+
+  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
+<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
+<script>
+  function initGoogleAnalytics() {
+    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
+      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
+    var enableDNT = "false" == "true";
+
+    if (!enableDNT || !doNotTrack) {
+      var measurementId = 'G-ZNXE6HSKMS';
+
+      (function(src) {
+        var tag = document.createElement('script');
+        tag.src = src;
+        tag.async = true;
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', measurementId);
+    }
+  }
+  window.addEventListener("load", initGoogleAnalytics);
+</script>
+
+<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  // mermaid 블록은 highlight.js 대상에서 제외 — hljs가 addLangData에서 class를
+  // "language-mermaid" -> "hljs mermaid"로 덮어써버려서, mermaid.html의 렌더링 스크립트가
+  // 뒤늦게(load 시점) 찾으려는 .language-mermaid 셀렉터가 항상 빈 결과를 내는 원인이었음.
+  var els = document.querySelectorAll('pre code:not(.language-mermaid)')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
+<style>
+  .pswp .pswp__container .pswp__img {
+    background-color: white;
+  }
+</style>
+
+<script>
+  function initPhotoSwipe() {
+    let customOptions = {};
+
+    try {
+      const data = ``.replaceAll("=>", ":");
+      customOptions = JSON.parse(data);
+    } catch (e) {
+      console.info("Invalid custom photo previewer options! " + e.message);
+    }
+
+    // Define object and gallery options
+    const options = Object.assign(
+      {
+        gallery: "section.main",
+        children: "a.photo-swipe",
+        photo_scale: 2,
+        // dynamic import is not supported in UMD version
+        pswpModule: PhotoSwipe,
+      },
+      customOptions
+    );
+
+    const galleryEl = document.querySelector(options.gallery);
+    if (!galleryEl) {
+      return;
+    }
+
+    const imgEls = [];
+    const els = galleryEl.querySelectorAll("img:not(.emoji)");
+    els.forEach((el) => {
+      if (el.src.trim() == "") {
+        return;
+      }
+      if (!imgEls.includes(el)) {
+        imgEls.push(el);
+      }
+    });
+
+    if (imgEls.length === 0) {
+      return;
+    }
+
+    imgEls.forEach((imgEl) => {
+      imgEl.outerHTML = `
+      <a class="photo-swipe"
+        href="${imgEl.src}"
+        data-pswp-width="${
+          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
+        }"
+        data-pswp-height="${
+          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
+        }"
+        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
+        target="_blank">
+        ${imgEl.outerHTML}
+      </a>`;
+    });
+
+    // Initialize PhotoSwipe 5
+    var lightbox = new PhotoSwipeLightbox(options);
+
+    lightbox.init();
+  }
+
+  window.addEventListener("load", initPhotoSwipe);
+</script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+  function isDarkTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark';
+  }
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: isDarkTheme() ? 'dark' : 'default',
+  });
+
+  function renderMermaidBlocks() {
+    // kramdown/rouge render ```mermaid fences as <pre><code class="language-mermaid">...</code></pre>
+    // mermaid.js only auto-scans <div class="mermaid">, so swap the markup before running it.
+    const blocks = document.querySelectorAll('pre > code.language-mermaid');
+    if (blocks.length === 0) {
+      return;
+    }
+    blocks.forEach((code) => {
+      const graphDefinition = code.textContent;
+      const container = document.createElement('div');
+      container.className = 'mermaid';
+      container.textContent = graphDefinition;
+      code.parentElement.replaceWith(container);
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  }
+
+  window.addEventListener('load', renderMermaidBlocks);
+</script>
+<!-- Custom Head HTML (if any) -->
+
+<!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 assets/js/chat-widget.js -->
+<script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
+  Haeran's blog
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/search.html">SEARCH</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<div class="page-link" style="display: inline;">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<div class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="fr">
+          
+          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="zh-CN">
+          
+          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ja">
+          
+          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ko">
+          
+          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ru">
+          
+          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
+          
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ko',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+</div>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    // 항상 localStorage를 사용 — 'auto' 모드에서도 유저가 직접 누른 토글이
+    // 브라우저 세션이 끝났다고 사라지지 않고, 다음 예약된 자동 전환 시점까지 유지된다.
+    var storage = localStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var blocks = document.querySelectorAll('pre');
+
+  function addCopyButton(pre) {
+    if (pre.querySelector('.code-copy-btn')) return;
+    var code = pre.querySelector('code');
+    if (!code) return;
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'code-copy-btn';
+    btn.textContent = 'Copy';
+    pre.appendChild(btn);
+
+    btn.addEventListener('click', function () {
+      var text = code.textContent;
+
+      function done(ok) {
+        btn.textContent = ok ? 'Copied!' : 'Failed';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+        return;
+      }
+
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        done(document.execCommand('copy'));
+      } catch (e) {
+        done(false);
+      }
+      document.body.removeChild(ta);
+    });
+  }
+
+  for (var i = 0; i < blocks.length; i++) {
+    addCopyButton(blocks[i]);
+  }
+});
+</script>
+<main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <div class="framework">
+  <section class="main">
+
+     <div class="reading-progress" aria-hidden="true">
+  <div class="reading-progress-bar" id="reading-progress-bar"></div>
+</div>
+
+<script>
+(function () {
+  var bar = document.getElementById('reading-progress-bar');
+  var article = document.querySelector('.post-content');
+  if (!bar || !article) return;
+
+  function update() {
+    var rect = article.getBoundingClientRect();
+    var articleTop = rect.top + window.pageYOffset;
+    var total = article.offsetHeight - window.innerHeight;
+    var scrolled = window.pageYOffset - articleTop;
+    var pct = total > 0 ? Math.min(100, Math.max(0, (scrolled / total) * 100)) : 100;
+    bar.style.width = pct + '%';
+  }
+
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+</script>
+<div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">[ 롤모임 운영일지 ] - 13. 실시간 채널을 하나로 합쳤더니, 조용히 새고 있던 게 보였다</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <div class="post-meta">
+    <time class="dt-published" datetime="2026-07-27T11:00:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Jul 27, 2026
+    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 17 mins</span>
+  </div>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#%EC%9A%B4%EC%98%81%EC%9D%BC%EC%A7%80">#운영일지</a><a class="post-tag" href="/tags.html#%EC%8B%A4%EC%8B%9C%EA%B0%84">#실시간</a><a class="post-tag" href="/tags.html#WebSocket">#WebSocket</a><a class="post-tag" href="/tags.html#Supabase">#Supabase</a><a class="post-tag" href="/tags.html#%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98">#아키텍처</a><a class="post-tag" href="/tags.html#%ED%9A%8C%EA%B3%A0">#회고</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <p>Supabase 요금이 예상보다 크게 나왔다. 파고들어보니 원인이 두 가지였다 — 하나는 <code class="language-plaintext highlighter-rouge">RiotMatch.rawInfo</code>(전적 원본 JSON)가 DB 용량의 대부분을 먹고 있던 것, 다른 하나는 Supabase Realtime이 백그라운드에서 계속 WAL을 폴링하며 리소스를 쓰고 있던 것. 앞의 것은 “Cloudflare R2 같은 데 따로 저장해서 필요할 때만 가져다 쓰면 어떨까”라는 설계만 해두고 아직 실행에 옮기진 않았다(별도 글감이다). 오늘 다룰 건 뒤의 것 — Realtime을 끄기로 한 결정과, 그 결정이 실행되고 나서 며칠 뒤에 발견한 예상 밖의 여파다.</p>
+
+<h2 id="첫-판단은-틀렸다--죽은-코드인-줄-알았다">첫 판단은 틀렸다 — “죽은 코드인 줄 알았다”</h2>
+
+<p>Realtime을 당장 끄자는 게 처음 방향이었다. 코드를 훑어보니 <code class="language-plaintext highlighter-rouge">useRealtimeSession.ts</code>라는 훅이 있긴 한데, 얼핏 보기엔 안 쓰이는 것처럼 보였다. “죽은 코드니까 그냥 끄면 된다”고 결론 내리려던 참이었다.</p>
+
+<p>다시 한 번 페이지 전체를 훑어보고 나서야 틀렸다는 걸 알았다. 이 훅은 실시간 경매 화면(<code class="language-plaintext highlighter-rouge">AuctionDetailPage.tsx</code>)에서 실제로 쓰이고 있었다 — 팀 구성 변경, 입찰 상태, 상점 구매 알림까지 이 채널을 타고 있었다. 죽은 코드가 아니라 <strong>이미 운영 중인 기능</strong>이었던 거다.</p>
+
+<p>여기서 멈추고 정정한 게 다행이었다. 만약 그대로 밀어붙였으면 경매 진행 중에 팀원들 화면이 서로 안 맞는 상태로 방치되는, 사용자 눈에 바로 보이는 사고가 났을 거다.</p>
+
+<h2 id="결정--끄기-전에-있는-채널로-흡수한다">결정 — 끄기 전에, 있는 채널로 흡수한다</h2>
+
+<p>그래서 방향을 바꿨다. Realtime을 그냥 끄는 게 아니라, <strong>이미 떠 있는 Socket.IO WS 서버로 그 역할을 흡수한 다음에 끈다.</strong> 이 프로젝트는 실시간 경매 입찰을 위해 별도 GCE VM에서 Socket.IO + Redis 조합의 WS 서버를 이미 운영하고 있었다. Realtime과 WS, 두 개의 실시간 채널을 유지할 이유가 없으니 하나로 합치는 게 맞는 방향이었다.</p>
+
+<p>캐시 무효화용으로 이미 존재하던 헬퍼 하나가 이 통합의 핵심이 됐다.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// invalidate-auction-cache.ts</span>
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">invalidateAuctionCache</span><span class="p">(</span>
+  <span class="nx">sessionId</span><span class="p">:</span> <span class="kr">number</span><span class="p">,</span>
+  <span class="nx">chat</span><span class="p">?:</span> <span class="nb">Record</span><span class="o">&lt;</span><span class="kr">string</span><span class="p">,</span> <span class="nx">unknown</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="nx">payload</span><span class="p">?:</span> <span class="nb">Record</span><span class="o">&lt;</span><span class="kr">string</span><span class="p">,</span> <span class="nx">unknown</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// ... WS 서버의 내부 엔드포인트로 POST, 실패해도 throw 안 함(최대 2회 재시도)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>payload를 안 주면 방에 있는 모든 클라이언트에게 “너 다시 조회해”(<code class="language-plaintext highlighter-rouge">session_invalidated</code>)라고 알리고, payload를 주면 서버가 미리 한 번 읽어온 최신 상태를 그대로 뿌린다(<code class="language-plaintext highlighter-rouge">session_state</code>) — 각자 재조회하는 대신 서버가 한 번 읽어서 나눠주는 셈이다. 문제는 이 헬퍼가 낙찰 확정 같은 몇몇 지점에만 붙어 있었고, 팀 참가/팀장 지정/셋업 변경 같은 다른 상태 변경 지점들엔 안 붙어 있었다는 거다. Realtime이 그 빈틈을 postgres_changes로 메워주고 있었으니 지금까진 티가 안 났던 것뿐이다.</p>
+
+<p>빈틈을 찾아서 다 메웠다. 처음 훑어봤을 때 10곳을 찾았는데, 코드리뷰를 한 번 더 돌리고 나니 6곳을 더 찾았다 — 참가자 추가/제거, 코인플립, 픽 순서 결정, MVP 투표 같은 지점들. 총 16개 라우트에 <code class="language-plaintext highlighter-rouge">invalidateAuctionCache</code> 호출을 추가하고, 프론트엔드에서 Realtime 채널 구독 코드를 걷어내고 전부 WS 하나로 합쳤다.</p>
+
+<h2 id="부작용--알림이-늘어난-만큼-db로-가는-재조회도-늘었다">부작용 — 알림이 늘어난 만큼, DB로 가는 재조회도 늘었다</h2>
+
+<p>메꾸고 나니 새로운 문제가 보였다. <code class="language-plaintext highlighter-rouge">session_invalidated</code>는 “다시 조회해”라는 신호다. 팀 참가/팀장 변경처럼 짧은 시간에 여러 번 일어날 수 있는 이벤트마다 이 신호를 쏘기 시작하면, 방에 있는 인원수만큼 재조회 요청이 한꺼번에 몰릴 수 있다. 예전엔(내전 팀원 수 X 각자 접속한 세션 수) 정도였던 부담이, 이번 변경으로 상태 변경이 일어날 때마다 매번 그 규모로 반복될 소지가 생긴 거다.</p>
+
+<p>그래서 세션 조회 엔드포인트에 <code class="language-plaintext highlighter-rouge">slim</code> 모드를 추가했다. 최초 1회만 평가 점수·천사카드 개수 같은 부가 쿼리까지 다 긁어오고, 그 이후 재조회는 메인 쿼리만 하고 부가 쿼리 2개는 건너뛰게 했다 — 프론트에서 이전 값을 그대로 이어 붙이는 merge 로직만 추가하면 됐다.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">slim</span> <span class="o">=</span> <span class="nx">req</span><span class="p">.</span><span class="nx">query</span><span class="p">.</span><span class="nx">slim</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">1</span><span class="dl">"</span><span class="p">;</span>
+<span class="kd">const</span> <span class="nx">evalMap</span> <span class="o">=</span> <span class="nx">slim</span> <span class="p">?</span> <span class="k">new</span> <span class="nc">Map</span><span class="p">()</span> <span class="p">:</span> <span class="k">await</span> <span class="nf">fetchEvalsByUser</span><span class="p">(</span><span class="nx">suUserIds</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">angelMap</span> <span class="o">=</span> <span class="nx">slim</span> <span class="p">?</span> <span class="k">new</span> <span class="nc">Map</span><span class="p">()</span> <span class="p">:</span> <span class="k">await</span> <span class="nf">fetchAngelCardCounts</span><span class="p">(</span><span class="nx">suUserIds</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>이 최적화를 셋업 화면에는 처음에 넣어놓고, 결과 화면(MVP 투표가 일어나는 곳)엔 빠뜨렸다는 것도 나중에 코드리뷰 과정에서 알아챘다. MVP 투표는 경기 끝나고 참가자 전원이 몰아서 누르는 패턴이라 오히려 이쪽이 더 위험한 지점이었다 — 같은 버그를 다른 화면에 남겨둔 채로 지나칠 뻔했다.</p>
+
+<h2 id="배포하고-나서--지금-얼마나-버틸-수-있지">배포하고 나서 — “지금 얼마나 버틸 수 있지?”</h2>
+
+<p>여기까지 배포하고 나서 자연스럽게 드는 질문이 있었다. WS 서버가 이제 더 많은 역할을 떠맡게 됐는데, 지금 인스턴스가 몇 대이고 얼마나 버틸 수 있는지 실제로는 모르고 있었다. 확인해보니:</p>
+
+<ul>
+  <li>
+<strong>API(Cloud Run)</strong>: <code class="language-plaintext highlighter-rouge">minScale=1, maxScale=10</code>, 인스턴스당 동시 요청 80개까지. 트래픽 따라 자동으로 늘어난다.</li>
+  <li>
+<strong>WS(GCE VM)</strong>: <code class="language-plaintext highlighter-rouge">e2-small</code>(2 vCPU) 한 대, pm2 fork 모드로 프로세스 1개. 오토스케일 없음, 이중화 없음 — <strong>단일 장애점</strong>이다.</li>
+</ul>
+
+<p>API는 늘어나는데 WS는 고정이라는 비대칭이 있다는 걸 이때 처음 명확히 확인했다. 다만 실제 부하를 재보니(<code class="language-plaintext highlighter-rouge">load average</code> 0.00대, 실제 연결 수 십여 개) 지금 트래픽 규모에선 전혀 임계치 근처가 아니었다. 그래서 “인스턴스를 늘리자”가 아니라 “일단 로그부터 자세히 보자”로 방향을 잡았다.</p>
+
+<h2 id="놀랐다가--그냥-인터넷-배경-소음이었다">놀랐다가 — 그냥 인터넷 배경 소음이었다</h2>
+
+<p>로그를 보다가 <code class="language-plaintext highlighter-rouge">ss -tan</code>으로 연결 상태를 찍어봤는데, <code class="language-plaintext highlighter-rouge">SYN-RECV</code> 상태 연결이 200개 넘게 잡혔다. 순간 “이거 뭔가 몰려오고 있나” 싶었다.</p>
+
+<p>까보니 아니었다. 목적지 포트를 찍어보니 전부 443/22였고, 발신지 IP도 제각각이었다 — 공인 IP를 가진 서버라면 늘 붙는 인터넷 스캐너들의 배경 트래픽이었다. 애플리케이션(auction-ws)과는 무관한 노이즈였던 셈이다.</p>
+
+<p>이 해프닝 자체는 별거 아니지만, 짚어둘 교훈은 있다. <strong>지표 하나만 보고 놀라기 전에, 그 지표가 실제로 뭘 재는 건지부터 확인해야 한다.</strong> <code class="language-plaintext highlighter-rouge">ss</code>가 보여주는 연결 수는 애플리케이션 트래픽과 OS 레벨의 배경 노이즈를 구분해주지 않는다.</p>
+
+<h2 id="진짜-문제는-로그를-더-파고들다가-나왔다">진짜 문제는 로그를 더 파고들다가 나왔다</h2>
+
+<p>스캐너 노이즈에 낚일 뻔한 김에, 로그를 조금 더 넓게 훑어봤다. 거기서 <code class="language-plaintext highlighter-rouge">PayloadTooLargeError</code>가 반복해서 찍히고 있는 걸 발견했다. 최근 로그에서만 52건.</p>
+
+<p>원인은 단순했다. WS 서버의 내부 무효화 엔드포인트가 <code class="language-plaintext highlighter-rouge">express.json()</code>을 <strong>바디 크기 제한 없이</strong> 쓰고 있었다 — Express 기본값인 100kb가 그대로 적용되고 있었던 거다.</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 수정 전</span>
+<span class="nx">app</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="nf">json</span><span class="p">());</span>
+
+<span class="c1">// 수정 후</span>
+<span class="nx">app</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="nf">json</span><span class="p">({</span> <span class="na">limit</span><span class="p">:</span> <span class="dl">"</span><span class="s2">3mb</span><span class="dl">"</span> <span class="p">}));</span>
+</code></pre></div></div>
+
+<p>문제가 되는 지점은 낙찰 확정 시 서버가 세션 전체 스냅샷을 만들어서 방에 한 번에 push하는 최적화 경로였다. 참가자·팀·베팅·경기 기록이 많이 쌓인 세션일수록 이 payload가 커지는데, 100kb를 넘는 순간 Express가 바디 파싱 단계에서 요청 자체를 거부해버린다. 라우트 핸들러는 실행조차 안 되니, Redis 캐시 갱신도 브로드캐스트도 둘 다 조용히 안 일어난다. 게다가 <code class="language-plaintext highlighter-rouge">invalidateAuctionCache</code>는 실패를 삼키는 설계였다 — 재시도 두 번 하고도 안 되면 그냥 로그만 남기고 넘어간다. 그러니 이 실패는 사용자 리포트가 아니고서는 발견될 방법이 없었다.</p>
+
+<p>역설적인 지점이 여기다. <strong>참가자가 많고 활발한 세션일수록, 다시 말해 실시간 동기화가 가장 중요한 세션일수록, 이 버그에 걸릴 확률이 높았다.</strong> 조용한 세션은 애초에 payload가 작아서 안 걸린다.</p>
+
+<h2 id="왜-await을-그대로-뒀는가">왜 <code class="language-plaintext highlighter-rouge">await</code>을 그대로 뒀는가</h2>
+
+<p>이 무효화 호출은 16곳 전부 <code class="language-plaintext highlighter-rouge">await</code>로 응답을 막고 있다. WS 서버가 느리거나 다운되면 팀 참가·투표 같은 기본 조작 하나하나가 최대 몇 초씩 지연될 수 있다는 뜻이라, “그냥 fire-and-forget으로 바꾸면 안 되나” 하는 생각이 자연스럽게 들었다.</p>
+
+<p>그런데 Cloud Run 설정을 확인해보니 <code class="language-plaintext highlighter-rouge">--no-cpu-throttling</code>이 걸려 있지 않았다 — 기본값(요청 처리가 끝나면 CPU가 스로틀됨)이 그대로 적용 중이었다. 이 상태에서 응답을 먼저 보내고 무효화 호출을 백그라운드로 돌리면, 응답을 보낸 시점에 CPU가 스로틀돼서 그 백그라운드 작업이 끝까지 실행되지 않고 조용히 유실될 수 있다. 방금 겪은 “조용히 실패하는” 버그를 하나 고치자고, 또 다른 조용히 실패하는 경로를 새로 만드는 셈이다. 그래서 지금은 “지연 vs 조용한 유실” 사이에서 지연 쪽을 택한 채로 남겨뒀다 — <code class="language-plaintext highlighter-rouge">--no-cpu-throttling</code>을 켜는 게 먼저 검토할 선행 조건이다.</p>
+
+<h2 id="정리">정리</h2>
+
+<ul>
+  <li>
+<strong>“죽은 코드처럼 보인다”는 판단은 한 번 더 확인하고 나서 내려야 한다.</strong> 첫 판단을 그대로 밀어붙였으면 눈에 보이는 사고로 이어졌을 거다 — 다시 훑어보고 스스로 정정한 게 이번엔 다행이었다.</li>
+  <li>
+<strong>채널을 하나로 합치는 리팩터링은 “빠뜨린 곳이 없는지” 검증까지가 작업의 절반이다.</strong> 처음 찾은 10곳에, 리뷰를 한 번 더 돌려서 6곳을 추가로 찾았다. 같은 종류의 최적화(slim 모드)도 화면 하나엔 넣고 다른 화면엔 빠뜨렸었다.</li>
+  <li>
+<strong>지표에 놀라기 전에 그 지표가 뭘 재는지부터 확인하라.</strong> <code class="language-plaintext highlighter-rouge">SYN-RECV</code> 200개는 공격도 폭주도 아니고 그냥 인터넷 배경 소음이었다.</li>
+  <li>
+<strong>가장 활발한 곳에서 가장 조용히 실패하는 버그가 제일 위험하다.</strong> <code class="language-plaintext highlighter-rouge">PayloadTooLargeError</code>는 세션이 커질수록, 즉 실시간 동기화가 제일 중요해지는 시점일수록 조용히 걸리는 버그였다. 실패를 삼키도록 설계된 경로는 로그를 일부러 파고들지 않으면 존재 자체를 알 수가 없다.</li>
+  <li>
+<strong>“지연을 줄이자”가 항상 정답은 아니다.</strong> 플랫폼의 다른 설정(CPU 스로틀링)과 맞물리면, 지연을 줄이려던 변경이 실패를 조용하게 만드는 방향으로 갈 수도 있다. 바꾸기 전에 그 변경이 기대는 전제부터 확인해야 한다.</li>
+</ul>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/study/llm/2026/07/27/llm-prompting-paper-07-toolformer.html" title="LLM 프롬프팅 논문 스터디 - 07. Toolformer">LLM 프롬프팅 논문 스터디 - 07....</a><a class="next" href="/journal/development%20diary/2026/07/27/lol-moim-incidents-14-product-retrospective.html" title="[ 롤모임 운영일지 ] - 14. 숫자보다 오래 남는 것들 — 기획 관점에서 돌아본 두 달">[ 롤모임 운영일지 ] - 14....</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li class="">
+          <a class="post-link" href="/study/2025/02/21/test_code_study.html" title="테스트 코드를 왜 해야하는가">
+            테스트 코드를 왜 해야하는가<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/journal/development%20diary/2026/07/19/lol-moim-incidents-09-riot-api-key.html" title="[ 롤모임 운영일지 ] - 09. 딱 이틀 버틴 워크어라운드 — Riot API 키 전환기">
+            [ 롤모임 운영일지 ] - 09. 딱 이틀 버틴 워크어라운드 — Riot...<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/journal/development%20diary/2026/07/27/k8s-study-07-namespace-rbac.html" title="[ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이 나눠 쓰는 법">
+            [ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이...<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/llm/2026/07/27/llm-prompting-paper-07-toolformer.html" title="LLM 프롬프팅 논문 스터디 - 07. Toolformer">
+            LLM 프롬프팅 논문 스터디 - 07. Toolformer<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
+</a>
+        </li>
+</ul>
+    </div>
+<div class="post-comments">
+<div id="utterances-placeholder"></div>
+<script>
+  const utterancesThemeFromDataTheme = () => {
+    const dataTheme = document.documentElement.getAttribute('data-theme');
+    return `github-${dataTheme}`;
+  };
+
+  const setUtterancesTheme = () => {
+    const iframe = document.querySelector('.utterances-frame');
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: utterancesThemeFromDataTheme()
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  // dynamic change
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        setUtterancesTheme();
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
+
+  let utterancesScript = document.createElement('script');
+  utterancesScript.async = true;
+  utterancesScript.src = 'https://utteranc.es/client.js';
+  utterancesScript.crossOrigin = 'anonymous';
+  utterancesScript.setAttribute('issue-term', 'title');
+  utterancesScript.setAttribute('label', 'utterances comment');
+  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
+  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
+
+  const placeholder = document.getElementById('utterances-placeholder');
+  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
+</script>
+</div></section>
+</div>
+
+  </section><section class="sidebar"><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+    </div>
+  </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div class="footer-social">
+        <a href="https://github.com/kimmand0o0" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
+        <a href="mailto:maeran.dev.u@gmail.com" aria-label="Email"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+        <a href="/feed.xml" aria-label="RSS"><i class="fa fa-rss" aria-hidden="true"></i></a>
+      </div>
+      <div>Unpublished Work <span class="copyleft">©</span> 2017-2026 Haeran</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>

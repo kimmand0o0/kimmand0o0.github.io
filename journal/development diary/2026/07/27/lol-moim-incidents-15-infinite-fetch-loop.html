@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Native cross-document page transitions (progressive enhancement, Chromium only) -->
+  <meta name="view-transition" content="same-origin">
+
+  <!-- Google Translate Customization (if needed) -->
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+
+  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>[ 롤모임 운영일지 ] - 15. 서비스가 자기 자신을 DDoS하던 날 — 무한 요청 루프 2연타 | Haeran’s blog</title>
+<meta name="generator" content="Jekyll v4.4.1">
+<meta property="og:title" content="[ 롤모임 운영일지 ] - 15. 서비스가 자기 자신을 DDoS하던 날 — 무한 요청 루프 2연타">
+<meta name="author" content="haeran">
+<meta property="og:locale" content="ko">
+<meta name="description" content="04편에서 “요청 1개가 쿼리 130개로 터지는” N+1 이야기를 했는데, 이번 편은 그보다 한 단계 더 나쁜 케이스다. 요청 1개가 쿼리 N개가 되는 게 아니라, 요청 자체가 무한이 되는 버그. 그것도 일주일 사이에 두 번, 서로 다른 훅에서 같은 원리로 터졌다.">
+<meta property="og:description" content="04편에서 “요청 1개가 쿼리 130개로 터지는” N+1 이야기를 했는데, 이번 편은 그보다 한 단계 더 나쁜 케이스다. 요청 1개가 쿼리 N개가 되는 게 아니라, 요청 자체가 무한이 되는 버그. 그것도 일주일 사이에 두 번, 서로 다른 훅에서 같은 원리로 터졌다.">
+<link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-15-infinite-fetch-loop.html">
+<meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-15-infinite-fetch-loop.html">
+<meta property="og:site_name" content="Haeran’s blog">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2026-07-27T12:30:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="[ 롤모임 운영일지 ] - 15. 서비스가 자기 자신을 DDoS하던 날 — 무한 요청 루프 2연타">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"haeran"},"dateModified":"2026-07-27T12:30:00+00:00","datePublished":"2026-07-27T12:30:00+00:00","description":"04편에서 “요청 1개가 쿼리 130개로 터지는” N+1 이야기를 했는데, 이번 편은 그보다 한 단계 더 나쁜 케이스다. 요청 1개가 쿼리 N개가 되는 게 아니라, 요청 자체가 무한이 되는 버그. 그것도 일주일 사이에 두 번, 서로 다른 훅에서 같은 원리로 터졌다.","headline":"[ 롤모임 운영일지 ] - 15. 서비스가 자기 자신을 DDoS하던 날 — 무한 요청 루프 2연타","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-15-infinite-fetch-loop.html"},"url":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-15-infinite-fetch-loop.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- Favicon -->
+  <link rel="icon" href="/assets/images/favicon.ico">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-15-infinite-fetch-loop.html">
+
+  <!-- Social Media (Open Graph, Twitter Card) -->
+  <meta property="og:title" content="[ 롤모임 운영일지 ] - 15. 서비스가 자기 자신을 DDoS하던 날 — 무한 요청 루프 2연타">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+  <meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-15-infinite-fetch-loop.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="[ 롤모임 운영일지 ] - 15. 서비스가 자기 자신을 DDoS하던 날 — 무한 요청 루프 2연타">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
+
+  <!-- Stylesheets and External Resources -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+
+  <!-- Editorial display typeface for headings only; body stays Noto Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <!-- JavaScript -->
+  <script src="/assets/js/main.js"></script>
+
+  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
+<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
+<script>
+  function initGoogleAnalytics() {
+    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
+      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
+    var enableDNT = "false" == "true";
+
+    if (!enableDNT || !doNotTrack) {
+      var measurementId = 'G-ZNXE6HSKMS';
+
+      (function(src) {
+        var tag = document.createElement('script');
+        tag.src = src;
+        tag.async = true;
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', measurementId);
+    }
+  }
+  window.addEventListener("load", initGoogleAnalytics);
+</script>
+
+<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  // mermaid 블록은 highlight.js 대상에서 제외 — hljs가 addLangData에서 class를
+  // "language-mermaid" -> "hljs mermaid"로 덮어써버려서, mermaid.html의 렌더링 스크립트가
+  // 뒤늦게(load 시점) 찾으려는 .language-mermaid 셀렉터가 항상 빈 결과를 내는 원인이었음.
+  var els = document.querySelectorAll('pre code:not(.language-mermaid)')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
+<style>
+  .pswp .pswp__container .pswp__img {
+    background-color: white;
+  }
+</style>
+
+<script>
+  function initPhotoSwipe() {
+    let customOptions = {};
+
+    try {
+      const data = ``.replaceAll("=>", ":");
+      customOptions = JSON.parse(data);
+    } catch (e) {
+      console.info("Invalid custom photo previewer options! " + e.message);
+    }
+
+    // Define object and gallery options
+    const options = Object.assign(
+      {
+        gallery: "section.main",
+        children: "a.photo-swipe",
+        photo_scale: 2,
+        // dynamic import is not supported in UMD version
+        pswpModule: PhotoSwipe,
+      },
+      customOptions
+    );
+
+    const galleryEl = document.querySelector(options.gallery);
+    if (!galleryEl) {
+      return;
+    }
+
+    const imgEls = [];
+    const els = galleryEl.querySelectorAll("img:not(.emoji)");
+    els.forEach((el) => {
+      if (el.src.trim() == "") {
+        return;
+      }
+      if (!imgEls.includes(el)) {
+        imgEls.push(el);
+      }
+    });
+
+    if (imgEls.length === 0) {
+      return;
+    }
+
+    imgEls.forEach((imgEl) => {
+      imgEl.outerHTML = `
+      <a class="photo-swipe"
+        href="${imgEl.src}"
+        data-pswp-width="${
+          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
+        }"
+        data-pswp-height="${
+          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
+        }"
+        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
+        target="_blank">
+        ${imgEl.outerHTML}
+      </a>`;
+    });
+
+    // Initialize PhotoSwipe 5
+    var lightbox = new PhotoSwipeLightbox(options);
+
+    lightbox.init();
+  }
+
+  window.addEventListener("load", initPhotoSwipe);
+</script>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+  function isDarkTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark';
+  }
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: isDarkTheme() ? 'dark' : 'default',
+  });
+
+  function renderMermaidBlocks() {
+    // kramdown/rouge render ```mermaid fences as <pre><code class="language-mermaid">...</code></pre>
+    // mermaid.js only auto-scans <div class="mermaid">, so swap the markup before running it.
+    const blocks = document.querySelectorAll('pre > code.language-mermaid');
+    if (blocks.length === 0) {
+      return;
+    }
+    blocks.forEach((code) => {
+      const graphDefinition = code.textContent;
+      const container = document.createElement('div');
+      container.className = 'mermaid';
+      container.textContent = graphDefinition;
+      code.parentElement.replaceWith(container);
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  }
+
+  window.addEventListener('load', renderMermaidBlocks);
+</script>
+<!-- Custom Head HTML (if any) -->
+
+<!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 assets/js/chat-widget.js -->
+<script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
+  Haeran's blog
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/search.html">SEARCH</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<div class="page-link" style="display: inline;">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<div class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="fr">
+          
+          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="zh-CN">
+          
+          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ja">
+          
+          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ko">
+          
+          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="ru">
+          
+          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
+          
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ko',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+</div>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    // 항상 localStorage를 사용 — 'auto' 모드에서도 유저가 직접 누른 토글이
+    // 브라우저 세션이 끝났다고 사라지지 않고, 다음 예약된 자동 전환 시점까지 유지된다.
+    var storage = localStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var blocks = document.querySelectorAll('pre');
+
+  function addCopyButton(pre) {
+    if (pre.querySelector('.code-copy-btn')) return;
+    var code = pre.querySelector('code');
+    if (!code) return;
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'code-copy-btn';
+    btn.textContent = 'Copy';
+    pre.appendChild(btn);
+
+    btn.addEventListener('click', function () {
+      var text = code.textContent;
+
+      function done(ok) {
+        btn.textContent = ok ? 'Copied!' : 'Failed';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+        return;
+      }
+
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        done(document.execCommand('copy'));
+      } catch (e) {
+        done(false);
+      }
+      document.body.removeChild(ta);
+    });
+  }
+
+  for (var i = 0; i < blocks.length; i++) {
+    addCopyButton(blocks[i]);
+  }
+});
+</script>
+<main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <div class="framework">
+  <section class="main">
+
+     <div class="reading-progress" aria-hidden="true">
+  <div class="reading-progress-bar" id="reading-progress-bar"></div>
+</div>
+
+<script>
+(function () {
+  var bar = document.getElementById('reading-progress-bar');
+  var article = document.querySelector('.post-content');
+  if (!bar || !article) return;
+
+  function update() {
+    var rect = article.getBoundingClientRect();
+    var articleTop = rect.top + window.pageYOffset;
+    var total = article.offsetHeight - window.innerHeight;
+    var scrolled = window.pageYOffset - articleTop;
+    var pct = total > 0 ? Math.min(100, Math.max(0, (scrolled / total) * 100)) : 100;
+    bar.style.width = pct + '%';
+  }
+
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+</script>
+<div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">[ 롤모임 운영일지 ] - 15. 서비스가 자기 자신을 DDoS하던 날 — 무한 요청 루프 2연타</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <div class="post-meta">
+    <time class="dt-published" datetime="2026-07-27T12:30:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Jul 27, 2026
+    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 20 mins</span>
+  </div>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#%EC%9A%B4%EC%98%81%EC%9D%BC%EC%A7%80">#운영일지</a><a class="post-tag" href="/tags.html#React">#React</a><a class="post-tag" href="/tags.html#useEffect">#useEffect</a><a class="post-tag" href="/tags.html#useCallback">#useCallback</a><a class="post-tag" href="/tags.html#%ED%94%84%EB%A1%A0%ED%8A%B8%EC%97%94%EB%93%9C">#프론트엔드</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <p><a href="/journal/development%20diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html">04편</a>에서 “요청 1개가 쿼리 130개로 터지는” N+1 이야기를 했는데, 이번 편은 그보다 한 단계 더 나쁜 케이스다. 요청 1개가 쿼리 N개가 되는 게 아니라, <strong>요청 자체가 무한</strong>이 되는 버그. 그것도 일주일 사이에 두 번, 서로 다른 훅에서 같은 원리로 터졌다.</p>
+
+<p>서버 입장에서 보면 이건 사실상 DDoS다. 다만 공격자가 외부가 아니라 우리가 배포한 프론트엔드 코드라는 점이 다를 뿐이다.</p>
+
+<h2 id="tldr">TL;DR</h2>
+
+<ul>
+  <li>테넌시 마이그레이션 다음날 아침, Cloud Run 로그에서 <strong>동일 클라이언트가 같은 API를 초당 10회 이상 무한 호출</strong>하는 걸 발견했다. 원인은 새로 만든 <code class="language-plaintext highlighter-rouge">useGroupNav()</code> 훅이 매 렌더마다 새 함수를 리턴한 것.</li>
+  <li>6일 뒤, 시즌패스 코스메틱을 출시하고 <strong>15분 만에</strong> 같은 종류의 버그가 또 터졌다. 이번엔 훅이 아니라 소비자 쪽 — <code class="language-plaintext highlighter-rouge">usePlugins()</code>가 주는 함수를 <code class="language-plaintext highlighter-rouge">useEffect</code> deps에 그대로 넣은 것.</li>
+  <li>두 사건의 공통 엔진은 같다: <strong>fetch → setState → 리렌더 → 새 참조 → effect 재실행 → fetch</strong>. 참조가 불안정한 값이 deps에 들어가는 순간, 데이터를 받아오는 effect는 영구기관이 된다.</li>
+</ul>
+
+<p><br></p>
+
+<h2 id="1-사건-1--마이그레이션-다음날-아침-초당-10회">1. 사건 1 — 마이그레이션 다음날 아침, 초당 10회</h2>
+
+<p>7월 7일에 세부 페이지들을 <code class="language-plaintext highlighter-rouge">/g/:slug/*</code> 경로로 옮기는 테넌시 마이그레이션(<a href="/journal/development%20diary/2026/07/27/lol-moim-incidents-17-tenant-path-migration.html">17편</a>에서 자세히 다룬다)을 배포했다. 이때 <code class="language-plaintext highlighter-rouge">useNavigate</code>를 감싸서 모임 슬러그를 자동으로 붙여주는 <code class="language-plaintext highlighter-rouge">useGroupNav()</code>라는 훅을 새로 만들어 앱 전체에 깔았다.</p>
+
+<p>다음날 아침부터 “사이트가 렉 걸린다”, “로딩이 무한반복된다”, “Failed to fetch가 계속 뜬다”는 증상이 몰려왔다. Cloud Run 로그를 열어보니 동일 클라이언트가 같은 경매 세션의 <code class="language-plaintext highlighter-rouge">/live-bid?slim=1</code>을 <strong>초당 10회 이상</strong> 쉬지 않고 호출하고 있었다.</p>
+
+<p>문제의 훅은 이렇게 생겼었다.</p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/frontend/src/lib/groupNav.tsx (수정 전)</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">useGroupNav</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">navigate</span> <span class="o">=</span> <span class="nf">useNavigate</span><span class="p">();</span>
+  <span class="kd">const</span> <span class="nx">slug</span> <span class="o">=</span> <span class="nf">useCurrentSlug</span><span class="p">();</span>
+  <span class="k">return </span><span class="p">(</span><span class="nx">to</span><span class="p">:</span> <span class="nx">To</span> <span class="o">|</span> <span class="kr">number</span><span class="p">,</span> <span class="nx">options</span><span class="p">?:</span> <span class="nx">NavigateOptions</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>   <span class="c1">// 매 렌더마다 새 함수</span>
+    <span class="k">if </span><span class="p">(</span><span class="k">typeof</span> <span class="nx">to</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">number</span><span class="dl">"</span><span class="p">)</span> <span class="k">return</span> <span class="nf">navigate</span><span class="p">(</span><span class="nx">to</span><span class="p">);</span>
+    <span class="kd">const</span> <span class="na">scoped</span><span class="p">:</span> <span class="nx">To</span> <span class="o">=</span> <span class="k">typeof</span> <span class="nx">to</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">string</span><span class="dl">"</span> <span class="p">?</span> <span class="nf">groupHref</span><span class="p">(</span><span class="nx">slug</span><span class="p">,</span> <span class="nx">to</span><span class="p">)</span> <span class="p">:</span> <span class="nx">to</span><span class="p">;</span>
+    <span class="k">return</span> <span class="nf">navigate</span><span class="p">(</span><span class="nx">scoped</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>훅 자체는 아무 잘못이 없어 보인다. 그냥 <code class="language-plaintext highlighter-rouge">navigate</code>를 감싼 함수를 리턴할 뿐이니까. 문제는 이 함수가 <strong>호출될 때마다 새로 만들어진다</strong>는 것, 그리고 이 훅이 <code class="language-plaintext highlighter-rouge">useNavigate</code>의 드롭인 교체라서 소비자들이 기존 습관대로 리턴값을 의존성 배열에 넣는다는 것이다.</p>
+
+<p>라이브 경매 페이지가 정확히 그 패턴이었다. <code class="language-plaintext highlighter-rouge">loadData</code>가 <code class="language-plaintext highlighter-rouge">navigate</code>를 의존성으로 가진 <code class="language-plaintext highlighter-rouge">useCallback</code>이고, 그 <code class="language-plaintext highlighter-rouge">loadData</code>를 의존성으로 가진 <code class="language-plaintext highlighter-rouge">useEffect</code>가 데이터를 fetch한다. 그러면 이런 체인이 돈다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>렌더 → useGroupNav()가 새 함수 리턴
+     → loadData(useCallback) 재생성
+     → useEffect "deps 바뀌었네?" → 재실행 → fetch
+     → 응답 도착 → setState
+     → 리렌더 → 다시 처음부터
+</code></pre></div></div>
+
+<p>한 바퀴 도는 데 걸리는 시간이 API 응답 시간(수십~수백 ms)이니, 클라이언트 한 명당 초당 수 회~10회 이상의 요청이 나온다. 유저가 뭘 잘못한 것도 아니고, 그냥 페이지를 열어둔 것만으로.</p>
+
+<p>수정은 <code class="language-plaintext highlighter-rouge">useCallback</code> 한 겹이다.</p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/frontend/src/lib/groupNav.tsx (수정 후)</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">useGroupNav</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">navigate</span> <span class="o">=</span> <span class="nf">useNavigate</span><span class="p">();</span>
+  <span class="kd">const</span> <span class="nx">slug</span> <span class="o">=</span> <span class="nf">useCurrentSlug</span><span class="p">();</span>
+  <span class="c1">// 매 렌더마다 새 함수를 리턴하면 안 됨 — 이걸 의존성으로 쓰는 useCallback/useEffect가</span>
+  <span class="c1">// 매 렌더 재생성/재실행되어 무한 재조회 루프에 빠짐.</span>
+  <span class="k">return</span> <span class="nf">useCallback</span><span class="p">(</span>
+    <span class="p">(</span><span class="nx">to</span><span class="p">:</span> <span class="nx">To</span> <span class="o">|</span> <span class="kr">number</span><span class="p">,</span> <span class="nx">options</span><span class="p">?:</span> <span class="nx">NavigateOptions</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="k">if </span><span class="p">(</span><span class="k">typeof</span> <span class="nx">to</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">number</span><span class="dl">"</span><span class="p">)</span> <span class="k">return</span> <span class="nf">navigate</span><span class="p">(</span><span class="nx">to</span><span class="p">);</span>
+      <span class="kd">const</span> <span class="na">scoped</span><span class="p">:</span> <span class="nx">To</span> <span class="o">=</span> <span class="k">typeof</span> <span class="nx">to</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">string</span><span class="dl">"</span> <span class="p">?</span> <span class="nf">groupHref</span><span class="p">(</span><span class="nx">slug</span><span class="p">,</span> <span class="nx">to</span><span class="p">)</span> <span class="p">:</span> <span class="nx">to</span><span class="p">;</span>
+      <span class="k">return</span> <span class="nf">navigate</span><span class="p">(</span><span class="nx">scoped</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+    <span class="p">},</span>
+    <span class="p">[</span><span class="nx">navigate</span><span class="p">,</span> <span class="nx">slug</span><span class="p">],</span>
+  <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>배포하고 로그의 폭주는 멈췄다. 마이그레이션 배포부터 이 수정까지 하루가 채 안 걸렸지만, 그 사이 서비스는 프론트엔드가 만들어낸 트래픽에 스스로 짓눌려 있었다.</p>
+
+<p><br></p>
+
+<h2 id="2-사건-2--코스메틱-출시-15분-만에">2. 사건 2 — 코스메틱 출시 15분 만에</h2>
+
+<p>6일 뒤인 7월 14일, 시즌패스 코스메틱(칭호 테두리, 네임이펙트 등)을 출시했다. 커밋 로그를 보면 그날 오후가 그대로 재현된다 — 17시 47분에 기능 출시, 17시 55분에 어드민 우회 누락 수정, 그리고 <strong>18시 2분에 “무한 요청 루프 긴급 수정”</strong>. 출시 15분 만에 같은 종류의 버그가 또 터진 것이다.</p>
+
+<p>이번 범인은 코스메틱 조회 훅이었다.</p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/frontend/src/hooks/useSeasonCosmetics.ts (수정 전)</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">useSeasonCosmetic</span><span class="p">(</span><span class="nx">userId</span><span class="p">?:</span> <span class="kr">number</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">has</span> <span class="p">}</span> <span class="o">=</span> <span class="nf">usePlugins</span><span class="p">();</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">isPlatformAdmin</span> <span class="p">}</span> <span class="o">=</span> <span class="nf">usePermissions</span><span class="p">();</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">equipped</span><span class="p">,</span> <span class="nx">setEquipped</span><span class="p">]</span> <span class="o">=</span> <span class="nf">useState</span><span class="p">({});</span>
+
+  <span class="nf">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nf">setEquipped</span><span class="p">({});</span>
+    <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">userId</span> <span class="o">||</span> <span class="o">!</span><span class="p">(</span><span class="nf">has</span><span class="p">(</span><span class="dl">"</span><span class="s2">season-pass</span><span class="dl">"</span><span class="p">)</span> <span class="o">||</span> <span class="nx">isPlatformAdmin</span><span class="p">))</span> <span class="k">return</span><span class="p">;</span>
+    <span class="nf">apiFetch</span><span class="p">(</span><span class="s2">`/api/season-pass/cosmetics/user/</span><span class="p">${</span><span class="nx">userId</span><span class="p">}</span><span class="s2">`</span><span class="p">)</span>
+      <span class="p">.</span><span class="nf">then</span><span class="p">(</span><span class="cm">/* ... setEquipped ... */</span><span class="p">);</span>
+  <span class="p">},</span> <span class="p">[</span><span class="nx">userId</span><span class="p">,</span> <span class="nx">has</span><span class="p">,</span> <span class="nx">isPlatformAdmin</span><span class="p">]);</span>   <span class="c1">// ← has가 문제</span>
+  <span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">usePlugins()</code>가 리턴하는 <code class="language-plaintext highlighter-rouge">has</code>는 객체 리터럴 안의 인라인 화살표 함수라서 <strong>매 렌더마다 새 참조</strong>다. 그걸 deps에 넣었으니 사건 1과 완전히 같은 엔진이 돈다: fetch → <code class="language-plaintext highlighter-rouge">setEquipped</code> → 리렌더 → 새 <code class="language-plaintext highlighter-rouge">has</code> → effect 재실행 → fetch.</p>
+
+<p>더 아픈 건 이 훅이 걸려 있는 위치였다. <code class="language-plaintext highlighter-rouge">useSeasonCosmetic</code>은 닉네임을 그리는 공용 <code class="language-plaintext highlighter-rouge">Nickname</code> 컴포넌트에서 호출되는데, 이 컴포넌트는 랭킹·멤버 목록·채팅 등 <a href="/journal/development%20diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html">04편</a>에서 세어봤듯 22개 페이지에서 재사용된다. 유저 목록 하나에 닉네임이 50개 있으면 무한 루프도 50개다. 사이트 전반이 느려지고 요청이 무더기로 실패하는 것처럼 보인 이유다.</p>
+
+<p>수정은 deps에서 함수를 빼고, effect가 실제로 의존하는 <strong>판정 결과(원시값)</strong>만 남기는 것이었다.</p>
+
+<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/frontend/src/hooks/useSeasonCosmetics.ts (수정 후)</span>
+<span class="kd">const</span> <span class="p">{</span> <span class="nx">has</span> <span class="p">}</span> <span class="o">=</span> <span class="nf">usePlugins</span><span class="p">();</span>
+<span class="kd">const</span> <span class="p">{</span> <span class="nx">isPlatformAdmin</span> <span class="p">}</span> <span class="o">=</span> <span class="nf">usePermissions</span><span class="p">();</span>
+<span class="c1">// has는 매 렌더마다 새 함수 참조 — deps에 함수 자체를 넣으면 무한 반복된다.</span>
+<span class="c1">// 원시값(boolean)만 의존성으로 둔다.</span>
+<span class="kd">const</span> <span class="nx">enabled</span> <span class="o">=</span> <span class="o">!!</span><span class="nx">userId</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nf">has</span><span class="p">(</span><span class="dl">"</span><span class="s2">season-pass</span><span class="dl">"</span><span class="p">)</span> <span class="o">||</span> <span class="nx">isPlatformAdmin</span><span class="p">);</span>
+
+<span class="nf">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">userId</span> <span class="o">||</span> <span class="o">!</span><span class="nx">enabled</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+  <span class="c1">// ... fetch ...</span>
+<span class="p">},</span> <span class="p">[</span><span class="nx">userId</span><span class="p">,</span> <span class="nx">enabled</span><span class="p">]);</span>   <span class="c1">// boolean은 값이 같으면 재실행 안 됨</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">boolean</code>은 참조가 아니라 값으로 비교되니, 플러그인 상태가 실제로 바뀌지 않는 한 effect는 다시 돌지 않는다.</p>
+
+<p><br></p>
+
+<h2 id="3-두-사건은-같은-버그의-양면이다">3. 두 사건은 같은 버그의 양면이다</h2>
+
+<p>일주일 사이 두 번 터진 게 우연이 아니라는 게 이번 편의 요점이다. 두 사건은 정확히 대칭이다.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>사건 1 (useGroupNav)</th>
+      <th>사건 2 (useSeasonCosmetic)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>불안정한 참조를 만든 쪽</td>
+      <td>
+<strong>훅(생산자)</strong> — 매 렌더 새 함수를 리턴</td>
+      <td>
+<code class="language-plaintext highlighter-rouge">usePlugins</code>도 새 함수를 리턴하지만…</td>
+    </tr>
+    <tr>
+      <td>루프를 완성한 쪽</td>
+      <td>소비자는 관례대로 deps에 넣었을 뿐</td>
+      <td>
+<strong>소비자</strong> — 함수를 deps에 그대로 넣음</td>
+    </tr>
+    <tr>
+      <td>수정 위치</td>
+      <td>생산자에 <code class="language-plaintext highlighter-rouge">useCallback</code>
+</td>
+      <td>소비자 deps를 원시값으로</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>그리고 루프가 완성되려면 재료가 하나 더 필요하다: <strong>effect 안의 setState</strong>. 참조가 불안정해도 effect가 setState를 안 하면 리렌더가 안 일어나서 루프는 한 바퀴로 끝난다. 하필 “데이터를 fetch해서 state에 넣는” effect가 프론트엔드에서 가장 흔한 패턴이라, 불안정한 참조 하나가 deps에 섞이는 순간 그대로 영구기관이 된다.</p>
+
+<p>N+1과 비교하면 성격이 더 나쁘다. N+1은 요청 1번에 쿼리 130개로 “끝나는” 문제고, 유저가 페이지를 닫으면 멈춘다. 무한 루프는 페이지를 열어두는 것만으로 계속 돈다. 그리고 lint(<code class="language-plaintext highlighter-rouge">react-hooks/exhaustive-deps</code>)는 “deps에 빠진 게 있다”는 방향은 잘 잡아주지만, “deps에 넣은 그 값이 매 렌더 새 참조라서 루프가 된다”는 반대 방향은 잡아주지 못한다. 오히려 lint를 성실히 따를수록 함수를 deps에 넣게 된다.</p>
+
+<p><br></p>
+
+<h2 id="4-남은-불씨">4. 남은 불씨</h2>
+
+<p>솔직하게 적어두면, <code class="language-plaintext highlighter-rouge">usePlugins()</code>의 <code class="language-plaintext highlighter-rouge">has</code>는 지금도 매 렌더 새 참조를 리턴한다. 사건 2를 소비자 쪽에서 고쳤기 때문이다. 즉 “usePlugins의 리턴값을 deps에 직접 넣지 않는다”는 컨벤션으로만 방어되고 있는 상태고, 새 코드가 이 지뢰를 다시 밟을 가능성은 열려 있다. 생산자 쪽(<code class="language-plaintext highlighter-rouge">useCallback</code> 또는 안정된 객체 리턴)도 고치는 게 맞다 — 다음 리팩터링 때 처리할 항목으로 남겨둔다.</p>
+
+<p>무한까지는 아니어도 “겹치는” 요청 문제도 같은 주에 하나 더 잡았다. <code class="language-plaintext highlighter-rouge">usePlugins()</code>와 시즌 분위기 훅이 모듈 캐시(<code class="language-plaintext highlighter-rouge">cache === null</code>이면 fetch) 방식이었는데, 같은 렌더 tick에 여러 컴포넌트가 동시에 마운트되면 각자 <code class="language-plaintext highlighter-rouge">null</code>을 보고 <strong>중복 요청</strong>을 쏘는 race가 있었다. in-flight promise 가드 + 구독자 패턴으로 요청을 1회로 합쳤다. 무한 루프의 사촌쯤 되는 버그다.</p>
+
+<p><br></p>
+
+<h2 id="정리">정리</h2>
+
+<ol>
+  <li>
+<strong>“매 렌더 새 참조 + deps + effect 안의 setState” 세 개가 모이면 무조건 무한 루프다.</strong> 각각은 흔하고 무해해 보이는 코드라서, 조합이 완성되기 전까지는 아무 경고도 없다.</li>
+  <li>
+<strong>공용 훅이 리턴하는 함수는 반드시 참조가 안정돼야 한다.</strong> 훅은 소비자가 리턴값을 deps에 넣을 것이라고 가정하고 설계해야 한다. 특히 <code class="language-plaintext highlighter-rouge">useNavigate</code>처럼 기존 API의 드롭인 교체라면, 소비자는 원본과 같은 참조 안정성을 기대한다.</li>
+  <li>
+<strong>effect deps에는 가능하면 원시값을 넣는다.</strong> 함수나 객체 대신 그 함수로 계산한 boolean/string을 넣으면, 참조 안정성 문제 자체가 사라진다.</li>
+  <li>
+<strong>이런 버그는 코드 리뷰보다 서버 로그가 먼저 알려준다.</strong> 클라이언트에서는 “좀 느린데?” 정도로 보이지만, 서버 로그에서는 동일 클라이언트의 같은 요청이 초당 10회씩 찍히는 게 한눈에 보인다. 프론트엔드 버그를 백엔드 로그로 잡았다.</li>
+  <li>
+<strong>출시 15분 만의 긴급 수정도 기록할 가치가 있다.</strong> 같은 원리로 두 번 터졌다는 걸 나란히 놓고 보니, 개별 버그가 아니라 패턴이 보였다.</li>
+</ol>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/journal/retrospect/2026/07/27/why-i-feel-unproductive.html" title="다들 열심히 하는데 나만 하는 게 없는 것 같아서, 깃을 뒤져봤다">다들 열심히 하는데 나만 하는 게...</a><a class="next" href="/journal/development%20diary/2026/07/27/lol-moim-incidents-16-zero-value-bugs.html" title="[ 롤모임 운영일지 ] - 16. 0점 입찰은 왜 자꾸 사라졌나 — falsy zero 버그 모음">[ 롤모임 운영일지 ] - 16....</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li class="">
+          <a class="post-link" href="/journal/retrospect/2026/07/27/why-i-feel-unproductive.html" title="다들 열심히 하는데 나만 하는 게 없는 것 같아서, 깃을 뒤져봤다">
+            다들 열심히 하는데 나만 하는 게 없는 것 같아서, 깃을 뒤져봤다<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/datadog/2026/07/22/datadog-study-01-overview.html" title="데이터독(Datadog) 학습 정리 (1) - 로그·메트릭·트레이스·모니터·대시보드">
+            데이터독(Datadog) 학습 정리 (1) - 로그·메트릭·트레이스·모니터·대시보드<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/journal/development%20diary/2026/07/22/lol-moim-incidents-12-ranking-pipeline-glicko.html" title="[ 롤모임 운영일지 ] - 12. 랭킹 공식을 하드코딩에서 조립식으로 — Glicko-2까지">
+            [ 롤모임 운영일지 ] - 12. 랭킹 공식을 하드코딩에서 조립식으로 — Glicko-2까지...<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
+</a>
+        </li>
+<li class="">
+          <a class="post-link" href="/study/book/%EC%8F%99%EC%8F%99%20%EB%93%A4%EC%96%B4%EC%98%A4%EB%8A%94%20%ED%95%A8%EC%88%98%ED%98%95%20%EC%BD%94%EB%94%A9/2024/11/26/grokking-simplicity-04.html" title="쏙쏙 들어오는 함수형 코딩 [CHAPTER 7, 8, 9]">
+            쏙쏙 들어오는 함수형 코딩 [CHAPTER 7, 8, 9]<span class="post-badges">
+  <span class="post-badge badge-top">TOP</span></span>
+</a>
+        </li>
+</ul>
+    </div>
+<div class="post-comments">
+<div id="utterances-placeholder"></div>
+<script>
+  const utterancesThemeFromDataTheme = () => {
+    const dataTheme = document.documentElement.getAttribute('data-theme');
+    return `github-${dataTheme}`;
+  };
+
+  const setUtterancesTheme = () => {
+    const iframe = document.querySelector('.utterances-frame');
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: utterancesThemeFromDataTheme()
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  // dynamic change
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        setUtterancesTheme();
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
+
+  let utterancesScript = document.createElement('script');
+  utterancesScript.async = true;
+  utterancesScript.src = 'https://utteranc.es/client.js';
+  utterancesScript.crossOrigin = 'anonymous';
+  utterancesScript.setAttribute('issue-term', 'title');
+  utterancesScript.setAttribute('label', 'utterances comment');
+  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
+  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
+
+  const placeholder = document.getElementById('utterances-placeholder');
+  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
+</script>
+</div></section>
+</div>
+
+  </section><section class="sidebar"><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+    </div>
+  </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div class="footer-social">
+        <a href="https://github.com/kimmand0o0" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
+        <a href="mailto:maeran.dev.u@gmail.com" aria-label="Email"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+        <a href="/feed.xml" aria-label="RSS"><i class="fa fa-rss" aria-hidden="true"></i></a>
+      </div>
+      <div>Unpublished Work <span class="copyleft">©</span> 2017-2026 Haeran</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>
