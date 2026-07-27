@@ -33,6 +33,7 @@ const olderHref = `/page${page + 1}/`;
         <div class="meta">
           <span class="chip">{categoriesOf(post).at(-1)}</span>
           <span class="views" data-views-path={postPath(post)} hidden />
+          <span class="comments-metric" data-comments-path={postPath(post)} hidden />
           <time>{formatDate(post)}</time>
         </div>
       </li>

@@ -64,6 +64,7 @@ if (kind === 'post' && post) {
             <span class="chip">{categoriesOf(post).at(-1)}</span>
             <span class="reading tip" data-tip={readingTip(post)}>{readingLabel(post)}</span>
             <span class="views" data-views-path={postPath(post)} hidden />
+            <span class="comments-metric" data-comments-path={postPath(post)} hidden />
             {tagsOf(post).length > 0 && (
               <span class="tags">
                 {tagsOf(post).map((t) => (
@@ -76,6 +77,37 @@ if (kind === 'post' && post) {
         <div class="prose">
           <Content />
         </div>
+
+        {/* 댓글 — 외부 서비스 없이 자체 워커(D1)에 저장한다 */}
+        <section class="post-comments">
+          <h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2>
+          <ul class="comment-list" id="comment-list"></ul>
+          <p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p>
+
+          <form class="comment-form" id="comment-form">
+            <input
+              type="text"
+              id="comment-author"
+              name="author"
+              placeholder="이름"
+              maxlength="30"
+              required
+            />
+            <textarea
+              id="comment-body"
+              name="body"
+              placeholder="댓글을 남겨주세요"
+              maxlength="1000"
+              rows="3"
+              required></textarea>
+            {/* 사람에게는 보이지 않는 미끼 입력 — 봇이 채우면 저장하지 않는다 */}
+            <input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off" />
+            <div class="comment-form-foot">
+              <span class="comment-status" id="comment-status"></span>
+              <button type="submit" id="comment-submit">등록</button>
+            </div>
+          </form>
+        </section>
       </article>
       <script
         is:inline
@@ -98,6 +130,95 @@ if (kind === 'post' && post) {
             keepalive: true,
           }).catch(() => {});
         })();
+      </script>
+
+      <script
+        is:inline
+        define:vars={{ commentPath: postPath(post), api: 'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev' }}
+      >
+        {
+          const list = document.getElementById('comment-list');
+          const empty = document.getElementById('comment-empty');
+          const countEl = document.getElementById('comments-count');
+          const form = document.getElementById('comment-form');
+          const status = document.getElementById('comment-status');
+          const submit = document.getElementById('comment-submit');
+
+          const fmt = (iso) => {
+            const d = new Date(iso);
+            const p = (n) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+          };
+
+          // textContent 로만 넣는다 — 사용자 입력을 HTML 로 해석하지 않기 위해
+          const render = (items) => {
+            list.textContent = '';
+            for (const c of items) {
+              const li = document.createElement('li');
+              const head = document.createElement('div');
+              head.className = 'comment-head';
+              const who = document.createElement('span');
+              who.className = 'comment-author';
+              who.textContent = c.author;
+              const when = document.createElement('time');
+              when.textContent = fmt(c.created_at);
+              head.append(who, when);
+              const body = document.createElement('p');
+              body.className = 'comment-body';
+              body.textContent = c.body;
+              li.append(head, body);
+              list.appendChild(li);
+            }
+            countEl.textContent = items.length ? items.length : '';
+            empty.hidden = items.length > 0;
+          };
+
+          const load = () =>
+            fetch(`${api}/api/comments?path=${encodeURIComponent(commentPath)}`)
+              .then((r) => (r.ok ? r.json() : null))
+              .then((json) => render(json?.items ?? []))
+              .catch(() => {
+                empty.textContent = '댓글을 불러오지 못했어요.';
+                empty.hidden = false;
+              });
+
+          load();
+
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const author = document.getElementById('comment-author').value.trim();
+            const body = document.getElementById('comment-body').value.trim();
+            if (!author || !body) return;
+
+            submit.disabled = true;
+            status.textContent = '등록 중…';
+            try {
+              const res = await fetch(`${api}/api/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  path: commentPath,
+                  author,
+                  body,
+                  website: document.getElementById('comment-website').value,
+                }),
+              });
+              if (res.status === 429) {
+                status.textContent = '조금 뒤에 다시 시도해주세요.';
+              } else if (!res.ok) {
+                status.textContent = '등록에 실패했어요.';
+              } else {
+                document.getElementById('comment-body').value = '';
+                status.textContent = '';
+                await load();
+              }
+            } catch {
+              status.textContent = '등록에 실패했어요.';
+            } finally {
+              submit.disabled = false;
+            }
+          });
+        }
       </script>
       {toc.length > 1 && (
         <aside class="toc">

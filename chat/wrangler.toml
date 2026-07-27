@@ -39,6 +39,15 @@ namespace_id = "1001"
   limit = 10
   period = 60
 
+# 댓글 작성 — 채팅과 한도를 나눠 쓰지 않도록 별도 네임스페이스
+[[ratelimits]]
+name = "COMMENT_RATE_LIMITER"
+namespace_id = "1002"
+
+  [ratelimits.simple]
+  limit = 3
+  period = 60
+
 [vars]
 # Hard monthly spend cap in USD. Once exceeded, the Worker stops calling the
 # LLM and returns a friendly "temporarily limited" response until the month

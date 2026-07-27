@@ -31,6 +31,7 @@ const categories = [...byCategory.entries()].sort((a, b) => b[1].length - a[1].l
               <time>{formatDate(post)}</time>
               <a href={postPath(post)}>{post.data.title}</a>
               <span class="views" data-views-path={postPath(post)} hidden />
+              <span class="comments-metric" data-comments-path={postPath(post)} hidden />
             </li>
           ))}
         </ul>

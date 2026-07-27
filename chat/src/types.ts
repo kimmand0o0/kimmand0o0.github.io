@@ -4,6 +4,7 @@ export interface Env {
   APP_KV: KVNamespace;
   CHAT_LOGS_DB: D1Database;
   CHAT_RATE_LIMITER: RateLimit;
+  COMMENT_RATE_LIMITER: RateLimit;
   OPENAI_PROXY: DurableObjectNamespace<OpenAiProxyDO>;
   MONTHLY_BUDGET_USD: string;
   ALLOWED_ORIGIN: string;

@@ -24,6 +24,7 @@ const years = [...byYear.entries()].sort((a, b) => Number(b[0]) - Number(a[0]));
               <time>{formatDate(post)}</time>
               <a href={postPath(post)}>{post.data.title}</a>
               <span class="views" data-views-path={postPath(post)} hidden />
+              <span class="comments-metric" data-comments-path={postPath(post)} hidden />
             </li>
           ))}
         </ul>

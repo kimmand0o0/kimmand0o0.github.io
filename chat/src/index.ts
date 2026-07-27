@@ -281,6 +281,80 @@ async function handleTopViews(url: URL, env: Env): Promise<Response> {
   return jsonResponse({ items: results ?? [] }, 200, env);
 }
 
+// ── 댓글 ────────────────────────────────────────────────────────────
+// 로그인 없는 익명 댓글. 방어는 3겹 — 레이트리밋 / 입력 길이·형식 / 수동 숨김.
+const MAX_AUTHOR = 30;
+const MAX_BODY = 1000;
+
+/** 블로그 글 URL 형태만 허용 — 임의 키로 테이블을 채우지 못하게 */
+function isPostPath(p: unknown): p is string {
+  return typeof p === 'string' && p.startsWith('/') && p.endsWith('.html') && p.length <= 300;
+}
+
+async function sha256(text: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function handleListComments(url: URL, env: Env): Promise<Response> {
+  const path = url.searchParams.get('path');
+  if (!isPostPath(path)) return jsonResponse({ error: 'invalid_path' }, 400, env);
+
+  const { results } = await env.CHAT_LOGS_DB.prepare(
+    'SELECT id, author, body, created_at FROM comments WHERE path = ? AND hidden = 0 ORDER BY id ASC LIMIT 500'
+  )
+    .bind(path)
+    .all<{ id: number; author: string; body: string; created_at: string }>();
+
+  return jsonResponse({ items: results ?? [] }, 200, env);
+}
+
+/** 목록 화면이 글마다 댓글 수를 한 번에 채우기 위한 집계 */
+async function handleCommentCounts(env: Env): Promise<Response> {
+  const { results } = await env.CHAT_LOGS_DB.prepare(
+    'SELECT path, COUNT(*) AS count FROM comments WHERE hidden = 0 GROUP BY path'
+  ).all<{ path: string; count: number }>();
+
+  return jsonResponse({ items: results ?? [] }, 200, env);
+}
+
+async function handleCreateComment(request: Request, env: Env): Promise<Response> {
+  const clientIp = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+  const { success } = await env.COMMENT_RATE_LIMITER.limit({ key: clientIp });
+  if (!success) return jsonResponse({ error: 'rate_limited' }, 429, env);
+
+  const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+  if (!body) return jsonResponse({ error: 'invalid_body' }, 400, env);
+
+  // 봇이 자동으로 모든 입력을 채우는 걸 잡는 미끼 필드 — 사람은 비워둔다
+  if (typeof body.website === 'string' && body.website.length > 0) {
+    return jsonResponse({ ok: true }, 200, env); // 조용히 무시
+  }
+
+  const path = body.path;
+  const author = typeof body.author === 'string' ? body.author.trim() : '';
+  const text = typeof body.body === 'string' ? body.body.trim() : '';
+
+  if (!isPostPath(path)) return jsonResponse({ error: 'invalid_path' }, 400, env);
+  if (!author || author.length > MAX_AUTHOR) return jsonResponse({ error: 'invalid_author' }, 400, env);
+  if (!text || text.length > MAX_BODY) return jsonResponse({ error: 'invalid_comment' }, 400, env);
+
+  const now = new Date().toISOString();
+  const ipHash = (await sha256(clientIp)).slice(0, 16);
+
+  const { meta } = await env.CHAT_LOGS_DB.prepare(
+    'INSERT INTO comments (path, author, body, created_at, ip_hash) VALUES (?, ?, ?, ?, ?)'
+  )
+    .bind(path, author, text, now, ipHash)
+    .run();
+
+  return jsonResponse(
+    { item: { id: meta.last_row_id, author, body: text, created_at: now } },
+    201,
+    env
+  );
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     if (request.method === 'OPTIONS') {
@@ -295,6 +369,15 @@ export default {
       }
       if (url.pathname === '/api/views/top' && request.method === 'GET') {
         return await handleTopViews(url, env);
+      }
+      if (url.pathname === '/api/comments' && request.method === 'GET') {
+        return await handleListComments(url, env);
+      }
+      if (url.pathname === '/api/comments' && request.method === 'POST') {
+        return await handleCreateComment(request, env);
+      }
+      if (url.pathname === '/api/comments/counts' && request.method === 'GET') {
+        return await handleCommentCounts(env);
       }
       if (url.pathname === '/api/chat' && request.method === 'POST') {
         return await handleChat(request, env, ctx);
