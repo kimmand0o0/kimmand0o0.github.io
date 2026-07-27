@@ -1,1424 +1,181 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Native cross-document page transitions (progressive enhancement, Chromium only) -->
-  <meta name="view-transition" content="same-origin">
-
-  <!-- Google Translate Customization (if needed) -->
-  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
-
-  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>[ K8s 스터디 ] - 08. 스케줄링과 requests/limits, Pod는 어디에 어떻게 배치되는가 | Haeran’s blog</title>
-<meta name="generator" content="Jekyll v4.4.1">
-<meta property="og:title" content="[ K8s 스터디 ] - 08. 스케줄링과 requests/limits, Pod는 어디에 어떻게 배치되는가">
-<meta name="author" content="haeran">
-<meta property="og:locale" content="ko">
-<meta name="description" content="지난 편까지 클러스터를 팀/환경별로 나누는 법을 봤다. 이번 편은 조금 더 물리적인 질문 — 노드(서버)가 여러 대인 클러스터에서, K8s는 새 Pod를 어디에 배치할지 어떻게 결정하는가.">
-<meta property="og:description" content="지난 편까지 클러스터를 팀/환경별로 나누는 법을 봤다. 이번 편은 조금 더 물리적인 질문 — 노드(서버)가 여러 대인 클러스터에서, K8s는 새 Pod를 어디에 배치할지 어떻게 결정하는가.">
-<link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/k8s-study-08-scheduling-resources.html">
-<meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/k8s-study-08-scheduling-resources.html">
-<meta property="og:site_name" content="Haeran’s blog">
-<meta property="og:type" content="article">
-<meta property="article:published_time" content="2026-07-27T01:00:00+00:00">
-<meta name="twitter:card" content="summary">
-<meta property="twitter:title" content="[ K8s 스터디 ] - 08. 스케줄링과 requests/limits, Pod는 어디에 어떻게 배치되는가">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"haeran"},"dateModified":"2026-07-27T01:00:00+00:00","datePublished":"2026-07-27T01:00:00+00:00","description":"지난 편까지 클러스터를 팀/환경별로 나누는 법을 봤다. 이번 편은 조금 더 물리적인 질문 — 노드(서버)가 여러 대인 클러스터에서, K8s는 새 Pod를 어디에 배치할지 어떻게 결정하는가.","headline":"[ K8s 스터디 ] - 08. 스케줄링과 requests/limits, Pod는 어디에 어떻게 배치되는가","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/k8s-study-08-scheduling-resources.html"},"url":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/k8s-study-08-scheduling-resources.html"}</script>
-<!-- End Jekyll SEO tag -->
-<!-- Favicon -->
-  <link rel="icon" href="/assets/images/favicon.ico">
-
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/k8s-study-08-scheduling-resources.html">
-
-  <!-- Social Media (Open Graph, Twitter Card) -->
-  <meta property="og:title" content="[ K8s 스터디 ] - 08. 스케줄링과 requests/limits, Pod는 어디에 어떻게 배치되는가">
-  <meta property="og:description" content="">
-  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
-  <meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/k8s-study-08-scheduling-resources.html">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="[ K8s 스터디 ] - 08. 스케줄링과 requests/limits, Pod는 어디에 어떻게 배치되는가">
-  <meta name="twitter:description" content="">
-  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
-
-  <!-- Stylesheets and External Resources -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
-
-  <!-- Editorial display typeface for headings only; body stays Noto Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/main.css">
-
-  <!-- JavaScript -->
-  <script src="/assets/js/main.js"></script>
-
-  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
-<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
-<script>
-  function initGoogleAnalytics() {
-    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
-      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
-    var enableDNT = "false" == "true";
-
-    if (!enableDNT || !doNotTrack) {
-      var measurementId = 'G-ZNXE6HSKMS';
-
-      (function(src) {
-        var tag = document.createElement('script');
-        tag.src = src;
-        tag.async = true;
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
-
+<!DOCTYPE html><html lang="ko"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>[ K8s 스터디 ] - 08. 스케줄링과 requests/limits, Pod는 어디에 어떻게 배치되는가 | Haeran&#39;s blog</title><meta name="description" content="문제의 본질을 파악하고 해결하는 과정을 기록합니다."><link rel="icon" href="/assets/images/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png"><link rel="alternate" type="application/rss+xml" title="Haeran's blog" href="/feed.xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"><script>
+      // FOUC 방지: 렌더 전에 저장된 테마 적용
+      (function () {
+        var t = localStorage.getItem('theme');
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script><!-- Google Analytics (GA4) — Jekyll 시절 _config.yml의 google_analytics 값 그대로 --><script async src="https://www.googletagmanager.com/gtag/js?id=G-ZNXE6HSKMS"></script><script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
+      function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
-      gtag('config', measurementId);
-    }
-  }
-  window.addEventListener("load", initGoogleAnalytics);
-</script>
-
-<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
-<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
-<!-- and it's easy to individually load additional languages -->
-<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script>
-// Init highlight js
-document.addEventListener('DOMContentLoaded', function(event) {
-  // mermaid 블록은 highlight.js 대상에서 제외 — hljs가 addLangData에서 class를
-  // "language-mermaid" -> "hljs mermaid"로 덮어써버려서, mermaid.html의 렌더링 스크립트가
-  // 뒤늦게(load 시점) 찾으려는 .language-mermaid 셀렉터가 항상 빈 결과를 내는 원인이었음.
-  var els = document.querySelectorAll('pre code:not(.language-mermaid)')
-
-  function addLangData(block) {
-    var outer = block.parentElement.parentElement.parentElement;
-    var lang = block.getAttribute('data-lang');
-    for (var i = 0; i < outer.classList.length; i++) {
-      var cls = outer.classList[i];
-      if (cls.startsWith('language-')) {
-        lang = cls;
-        break;
-      }
-    }
-    if (!lang) {
-      cls = block.getAttribute('class');
-      lang = cls ? cls.replace('hljs ', '') : '';
-    }
-    if (lang.startsWith('language-')) {
-      lang = lang.substr(9);
-    }
-    block.setAttribute('class', 'hljs ' + lang);
-    block.parentNode.setAttribute('data-lang', lang);
-  }
-
-  function addBadge(block) {
-    var enabled = ('true' || 'true').toLowerCase();
-    if (enabled == 'true') {
-      var pre = block.parentElement;
-      pre.classList.add('badge');
-    }
-  }
-
-  function handle(block) {
-    addLangData(block);
-    addBadge(block)
-    hljs.highlightBlock(block);
-  }
-
-  for (var i = 0; i < els.length; i++) {
-    var el = els[i];
-    handle(el);
-  }
-});
-</script>
-
-<style>
-  /* code language badge */
-  pre.badge::before {
-    content: attr(data-lang);
-    color: #fff;
-    background-color: #ff4e00;
-    padding: 0 .5em;
-    border-radius: 0 2px;
-    text-transform: uppercase;
-    text-align: center;
-    min-width: 32px;
-    display: inline-block;
-    position: absolute;
-    right: 0;
-  }
-
-  /* fix wrong badge display for firefox browser */
-  code > table pre::before {
-    display: none;
-  }
-</style>
-<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
-<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
-<style>
-  .pswp .pswp__container .pswp__img {
-    background-color: white;
-  }
-</style>
-
-<script>
-  function initPhotoSwipe() {
-    let customOptions = {};
-
-    try {
-      const data = ``.replaceAll("=>", ":");
-      customOptions = JSON.parse(data);
-    } catch (e) {
-      console.info("Invalid custom photo previewer options! " + e.message);
-    }
-
-    // Define object and gallery options
-    const options = Object.assign(
-      {
-        gallery: "section.main",
-        children: "a.photo-swipe",
-        photo_scale: 2,
-        // dynamic import is not supported in UMD version
-        pswpModule: PhotoSwipe,
-      },
-      customOptions
-    );
-
-    const galleryEl = document.querySelector(options.gallery);
-    if (!galleryEl) {
-      return;
-    }
-
-    const imgEls = [];
-    const els = galleryEl.querySelectorAll("img:not(.emoji)");
-    els.forEach((el) => {
-      if (el.src.trim() == "") {
-        return;
-      }
-      if (!imgEls.includes(el)) {
-        imgEls.push(el);
-      }
-    });
-
-    if (imgEls.length === 0) {
-      return;
-    }
-
-    imgEls.forEach((imgEl) => {
-      imgEl.outerHTML = `
-      <a class="photo-swipe"
-        href="${imgEl.src}"
-        data-pswp-width="${
-          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
-        }"
-        data-pswp-height="${
-          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
-        }"
-        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
-        target="_blank">
-        ${imgEl.outerHTML}
-      </a>`;
-    });
-
-    // Initialize PhotoSwipe 5
-    var lightbox = new PhotoSwipeLightbox(options);
-
-    lightbox.init();
-  }
-
-  window.addEventListener("load", initPhotoSwipe);
-</script>
-<script type="module">
-  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
-
-  function isDarkTheme() {
-    return document.documentElement.getAttribute('data-theme') === 'dark';
-  }
-
-  mermaid.initialize({
-    startOnLoad: false,
-    theme: isDarkTheme() ? 'dark' : 'default',
-  });
-
-  function renderMermaidBlocks() {
-    // kramdown/rouge render ```mermaid fences as <pre><code class="language-mermaid">...</code></pre>
-    // mermaid.js only auto-scans <div class="mermaid">, so swap the markup before running it.
-    const blocks = document.querySelectorAll('pre > code.language-mermaid');
-    if (blocks.length === 0) {
-      return;
-    }
-    blocks.forEach((code) => {
-      const graphDefinition = code.textContent;
-      const container = document.createElement('div');
-      container.className = 'mermaid';
-      container.textContent = graphDefinition;
-      code.parentElement.replaceWith(container);
-    });
-    mermaid.run({ querySelector: '.mermaid' });
-  }
-
-  window.addEventListener('load', renderMermaidBlocks);
-</script>
-<!-- Custom Head HTML (if any) -->
-
-<!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 assets/js/chat-widget.js -->
-<script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script>
-</head>
-<body>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<header class="site-header " role="banner">
-
-  <div class="wrapper">
-    <div class="site-header-inner">
-<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
-  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
-  Haeran's blog
-</a>
-</span><nav class="site-nav">
-          <input type="checkbox" id="nav-trigger" class="nav-trigger">
-          <label for="nav-trigger">
-            <span class="menu-icon">
-              <svg viewbox="0 0 18 15" width="18px" height="15px">
-                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
-              </svg>
-            </span>
-          </label>
-
-          <div class="trigger">
-<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/search.html">SEARCH</a><a class="page-link" href="/tags.html">TAGS</a>
-
-
-
-
-
-
-
-
-
-<div class="page-link" style="display: inline;">
-
-
-
-<div id="google_translate_element" style="display: none;">
-</div>
-
-<div class="ct-language">
-  <ul class="list-unstyled ct-language-dropdown">
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="en">
-          
-          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
-          
-        </a>
-      </li>
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="fr">
-          
-          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
-          
-        </a>
-      </li>
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="zh-CN">
-          
-          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
-          
-        </a>
-      </li>
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="ja">
-          
-          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
-          
-        </a>
-      </li>
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="ko">
-          
-          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
-          
-        </a>
-      </li>
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="ru">
-          
-          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
-          
-        </a>
-      </li>
-    
-  </ul>
-</div>
-
-<script type="text/javascript">
-function googleTranslateElementInit() {
-  new google.translate.TranslateElement({
-    pageLanguage: 'ko',
-    autoDisplay: false,
-    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
-  }, 'google_translate_element');
-
-  // Links to cross-origin destinations are unsafe
-  var gll = document.getElementsByClassName('goog-logo-link')[0];
-  if (gll) {
-    gll.setAttribute('rel', 'noopener');
-  }
-
-  function restoreLang() {
-    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
-    if (!iframe) return;
-
-    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-    var restore_el = innerDoc.getElementsByTagName("button");
-
-    for (var i = 0; i < restore_el.length; i++) {
-      if (restore_el[i].id.indexOf("restore") >= 0) {
-        restore_el[i].click();
-        var close_el = innerDoc.getElementsByClassName("goog-close-link");
-        close_el[0].click();
-        return;
-      }
-    }
-  }
-
-  function triggerHtmlEvent(element, eventName) {
-    var event;
-    if (document.createEvent) {
-      event = document.createEvent('HTMLEvents');
-      event.initEvent(eventName, true, true);
-      element.dispatchEvent(event);
-    } else {
-      event = document.createEventObject();
-      event.eventType = eventName;
-      element.fireEvent('on' + event.eventType, event);
-    }
-  }
-
-  var googleCombo = document.querySelector("select.goog-te-combo");
-  var langSelect = document.querySelector('.ct-language');
-  langSelect.addEventListener('click', function(event) {
-    if (!event.target) {
-      return;
-    }
-
-    var selected = document.querySelector('.ct-language .ct-language-selected');
-    if (selected) {
-      selected.classList.remove('ct-language-selected');
-    }
-
-    var target = event.target;
-    while (target && target !== langSelect ) {
-      if (target.matches('.lang-select')) {
-        break;
-      }
-      target = target.parentElement;
-    }
-
-    if (target && target.matches('.lang-select')) {
-      var lang = target.getAttribute('data-lang');
-      if (googleCombo.value == lang) {
-        restoreLang();
-      } else {
-        target.parentElement.classList.add('ct-language-selected');
-        googleCombo.value = lang;
-        triggerHtmlEvent(googleCombo, 'change');
-      }
-    }
-
-    event.preventDefault();
-  });
-}
-</script>
-
-<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
-</div>
-</div>
-        </nav>
-</div>
-  </div>
-</header>
-
-<script>
-  function initHeader() {
-    var lastScrollY = getScrollPos().y;
-    var documentElement = document.documentElement;
-
-    function storeScrollData() {
-      var y = getScrollPos().y;var scrollStatus = "";
-
-      if (y <= 0) {
-        scrollStatus = "top";
-      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
-        scrollStatus = "bottom";
-      } else {
-        var isScrollDown = (y - lastScrollY > 0) ? true : false;
-        scrollStatus = isScrollDown ? "down" : "up";
-      }
-
-      lastScrollY = y;
-      documentElement.setAttribute("data-scroll-status", scrollStatus);
-    }
-
-    window.addEventListener('scroll', function(e) {
-      storeScrollData();
-    });
-
-    storeScrollData();
-  }
-  document.addEventListener('DOMContentLoaded', initHeader);
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script>
-  function hashLocate(hashValue) {
-    hashValue = hashValue.replace(/^.*#h-/, '');
-    hashValue = decodeURIComponent(hashValue);
-    var element = document.getElementById(hashValue);
-
-    if (!element) {
-      return;
-    }
-
-    var header = document.querySelector('header.site-header');
-    var headerRect = header.getBoundingClientRect();
-    var headerTop = Math.floor(headerRect.top);
-    var headerHeight = Math.floor(headerRect.height);
-    var scrollPos = getScrollPos();
-    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
-
-    if (offsetY == scrollPos.y) {
-      return;
-    }
-
-    if (headerTop == 0  && offsetY > scrollPos.y) {
-      offsetY += headerHeight + 2;
-    } else if (headerTop < 0  && offsetY < scrollPos.y) {
-      offsetY -= headerHeight - 2;
-    }
-
-    smoothScrollTo(offsetY);
-  }
-
-  // The first event occurred
-  window.addEventListener('load', function(event) {
-    if (window.location.hash) {
-      hashLocate(window.location.hash);
-    }
-  });
-
-  // The first event occurred
-  window.addEventListener('click', function(event) {
-    if (event.target.tagName.toLowerCase() == 'a') {
-      hashLocate(event.target.getAttribute('href'));
-    }
-  });
-</script>
-<div class="theme-toggle">
-  <input type="checkbox" id="theme-switch">
-  <label for="theme-switch">
-    <div class="toggle"></div>
-    <div class="names">
-      <p class="light">Light</p>
-      <p class="dark">Dark</p>
-    </div>
-  </label>
-</div>
-
-
-
-
-<script>
-  (function() {
-    var sw = document.getElementById('theme-switch');
-    var html = document.getElementsByTagName('html')[0];
-    var nightModeOption = ('auto' || 'auto').toLowerCase();
-    // 항상 localStorage를 사용 — 'auto' 모드에서도 유저가 직접 누른 토글이
-    // 브라우저 세션이 끝났다고 사라지지 않고, 다음 예약된 자동 전환 시점까지 유지된다.
-    var storage = localStorage;
-    var themeData = loadThemeData();
-
-    function saveThemeData(data) {
-      storage.setItem('theme', JSON.stringify(data));
-    }
-
-    function loadThemeData() {
-      var data = storage.getItem('theme');
-      try {
-        data = JSON.parse(data ? data : '');
-      } catch(e) {
-        data = { nightShift: undefined, autoToggleAt: 0 };
-        saveThemeData(data);
-      }
-      return data;
-    }
-
-    function handleThemeToggle(nightShift) {
-      themeData.nightShift = nightShift;
-      saveThemeData(themeData);
-      html.dataset.theme = nightShift ? 'dark' : 'light';
-      setTimeout(function() {
-        sw.checked = nightShift ? true : false;
-      }, 50);
-    }
-
-    function autoThemeToggle() {
-      // Next time point of theme toggle
-      var now = new Date();
-      var toggleAt = new Date();
-      var hours = now.getHours();
-      var nightShift = hours >= 19 || hours <=7;
-
-      if (nightShift) {
-        if (hours > 7) {
-          toggleAt.setDate(toggleAt.getDate() + 1);
-        }
-        toggleAt.setHours(7);
-      } else {
-        toggleAt.setHours(19);
-      }
-
-      toggleAt.setMinutes(0);
-      toggleAt.setSeconds(0);
-      toggleAt.setMilliseconds(0)
-
-      var delay = toggleAt.getTime() - now.getTime();
-
-      // auto toggle theme mode
-      setTimeout(function() {
-        handleThemeToggle(!nightShift);
-      }, delay);
-
-      return {
-        nightShift: nightShift,
-        toggleAt: toggleAt.getTime()
-      };
-    }
-
-    // Listen the theme toggle event
-    sw.addEventListener('change', function(event) {
-      handleThemeToggle(event.target.checked);
-    });
-
-    if (nightModeOption == 'auto') {
-      var data = autoThemeToggle();
-
-      // Toggle theme by local setting
-      if (data.toggleAt > themeData.autoToggleAt) {
-        themeData.autoToggleAt = data.toggleAt;
-        handleThemeToggle(data.nightShift);
-      } else {
-        handleThemeToggle(themeData.nightShift);
-      }
-    } else if (nightModeOption == 'manual') {
-      handleThemeToggle(themeData.nightShift);
-    } else {
-      var nightShift = themeData.nightShift;
-      if (nightShift === undefined) {
-        nightShift = nightModeOption === 'on';
-      }
-      handleThemeToggle(nightShift);
-    }
-  })();
-</script>
-<div id="click-to-top" class="click-to-top">
-  <i class="fa fa-arrow-up"></i>
-</div>
-<script>
-  (function () {
-    const clickToTop = document.getElementById('click-to-top');
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 100) {
-        clickToTop.classList.add('show')
-      }else {
-        clickToTop.classList.remove('show')
-      }
-    });
-    clickToTop.addEventListener('click', () => {
-      window.smoothScrollTo(0);
-    });
-  })();
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  var blocks = document.querySelectorAll('pre');
-
-  function addCopyButton(pre) {
-    if (pre.querySelector('.code-copy-btn')) return;
-    var code = pre.querySelector('code');
-    if (!code) return;
-
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'code-copy-btn';
-    btn.textContent = 'Copy';
-    pre.appendChild(btn);
-
-    btn.addEventListener('click', function () {
-      var text = code.textContent;
-
-      function done(ok) {
-        btn.textContent = ok ? 'Copied!' : 'Failed';
-        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
-      }
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
-        return;
-      }
-
-      var ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        done(document.execCommand('copy'));
-      } catch (e) {
-        done(false);
-      }
-      document.body.removeChild(ta);
-    });
-  }
-
-  for (var i = 0; i < blocks.length; i++) {
-    addCopyButton(blocks[i]);
-  }
-});
-</script>
-<main class="page-content" aria-label="Content">
-    <div class="wrapper">
-      <div class="framework">
-  <section class="main">
-
-     <div class="reading-progress" aria-hidden="true">
-  <div class="reading-progress-bar" id="reading-progress-bar"></div>
-</div>
-
-<script>
-(function () {
-  var bar = document.getElementById('reading-progress-bar');
-  var article = document.querySelector('.post-content');
-  if (!bar || !article) return;
-
-  function update() {
-    var rect = article.getBoundingClientRect();
-    var articleTop = rect.top + window.pageYOffset;
-    var total = article.offsetHeight - window.innerHeight;
-    var scrolled = window.pageYOffset - articleTop;
-    var pct = total > 0 ? Math.min(100, Math.max(0, (scrolled / total) * 100)) : 100;
-    bar.style.width = pct + '%';
-  }
-
-  window.addEventListener('scroll', update, { passive: true });
-  window.addEventListener('resize', update);
-  update();
-})();
-</script>
-<div class="post">
-  <section>
-
-
-
-
-
-
-
-
-
-<header class="post-header">
-  <h1 class="post-title p-name" itemprop="name headline">[ K8s 스터디 ] - 08. 스케줄링과 requests/limits, Pod는 어디에 어떻게 배치되는가</h1>
-  <h2 class="post-subtitle"></h2>
-
-  <div class="post-meta">
-    <time class="dt-published" datetime="2026-07-27T01:00:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Jul 27, 2026
-    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span>
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 10 mins</span>
-  </div>
-<div class="post-tags">
-<a class="post-tag" href="/tags.html#K8s">#K8s</a><a class="post-tag" href="/tags.html#Kubernetes">#Kubernetes</a><a class="post-tag" href="/tags.html#%EC%8A%A4%ED%84%B0%EB%94%94">#스터디</a><a class="post-tag" href="/tags.html#%EC%8A%A4%EC%BC%80%EC%A4%84%EB%A7%81">#스케줄링</a><a class="post-tag" href="/tags.html#requests">#requests</a><a class="post-tag" href="/tags.html#limits">#limits</a><a class="post-tag" href="/tags.html#QoS">#QoS</a>
-</div></header>
-<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="post-content e-content" itemprop="articleBody">
-
-      <p><a href="/journal/development%20diary/2026/07/27/k8s-study-07-namespace-rbac.html">지난 편</a>까지 클러스터를 팀/환경별로 나누는 법을 봤다. 이번 편은 조금 더 물리적인 질문 — 노드(서버)가 여러 대인 클러스터에서, K8s는 새 Pod를 어디에 배치할지 어떻게 결정하는가.</p>
-
+      gtag('config', 'G-ZNXE6HSKMS');
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BG287Ete.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ K8s 스터디 ] - 08. 스케줄링과 requests/limits, Pod는 어디에 어떻게 배치되는가</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading">5분 읽기</span><span class="tags"><a href="/tags.html#K8s">#K8s</a><a href="/tags.html#Kubernetes">#Kubernetes</a><a href="/tags.html#스터디">#스터디</a><a href="/tags.html#스케줄링">#스케줄링</a><a href="/tags.html#requests">#requests</a><a href="/tags.html#limits">#limits</a><a href="/tags.html#QoS">#QoS</a></span></div></header><div class="prose"><p><a href="/journal/development%20diary/2026/07/27/k8s-study-07-namespace-rbac.html">지난 편</a>까지 클러스터를 팀/환경별로 나누는 법을 봤다. 이번 편은 조금 더 물리적인 질문 — 노드(서버)가 여러 대인 클러스터에서, K8s는 새 Pod를 어디에 배치할지 어떻게 결정하는가.</p>
 <h2 id="tldr">TL;DR</h2>
-
 <ul>
-  <li>스케줄러(kube-scheduler)는 Pod가 선언한 <strong>requests</strong>만 보고 배치할 노드를 결정한다 — limits는 배치 판단에 안 쓰인다</li>
-  <li>CPU가 limits를 넘으면 느려지기만 하고(throttle), 메모리가 limits를 넘으면 죽는다(OOMKilled) — 압축 가능/불가능 자원의 차이</li>
-  <li>requests/limits 설정 여부에 따라 QoS 등급(Guaranteed/Burstable/BestEffort)이 자동으로 매겨지고, 노드가 바빠지면 이 순서대로 먼저 쫓겨난다</li>
-  <li>K8s 1.35(GA)부터는 Pod 재시작 없이 리소스를 그 자리에서 조정하는 In-Place Resize도 가능해졌다</li>
+<li>스케줄러(kube-scheduler)는 Pod가 선언한 <strong>requests</strong>만 보고 배치할 노드를 결정한다 — limits는 배치 판단에 안 쓰인다</li>
+<li>CPU가 limits를 넘으면 느려지기만 하고(throttle), 메모리가 limits를 넘으면 죽는다(OOMKilled) — 압축 가능/불가능 자원의 차이</li>
+<li>requests/limits 설정 여부에 따라 QoS 등급(Guaranteed/Burstable/BestEffort)이 자동으로 매겨지고, 노드가 바빠지면 이 순서대로 먼저 쫓겨난다</li>
+<li>K8s 1.35(GA)부터는 Pod 재시작 없이 리소스를 그 자리에서 조정하는 In-Place Resize도 가능해졌다</li>
 </ul>
-
-<p><br></p>
-
+<br>
 <h2 id="1-리소스-선언-없이-배치하면-생기는-문제">1. 리소스 선언 없이 배치하면 생기는 문제</h2>
-
 <ul>
-  <li>Pod가 얼마나 CPU/메모리를 쓸지 정보가 없으면 → 스케줄러가 “이 노드에 여유가 있는지” 판단할 근거가 없어서, 이미 꽉 찬 노드에도 Pod를 던져 넣을 수 있음</li>
-  <li>그렇게 배치된 Pod가 뜨자마자 메모리 부족(OOM)으로 죽거나, CPU 경합으로 응답이 느려짐</li>
-  <li>한 Pod가 버그로 메모리를 무한정 먹기 시작하면 → 같은 노드의 죄 없는 다른 Pod들까지 같이 죽음 (“이웃 효과”)</li>
+<li>Pod가 얼마나 CPU/메모리를 쓸지 정보가 없으면 → 스케줄러가 “이 노드에 여유가 있는지” 판단할 근거가 없어서, 이미 꽉 찬 노드에도 Pod를 던져 넣을 수 있음</li>
+<li>그렇게 배치된 Pod가 뜨자마자 메모리 부족(OOM)으로 죽거나, CPU 경합으로 응답이 느려짐</li>
+<li>한 Pod가 버그로 메모리를 무한정 먹기 시작하면 → 같은 노드의 죄 없는 다른 Pod들까지 같이 죽음 (“이웃 효과”)</li>
 </ul>
-
 <h2 id="2-핵심-아이디어">2. 핵심 아이디어</h2>
-
 <p><strong>핵심 한 줄 요약:</strong> Pod는 requests(최소 보장 필요량)와 limits(초과 금지 상한)를 선언하고, 스케줄러는 requests를 만족하는 노드를 찾아 배치하며, 실행 중에는 limits를 넘지 못하게 강제한다.</p>
-
 <ol>
-  <li>
-<strong>선언:</strong> Pod가 <code class="language-plaintext highlighter-rouge">resources.requests</code>와 <code class="language-plaintext highlighter-rouge">resources.limits</code>를 CPU/메모리 단위로 선언</li>
-  <li>
-<strong>스케줄링 판단:</strong> 스케줄러가 각 노드의 “전체 용량 − 이미 배치된 Pod들의 requests 합”을 계산해서 후보 노드를 남김</li>
-  <li>
-<strong>배치:</strong> 후보 노드 중 하나를 골라 실제로 띄움</li>
-  <li>
-<strong>실행 중 제한:</strong> CPU는 limits를 넘으면 throttle(느려짐)만, <strong>메모리</strong>는 limits를 넘으면 OOMKilled — 처리 방식이 다르다 (CPU는 압축 가능 자원, 메모리는 압축 불가능 자원이라 그렇다)</li>
-  <li>
-<strong>QoS 클래스:</strong> requests/limits 설정 방식에 따라 Guaranteed(둘이 같음) / Burstable(둘 다 있지만 다름) / BestEffort(둘 다 없음)이 자동 결정되고, 노드가 부족해지면 BestEffort → Burstable → Guaranteed 순으로 축출됨 (같은 Burstable끼리는 requests를 얼마나 초과했는지로 한 번 더 갈림)</li>
+<li><strong>선언:</strong> Pod가 <code>resources.requests</code>와 <code>resources.limits</code>를 CPU/메모리 단위로 선언</li>
+<li><strong>스케줄링 판단:</strong> 스케줄러가 각 노드의 “전체 용량 − 이미 배치된 Pod들의 requests 합”을 계산해서 후보 노드를 남김</li>
+<li><strong>배치:</strong> 후보 노드 중 하나를 골라 실제로 띄움</li>
+<li><strong>실행 중 제한:</strong> CPU는 limits를 넘으면 throttle(느려짐)만, <strong>메모리</strong>는 limits를 넘으면 OOMKilled — 처리 방식이 다르다 (CPU는 압축 가능 자원, 메모리는 압축 불가능 자원이라 그렇다)</li>
+<li><strong>QoS 클래스:</strong> requests/limits 설정 방식에 따라 Guaranteed(둘이 같음) / Burstable(둘 다 있지만 다름) / BestEffort(둘 다 없음)이 자동 결정되고, 노드가 부족해지면 BestEffort → Burstable → Guaranteed 순으로 축출됨 (같은 Burstable끼리는 requests를 얼마나 초과했는지로 한 번 더 갈림)</li>
 </ol>
-
-<pre><code class="language-mermaid">flowchart TB
-    Pod["새 Pod&lt;br/&gt;requests: CPU 0.5, Mem 512Mi"] --&gt; Scheduler["kube-scheduler"]
-    Scheduler --&gt;|"여유 있음"| NodeA["Node A&lt;br/&gt;가용: CPU 2, Mem 4Gi"]
-    Scheduler -.-&gt;|"여유 없음, 후보 제외"| NodeB["Node B&lt;br/&gt;가용: CPU 0.1, Mem 200Mi"]
-    NodeA --&gt; Placed["Pod가 Node A에 배치됨"]
-</code></pre>
-
+<pre class="mermaid">flowchart TB
+    Pod["새 Pod&#x3C;br/>requests: CPU 0.5, Mem 512Mi"] --> Scheduler["kube-scheduler"]
+    Scheduler -->|"여유 있음"| NodeA["Node A&#x3C;br/>가용: CPU 2, Mem 4Gi"]
+    Scheduler -.->|"여유 없음, 후보 제외"| NodeB["Node B&#x3C;br/>가용: CPU 0.1, Mem 200Mi"]
+    NodeA --> Placed["Pod가 Node A에 배치됨"]</pre>
 <h2 id="3-비유--이사-갈-집-구하기">3. 비유 — 이사 갈 집 구하기</h2>
 
-<table>
-  <thead>
-    <tr>
-      <th>상황</th>
-      <th>비유</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Pod의 requests</td>
-      <td>“최소 방 3개, 20평은 필요해요”라고 부동산에 요청하는 조건</td>
-    </tr>
-    <tr>
-      <td>스케줄러</td>
-      <td>그 조건에 맞는 빈 건물(노드)을 찾아주는 부동산 중개인</td>
-    </tr>
-    <tr>
-      <td>Pod의 limits</td>
-      <td>“아무리 짐이 늘어도 30평 이상은 못 씁니다”라는 계약상 상한</td>
-    </tr>
-    <tr>
-      <td>CPU 초과(throttle)</td>
-      <td>짐을 더 놓으려 하면 문이 안 열려서 못 들어감(느려짐, 죽지는 않음)</td>
-    </tr>
-    <tr>
-      <td>메모리 초과(OOMKill)</td>
-      <td>계약 면적을 넘어서 짐을 쌓다가 바닥이 무너져 강제 퇴거당함</td>
-    </tr>
-  </tbody>
-</table>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>상황</th><th>비유</th></tr></thead><tbody><tr><td>Pod의 requests</td><td>“최소 방 3개, 20평은 필요해요”라고 부동산에 요청하는 조건</td></tr><tr><td>스케줄러</td><td>그 조건에 맞는 빈 건물(노드)을 찾아주는 부동산 중개인</td></tr><tr><td>Pod의 limits</td><td>“아무리 짐이 늘어도 30평 이상은 못 씁니다”라는 계약상 상한</td></tr><tr><td>CPU 초과(throttle)</td><td>짐을 더 놓으려 하면 문이 안 열려서 못 들어감(느려짐, 죽지는 않음)</td></tr><tr><td>메모리 초과(OOMKill)</td><td>계약 면적을 넘어서 짐을 쌓다가 바닥이 무너져 강제 퇴거당함</td></tr></tbody></table>
 <h2 id="4-실제로-이렇게-쓴다">4. 실제로 이렇게 쓴다</h2>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">apps/v1</span>
-<span class="na">kind</span><span class="pi">:</span> <span class="s">Deployment</span>
-<span class="na">metadata</span><span class="pi">:</span>
-  <span class="na">name</span><span class="pi">:</span> <span class="s">web</span>
-<span class="na">spec</span><span class="pi">:</span>
-  <span class="na">replicas</span><span class="pi">:</span> <span class="m">3</span>
-  <span class="na">selector</span><span class="pi">:</span>
-    <span class="na">matchLabels</span><span class="pi">:</span>
-      <span class="na">app</span><span class="pi">:</span> <span class="s">web</span>
-  <span class="na">template</span><span class="pi">:</span>
-    <span class="na">metadata</span><span class="pi">:</span>
-      <span class="na">labels</span><span class="pi">:</span>
-        <span class="na">app</span><span class="pi">:</span> <span class="s">web</span>
-    <span class="na">spec</span><span class="pi">:</span>
-      <span class="na">containers</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">nginx</span>
-        <span class="na">image</span><span class="pi">:</span> <span class="s">nginx:1.25</span>
-        <span class="na">resources</span><span class="pi">:</span>
-          <span class="na">requests</span><span class="pi">:</span>              <span class="c1"># 최소 이만큼은 확보돼야 스케줄링됨</span>
-            <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">250m"</span>           <span class="c1"># 0.25 코어</span>
-            <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">256Mi"</span>
-          <span class="na">limits</span><span class="pi">:</span>                 <span class="c1"># 이 이상은 못 씀</span>
-            <span class="na">cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">500m"</span>
-            <span class="na">memory</span><span class="pi">:</span> <span class="s2">"</span><span class="s">512Mi"</span>
-</code></pre></div></div>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl describe node node-a
-<span class="c"># Allocated resources:</span>
-<span class="c">#   Resource   Requests    Limits</span>
-<span class="c">#   --------   --------    ------</span>
-<span class="c">#   cpu        1500m (75%)  3000m (150%)</span>
-<span class="c">#   memory     3Gi (60%)    6Gi (120%)</span>
-
-kubectl top pods   <span class="c"># 실제 사용량 확인 (metrics-server 필요)</span>
-<span class="c"># NAME        CPU(cores)   MEMORY(bytes)</span>
-<span class="c"># web-abc123  180m         210Mi</span>
-</code></pre></div></div>
-
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">apps/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Deployment</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">web</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  replicas</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  selector</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    matchLabels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">web</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  template</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">web</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx:1.25</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          requests</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:              </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 최소 이만큼은 확보돼야 스케줄링됨</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"250m"</span><span style="color:#6A737D;--shiki-dark:#6A737D">           # 0.25 코어</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"256Mi"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          limits</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:                 </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 이 이상은 못 씀</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"500m"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"512Mi"</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> node</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> node-a</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Allocated resources:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">#   Resource   Requests    Limits</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">#   --------   --------    ------</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">#   cpu        1500m (75%)  3000m (150%)</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">#   memory     3Gi (60%)    6Gi (120%)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> top</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pods</span><span style="color:#6A737D;--shiki-dark:#6A737D">   # 실제 사용량 확인 (metrics-server 필요)</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># NAME        CPU(cores)   MEMORY(bytes)</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># web-abc123  180m         210Mi</span></span></code></pre>
 <blockquote>
-  <p><strong>최신 동향 (공식문서 검증):</strong> 예전엔 requests/limits를 바꾸려면 Pod를 지우고 다시 만들어야 했다. <a href="https://kubernetes.io/blog/2025/05/16/kubernetes-v1-33-in-place-pod-resize-beta/">In-Place Pod Resize</a> 기능이 K8s 1.35(2025-12)에서 GA되면서, 재시작 없이 실행 중인 Pod의 CPU/메모리를 그 자리에서 조정할 수 있게 됐다.</p>
+<p><strong>최신 동향 (공식문서 검증):</strong> 예전엔 requests/limits를 바꾸려면 Pod를 지우고 다시 만들어야 했다. <a href="https://kubernetes.io/blog/2025/05/16/kubernetes-v1-33-in-place-pod-resize-beta/">In-Place Pod Resize</a> 기능이 K8s 1.35(2025-12)에서 GA되면서, 재시작 없이 실행 중인 Pod의 CPU/메모리를 그 자리에서 조정할 수 있게 됐다.</p>
 </blockquote>
-
 <h2 id="지금-상태--다음에-할-일">지금 상태 / 다음에 할 일</h2>
+<p>스케줄링/QoS까지 정리했고, kubernetes.io로 재검증한 결과 스케줄러의 requests 기준 판단, CPU/메모리 초과 처리 차이, QoS 축출 순서 전부 정확했다(1.35 GA된 In-Place Resize만 추가). 다음 편은 <strong>Helm</strong> — 지금까지 써온 YAML 매니페스트 뭉치를 어떻게 패키징하고 재사용하는지.</p></div></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/k8s-study-08-scheduling-resources.html";
+const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
-<p>스케줄링/QoS까지 정리했고, kubernetes.io로 재검증한 결과 스케줄러의 requests 기준 판단, CPU/메모리 초과 처리 차이, QoS 축출 순서 전부 정확했다(1.35 GA된 In-Place Resize만 추가). 다음 편은 <strong>Helm</strong> — 지금까지 써온 YAML 매니페스트 뭉치를 어떻게 패키징하고 재사용하는지.</p>
-
-
-    </div>
-
-</article>
-<div class="post-nav">
-<a class="previous" href="/journal/development%20diary/2026/07/27/k8s-study-07-namespace-rbac.html" title="[ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이 나눠 쓰는 법">[ K8s 스터디 ] - 07....</a><a class="next" href="/study/llm/2026/07/27/llm-prompting-paper-07-toolformer.html" title="LLM 프롬프팅 논문 스터디 - 07. Toolformer">LLM 프롬프팅 논문 스터디 - 07....</a>
-</div>
-<div class="post-related">
-      <div>Related Articles</div>
-      <ul>
-        <li class="">
-          <a class="post-link" href="/journal/development%20diary/2026/07/27/k8s-study-08-scheduling-resources.html" title="[ K8s 스터디 ] - 08. 스케줄링과 requests/limits, Pod는 어디에 어떻게 배치되는가">
-            [ K8s 스터디 ] - 08. 스케줄링과 requests/limits, Pod는 어디에 어떻게 배치되는가...<span class="post-badges">
-  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
-</a>
-        </li>
-<li class="">
-          <a class="post-link" href="/study/llm/2026/07/22/llm-prompting-paper-05-rethinking-demonstrations.html" title="LLM 프롬프팅 논문 스터디 - 05. Rethinking the Role of Demonstrations">
-            LLM 프롬프팅 논문 스터디 - 05. Rethinking the Role of Demonstrations<span class="post-badges">
-  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
-</a>
-        </li>
-<li class="">
-          <a class="post-link" href="/journal/development%20diary/2026/07/21/biker-app-devlog-01-scaffold.html" title="[ 바이커 앱 개발일지 ] - 01. 모노레포부터 GKE 배포 설계까지, 스캐폴딩 기록">
-            [ 바이커 앱 개발일지 ] - 01. 모노레포부터 GKE 배포 설계까지, 스캐폴딩...<span class="post-badges">
-  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
-</a>
-        </li>
-<li class="">
-          <a class="post-link" href="/journal/retrospect/2026/07/27/what-my-blog-says-about-me.html" title="AI에게 블로그 2년 반치를 전부 읽히고, 나에 대해 알려달라고 했다">
-            AI에게 블로그 2년 반치를 전부 읽히고, 나에 대해 알려달라고 했다<span class="post-badges">
-  <span class="post-badge badge-top">TOP</span></span>
-</a>
-        </li>
-</ul>
-    </div>
-<div class="post-comments">
-<div id="utterances-placeholder"></div>
-<script>
-  const utterancesThemeFromDataTheme = () => {
-    const dataTheme = document.documentElement.getAttribute('data-theme');
-    return `github-${dataTheme}`;
-  };
-
-  const setUtterancesTheme = () => {
-    const iframe = document.querySelector('.utterances-frame');
-    if (iframe) {
-      const message = {
-        type: 'set-theme',
-        theme: utterancesThemeFromDataTheme()
-      };
-      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
-    }
-  }
-
-  // dynamic change
-  const observer = new MutationObserver((mutationsList, observer) => {
-    for (let mutation of mutationsList) {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-        setUtterancesTheme();
-      }
-    }
-  });
-  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
-
-  let utterancesScript = document.createElement('script');
-  utterancesScript.async = true;
-  utterancesScript.src = 'https://utteranc.es/client.js';
-  utterancesScript.crossOrigin = 'anonymous';
-  utterancesScript.setAttribute('issue-term', 'title');
-  utterancesScript.setAttribute('label', 'utterances comment');
-  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
-  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
-
-  const placeholder = document.getElementById('utterances-placeholder');
-  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
-</script>
-</div></section>
-</div>
-
-  </section><section class="sidebar"><style type="text/css" media="screen">
-.post-menu ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-</style>
-
-<div class="post-menu">
-  <div class="post-menu-title">TOC</div>
-  <div class="post-menu-content"></div>
-</div>
-
-<script>
-  function generateContent() {
-    var menu = document.querySelector(".post-menu");
-    var menuContent =  menu.querySelector(".post-menu-content");
-    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
-
-    // Hide menu when no headings
-    if (headings.length === 0) {
-      return menu.style.display = "none";
-    }
-
-    // Generate post menu
-    var menuHTML = '';
-    for (var i = 0; i < headings.length; i++) {
-      var h = headings[i];
-      menuHTML += (
-        '<li class="h-' + h.tagName.toLowerCase() + '">'
-        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
-    }
-
-    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
-
-    // The header element
-    var header = document.querySelector('header.site-header');
-
-    function doMenuCollapse(index, over_items) {
-      var items = menuContent.firstChild.children;
-
-      if (over_items == undefined) {
-        over_items = 20;
-      }
-
-      if (items.length < over_items) {
-        return;
-      }
-
-      var activeItem = items[index];
-      var beginItem = activeItem
-      var endItem = activeItem
-      var beginIndex = index;
-      var endIndex = index + 1;
-      while (beginIndex >= 0
-        && !items[beginIndex].classList.contains('h-h2')) {
-        beginIndex -= 1;
-      }
-      while (endIndex < items.length
-        && !items[endIndex].classList.contains('h-h2')) {
-        endIndex += 1;
-      }
-      for (var i = 0; i < beginIndex; i++) {
-        item = items[i]
-        if (!item.classList.contains('h-h2')) {
-          item.style.display = 'none';
+        // 조회수 1회 기록 — 실패해도 페이지에는 영향 없음(검색 페이지의 "많이 본 글" 소스)
+        fetch(chatOrigin + '/api/view', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: viewPath }),
+          keepalive: true,
+        }).catch(function () {});
+      })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#tldr">TL;DR</a></li><li class="depth-2"><a href="#1-리소스-선언-없이-배치하면-생기는-문제">1. 리소스 선언 없이 배치하면 생기는 문제</a></li><li class="depth-2"><a href="#2-핵심-아이디어">2. 핵심 아이디어</a></li><li class="depth-2"><a href="#3-비유--이사-갈-집-구하기">3. 비유 — 이사 갈 집 구하기</a></li><li class="depth-2"><a href="#4-실제로-이렇게-쓴다">4. 실제로 이렇게 쓴다</a></li><li class="depth-2"><a href="#지금-상태--다음에-할-일">지금 상태 / 다음에 할 일</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+      // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
+      (function () {
+        var root = document.documentElement;
+        function sync() {
+          root.setAttribute('data-scrolled', window.scrollY > 8 ? 'true' : 'false');
         }
-      }
-      for (var i = beginIndex + 1; i < endIndex; i++) {
-        item = items[i]
-        // if (!item.classList.contains('h-h2')) {
-          item.style.display = '';
-        // }
-      }
-      for (var i = endIndex; i < items.length; i++) {
-        item = items[i]
-        if (!item.classList.contains('h-h2')) {
-          item.style.display = 'none';
-        }
-      }
-    }
+        sync();
+        window.addEventListener('scroll', sync, { passive: true });
+      })();
 
-    // Init menu collapsed
-    doMenuCollapse(-1);
-
-    // Active the menu item
-    window.addEventListener('scroll', function (event) {
-      var lastActive = menuContent.querySelector('.active');
-      var changed = true;
-      var activeIndex = -1;
-      for (var i = headings.length - 1; i >= 0; i--) {
-        var h = headings[i];
-        var headingRect = h.getBoundingClientRect();
-        var headerRect = header.getBoundingClientRect();
-        var headerTop = Math.floor(headerRect.top);
-        var headerHeight = Math.floor(headerRect.height);
-        var headerHeight = headerTop + headerHeight + 20;
-        if (headingRect.top <= headerHeight) {
-          var id = 'h-' + h.getAttribute('id');
-          var a = menuContent.querySelector('a[href="#' + id  + '"]');
-          var curActive = a.parentNode;
-          if (curActive) {
-            curActive.classList.add('active');
-            activeIndex = i;
+      // 목차 — 현재 읽고 있는 섹션 표시
+      (function () {
+        var links = document.querySelectorAll('.toc a');
+        if (!links.length) return;
+        var map = {};
+        var targets = [];
+        links.forEach(function (a) {
+          var id = decodeURIComponent(a.getAttribute('href').slice(1));
+          var el = document.getElementById(id);
+          if (el) {
+            map[id] = a;
+            targets.push(el);
           }
-          if (lastActive == curActive) {
-            changed = false;
-          }
-          break;
-        }
+        });
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (e) {
+              if (!e.isIntersecting) return;
+              links.forEach(function (a) { a.classList.remove('active'); });
+              var a = map[e.target.id];
+              if (a) a.classList.add('active');
+            });
+          },
+          // 헤더 아래 상단 밴드에 들어온 헤딩을 현재 섹션으로 본다
+          { rootMargin: '-72px 0px -75% 0px' }
+        );
+        targets.forEach(function (el) { io.observe(el); });
+      })();
+
+      document.getElementById('theme-toggle').addEventListener('click', function () {
+        var next =
+          document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+      });
+    </script> <script type="module">
+      // mermaid 클라이언트 렌더 (기존 Jekyll 셋업과 동일하게 mermaid@10 사용)
+      if (document.querySelector('pre.mermaid')) {
+        const { default: mermaid } = await import(
+          'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'
+        );
+        mermaid.initialize({
+          startOnLoad: false,
+          theme:
+            document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+        });
+        mermaid.run({ querySelector: 'pre.mermaid' });
       }
-      if (changed) {
-        if (lastActive) {
-          lastActive.classList.remove('active');
-        }
-        doMenuCollapse(activeIndex);
-      }
-      event.preventDefault();
-    });
-  }
-  generateContent();
-</script>
-</section>
-</div>
-
-    </div>
-  </main><footer class="site-footer h-card">
-  <data class="u-url" href="/"></data>
-
-  <div class="wrapper">
-    <div class="site-footer-inner">
-<div class="footer-social">
-        <a href="https://github.com/kimmand0o0" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
-        <a href="mailto:maeran.dev.u@gmail.com" aria-label="Email"><i class="fa fa-envelope" aria-hidden="true"></i></a>
-        <a href="/feed.xml" aria-label="RSS"><i class="fa fa-rss" aria-hidden="true"></i></a>
-      </div>
-      <div>Unpublished Work <span class="copyleft">©</span> 2017-2026 Haeran</div>
-      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
-      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
-      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
-    </div>
-  </div>
-</footer>
-</body>
-
-</html>
+    </script> </body> </html>

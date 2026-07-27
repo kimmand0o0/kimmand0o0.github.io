@@ -1,1453 +1,203 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Native cross-document page transitions (progressive enhancement, Chromium only) -->
-  <meta name="view-transition" content="same-origin">
-
-  <!-- Google Translate Customization (if needed) -->
-  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
-
-  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>[ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이 나눠 쓰는 법 | Haeran’s blog</title>
-<meta name="generator" content="Jekyll v4.4.1">
-<meta property="og:title" content="[ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이 나눠 쓰는 법">
-<meta name="author" content="haeran">
-<meta property="og:locale" content="ko">
-<meta name="description" content="지난 편까지 Pod/Deployment/Service/Ingress로 앱 하나를 배포하고 노출하는 흐름을 정리했다. 이번 편은 조금 결이 다르다 — 클러스터 하나를 여러 팀이나 여러 환경이 같이 쓸 때 필요한 Namespace와 RBAC.">
-<meta property="og:description" content="지난 편까지 Pod/Deployment/Service/Ingress로 앱 하나를 배포하고 노출하는 흐름을 정리했다. 이번 편은 조금 결이 다르다 — 클러스터 하나를 여러 팀이나 여러 환경이 같이 쓸 때 필요한 Namespace와 RBAC.">
-<link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/k8s-study-07-namespace-rbac.html">
-<meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/k8s-study-07-namespace-rbac.html">
-<meta property="og:site_name" content="Haeran’s blog">
-<meta property="og:type" content="article">
-<meta property="article:published_time" content="2026-07-27T00:00:00+00:00">
-<meta name="twitter:card" content="summary">
-<meta property="twitter:title" content="[ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이 나눠 쓰는 법">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"haeran"},"dateModified":"2026-07-27T00:00:00+00:00","datePublished":"2026-07-27T00:00:00+00:00","description":"지난 편까지 Pod/Deployment/Service/Ingress로 앱 하나를 배포하고 노출하는 흐름을 정리했다. 이번 편은 조금 결이 다르다 — 클러스터 하나를 여러 팀이나 여러 환경이 같이 쓸 때 필요한 Namespace와 RBAC.","headline":"[ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이 나눠 쓰는 법","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/k8s-study-07-namespace-rbac.html"},"url":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/k8s-study-07-namespace-rbac.html"}</script>
-<!-- End Jekyll SEO tag -->
-<!-- Favicon -->
-  <link rel="icon" href="/assets/images/favicon.ico">
-
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/k8s-study-07-namespace-rbac.html">
-
-  <!-- Social Media (Open Graph, Twitter Card) -->
-  <meta property="og:title" content="[ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이 나눠 쓰는 법">
-  <meta property="og:description" content="">
-  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
-  <meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/k8s-study-07-namespace-rbac.html">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="[ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이 나눠 쓰는 법">
-  <meta name="twitter:description" content="">
-  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
-
-  <!-- Stylesheets and External Resources -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
-
-  <!-- Editorial display typeface for headings only; body stays Noto Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/main.css">
-
-  <!-- JavaScript -->
-  <script src="/assets/js/main.js"></script>
-
-  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
-<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
-<script>
-  function initGoogleAnalytics() {
-    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
-      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
-    var enableDNT = "false" == "true";
-
-    if (!enableDNT || !doNotTrack) {
-      var measurementId = 'G-ZNXE6HSKMS';
-
-      (function(src) {
-        var tag = document.createElement('script');
-        tag.src = src;
-        tag.async = true;
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
-
+<!DOCTYPE html><html lang="ko"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>[ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이 나눠 쓰는 법 | Haeran&#39;s blog</title><meta name="description" content="문제의 본질을 파악하고 해결하는 과정을 기록합니다."><link rel="icon" href="/assets/images/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png"><link rel="alternate" type="application/rss+xml" title="Haeran's blog" href="/feed.xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"><script>
+      // FOUC 방지: 렌더 전에 저장된 테마 적용
+      (function () {
+        var t = localStorage.getItem('theme');
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script><!-- Google Analytics (GA4) — Jekyll 시절 _config.yml의 google_analytics 값 그대로 --><script async src="https://www.googletagmanager.com/gtag/js?id=G-ZNXE6HSKMS"></script><script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
+      function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
-      gtag('config', measurementId);
-    }
-  }
-  window.addEventListener("load", initGoogleAnalytics);
-</script>
-
-<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
-<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
-<!-- and it's easy to individually load additional languages -->
-<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script>
-// Init highlight js
-document.addEventListener('DOMContentLoaded', function(event) {
-  // mermaid 블록은 highlight.js 대상에서 제외 — hljs가 addLangData에서 class를
-  // "language-mermaid" -> "hljs mermaid"로 덮어써버려서, mermaid.html의 렌더링 스크립트가
-  // 뒤늦게(load 시점) 찾으려는 .language-mermaid 셀렉터가 항상 빈 결과를 내는 원인이었음.
-  var els = document.querySelectorAll('pre code:not(.language-mermaid)')
-
-  function addLangData(block) {
-    var outer = block.parentElement.parentElement.parentElement;
-    var lang = block.getAttribute('data-lang');
-    for (var i = 0; i < outer.classList.length; i++) {
-      var cls = outer.classList[i];
-      if (cls.startsWith('language-')) {
-        lang = cls;
-        break;
-      }
-    }
-    if (!lang) {
-      cls = block.getAttribute('class');
-      lang = cls ? cls.replace('hljs ', '') : '';
-    }
-    if (lang.startsWith('language-')) {
-      lang = lang.substr(9);
-    }
-    block.setAttribute('class', 'hljs ' + lang);
-    block.parentNode.setAttribute('data-lang', lang);
-  }
-
-  function addBadge(block) {
-    var enabled = ('true' || 'true').toLowerCase();
-    if (enabled == 'true') {
-      var pre = block.parentElement;
-      pre.classList.add('badge');
-    }
-  }
-
-  function handle(block) {
-    addLangData(block);
-    addBadge(block)
-    hljs.highlightBlock(block);
-  }
-
-  for (var i = 0; i < els.length; i++) {
-    var el = els[i];
-    handle(el);
-  }
-});
-</script>
-
-<style>
-  /* code language badge */
-  pre.badge::before {
-    content: attr(data-lang);
-    color: #fff;
-    background-color: #ff4e00;
-    padding: 0 .5em;
-    border-radius: 0 2px;
-    text-transform: uppercase;
-    text-align: center;
-    min-width: 32px;
-    display: inline-block;
-    position: absolute;
-    right: 0;
-  }
-
-  /* fix wrong badge display for firefox browser */
-  code > table pre::before {
-    display: none;
-  }
-</style>
-<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
-<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
-<style>
-  .pswp .pswp__container .pswp__img {
-    background-color: white;
-  }
-</style>
-
-<script>
-  function initPhotoSwipe() {
-    let customOptions = {};
-
-    try {
-      const data = ``.replaceAll("=>", ":");
-      customOptions = JSON.parse(data);
-    } catch (e) {
-      console.info("Invalid custom photo previewer options! " + e.message);
-    }
-
-    // Define object and gallery options
-    const options = Object.assign(
-      {
-        gallery: "section.main",
-        children: "a.photo-swipe",
-        photo_scale: 2,
-        // dynamic import is not supported in UMD version
-        pswpModule: PhotoSwipe,
-      },
-      customOptions
-    );
-
-    const galleryEl = document.querySelector(options.gallery);
-    if (!galleryEl) {
-      return;
-    }
-
-    const imgEls = [];
-    const els = galleryEl.querySelectorAll("img:not(.emoji)");
-    els.forEach((el) => {
-      if (el.src.trim() == "") {
-        return;
-      }
-      if (!imgEls.includes(el)) {
-        imgEls.push(el);
-      }
-    });
-
-    if (imgEls.length === 0) {
-      return;
-    }
-
-    imgEls.forEach((imgEl) => {
-      imgEl.outerHTML = `
-      <a class="photo-swipe"
-        href="${imgEl.src}"
-        data-pswp-width="${
-          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
-        }"
-        data-pswp-height="${
-          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
-        }"
-        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
-        target="_blank">
-        ${imgEl.outerHTML}
-      </a>`;
-    });
-
-    // Initialize PhotoSwipe 5
-    var lightbox = new PhotoSwipeLightbox(options);
-
-    lightbox.init();
-  }
-
-  window.addEventListener("load", initPhotoSwipe);
-</script>
-<script type="module">
-  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
-
-  function isDarkTheme() {
-    return document.documentElement.getAttribute('data-theme') === 'dark';
-  }
-
-  mermaid.initialize({
-    startOnLoad: false,
-    theme: isDarkTheme() ? 'dark' : 'default',
-  });
-
-  function renderMermaidBlocks() {
-    // kramdown/rouge render ```mermaid fences as <pre><code class="language-mermaid">...</code></pre>
-    // mermaid.js only auto-scans <div class="mermaid">, so swap the markup before running it.
-    const blocks = document.querySelectorAll('pre > code.language-mermaid');
-    if (blocks.length === 0) {
-      return;
-    }
-    blocks.forEach((code) => {
-      const graphDefinition = code.textContent;
-      const container = document.createElement('div');
-      container.className = 'mermaid';
-      container.textContent = graphDefinition;
-      code.parentElement.replaceWith(container);
-    });
-    mermaid.run({ querySelector: '.mermaid' });
-  }
-
-  window.addEventListener('load', renderMermaidBlocks);
-</script>
-<!-- Custom Head HTML (if any) -->
-
-<!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 assets/js/chat-widget.js -->
-<script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script>
-</head>
-<body>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<header class="site-header " role="banner">
-
-  <div class="wrapper">
-    <div class="site-header-inner">
-<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
-  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
-  Haeran's blog
-</a>
-</span><nav class="site-nav">
-          <input type="checkbox" id="nav-trigger" class="nav-trigger">
-          <label for="nav-trigger">
-            <span class="menu-icon">
-              <svg viewbox="0 0 18 15" width="18px" height="15px">
-                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
-              </svg>
-            </span>
-          </label>
-
-          <div class="trigger">
-<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/search.html">SEARCH</a><a class="page-link" href="/tags.html">TAGS</a>
-
-
-
-
-
-
-
-
-
-<div class="page-link" style="display: inline;">
-
-
-
-<div id="google_translate_element" style="display: none;">
-</div>
-
-<div class="ct-language">
-  <ul class="list-unstyled ct-language-dropdown">
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="en">
-          
-          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
-          
-        </a>
-      </li>
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="fr">
-          
-          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
-          
-        </a>
-      </li>
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="zh-CN">
-          
-          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
-          
-        </a>
-      </li>
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="ja">
-          
-          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
-          
-        </a>
-      </li>
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="ko">
-          
-          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
-          
-        </a>
-      </li>
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="ru">
-          
-          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
-          
-        </a>
-      </li>
-    
-  </ul>
-</div>
-
-<script type="text/javascript">
-function googleTranslateElementInit() {
-  new google.translate.TranslateElement({
-    pageLanguage: 'ko',
-    autoDisplay: false,
-    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
-  }, 'google_translate_element');
-
-  // Links to cross-origin destinations are unsafe
-  var gll = document.getElementsByClassName('goog-logo-link')[0];
-  if (gll) {
-    gll.setAttribute('rel', 'noopener');
-  }
-
-  function restoreLang() {
-    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
-    if (!iframe) return;
-
-    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-    var restore_el = innerDoc.getElementsByTagName("button");
-
-    for (var i = 0; i < restore_el.length; i++) {
-      if (restore_el[i].id.indexOf("restore") >= 0) {
-        restore_el[i].click();
-        var close_el = innerDoc.getElementsByClassName("goog-close-link");
-        close_el[0].click();
-        return;
-      }
-    }
-  }
-
-  function triggerHtmlEvent(element, eventName) {
-    var event;
-    if (document.createEvent) {
-      event = document.createEvent('HTMLEvents');
-      event.initEvent(eventName, true, true);
-      element.dispatchEvent(event);
-    } else {
-      event = document.createEventObject();
-      event.eventType = eventName;
-      element.fireEvent('on' + event.eventType, event);
-    }
-  }
-
-  var googleCombo = document.querySelector("select.goog-te-combo");
-  var langSelect = document.querySelector('.ct-language');
-  langSelect.addEventListener('click', function(event) {
-    if (!event.target) {
-      return;
-    }
-
-    var selected = document.querySelector('.ct-language .ct-language-selected');
-    if (selected) {
-      selected.classList.remove('ct-language-selected');
-    }
-
-    var target = event.target;
-    while (target && target !== langSelect ) {
-      if (target.matches('.lang-select')) {
-        break;
-      }
-      target = target.parentElement;
-    }
-
-    if (target && target.matches('.lang-select')) {
-      var lang = target.getAttribute('data-lang');
-      if (googleCombo.value == lang) {
-        restoreLang();
-      } else {
-        target.parentElement.classList.add('ct-language-selected');
-        googleCombo.value = lang;
-        triggerHtmlEvent(googleCombo, 'change');
-      }
-    }
-
-    event.preventDefault();
-  });
-}
-</script>
-
-<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
-</div>
-</div>
-        </nav>
-</div>
-  </div>
-</header>
-
-<script>
-  function initHeader() {
-    var lastScrollY = getScrollPos().y;
-    var documentElement = document.documentElement;
-
-    function storeScrollData() {
-      var y = getScrollPos().y;var scrollStatus = "";
-
-      if (y <= 0) {
-        scrollStatus = "top";
-      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
-        scrollStatus = "bottom";
-      } else {
-        var isScrollDown = (y - lastScrollY > 0) ? true : false;
-        scrollStatus = isScrollDown ? "down" : "up";
-      }
-
-      lastScrollY = y;
-      documentElement.setAttribute("data-scroll-status", scrollStatus);
-    }
-
-    window.addEventListener('scroll', function(e) {
-      storeScrollData();
-    });
-
-    storeScrollData();
-  }
-  document.addEventListener('DOMContentLoaded', initHeader);
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script>
-  function hashLocate(hashValue) {
-    hashValue = hashValue.replace(/^.*#h-/, '');
-    hashValue = decodeURIComponent(hashValue);
-    var element = document.getElementById(hashValue);
-
-    if (!element) {
-      return;
-    }
-
-    var header = document.querySelector('header.site-header');
-    var headerRect = header.getBoundingClientRect();
-    var headerTop = Math.floor(headerRect.top);
-    var headerHeight = Math.floor(headerRect.height);
-    var scrollPos = getScrollPos();
-    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
-
-    if (offsetY == scrollPos.y) {
-      return;
-    }
-
-    if (headerTop == 0  && offsetY > scrollPos.y) {
-      offsetY += headerHeight + 2;
-    } else if (headerTop < 0  && offsetY < scrollPos.y) {
-      offsetY -= headerHeight - 2;
-    }
-
-    smoothScrollTo(offsetY);
-  }
-
-  // The first event occurred
-  window.addEventListener('load', function(event) {
-    if (window.location.hash) {
-      hashLocate(window.location.hash);
-    }
-  });
-
-  // The first event occurred
-  window.addEventListener('click', function(event) {
-    if (event.target.tagName.toLowerCase() == 'a') {
-      hashLocate(event.target.getAttribute('href'));
-    }
-  });
-</script>
-<div class="theme-toggle">
-  <input type="checkbox" id="theme-switch">
-  <label for="theme-switch">
-    <div class="toggle"></div>
-    <div class="names">
-      <p class="light">Light</p>
-      <p class="dark">Dark</p>
-    </div>
-  </label>
-</div>
-
-
-
-
-<script>
-  (function() {
-    var sw = document.getElementById('theme-switch');
-    var html = document.getElementsByTagName('html')[0];
-    var nightModeOption = ('auto' || 'auto').toLowerCase();
-    // 항상 localStorage를 사용 — 'auto' 모드에서도 유저가 직접 누른 토글이
-    // 브라우저 세션이 끝났다고 사라지지 않고, 다음 예약된 자동 전환 시점까지 유지된다.
-    var storage = localStorage;
-    var themeData = loadThemeData();
-
-    function saveThemeData(data) {
-      storage.setItem('theme', JSON.stringify(data));
-    }
-
-    function loadThemeData() {
-      var data = storage.getItem('theme');
-      try {
-        data = JSON.parse(data ? data : '');
-      } catch(e) {
-        data = { nightShift: undefined, autoToggleAt: 0 };
-        saveThemeData(data);
-      }
-      return data;
-    }
-
-    function handleThemeToggle(nightShift) {
-      themeData.nightShift = nightShift;
-      saveThemeData(themeData);
-      html.dataset.theme = nightShift ? 'dark' : 'light';
-      setTimeout(function() {
-        sw.checked = nightShift ? true : false;
-      }, 50);
-    }
-
-    function autoThemeToggle() {
-      // Next time point of theme toggle
-      var now = new Date();
-      var toggleAt = new Date();
-      var hours = now.getHours();
-      var nightShift = hours >= 19 || hours <=7;
-
-      if (nightShift) {
-        if (hours > 7) {
-          toggleAt.setDate(toggleAt.getDate() + 1);
-        }
-        toggleAt.setHours(7);
-      } else {
-        toggleAt.setHours(19);
-      }
-
-      toggleAt.setMinutes(0);
-      toggleAt.setSeconds(0);
-      toggleAt.setMilliseconds(0)
-
-      var delay = toggleAt.getTime() - now.getTime();
-
-      // auto toggle theme mode
-      setTimeout(function() {
-        handleThemeToggle(!nightShift);
-      }, delay);
-
-      return {
-        nightShift: nightShift,
-        toggleAt: toggleAt.getTime()
-      };
-    }
-
-    // Listen the theme toggle event
-    sw.addEventListener('change', function(event) {
-      handleThemeToggle(event.target.checked);
-    });
-
-    if (nightModeOption == 'auto') {
-      var data = autoThemeToggle();
-
-      // Toggle theme by local setting
-      if (data.toggleAt > themeData.autoToggleAt) {
-        themeData.autoToggleAt = data.toggleAt;
-        handleThemeToggle(data.nightShift);
-      } else {
-        handleThemeToggle(themeData.nightShift);
-      }
-    } else if (nightModeOption == 'manual') {
-      handleThemeToggle(themeData.nightShift);
-    } else {
-      var nightShift = themeData.nightShift;
-      if (nightShift === undefined) {
-        nightShift = nightModeOption === 'on';
-      }
-      handleThemeToggle(nightShift);
-    }
-  })();
-</script>
-<div id="click-to-top" class="click-to-top">
-  <i class="fa fa-arrow-up"></i>
-</div>
-<script>
-  (function () {
-    const clickToTop = document.getElementById('click-to-top');
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 100) {
-        clickToTop.classList.add('show')
-      }else {
-        clickToTop.classList.remove('show')
-      }
-    });
-    clickToTop.addEventListener('click', () => {
-      window.smoothScrollTo(0);
-    });
-  })();
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  var blocks = document.querySelectorAll('pre');
-
-  function addCopyButton(pre) {
-    if (pre.querySelector('.code-copy-btn')) return;
-    var code = pre.querySelector('code');
-    if (!code) return;
-
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'code-copy-btn';
-    btn.textContent = 'Copy';
-    pre.appendChild(btn);
-
-    btn.addEventListener('click', function () {
-      var text = code.textContent;
-
-      function done(ok) {
-        btn.textContent = ok ? 'Copied!' : 'Failed';
-        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
-      }
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
-        return;
-      }
-
-      var ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        done(document.execCommand('copy'));
-      } catch (e) {
-        done(false);
-      }
-      document.body.removeChild(ta);
-    });
-  }
-
-  for (var i = 0; i < blocks.length; i++) {
-    addCopyButton(blocks[i]);
-  }
-});
-</script>
-<main class="page-content" aria-label="Content">
-    <div class="wrapper">
-      <div class="framework">
-  <section class="main">
-
-     <div class="reading-progress" aria-hidden="true">
-  <div class="reading-progress-bar" id="reading-progress-bar"></div>
-</div>
-
-<script>
-(function () {
-  var bar = document.getElementById('reading-progress-bar');
-  var article = document.querySelector('.post-content');
-  if (!bar || !article) return;
-
-  function update() {
-    var rect = article.getBoundingClientRect();
-    var articleTop = rect.top + window.pageYOffset;
-    var total = article.offsetHeight - window.innerHeight;
-    var scrolled = window.pageYOffset - articleTop;
-    var pct = total > 0 ? Math.min(100, Math.max(0, (scrolled / total) * 100)) : 100;
-    bar.style.width = pct + '%';
-  }
-
-  window.addEventListener('scroll', update, { passive: true });
-  window.addEventListener('resize', update);
-  update();
-})();
-</script>
-<div class="post">
-  <section>
-
-
-
-
-
-
-
-
-
-<header class="post-header">
-  <h1 class="post-title p-name" itemprop="name headline">[ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이 나눠 쓰는 법</h1>
-  <h2 class="post-subtitle"></h2>
-
-  <div class="post-meta">
-    <time class="dt-published" datetime="2026-07-27T00:00:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Jul 27, 2026
-    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span>
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 10 mins</span>
-  </div>
-<div class="post-tags">
-<a class="post-tag" href="/tags.html#K8s">#K8s</a><a class="post-tag" href="/tags.html#Kubernetes">#Kubernetes</a><a class="post-tag" href="/tags.html#%EC%8A%A4%ED%84%B0%EB%94%94">#스터디</a><a class="post-tag" href="/tags.html#Namespace">#Namespace</a><a class="post-tag" href="/tags.html#RBAC">#RBAC</a>
-</div></header>
-<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="post-content e-content" itemprop="articleBody">
-
-      <p><a href="/journal/development%20diary/2026/07/23/k8s-study-06-ingress.html">지난 편</a>까지 Pod/Deployment/Service/Ingress로 앱 하나를 배포하고 노출하는 흐름을 정리했다. 이번 편은 조금 결이 다르다 — 클러스터 하나를 여러 팀이나 여러 환경이 같이 쓸 때 필요한 Namespace와 RBAC.</p>
-
+      gtag('config', 'G-ZNXE6HSKMS');
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BG287Ete.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이 나눠 쓰는 법</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading">5분 읽기</span><span class="tags"><a href="/tags.html#K8s">#K8s</a><a href="/tags.html#Kubernetes">#Kubernetes</a><a href="/tags.html#스터디">#스터디</a><a href="/tags.html#Namespace">#Namespace</a><a href="/tags.html#RBAC">#RBAC</a></span></div></header><div class="prose"><p><a href="/journal/development%20diary/2026/07/23/k8s-study-06-ingress.html">지난 편</a>까지 Pod/Deployment/Service/Ingress로 앱 하나를 배포하고 노출하는 흐름을 정리했다. 이번 편은 조금 결이 다르다 — 클러스터 하나를 여러 팀이나 여러 환경이 같이 쓸 때 필요한 Namespace와 RBAC.</p>
 <h2 id="tldr">TL;DR</h2>
-
 <ul>
-  <li>Namespace는 클러스터 하나를 여러 논리적 구획으로 나누는 칸막이 — 지금까지 만든 Pod/Deployment 전부 사실 <code class="language-plaintext highlighter-rouge">default</code>라는 Namespace 안에 있었다</li>
-  <li>RBAC는 그 칸막이 안에서 “누가 무엇을 할 수 있는지”를 정하는 출입증 시스템</li>
-  <li>Role은 네임스페이스 범위, ClusterRole은 클러스터 전체 범위 권한</li>
-  <li>신입 개발자에게 “조회만 가능”처럼 최소 권한만 부여하면 실수로 프로덕션을 지우는 사고를 구조적으로 막을 수 있다</li>
+<li>Namespace는 클러스터 하나를 여러 논리적 구획으로 나누는 칸막이 — 지금까지 만든 Pod/Deployment 전부 사실 <code>default</code>라는 Namespace 안에 있었다</li>
+<li>RBAC는 그 칸막이 안에서 “누가 무엇을 할 수 있는지”를 정하는 출입증 시스템</li>
+<li>Role은 네임스페이스 범위, ClusterRole은 클러스터 전체 범위 권한</li>
+<li>신입 개발자에게 “조회만 가능”처럼 최소 권한만 부여하면 실수로 프로덕션을 지우는 사고를 구조적으로 막을 수 있다</li>
 </ul>
-
-<p><br></p>
-
+<br>
 <h2 id="1-클러스터-하나를-여러-팀이-같이-쓰면-생기는-문제">1. 클러스터 하나를 여러 팀이 같이 쓰면 생기는 문제</h2>
-
 <ul>
-  <li>팀 A와 팀 B가 각자 <code class="language-plaintext highlighter-rouge">web</code>이라는 이름의 Deployment를 만들고 싶다 → 클러스터 전체에서 이름이 겹치면 충돌</li>
-  <li>팀 A가 실수로 <code class="language-plaintext highlighter-rouge">kubectl delete deployment web</code>을 쳤는데, 그게 팀 B의 리소스였다 → 실수로 남의 서비스를 지워버림</li>
-  <li>모든 팀원이 클러스터 전체에 대한 관리자 권한을 가지고 있다 → 신입도 프로덕션 결제 서비스를 삭제할 수 있는 상태</li>
-  <li>특정 팀이 클러스터 전체 CPU/메모리를 다 써버려서 다른 팀 서비스가 죽는다 → 팀별 사용량 제한이 없음</li>
+<li>팀 A와 팀 B가 각자 <code>web</code>이라는 이름의 Deployment를 만들고 싶다 → 클러스터 전체에서 이름이 겹치면 충돌</li>
+<li>팀 A가 실수로 <code>kubectl delete deployment web</code>을 쳤는데, 그게 팀 B의 리소스였다 → 실수로 남의 서비스를 지워버림</li>
+<li>모든 팀원이 클러스터 전체에 대한 관리자 권한을 가지고 있다 → 신입도 프로덕션 결제 서비스를 삭제할 수 있는 상태</li>
+<li>특정 팀이 클러스터 전체 CPU/메모리를 다 써버려서 다른 팀 서비스가 죽는다 → 팀별 사용량 제한이 없음</li>
 </ul>
-
 <h2 id="2-핵심-아이디어">2. 핵심 아이디어</h2>
-
 <p><strong>핵심 한 줄 요약:</strong> Namespace로 리소스를 논리적으로 격리하고, RBAC로 그 안에서 “누가 무엇을 할 수 있는지”를 최소한으로 제한한다.</p>
-
 <ol>
-  <li>
-<strong>Namespace 생성:</strong> 클러스터를 <code class="language-plaintext highlighter-rouge">team-a</code>, <code class="language-plaintext highlighter-rouge">team-b</code>, <code class="language-plaintext highlighter-rouge">dev</code>, <code class="language-plaintext highlighter-rouge">prod</code> 같은 가상 구획으로 나눔</li>
-  <li>
-<strong>이름 충돌 방지:</strong> 리소스는 기본적으로 자신의 Namespace 안에서만 이름이 유일하면 됨</li>
-  <li>
-<strong>ResourceQuota:</strong> Namespace별로 “여기서는 CPU 4코어, 메모리 8GB까지만” 같은 사용량 상한을 걸 수 있음</li>
-  <li>
-<strong>Role:</strong> 특정 Namespace 안에서 허용할 동작(조회는 되지만 삭제는 안 됨 등)을 정의</li>
-  <li>
-<strong>RoleBinding:</strong> 그 Role을 특정 사용자나 서비스 어카운트에게 부여</li>
-  <li>
-<strong>ClusterRole/ClusterRoleBinding:</strong> Namespace 경계를 넘어 클러스터 전체에 적용해야 하는 권한에는 이걸 씀</li>
+<li><strong>Namespace 생성:</strong> 클러스터를 <code>team-a</code>, <code>team-b</code>, <code>dev</code>, <code>prod</code> 같은 가상 구획으로 나눔</li>
+<li><strong>이름 충돌 방지:</strong> 리소스는 기본적으로 자신의 Namespace 안에서만 이름이 유일하면 됨</li>
+<li><strong>ResourceQuota:</strong> Namespace별로 “여기서는 CPU 4코어, 메모리 8GB까지만” 같은 사용량 상한을 걸 수 있음</li>
+<li><strong>Role:</strong> 특정 Namespace 안에서 허용할 동작(조회는 되지만 삭제는 안 됨 등)을 정의</li>
+<li><strong>RoleBinding:</strong> 그 Role을 특정 사용자나 서비스 어카운트에게 부여</li>
+<li><strong>ClusterRole/ClusterRoleBinding:</strong> Namespace 경계를 넘어 클러스터 전체에 적용해야 하는 권한에는 이걸 씀</li>
 </ol>
-
-<pre><code class="language-mermaid">flowchart TB
+<pre class="mermaid">flowchart TB
     subgraph Cluster["클러스터 하나"]
         subgraph NS1["Namespace: team-a"]
             D1["Deployment: web"]
-            R1["Role: pod-reader&lt;br/&gt;(get/list만 가능)"]
+            R1["Role: pod-reader&#x3C;br/>(get/list만 가능)"]
         end
         subgraph NS2["Namespace: team-b"]
-            D2["Deployment: web&lt;br/&gt;(이름 같아도 충돌 없음)"]
+            D2["Deployment: web&#x3C;br/>(이름 같아도 충돌 없음)"]
         end
     end
-    User["team-a 팀원"] --&gt;|"RoleBinding"| R1
-    R1 -.적용 범위.-&gt; NS1
-    User -.권한 없음.-&gt; NS2
-</code></pre>
-
+    User["team-a 팀원"] -->|"RoleBinding"| R1
+    R1 -.적용 범위.-> NS1
+    User -.권한 없음.-> NS2</pre>
 <p>team-a 팀원은 RoleBinding을 통해 team-a 안에서만 정해진 동작을 할 수 있고, team-b 쪽은 아예 보이지도 않는다.</p>
-
 <h2 id="3-비유--공유-오피스-건물">3. 비유 — 공유 오피스 건물</h2>
 
-<table>
-  <thead>
-    <tr>
-      <th>상황</th>
-      <th>비유</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>클러스터</td>
-      <td>건물 전체</td>
-    </tr>
-    <tr>
-      <td>Namespace</td>
-      <td>각 층/사무실 (팀A 사무실, 팀B 사무실)</td>
-    </tr>
-    <tr>
-      <td>이름 충돌 없음</td>
-      <td>팀A 사무실에도, 팀B 사무실에도 “회의실”이 있어도 헷갈리지 않음</td>
-    </tr>
-    <tr>
-      <td>ResourceQuota</td>
-      <td>사무실마다 전기 사용량 한도 계약</td>
-    </tr>
-    <tr>
-      <td>Role</td>
-      <td>“이 출입증으로는 문 열기·불 켜기만 가능, 인테리어 철거는 불가”</td>
-    </tr>
-    <tr>
-      <td>RoleBinding</td>
-      <td>그 출입증을 실제로 특정 직원에게 발급</td>
-    </tr>
-  </tbody>
-</table>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>상황</th><th>비유</th></tr></thead><tbody><tr><td>클러스터</td><td>건물 전체</td></tr><tr><td>Namespace</td><td>각 층/사무실 (팀A 사무실, 팀B 사무실)</td></tr><tr><td>이름 충돌 없음</td><td>팀A 사무실에도, 팀B 사무실에도 “회의실”이 있어도 헷갈리지 않음</td></tr><tr><td>ResourceQuota</td><td>사무실마다 전기 사용량 한도 계약</td></tr><tr><td>Role</td><td>“이 출입증으로는 문 열기·불 켜기만 가능, 인테리어 철거는 불가”</td></tr><tr><td>RoleBinding</td><td>그 출입증을 실제로 특정 직원에게 발급</td></tr></tbody></table>
 <h2 id="4-실제로-이렇게-쓴다">4. 실제로 이렇게 쓴다</h2>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Namespace 생성</span>
-<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
-<span class="na">kind</span><span class="pi">:</span> <span class="s">Namespace</span>
-<span class="na">metadata</span><span class="pi">:</span>
-  <span class="na">name</span><span class="pi">:</span> <span class="s">team-a</span>
-</code></pre></div></div>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># ResourceQuota — team-a 안에서 쓸 수 있는 리소스 상한</span>
-<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
-<span class="na">kind</span><span class="pi">:</span> <span class="s">ResourceQuota</span>
-<span class="na">metadata</span><span class="pi">:</span>
-  <span class="na">name</span><span class="pi">:</span> <span class="s">team-a-quota</span>
-  <span class="na">namespace</span><span class="pi">:</span> <span class="s">team-a</span>
-<span class="na">spec</span><span class="pi">:</span>
-  <span class="na">hard</span><span class="pi">:</span>
-    <span class="na">requests.cpu</span><span class="pi">:</span> <span class="s2">"</span><span class="s">4"</span>
-    <span class="na">requests.memory</span><span class="pi">:</span> <span class="s">8Gi</span>
-    <span class="na">pods</span><span class="pi">:</span> <span class="s2">"</span><span class="s">20"</span>
-</code></pre></div></div>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Role — team-a Namespace 안에서 Pod 조회만 허용 (삭제/생성 불가)</span>
-<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">rbac.authorization.k8s.io/v1</span>
-<span class="na">kind</span><span class="pi">:</span> <span class="s">Role</span>
-<span class="na">metadata</span><span class="pi">:</span>
-  <span class="na">namespace</span><span class="pi">:</span> <span class="s">team-a</span>
-  <span class="na">name</span><span class="pi">:</span> <span class="s">pod-reader</span>
-<span class="na">rules</span><span class="pi">:</span>
-<span class="pi">-</span> <span class="na">apiGroups</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">"</span><span class="pi">]</span>
-  <span class="na">resources</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">pods"</span><span class="pi">]</span>
-  <span class="na">verbs</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">get"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">list"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">watch"</span><span class="pi">]</span>   <span class="c1"># 딱 이 세 가지 동작만 허용</span>
-</code></pre></div></div>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># RoleBinding — 실제 사용자에게 위 Role을 부여</span>
-<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">rbac.authorization.k8s.io/v1</span>
-<span class="na">kind</span><span class="pi">:</span> <span class="s">RoleBinding</span>
-<span class="na">metadata</span><span class="pi">:</span>
-  <span class="na">name</span><span class="pi">:</span> <span class="s">read-pods</span>
-  <span class="na">namespace</span><span class="pi">:</span> <span class="s">team-a</span>
-<span class="na">subjects</span><span class="pi">:</span>
-<span class="pi">-</span> <span class="na">kind</span><span class="pi">:</span> <span class="s">User</span>
-  <span class="na">name</span><span class="pi">:</span> <span class="s">junior-dev@example.com</span>
-  <span class="na">apiGroup</span><span class="pi">:</span> <span class="s">rbac.authorization.k8s.io</span>
-<span class="na">roleRef</span><span class="pi">:</span>
-  <span class="na">kind</span><span class="pi">:</span> <span class="s">Role</span>
-  <span class="na">name</span><span class="pi">:</span> <span class="s">pod-reader</span>
-  <span class="na">apiGroup</span><span class="pi">:</span> <span class="s">rbac.authorization.k8s.io</span>
-</code></pre></div></div>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get pods <span class="nt">-n</span> team-a
-
-kubectl auth can-i delete pods <span class="nt">-n</span> team-a <span class="nt">--as</span><span class="o">=</span>junior-dev@example.com
-<span class="c"># no   &lt;- Role에 delete를 안 줬으니 거부됨</span>
-</code></pre></div></div>
-
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Namespace 생성</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Namespace</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">team-a</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ResourceQuota — team-a 안에서 쓸 수 있는 리소스 상한</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">ResourceQuota</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">team-a-quota</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">team-a</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  hard</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    requests.cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"4"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    requests.memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">8Gi</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    pods</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"20"</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Role — team-a Namespace 안에서 Pod 조회만 허용 (삭제/생성 불가)</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">rbac.authorization.k8s.io/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Role</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">team-a</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">pod-reader</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">rules</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">- </span><span style="color:#22863A;--shiki-dark:#85E89D">apiGroups</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"pods"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  verbs</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"get"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"list"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"watch"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]   </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 딱 이 세 가지 동작만 허용</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># RoleBinding — 실제 사용자에게 위 Role을 부여</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">rbac.authorization.k8s.io/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">RoleBinding</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">read-pods</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">team-a</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">subjects</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">- </span><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">User</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">junior-dev@example.com</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  apiGroup</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">rbac.authorization.k8s.io</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">roleRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Role</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">pod-reader</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  apiGroup</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">rbac.authorization.k8s.io</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pods</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> team-a</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> auth</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> can-i</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> delete</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pods</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> team-a</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --as=junior-dev@example.com</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># no   &#x3C;- Role에 delete를 안 줬으니 거부됨</span></span></code></pre>
 <h2 id="지금-상태--다음에-할-일">지금 상태 / 다음에 할 일</h2>
+<p>Namespace/RBAC까지 정리하면서, kubernetes.io 공식 문서로 다시 대조해봤는데 이번 편은 전부 그대로 맞았다(apiVersion, Role/ClusterRole 구분, ResourceQuota 필드명, <code>kubectl auth can-i --as=</code> 문법 전부 정확). 다음 편은 <strong>스케줄링 &#x26; 리소스</strong> — 클러스터가 Pod를 어디에, 어떻게 배치하는지.</p></div></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/k8s-study-07-namespace-rbac.html";
+const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
-<p>Namespace/RBAC까지 정리하면서, kubernetes.io 공식 문서로 다시 대조해봤는데 이번 편은 전부 그대로 맞았다(apiVersion, Role/ClusterRole 구분, ResourceQuota 필드명, <code class="language-plaintext highlighter-rouge">kubectl auth can-i --as=</code> 문법 전부 정확). 다음 편은 <strong>스케줄링 &amp; 리소스</strong> — 클러스터가 Pod를 어디에, 어떻게 배치하는지.</p>
-
-
-    </div>
-
-</article>
-<div class="post-nav">
-<a class="previous" href="/study/datadog/2026/07/23/datadog-study-06-monitor-alert-design.html" title="데이터독(Datadog) 학습 정리 (6) - 모니터 알림 조건 설계">데이터독(Datadog) 학습 정리 (6) - 모니터...</a><a class="next" href="/journal/development%20diary/2026/07/27/k8s-study-08-scheduling-resources.html" title="[ K8s 스터디 ] - 08. 스케줄링과 requests/limits, Pod는 어디에 어떻게 배치되는가">[ K8s 스터디 ] - 08....</a>
-</div>
-<div class="post-related">
-      <div>Related Articles</div>
-      <ul>
-        <li class="">
-          <a class="post-link" href="/study/javascript/2025/01/14/module.html" title="모듈, 고립화와 지역화">
-            모듈, 고립화와 지역화<span class="post-badges">
-  <span class="post-badge badge-top">TOP</span></span>
-</a>
-        </li>
-<li class="">
-          <a class="post-link" href="/study/2025/02/21/test_code_study.html" title="테스트 코드를 왜 해야하는가">
-            테스트 코드를 왜 해야하는가<span class="post-badges">
-  <span class="post-badge badge-top">TOP</span></span>
-</a>
-        </li>
-<li class="">
-          <a class="post-link" href="/study/javascript/2025/01/09/promises-callback-sync.html" title="Promises API, Callback API, Synchronous API">
-            Promises API, Callback API, Synchronous API<span class="post-badges">
-  <span class="post-badge badge-top">TOP</span></span>
-</a>
-        </li>
-<li class="">
-          <a class="post-link" href="/study/datadog/2026/07/23/datadog-study-06-monitor-alert-design.html" title="데이터독(Datadog) 학습 정리 (6) - 모니터 알림 조건 설계">
-            데이터독(Datadog) 학습 정리 (6) - 모니터 알림 조건 설계<span class="post-badges">
-  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
-</a>
-        </li>
-</ul>
-    </div>
-<div class="post-comments">
-<div id="utterances-placeholder"></div>
-<script>
-  const utterancesThemeFromDataTheme = () => {
-    const dataTheme = document.documentElement.getAttribute('data-theme');
-    return `github-${dataTheme}`;
-  };
-
-  const setUtterancesTheme = () => {
-    const iframe = document.querySelector('.utterances-frame');
-    if (iframe) {
-      const message = {
-        type: 'set-theme',
-        theme: utterancesThemeFromDataTheme()
-      };
-      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
-    }
-  }
-
-  // dynamic change
-  const observer = new MutationObserver((mutationsList, observer) => {
-    for (let mutation of mutationsList) {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-        setUtterancesTheme();
-      }
-    }
-  });
-  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
-
-  let utterancesScript = document.createElement('script');
-  utterancesScript.async = true;
-  utterancesScript.src = 'https://utteranc.es/client.js';
-  utterancesScript.crossOrigin = 'anonymous';
-  utterancesScript.setAttribute('issue-term', 'title');
-  utterancesScript.setAttribute('label', 'utterances comment');
-  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
-  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
-
-  const placeholder = document.getElementById('utterances-placeholder');
-  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
-</script>
-</div></section>
-</div>
-
-  </section><section class="sidebar"><style type="text/css" media="screen">
-.post-menu ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-</style>
-
-<div class="post-menu">
-  <div class="post-menu-title">TOC</div>
-  <div class="post-menu-content"></div>
-</div>
-
-<script>
-  function generateContent() {
-    var menu = document.querySelector(".post-menu");
-    var menuContent =  menu.querySelector(".post-menu-content");
-    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
-
-    // Hide menu when no headings
-    if (headings.length === 0) {
-      return menu.style.display = "none";
-    }
-
-    // Generate post menu
-    var menuHTML = '';
-    for (var i = 0; i < headings.length; i++) {
-      var h = headings[i];
-      menuHTML += (
-        '<li class="h-' + h.tagName.toLowerCase() + '">'
-        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
-    }
-
-    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
-
-    // The header element
-    var header = document.querySelector('header.site-header');
-
-    function doMenuCollapse(index, over_items) {
-      var items = menuContent.firstChild.children;
-
-      if (over_items == undefined) {
-        over_items = 20;
-      }
-
-      if (items.length < over_items) {
-        return;
-      }
-
-      var activeItem = items[index];
-      var beginItem = activeItem
-      var endItem = activeItem
-      var beginIndex = index;
-      var endIndex = index + 1;
-      while (beginIndex >= 0
-        && !items[beginIndex].classList.contains('h-h2')) {
-        beginIndex -= 1;
-      }
-      while (endIndex < items.length
-        && !items[endIndex].classList.contains('h-h2')) {
-        endIndex += 1;
-      }
-      for (var i = 0; i < beginIndex; i++) {
-        item = items[i]
-        if (!item.classList.contains('h-h2')) {
-          item.style.display = 'none';
+        // 조회수 1회 기록 — 실패해도 페이지에는 영향 없음(검색 페이지의 "많이 본 글" 소스)
+        fetch(chatOrigin + '/api/view', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: viewPath }),
+          keepalive: true,
+        }).catch(function () {});
+      })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#tldr">TL;DR</a></li><li class="depth-2"><a href="#1-클러스터-하나를-여러-팀이-같이-쓰면-생기는-문제">1. 클러스터 하나를 여러 팀이 같이 쓰면 생기는 문제</a></li><li class="depth-2"><a href="#2-핵심-아이디어">2. 핵심 아이디어</a></li><li class="depth-2"><a href="#3-비유--공유-오피스-건물">3. 비유 — 공유 오피스 건물</a></li><li class="depth-2"><a href="#4-실제로-이렇게-쓴다">4. 실제로 이렇게 쓴다</a></li><li class="depth-2"><a href="#지금-상태--다음에-할-일">지금 상태 / 다음에 할 일</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+      // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
+      (function () {
+        var root = document.documentElement;
+        function sync() {
+          root.setAttribute('data-scrolled', window.scrollY > 8 ? 'true' : 'false');
         }
-      }
-      for (var i = beginIndex + 1; i < endIndex; i++) {
-        item = items[i]
-        // if (!item.classList.contains('h-h2')) {
-          item.style.display = '';
-        // }
-      }
-      for (var i = endIndex; i < items.length; i++) {
-        item = items[i]
-        if (!item.classList.contains('h-h2')) {
-          item.style.display = 'none';
-        }
-      }
-    }
+        sync();
+        window.addEventListener('scroll', sync, { passive: true });
+      })();
 
-    // Init menu collapsed
-    doMenuCollapse(-1);
-
-    // Active the menu item
-    window.addEventListener('scroll', function (event) {
-      var lastActive = menuContent.querySelector('.active');
-      var changed = true;
-      var activeIndex = -1;
-      for (var i = headings.length - 1; i >= 0; i--) {
-        var h = headings[i];
-        var headingRect = h.getBoundingClientRect();
-        var headerRect = header.getBoundingClientRect();
-        var headerTop = Math.floor(headerRect.top);
-        var headerHeight = Math.floor(headerRect.height);
-        var headerHeight = headerTop + headerHeight + 20;
-        if (headingRect.top <= headerHeight) {
-          var id = 'h-' + h.getAttribute('id');
-          var a = menuContent.querySelector('a[href="#' + id  + '"]');
-          var curActive = a.parentNode;
-          if (curActive) {
-            curActive.classList.add('active');
-            activeIndex = i;
+      // 목차 — 현재 읽고 있는 섹션 표시
+      (function () {
+        var links = document.querySelectorAll('.toc a');
+        if (!links.length) return;
+        var map = {};
+        var targets = [];
+        links.forEach(function (a) {
+          var id = decodeURIComponent(a.getAttribute('href').slice(1));
+          var el = document.getElementById(id);
+          if (el) {
+            map[id] = a;
+            targets.push(el);
           }
-          if (lastActive == curActive) {
-            changed = false;
-          }
-          break;
-        }
+        });
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (e) {
+              if (!e.isIntersecting) return;
+              links.forEach(function (a) { a.classList.remove('active'); });
+              var a = map[e.target.id];
+              if (a) a.classList.add('active');
+            });
+          },
+          // 헤더 아래 상단 밴드에 들어온 헤딩을 현재 섹션으로 본다
+          { rootMargin: '-72px 0px -75% 0px' }
+        );
+        targets.forEach(function (el) { io.observe(el); });
+      })();
+
+      document.getElementById('theme-toggle').addEventListener('click', function () {
+        var next =
+          document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+      });
+    </script> <script type="module">
+      // mermaid 클라이언트 렌더 (기존 Jekyll 셋업과 동일하게 mermaid@10 사용)
+      if (document.querySelector('pre.mermaid')) {
+        const { default: mermaid } = await import(
+          'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'
+        );
+        mermaid.initialize({
+          startOnLoad: false,
+          theme:
+            document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+        });
+        mermaid.run({ querySelector: 'pre.mermaid' });
       }
-      if (changed) {
-        if (lastActive) {
-          lastActive.classList.remove('active');
-        }
-        doMenuCollapse(activeIndex);
-      }
-      event.preventDefault();
-    });
-  }
-  generateContent();
-</script>
-</section>
-</div>
-
-    </div>
-  </main><footer class="site-footer h-card">
-  <data class="u-url" href="/"></data>
-
-  <div class="wrapper">
-    <div class="site-footer-inner">
-<div class="footer-social">
-        <a href="https://github.com/kimmand0o0" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
-        <a href="mailto:maeran.dev.u@gmail.com" aria-label="Email"><i class="fa fa-envelope" aria-hidden="true"></i></a>
-        <a href="/feed.xml" aria-label="RSS"><i class="fa fa-rss" aria-hidden="true"></i></a>
-      </div>
-      <div>Unpublished Work <span class="copyleft">©</span> 2017-2026 Haeran</div>
-      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
-      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
-      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
-    </div>
-  </div>
-</footer>
-</body>
-
-</html>
+    </script> </body> </html>

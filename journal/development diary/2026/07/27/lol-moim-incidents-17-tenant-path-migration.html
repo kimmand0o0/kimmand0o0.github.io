@@ -1,1419 +1,157 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Native cross-document page transitions (progressive enhancement, Chromium only) -->
-  <meta name="view-transition" content="same-origin">
-
-  <!-- Google Translate Customization (if needed) -->
-  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
-
-  <!-- SEO Tags --><!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>[ 롤모임 운영일지 ] - 17. 주소가 곧 격리다 — 세부 페이지를 /g/:slug로 옮긴 이유 | Haeran’s blog</title>
-<meta name="generator" content="Jekyll v4.4.1">
-<meta property="og:title" content="[ 롤모임 운영일지 ] - 17. 주소가 곧 격리다 — 세부 페이지를 /g/:slug로 옮긴 이유">
-<meta name="author" content="haeran">
-<meta property="og:locale" content="ko">
-<meta name="description" content="02편에서 멀티테넌시를 경로 방식(X-Group-Slug 헤더)으로 설계했고, 10편에서 백엔드의 격리 누락을 한바탕 잡았다. 그런데 그 뒤로도 “다른 모임 화면에 원조 모임(이세계) 멤버가 보인다”는 증상이 또 나왔다. 이번엔 백엔드가 아니었다. 백엔드는 받은 헤더대로 정확히 스코프하고 있었고, 프론트가 틀린 slug를 보내고 있었다. 이번 편은 그 마지막 조각 — 프론트 라우팅을 /g/:slug/*로 옮긴 마이그레이션 기록이다.">
-<meta property="og:description" content="02편에서 멀티테넌시를 경로 방식(X-Group-Slug 헤더)으로 설계했고, 10편에서 백엔드의 격리 누락을 한바탕 잡았다. 그런데 그 뒤로도 “다른 모임 화면에 원조 모임(이세계) 멤버가 보인다”는 증상이 또 나왔다. 이번엔 백엔드가 아니었다. 백엔드는 받은 헤더대로 정확히 스코프하고 있었고, 프론트가 틀린 slug를 보내고 있었다. 이번 편은 그 마지막 조각 — 프론트 라우팅을 /g/:slug/*로 옮긴 마이그레이션 기록이다.">
-<link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-17-tenant-path-migration.html">
-<meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-17-tenant-path-migration.html">
-<meta property="og:site_name" content="Haeran’s blog">
-<meta property="og:type" content="article">
-<meta property="article:published_time" content="2026-07-27T12:50:00+00:00">
-<meta name="twitter:card" content="summary">
-<meta property="twitter:title" content="[ 롤모임 운영일지 ] - 17. 주소가 곧 격리다 — 세부 페이지를 /g/:slug로 옮긴 이유">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"haeran"},"dateModified":"2026-07-27T12:50:00+00:00","datePublished":"2026-07-27T12:50:00+00:00","description":"02편에서 멀티테넌시를 경로 방식(X-Group-Slug 헤더)으로 설계했고, 10편에서 백엔드의 격리 누락을 한바탕 잡았다. 그런데 그 뒤로도 “다른 모임 화면에 원조 모임(이세계) 멤버가 보인다”는 증상이 또 나왔다. 이번엔 백엔드가 아니었다. 백엔드는 받은 헤더대로 정확히 스코프하고 있었고, 프론트가 틀린 slug를 보내고 있었다. 이번 편은 그 마지막 조각 — 프론트 라우팅을 /g/:slug/*로 옮긴 마이그레이션 기록이다.","headline":"[ 롤모임 운영일지 ] - 17. 주소가 곧 격리다 — 세부 페이지를 /g/:slug로 옮긴 이유","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-17-tenant-path-migration.html"},"url":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-17-tenant-path-migration.html"}</script>
-<!-- End Jekyll SEO tag -->
-<!-- Favicon -->
-  <link rel="icon" href="/assets/images/favicon.ico">
-
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-17-tenant-path-migration.html">
-
-  <!-- Social Media (Open Graph, Twitter Card) -->
-  <meta property="og:title" content="[ 롤모임 운영일지 ] - 17. 주소가 곧 격리다 — 세부 페이지를 /g/:slug로 옮긴 이유">
-  <meta property="og:description" content="">
-  <meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
-  <meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/27/lol-moim-incidents-17-tenant-path-migration.html">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="[ 롤모임 운영일지 ] - 17. 주소가 곧 격리다 — 세부 페이지를 /g/:slug로 옮긴 이유">
-  <meta name="twitter:description" content="">
-  <meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpg">
-
-  <!-- Stylesheets and External Resources -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
-
-  <!-- Editorial display typeface for headings only; body stays Noto Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/main.css">
-
-  <!-- JavaScript -->
-  <script src="/assets/js/main.js"></script>
-
-  <!-- RSS Feed Metadata --><link type="application/atom+xml" rel="alternate" href="https://kimmand0o0.github.io/feed.xml" title="Haeran's blog">
-<!-- Google Analytics (Production only) --><!-- Google tag (gtag.js) -->
-<script>
-  function initGoogleAnalytics() {
-    var doNotTrack = (window.doNotTrack === "1" || navigator.doNotTrack === "1" ||
-      navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1");
-    var enableDNT = "false" == "true";
-
-    if (!enableDNT || !doNotTrack) {
-      var measurementId = 'G-ZNXE6HSKMS';
-
-      (function(src) {
-        var tag = document.createElement('script');
-        tag.src = src;
-        tag.async = true;
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-      })('https://www.googletagmanager.com/gtag/js?id=' + measurementId);
-
+<!DOCTYPE html><html lang="ko"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>[ 롤모임 운영일지 ] - 17. 주소가 곧 격리다 — 세부 페이지를 /g/:slug로 옮긴 이유 | Haeran&#39;s blog</title><meta name="description" content="문제의 본질을 파악하고 해결하는 과정을 기록합니다."><link rel="icon" href="/assets/images/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png"><link rel="alternate" type="application/rss+xml" title="Haeran's blog" href="/feed.xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"><script>
+      // FOUC 방지: 렌더 전에 저장된 테마 적용
+      (function () {
+        var t = localStorage.getItem('theme');
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script><!-- Google Analytics (GA4) — Jekyll 시절 _config.yml의 google_analytics 값 그대로 --><script async src="https://www.googletagmanager.com/gtag/js?id=G-ZNXE6HSKMS"></script><script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
+      function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
-      gtag('config', measurementId);
-    }
-  }
-  window.addEventListener("load", initGoogleAnalytics);
-</script>
-
-<!-- Code Highlighting and Additional Features --><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
-<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
-<!-- and it's easy to individually load additional languages -->
-<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js" async></script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script>
-// Init highlight js
-document.addEventListener('DOMContentLoaded', function(event) {
-  // mermaid 블록은 highlight.js 대상에서 제외 — hljs가 addLangData에서 class를
-  // "language-mermaid" -> "hljs mermaid"로 덮어써버려서, mermaid.html의 렌더링 스크립트가
-  // 뒤늦게(load 시점) 찾으려는 .language-mermaid 셀렉터가 항상 빈 결과를 내는 원인이었음.
-  var els = document.querySelectorAll('pre code:not(.language-mermaid)')
-
-  function addLangData(block) {
-    var outer = block.parentElement.parentElement.parentElement;
-    var lang = block.getAttribute('data-lang');
-    for (var i = 0; i < outer.classList.length; i++) {
-      var cls = outer.classList[i];
-      if (cls.startsWith('language-')) {
-        lang = cls;
-        break;
-      }
-    }
-    if (!lang) {
-      cls = block.getAttribute('class');
-      lang = cls ? cls.replace('hljs ', '') : '';
-    }
-    if (lang.startsWith('language-')) {
-      lang = lang.substr(9);
-    }
-    block.setAttribute('class', 'hljs ' + lang);
-    block.parentNode.setAttribute('data-lang', lang);
-  }
-
-  function addBadge(block) {
-    var enabled = ('true' || 'true').toLowerCase();
-    if (enabled == 'true') {
-      var pre = block.parentElement;
-      pre.classList.add('badge');
-    }
-  }
-
-  function handle(block) {
-    addLangData(block);
-    addBadge(block)
-    hljs.highlightBlock(block);
-  }
-
-  for (var i = 0; i < els.length; i++) {
-    var el = els[i];
-    handle(el);
-  }
-});
-</script>
-
-<style>
-  /* code language badge */
-  pre.badge::before {
-    content: attr(data-lang);
-    color: #fff;
-    background-color: #ff4e00;
-    padding: 0 .5em;
-    border-radius: 0 2px;
-    text-transform: uppercase;
-    text-align: center;
-    min-width: 32px;
-    display: inline-block;
-    position: absolute;
-    right: 0;
-  }
-
-  /* fix wrong badge display for firefox browser */
-  code > table pre::before {
-    display: none;
-  }
-</style>
-<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe-lightbox.umd.min.js" async></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/umd/photoswipe.umd.min.js" async></script>
-<link href="//cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.7/photoswipe.min.css" rel="stylesheet">
-<style>
-  .pswp .pswp__container .pswp__img {
-    background-color: white;
-  }
-</style>
-
-<script>
-  function initPhotoSwipe() {
-    let customOptions = {};
-
-    try {
-      const data = ``.replaceAll("=>", ":");
-      customOptions = JSON.parse(data);
-    } catch (e) {
-      console.info("Invalid custom photo previewer options! " + e.message);
-    }
-
-    // Define object and gallery options
-    const options = Object.assign(
-      {
-        gallery: "section.main",
-        children: "a.photo-swipe",
-        photo_scale: 2,
-        // dynamic import is not supported in UMD version
-        pswpModule: PhotoSwipe,
-      },
-      customOptions
-    );
-
-    const galleryEl = document.querySelector(options.gallery);
-    if (!galleryEl) {
-      return;
-    }
-
-    const imgEls = [];
-    const els = galleryEl.querySelectorAll("img:not(.emoji)");
-    els.forEach((el) => {
-      if (el.src.trim() == "") {
-        return;
-      }
-      if (!imgEls.includes(el)) {
-        imgEls.push(el);
-      }
-    });
-
-    if (imgEls.length === 0) {
-      return;
-    }
-
-    imgEls.forEach((imgEl) => {
-      imgEl.outerHTML = `
-      <a class="photo-swipe"
-        href="${imgEl.src}"
-        data-pswp-width="${
-          Math.max(imgEl.naturalWidth, imgEl.width) * options.photo_scale
-        }"
-        data-pswp-height="${
-          Math.max(imgEl.naturalHeight, imgEl.height) * options.photo_scale
-        }"
-        data-pswp-caption="${imgEl.getAttribute("caption") || imgEl.alt}"
-        target="_blank">
-        ${imgEl.outerHTML}
-      </a>`;
-    });
-
-    // Initialize PhotoSwipe 5
-    var lightbox = new PhotoSwipeLightbox(options);
-
-    lightbox.init();
-  }
-
-  window.addEventListener("load", initPhotoSwipe);
-</script>
-<script type="module">
-  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
-
-  function isDarkTheme() {
-    return document.documentElement.getAttribute('data-theme') === 'dark';
-  }
-
-  mermaid.initialize({
-    startOnLoad: false,
-    theme: isDarkTheme() ? 'dark' : 'default',
-  });
-
-  function renderMermaidBlocks() {
-    // kramdown/rouge render ```mermaid fences as <pre><code class="language-mermaid">...</code></pre>
-    // mermaid.js only auto-scans <div class="mermaid">, so swap the markup before running it.
-    const blocks = document.querySelectorAll('pre > code.language-mermaid');
-    if (blocks.length === 0) {
-      return;
-    }
-    blocks.forEach((code) => {
-      const graphDefinition = code.textContent;
-      const container = document.createElement('div');
-      container.className = 'mermaid';
-      container.textContent = graphDefinition;
-      code.parentElement.replaceWith(container);
-    });
-    mermaid.run({ querySelector: '.mermaid' });
-  }
-
-  window.addEventListener('load', renderMermaidBlocks);
-</script>
-<!-- Custom Head HTML (if any) -->
-
-<!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 assets/js/chat-widget.js -->
-<script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script>
-</head>
-<body>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<header class="site-header " role="banner">
-
-  <div class="wrapper">
-    <div class="site-header-inner">
-<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
-  <img class="site-favicon" title="Haeran's blog" src="/assets/images/favicon.ico" onerror="this.style.display='none'">
-  Haeran's blog
-</a>
-</span><nav class="site-nav">
-          <input type="checkbox" id="nav-trigger" class="nav-trigger">
-          <label for="nav-trigger">
-            <span class="menu-icon">
-              <svg viewbox="0 0 18 15" width="18px" height="15px">
-                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
-              </svg>
-            </span>
-          </label>
-
-          <div class="trigger">
-<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/search.html">SEARCH</a><a class="page-link" href="/tags.html">TAGS</a>
-
-
-
-
-
-
-
-
-
-<div class="page-link" style="display: inline;">
-
-
-
-<div id="google_translate_element" style="display: none;">
-</div>
-
-<div class="ct-language">
-  <ul class="list-unstyled ct-language-dropdown">
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="en">
-          
-          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
-          
-        </a>
-      </li>
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="fr">
-          
-          <img src="https://cdn.countryflags.com/thumbs/france/flag-400.png" title="French">
-          
-        </a>
-      </li>
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="zh-CN">
-          
-          <img src="https://cdn.countryflags.com/thumbs/china/flag-400.png" title="Chinese(Simple)">
-          
-        </a>
-      </li>
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="ja">
-          
-          <img src="https://cdn.countryflags.com/thumbs/japan/flag-400.png" title="Japanese">
-          
-        </a>
-      </li>
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="ko">
-          
-          <img src="https://cdn.countryflags.com/thumbs/south-korea/flag-400.png" title="Korean">
-          
-        </a>
-      </li>
-    
-      <li>
-        <a href="#" class="lang-select" data-lang="ru">
-          
-          <img src="https://cdn.countryflags.com/thumbs/russia/flag-400.png" title="Russian">
-          
-        </a>
-      </li>
-    
-  </ul>
-</div>
-
-<script type="text/javascript">
-function googleTranslateElementInit() {
-  new google.translate.TranslateElement({
-    pageLanguage: 'ko',
-    autoDisplay: false,
-    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
-  }, 'google_translate_element');
-
-  // Links to cross-origin destinations are unsafe
-  var gll = document.getElementsByClassName('goog-logo-link')[0];
-  if (gll) {
-    gll.setAttribute('rel', 'noopener');
-  }
-
-  function restoreLang() {
-    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
-    if (!iframe) return;
-
-    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-    var restore_el = innerDoc.getElementsByTagName("button");
-
-    for (var i = 0; i < restore_el.length; i++) {
-      if (restore_el[i].id.indexOf("restore") >= 0) {
-        restore_el[i].click();
-        var close_el = innerDoc.getElementsByClassName("goog-close-link");
-        close_el[0].click();
-        return;
-      }
-    }
-  }
-
-  function triggerHtmlEvent(element, eventName) {
-    var event;
-    if (document.createEvent) {
-      event = document.createEvent('HTMLEvents');
-      event.initEvent(eventName, true, true);
-      element.dispatchEvent(event);
-    } else {
-      event = document.createEventObject();
-      event.eventType = eventName;
-      element.fireEvent('on' + event.eventType, event);
-    }
-  }
-
-  var googleCombo = document.querySelector("select.goog-te-combo");
-  var langSelect = document.querySelector('.ct-language');
-  langSelect.addEventListener('click', function(event) {
-    if (!event.target) {
-      return;
-    }
-
-    var selected = document.querySelector('.ct-language .ct-language-selected');
-    if (selected) {
-      selected.classList.remove('ct-language-selected');
-    }
-
-    var target = event.target;
-    while (target && target !== langSelect ) {
-      if (target.matches('.lang-select')) {
-        break;
-      }
-      target = target.parentElement;
-    }
-
-    if (target && target.matches('.lang-select')) {
-      var lang = target.getAttribute('data-lang');
-      if (googleCombo.value == lang) {
-        restoreLang();
-      } else {
-        target.parentElement.classList.add('ct-language-selected');
-        googleCombo.value = lang;
-        triggerHtmlEvent(googleCombo, 'change');
-      }
-    }
-
-    event.preventDefault();
-  });
-}
-</script>
-
-<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
-</div>
-</div>
-        </nav>
-</div>
-  </div>
-</header>
-
-<script>
-  function initHeader() {
-    var lastScrollY = getScrollPos().y;
-    var documentElement = document.documentElement;
-
-    function storeScrollData() {
-      var y = getScrollPos().y;var scrollStatus = "";
-
-      if (y <= 0) {
-        scrollStatus = "top";
-      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
-        scrollStatus = "bottom";
-      } else {
-        var isScrollDown = (y - lastScrollY > 0) ? true : false;
-        scrollStatus = isScrollDown ? "down" : "up";
-      }
-
-      lastScrollY = y;
-      documentElement.setAttribute("data-scroll-status", scrollStatus);
-    }
-
-    window.addEventListener('scroll', function(e) {
-      storeScrollData();
-    });
-
-    storeScrollData();
-  }
-  document.addEventListener('DOMContentLoaded', initHeader);
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script>
-  function hashLocate(hashValue) {
-    hashValue = hashValue.replace(/^.*#h-/, '');
-    hashValue = decodeURIComponent(hashValue);
-    var element = document.getElementById(hashValue);
-
-    if (!element) {
-      return;
-    }
-
-    var header = document.querySelector('header.site-header');
-    var headerRect = header.getBoundingClientRect();
-    var headerTop = Math.floor(headerRect.top);
-    var headerHeight = Math.floor(headerRect.height);
-    var scrollPos = getScrollPos();
-    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
-
-    if (offsetY == scrollPos.y) {
-      return;
-    }
-
-    if (headerTop == 0  && offsetY > scrollPos.y) {
-      offsetY += headerHeight + 2;
-    } else if (headerTop < 0  && offsetY < scrollPos.y) {
-      offsetY -= headerHeight - 2;
-    }
-
-    smoothScrollTo(offsetY);
-  }
-
-  // The first event occurred
-  window.addEventListener('load', function(event) {
-    if (window.location.hash) {
-      hashLocate(window.location.hash);
-    }
-  });
-
-  // The first event occurred
-  window.addEventListener('click', function(event) {
-    if (event.target.tagName.toLowerCase() == 'a') {
-      hashLocate(event.target.getAttribute('href'));
-    }
-  });
-</script>
-<div class="theme-toggle">
-  <input type="checkbox" id="theme-switch">
-  <label for="theme-switch">
-    <div class="toggle"></div>
-    <div class="names">
-      <p class="light">Light</p>
-      <p class="dark">Dark</p>
-    </div>
-  </label>
-</div>
-
-
-
-
-<script>
-  (function() {
-    var sw = document.getElementById('theme-switch');
-    var html = document.getElementsByTagName('html')[0];
-    var nightModeOption = ('auto' || 'auto').toLowerCase();
-    // 항상 localStorage를 사용 — 'auto' 모드에서도 유저가 직접 누른 토글이
-    // 브라우저 세션이 끝났다고 사라지지 않고, 다음 예약된 자동 전환 시점까지 유지된다.
-    var storage = localStorage;
-    var themeData = loadThemeData();
-
-    function saveThemeData(data) {
-      storage.setItem('theme', JSON.stringify(data));
-    }
-
-    function loadThemeData() {
-      var data = storage.getItem('theme');
-      try {
-        data = JSON.parse(data ? data : '');
-      } catch(e) {
-        data = { nightShift: undefined, autoToggleAt: 0 };
-        saveThemeData(data);
-      }
-      return data;
-    }
-
-    function handleThemeToggle(nightShift) {
-      themeData.nightShift = nightShift;
-      saveThemeData(themeData);
-      html.dataset.theme = nightShift ? 'dark' : 'light';
-      setTimeout(function() {
-        sw.checked = nightShift ? true : false;
-      }, 50);
-    }
-
-    function autoThemeToggle() {
-      // Next time point of theme toggle
-      var now = new Date();
-      var toggleAt = new Date();
-      var hours = now.getHours();
-      var nightShift = hours >= 19 || hours <=7;
-
-      if (nightShift) {
-        if (hours > 7) {
-          toggleAt.setDate(toggleAt.getDate() + 1);
-        }
-        toggleAt.setHours(7);
-      } else {
-        toggleAt.setHours(19);
-      }
-
-      toggleAt.setMinutes(0);
-      toggleAt.setSeconds(0);
-      toggleAt.setMilliseconds(0)
-
-      var delay = toggleAt.getTime() - now.getTime();
-
-      // auto toggle theme mode
-      setTimeout(function() {
-        handleThemeToggle(!nightShift);
-      }, delay);
-
-      return {
-        nightShift: nightShift,
-        toggleAt: toggleAt.getTime()
-      };
-    }
-
-    // Listen the theme toggle event
-    sw.addEventListener('change', function(event) {
-      handleThemeToggle(event.target.checked);
-    });
-
-    if (nightModeOption == 'auto') {
-      var data = autoThemeToggle();
-
-      // Toggle theme by local setting
-      if (data.toggleAt > themeData.autoToggleAt) {
-        themeData.autoToggleAt = data.toggleAt;
-        handleThemeToggle(data.nightShift);
-      } else {
-        handleThemeToggle(themeData.nightShift);
-      }
-    } else if (nightModeOption == 'manual') {
-      handleThemeToggle(themeData.nightShift);
-    } else {
-      var nightShift = themeData.nightShift;
-      if (nightShift === undefined) {
-        nightShift = nightModeOption === 'on';
-      }
-      handleThemeToggle(nightShift);
-    }
-  })();
-</script>
-<div id="click-to-top" class="click-to-top">
-  <i class="fa fa-arrow-up"></i>
-</div>
-<script>
-  (function () {
-    const clickToTop = document.getElementById('click-to-top');
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 100) {
-        clickToTop.classList.add('show')
-      }else {
-        clickToTop.classList.remove('show')
-      }
-    });
-    clickToTop.addEventListener('click', () => {
-      window.smoothScrollTo(0);
-    });
-  })();
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  var blocks = document.querySelectorAll('pre');
-
-  function addCopyButton(pre) {
-    if (pre.querySelector('.code-copy-btn')) return;
-    var code = pre.querySelector('code');
-    if (!code) return;
-
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'code-copy-btn';
-    btn.textContent = 'Copy';
-    pre.appendChild(btn);
-
-    btn.addEventListener('click', function () {
-      var text = code.textContent;
-
-      function done(ok) {
-        btn.textContent = ok ? 'Copied!' : 'Failed';
-        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
-      }
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
-        return;
-      }
-
-      var ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        done(document.execCommand('copy'));
-      } catch (e) {
-        done(false);
-      }
-      document.body.removeChild(ta);
-    });
-  }
-
-  for (var i = 0; i < blocks.length; i++) {
-    addCopyButton(blocks[i]);
-  }
-});
-</script>
-<main class="page-content" aria-label="Content">
-    <div class="wrapper">
-      <div class="framework">
-  <section class="main">
-
-     <div class="reading-progress" aria-hidden="true">
-  <div class="reading-progress-bar" id="reading-progress-bar"></div>
-</div>
-
-<script>
-(function () {
-  var bar = document.getElementById('reading-progress-bar');
-  var article = document.querySelector('.post-content');
-  if (!bar || !article) return;
-
-  function update() {
-    var rect = article.getBoundingClientRect();
-    var articleTop = rect.top + window.pageYOffset;
-    var total = article.offsetHeight - window.innerHeight;
-    var scrolled = window.pageYOffset - articleTop;
-    var pct = total > 0 ? Math.min(100, Math.max(0, (scrolled / total) * 100)) : 100;
-    bar.style.width = pct + '%';
-  }
-
-  window.addEventListener('scroll', update, { passive: true });
-  window.addEventListener('resize', update);
-  update();
-})();
-</script>
-<div class="post">
-  <section>
-
-
-
-
-
-
-
-
-
-<header class="post-header">
-  <h1 class="post-title p-name" itemprop="name headline">[ 롤모임 운영일지 ] - 17. 주소가 곧 격리다 — 세부 페이지를 /g/:slug로 옮긴 이유</h1>
-  <h2 class="post-subtitle"></h2>
-
-  <div class="post-meta">
-    <time class="dt-published" datetime="2026-07-27T12:50:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Jul 27, 2026
-    </time><span class="post-author left-vsplit"><i class="fa fa-pencil"></i> haeran</span>
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 17 mins</span>
-  </div>
-<div class="post-tags">
-<a class="post-tag" href="/tags.html#%EC%9A%B4%EC%98%81%EC%9D%BC%EC%A7%80">#운영일지</a><a class="post-tag" href="/tags.html#%EB%A9%80%ED%8B%B0%ED%85%8C%EB%84%8C%EC%8B%9C">#멀티테넌시</a><a class="post-tag" href="/tags.html#React">#React</a><a class="post-tag" href="/tags.html#react-router">#react-router</a><a class="post-tag" href="/tags.html#%EB%9D%BC%EC%9A%B0%ED%8C%85">#라우팅</a>
-</div></header>
-<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="post-content e-content" itemprop="articleBody">
-
-      <p><a href="/journal/development%20diary/2026/07/12/lol-moim-incidents-02-multitenancy.html">02편</a>에서 멀티테넌시를 경로 방식(<code class="language-plaintext highlighter-rouge">X-Group-Slug</code> 헤더)으로 설계했고, <a href="/journal/development%20diary/2026/07/20/lol-moim-incidents-10-cross-tenant-leak.html">10편</a>에서 백엔드의 격리 누락을 한바탕 잡았다. 그런데 그 뒤로도 “다른 모임 화면에 원조 모임(이세계) 멤버가 보인다”는 증상이 또 나왔다. 이번엔 백엔드가 아니었다. 백엔드는 받은 헤더대로 정확히 스코프하고 있었고, <strong>프론트가 틀린 slug를 보내고 있었다.</strong> 이번 편은 그 마지막 조각 — 프론트 라우팅을 <code class="language-plaintext highlighter-rouge">/g/:slug/*</code>로 옮긴 마이그레이션 기록이다.</p>
-
-<p><br></p>
-
+      gtag('config', 'G-ZNXE6HSKMS');
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BG287Ete.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 17. 주소가 곧 격리다 — 세부 페이지를 /g/:slug로 옮긴 이유</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading">9분 읽기</span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#멀티테넌시">#멀티테넌시</a><a href="/tags.html#React">#React</a><a href="/tags.html#react-router">#react-router</a><a href="/tags.html#라우팅">#라우팅</a></span></div></header><div class="prose"><p><a href="/journal/development%20diary/2026/07/12/lol-moim-incidents-02-multitenancy.html">02편</a>에서 멀티테넌시를 경로 방식(<code>X-Group-Slug</code> 헤더)으로 설계했고, <a href="/journal/development%20diary/2026/07/20/lol-moim-incidents-10-cross-tenant-leak.html">10편</a>에서 백엔드의 격리 누락을 한바탕 잡았다. 그런데 그 뒤로도 “다른 모임 화면에 원조 모임(이세계) 멤버가 보인다”는 증상이 또 나왔다. 이번엔 백엔드가 아니었다. 백엔드는 받은 헤더대로 정확히 스코프하고 있었고, <strong>프론트가 틀린 slug를 보내고 있었다.</strong> 이번 편은 그 마지막 조각 — 프론트 라우팅을 <code>/g/:slug/*</code>로 옮긴 마이그레이션 기록이다.</p>
+<br>
 <h2 id="증상--백엔드를-다-고쳤는데-왜-또-섞이나">증상 — 백엔드를 다 고쳤는데 왜 또 섞이나</h2>
-
-<p>플랫폼 운영진 계정으로 다른 모임에 들어가서 홈을 본 다음, 멤버 목록(<code class="language-plaintext highlighter-rouge">/users</code>) 같은 세부 페이지로 이동하면 — 방금 보던 모임이 아니라 <strong>이세계 모임의 멤버가 떴다.</strong></p>
-
-<p>10편까지의 사고들과 결이 다른 게, 이건 DB 쿼리에서 <code class="language-plaintext highlighter-rouge">groupId</code>가 빠진 게 아니다. API 요청 자체가 “이세계 모임 것을 달라”고 하고 있었다. 격리는 완벽하게 작동했다. 요청이 틀렸을 뿐.</p>
-
-<p><br></p>
-
+<p>플랫폼 운영진 계정으로 다른 모임에 들어가서 홈을 본 다음, 멤버 목록(<code>/users</code>) 같은 세부 페이지로 이동하면 — 방금 보던 모임이 아니라 <strong>이세계 모임의 멤버가 떴다.</strong></p>
+<p>10편까지의 사고들과 결이 다른 게, 이건 DB 쿼리에서 <code>groupId</code>가 빠진 게 아니다. API 요청 자체가 “이세계 모임 것을 달라”고 하고 있었다. 격리는 완벽하게 작동했다. 요청이 틀렸을 뿐.</p>
+<br>
 <h2 id="원인--모임-컨텍스트가-url-밖에-있었다">원인 — 모임 컨텍스트가 URL 밖에 있었다</h2>
-
-<p>당시 구조에서 “지금 어느 모임을 보고 있는가”라는 상태는 URL에 없었다. 모임 홈만 <code class="language-plaintext highlighter-rouge">/g/:slug</code>였고, 세부 페이지는 전부 루트 경로(<code class="language-plaintext highlighter-rouge">/users</code>, <code class="language-plaintext highlighter-rouge">/auction</code>, <code class="language-plaintext highlighter-rouge">/calendar</code>…)였다. 그래서 <code class="language-plaintext highlighter-rouge">apiFetch</code>는 이렇게 동작했다.</p>
-
-<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/frontend/src/lib/api.ts (당시 동작)</span>
-<span class="c1">// URL에 /g/:slug가 있으면 그걸 쓰고, 없으면 "마지막 활성 모임"(localStorage)을 쓴다</span>
-<span class="k">if </span><span class="p">(</span><span class="k">typeof</span> <span class="nb">window</span> <span class="o">!==</span> <span class="dl">"</span><span class="s2">undefined</span><span class="dl">"</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">headers</span><span class="p">[</span><span class="dl">"</span><span class="s2">X-Group-Slug</span><span class="dl">"</span><span class="p">])</span> <span class="p">{</span>
-  <span class="kd">const</span> <span class="nx">m</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">pathname</span><span class="p">.</span><span class="nf">match</span><span class="p">(</span><span class="sr">/^</span><span class="se">\/</span><span class="sr">g</span><span class="se">\/([</span><span class="sr">a-z0-9-</span><span class="se">]</span><span class="sr">+</span><span class="se">)</span><span class="sr">/</span><span class="p">);</span>
-  <span class="k">if </span><span class="p">(</span><span class="nx">m</span><span class="p">)</span> <span class="p">{</span> <span class="nf">setActiveGroupSlug</span><span class="p">(</span><span class="nx">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span> <span class="nx">headers</span><span class="p">[</span><span class="dl">"</span><span class="s2">X-Group-Slug</span><span class="dl">"</span><span class="p">]</span> <span class="o">=</span> <span class="nx">m</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span> <span class="p">}</span>
-  <span class="k">else</span> <span class="nx">headers</span><span class="p">[</span><span class="dl">"</span><span class="s2">X-Group-Slug</span><span class="dl">"</span><span class="p">]</span> <span class="o">=</span> <span class="nf">getActiveGroupSlug</span><span class="p">();</span>   <span class="c1">// ← 여기가 문제</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>세부 페이지는 루트 경로라 항상 else 분기 — 즉 <strong>localStorage에 저장된 “마지막 활성 모임”</strong> 으로 요청이 나갔다. 그리고 이 활성 모임 값은 <code class="language-plaintext highlighter-rouge">/g/:slug</code> 모임 홈을 지나갈 때만 갱신됐다.</p>
-
+<p>당시 구조에서 “지금 어느 모임을 보고 있는가”라는 상태는 URL에 없었다. 모임 홈만 <code>/g/:slug</code>였고, 세부 페이지는 전부 루트 경로(<code>/users</code>, <code>/auction</code>, <code>/calendar</code>…)였다. 그래서 <code>apiFetch</code>는 이렇게 동작했다.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="ts"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// packages/frontend/src/lib/api.ts (당시 동작)</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// URL에 /g/:slug가 있으면 그걸 쓰고, 없으면 "마지막 활성 모임"(localStorage)을 쓴다</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#D73A49;--shiki-dark:#F97583">typeof</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> window </span><span style="color:#D73A49;--shiki-dark:#F97583">!==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "undefined"</span><span style="color:#D73A49;--shiki-dark:#F97583"> &#x26;&#x26;</span><span style="color:#D73A49;--shiki-dark:#F97583"> !</span><span style="color:#24292E;--shiki-dark:#E1E4E8">headers[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"X-Group-Slug"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  const</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> m</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> window.location.pathname.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">match</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">/</span><span style="color:#D73A49;--shiki-dark:#F97583">^</span><span style="color:#22863A;--shiki-light-font-weight:bold;--shiki-dark:#85E89D;--shiki-dark-font-weight:bold">\/</span><span style="color:#032F62;--shiki-dark:#DBEDFF">g</span><span style="color:#22863A;--shiki-light-font-weight:bold;--shiki-dark:#85E89D;--shiki-dark-font-weight:bold">\/</span><span style="color:#032F62;--shiki-dark:#DBEDFF">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">[a-z0-9-]</span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#032F62;--shiki-dark:#DBEDFF">)</span><span style="color:#032F62;--shiki-dark:#9ECBFF">/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (m) { </span><span style="color:#6F42C1;--shiki-dark:#B392F0">setActiveGroupSlug</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(m[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]); headers[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"X-Group-Slug"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> m[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]; }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  else</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> headers[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"X-Group-Slug"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> getActiveGroupSlug</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// ← 여기가 문제</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>세부 페이지는 루트 경로라 항상 else 분기 — 즉 <strong>localStorage에 저장된 “마지막 활성 모임”</strong> 으로 요청이 나갔다. 그리고 이 활성 모임 값은 <code>/g/:slug</code> 모임 홈을 지나갈 때만 갱신됐다.</p>
 <p>조합하면 사고 시나리오가 완성된다. 플랫폼 운영진(활성 모임 = 이세계)이 다른 모임 홈을 열었다가, 활성 모임이 갱신되기 전에(혹은 갱신을 안 거치는 경로로) 루트 경로 세부 페이지로 이동하면 — stale한 slug로 조회가 나가고, 화면엔 이세계 멤버가 뜬다.</p>
-
 <p>한 문장으로 요약하면: <strong>“어느 모임인가”라는 상태가 URL이 아니라 localStorage에 있었고, 그 둘이 어긋날 수 있었다.</strong></p>
-
-<p><br></p>
-
+<br>
 <h2 id="첫-수습--홈-진입-시-활성-모임을-확정하기">첫 수습 — 홈 진입 시 활성 모임을 확정하기</h2>
-
-<p>첫 수정은 모임 홈(<code class="language-plaintext highlighter-rouge">/g/:slug</code>)에 진입하는 순간 그 slug를 활성 모임으로 명시적으로 저장하는 것이었다. 커밋 메시지에도 “완화”라고 적었다 — 홈을 거쳐서 이동하는 경로는 고쳐지지만, 홈을 안 거치는 경로(딥링크, 새 탭, 뒤로가기)에서는 여전히 어긋날 수 있다는 걸 알고 있었기 때문이다.</p>
-
+<p>첫 수정은 모임 홈(<code>/g/:slug</code>)에 진입하는 순간 그 slug를 활성 모임으로 명시적으로 저장하는 것이었다. 커밋 메시지에도 “완화”라고 적었다 — 홈을 거쳐서 이동하는 경로는 고쳐지지만, 홈을 안 거치는 경로(딥링크, 새 탭, 뒤로가기)에서는 여전히 어긋날 수 있다는 걸 알고 있었기 때문이다.</p>
 <p>상태를 “더 부지런히 동기화”하는 방식은 언제나 이렇다. 동기화 시점을 하나 추가할 때마다 구멍이 하나 줄어들 뿐, 구멍이 없어졌다는 보장은 끝까지 안 생긴다.</p>
-
-<p><br></p>
-
+<br>
 <h2 id="근본-해결--url이-모임을-담게-하기">근본 해결 — URL이 모임을 담게 하기</h2>
-
-<p>나흘 뒤, 라우팅 자체를 바꿨다. 모임에 종속되는 모든 세부 페이지를 <code class="language-plaintext highlighter-rouge">/g/:slug/*</code> 아래로 중첩시켰다. <code class="language-plaintext highlighter-rouge">/users</code>가 아니라 <code class="language-plaintext highlighter-rouge">/g/isegye/users</code>. 이러면 <code class="language-plaintext highlighter-rouge">apiFetch</code>의 URL 추출 분기가 <strong>항상</strong> 성공하고, localStorage 폴백은 진짜 전역 화면에서만 쓰인다.</p>
-
+<p>나흘 뒤, 라우팅 자체를 바꿨다. 모임에 종속되는 모든 세부 페이지를 <code>/g/:slug/*</code> 아래로 중첩시켰다. <code>/users</code>가 아니라 <code>/g/isegye/users</code>. 이러면 <code>apiFetch</code>의 URL 추출 분기가 <strong>항상</strong> 성공하고, localStorage 폴백은 진짜 전역 화면에서만 쓰인다.</p>
 <p>“어느 모임을 보고 있는가”가 주소 그 자체가 되는 것이다. 주소는 stale해질 수 없다. 새 탭에서 열어도, 북마크로 진입해도, 뒤로가기를 해도 URL은 그 화면이 어느 모임인지 정확히 알고 있다.</p>
-
-<p><br></p>
-
+<br>
 <h2 id="45개-파일을-안-고치고-고치는-법--드롭인-마이그레이션">45개 파일을 “안 고치고” 고치는 법 — 드롭인 마이그레이션</h2>
-
-<p>문제는 규모였다. 그룹 종속 링크와 <code class="language-plaintext highlighter-rouge">navigate()</code> 호출을 가진 파일이 45개쯤 됐다. <code class="language-plaintext highlighter-rouge">&lt;Link to="/users"&gt;</code>를 전부 <code class="language-plaintext highlighter-rouge">&lt;Link to={</code>/g/${slug}/users<code class="language-plaintext highlighter-rouge">}&gt;</code>로 바꾸는 건 하기도 싫고, 빠뜨리기도 쉽다.</p>
-
-<p>그래서 react-router의 <code class="language-plaintext highlighter-rouge">Link</code>/<code class="language-plaintext highlighter-rouge">useNavigate</code>와 시그니처가 같은 <strong>드롭인 래퍼</strong>를 만들었다.</p>
-
-<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/frontend/src/lib/groupNav.tsx</span>
-<span class="c1">// 모임(테넌트) 종속 최상위 경로 세그먼트 — 이 경로들만 /g/:slug 프리픽스가 붙는다.</span>
-<span class="k">export</span> <span class="kd">const</span> <span class="nx">GROUP_SEGMENTS</span> <span class="o">=</span> <span class="p">[</span>
-  <span class="dl">"</span><span class="s2">users</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">auction</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">calendar</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">hall-of-fame</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">notices</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">admin</span><span class="dl">"</span><span class="p">,</span>
-  <span class="dl">"</span><span class="s2">missions</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">streak-bets</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">season-pass</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">point-bets</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">evaluator</span><span class="dl">"</span><span class="p">,</span>
-  <span class="dl">"</span><span class="s2">bet-store</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">mentoring</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">eval-feed</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">lfg</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">external-match</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">league</span><span class="dl">"</span><span class="p">,</span>
-  <span class="dl">"</span><span class="s2">recap</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">inventory</span><span class="dl">"</span><span class="p">,</span>
-<span class="p">]</span> <span class="kd">as const</span><span class="p">;</span>
-
-<span class="cm">/** 모임 종속 경로면 /g/&lt;slug&gt; 프리픽스를 붙이고, 아니면 그대로 반환. */</span>
-<span class="k">export</span> <span class="kd">function</span> <span class="nf">groupHref</span><span class="p">(</span><span class="nx">slug</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span> <span class="nx">to</span><span class="p">:</span> <span class="kr">string</span><span class="p">):</span> <span class="kr">string</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="nf">isGroupScopedPath</span><span class="p">(</span><span class="nx">to</span><span class="p">)</span> <span class="p">?</span> <span class="s2">`/g/</span><span class="p">${</span><span class="nx">slug</span><span class="p">}${</span><span class="nx">to</span><span class="p">}</span><span class="s2">`</span> <span class="p">:</span> <span class="nx">to</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="c1">// react-router Link 드롭인. 문자열 to가 모임 종속 경로면 현재 URL의 slug를 프리픽스한다.</span>
-<span class="k">export</span> <span class="kd">const</span> <span class="nx">GLink</span> <span class="o">=</span> <span class="nx">forwardRef</span><span class="o">&lt;</span><span class="nx">HTMLAnchorElement</span><span class="p">,</span> <span class="nx">LinkProps</span><span class="o">&gt;</span><span class="p">(</span><span class="kd">function</span> <span class="nf">GLink</span><span class="p">({</span> <span class="nx">to</span><span class="p">,</span> <span class="p">...</span><span class="nx">rest</span> <span class="p">},</span> <span class="nx">ref</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">const</span> <span class="nx">slug</span> <span class="o">=</span> <span class="nf">useCurrentSlug</span><span class="p">();</span>   <span class="c1">// useParams().slug ?? 활성 모임</span>
-  <span class="kd">const</span> <span class="nx">scopedTo</span><span class="p">:</span> <span class="nx">To</span> <span class="o">=</span> <span class="k">typeof</span> <span class="nx">to</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">string</span><span class="dl">"</span> <span class="p">?</span> <span class="nf">groupHref</span><span class="p">(</span><span class="nx">slug</span><span class="p">,</span> <span class="nx">to</span><span class="p">)</span> <span class="p">:</span> <span class="nx">to</span><span class="p">;</span>
-  <span class="k">return</span> <span class="p">&lt;</span><span class="nc">Link</span> <span class="na">ref</span><span class="p">=</span><span class="si">{</span><span class="nx">ref</span><span class="si">}</span> <span class="na">to</span><span class="p">=</span><span class="si">{</span><span class="nx">scopedTo</span><span class="si">}</span> <span class="si">{</span><span class="p">...</span><span class="nx">rest</span><span class="si">}</span> <span class="p">/&gt;;</span>
-<span class="p">});</span>
-</code></pre></div></div>
-
+<p>문제는 규모였다. 그룹 종속 링크와 <code>navigate()</code> 호출을 가진 파일이 45개쯤 됐다. <code>&#x3C;Link to="/users"></code>를 전부 <code>&#x3C;Link to={</code>/g/${slug}/users<code>}></code>로 바꾸는 건 하기도 싫고, 빠뜨리기도 쉽다.</p>
+<p>그래서 react-router의 <code>Link</code>/<code>useNavigate</code>와 시그니처가 같은 <strong>드롭인 래퍼</strong>를 만들었다.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="tsx"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// packages/frontend/src/lib/groupNav.tsx</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 모임(테넌트) 종속 최상위 경로 세그먼트 — 이 경로들만 /g/:slug 프리픽스가 붙는다.</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">export</span><span style="color:#D73A49;--shiki-dark:#F97583"> const</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> GROUP_SEGMENTS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  "users"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"auction"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"calendar"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hall-of-fame"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"notices"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"admin"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  "missions"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"streak-bets"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"season-pass"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"point-bets"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"evaluator"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  "bet-store"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"mentoring"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"eval-feed"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"lfg"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"external-match"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"league"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  "recap"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"inventory"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">as</span><span style="color:#D73A49;--shiki-dark:#F97583"> const</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/** 모임 종속 경로면 /g/&#x3C;slug> 프리픽스를 붙이고, 아니면 그대로 반환. */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">export</span><span style="color:#D73A49;--shiki-dark:#F97583"> function</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> groupHref</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">slug</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">to</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  return</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> isGroupScopedPath</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(to) </span><span style="color:#D73A49;--shiki-dark:#F97583">?</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> `/g/${</span><span style="color:#24292E;--shiki-dark:#E1E4E8">slug</span><span style="color:#032F62;--shiki-dark:#9ECBFF">}${</span><span style="color:#24292E;--shiki-dark:#E1E4E8">to</span><span style="color:#032F62;--shiki-dark:#9ECBFF">}`</span><span style="color:#D73A49;--shiki-dark:#F97583"> :</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> to;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// react-router Link 드롭인. 문자열 to가 모임 종속 경로면 현재 URL의 slug를 프리픽스한다.</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">export</span><span style="color:#D73A49;--shiki-dark:#F97583"> const</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> GLink</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> forwardRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&#x3C;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">HTMLAnchorElement</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">LinkProps</span><span style="color:#24292E;--shiki-dark:#E1E4E8">>(</span><span style="color:#D73A49;--shiki-dark:#F97583">function</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> GLink</span><span style="color:#24292E;--shiki-dark:#E1E4E8">({ </span><span style="color:#E36209;--shiki-dark:#FFAB70">to</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">...</span><span style="color:#E36209;--shiki-dark:#FFAB70">rest</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }, </span><span style="color:#E36209;--shiki-dark:#FFAB70">ref</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  const</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> slug</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> useCurrentSlug</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// useParams().slug ?? 활성 모임</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  const</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> scopedTo</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> To</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#D73A49;--shiki-dark:#F97583"> typeof</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> to </span><span style="color:#D73A49;--shiki-dark:#F97583">===</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "string"</span><span style="color:#D73A49;--shiki-dark:#F97583"> ?</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> groupHref</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(slug, to) </span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> to;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> &#x3C;</span><span style="color:#005CC5;--shiki-dark:#79B8FF">Link</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ref</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{ref} </span><span style="color:#6F42C1;--shiki-dark:#B392F0">to</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{scopedTo} {</span><span style="color:#D73A49;--shiki-dark:#F97583">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">rest} />;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">});</span></span></code></pre>
 <p>핵심은 각 파일에서 <strong>import 한 줄만</strong> 바꾸면 된다는 것.</p>
-
-<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 각 페이지 파일에서 — JSX는 한 글자도 안 바뀐다</span>
-<span class="k">import</span> <span class="p">{</span> <span class="nx">GLink</span> <span class="kd">as </span><span class="nx">Link</span><span class="p">,</span> <span class="nx">useGroupNav</span> <span class="kd">as </span><span class="nx">useNavigate</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@/lib/groupNav</span><span class="dl">"</span><span class="p">;</span>
-<span class="c1">// &lt;Link to="/users"&gt; ... 기존 JSX 그대로</span>
-</code></pre></div></div>
-
-<p><code class="language-plaintext highlighter-rouge">&lt;Link to="/users"&gt;</code>라고 쓰인 JSX는 그대로 두고, 그 <code class="language-plaintext highlighter-rouge">Link</code>가 실제로 렌더하는 주소만 <code class="language-plaintext highlighter-rouge">/g/&lt;현재 slug&gt;/users</code>로 바뀐다. 어떤 경로가 모임 종속인지는 <code class="language-plaintext highlighter-rouge">GROUP_SEGMENTS</code> 화이트리스트가 판단하니, <code class="language-plaintext highlighter-rouge">/profile</code>이나 <code class="language-plaintext highlighter-rouge">/login</code> 같은 전역 경로는 래퍼를 통과해도 프리픽스가 안 붙는다. 02편에서 <code class="language-plaintext highlighter-rouge">account.role</code>의 이름은 유지한 채 값을 채우는 방식만 바꿨던 것과 같은 전략이다 — <strong>인터페이스를 유지하면 파급 범위가 줄어든다.</strong></p>
-
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="tsx"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 각 페이지 파일에서 — JSX는 한 글자도 안 바뀐다</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> { GLink </span><span style="color:#D73A49;--shiki-dark:#F97583">as</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Link, useGroupNav </span><span style="color:#D73A49;--shiki-dark:#F97583">as</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> useNavigate } </span><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "@/lib/groupNav"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// &#x3C;Link to="/users"> ... 기존 JSX 그대로</span></span></code></pre>
+<p><code>&#x3C;Link to="/users"></code>라고 쓰인 JSX는 그대로 두고, 그 <code>Link</code>가 실제로 렌더하는 주소만 <code>/g/&#x3C;현재 slug>/users</code>로 바뀐다. 어떤 경로가 모임 종속인지는 <code>GROUP_SEGMENTS</code> 화이트리스트가 판단하니, <code>/profile</code>이나 <code>/login</code> 같은 전역 경로는 래퍼를 통과해도 프리픽스가 안 붙는다. 02편에서 <code>account.role</code>의 이름은 유지한 채 값을 채우는 방식만 바꿨던 것과 같은 전략이다 — <strong>인터페이스를 유지하면 파급 범위가 줄어든다.</strong></p>
 <p>결과적으로 커밋은 58개 파일을 건드렸지만, 그중 대부분은 import 한 줄 교체였고 실질적인 로직 변경은 라우터와 래퍼 모듈에 집중됐다.</p>
-
-<p><br></p>
-
+<br>
 <h2 id="레거시-경로-호환--북마크는-죄가-없다">레거시 경로 호환 — 북마크는 죄가 없다</h2>
-
-<p>라우트를 옮기면 기존 주소(<code class="language-plaintext highlighter-rouge">/users</code>)로 들어오는 북마크·딥링크·구버전 링크가 전부 404가 된다. 그래서 레거시 루트 경로에는 리다이렉트를 깔았다.</p>
-
-<div class="language-tsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// packages/frontend/src/router.tsx</span>
-<span class="c1">// 레거시 루트 경로(/users 등)로 진입하면 활성 모임 slug를 붙여 /g/:slug/... 로 보낸다.</span>
-<span class="c1">// (북마크·외부 딥링크·구버전 링크 호환. in-app 링크는 GLink가 이미 slug를 담아 여기 안 옴.)</span>
-<span class="kd">function</span> <span class="nf">LegacyGroupRedirect</span><span class="p">()</span> <span class="p">{</span>
-  <span class="kd">const</span> <span class="nx">loc</span> <span class="o">=</span> <span class="nf">useLocation</span><span class="p">();</span>
-  <span class="kd">const</span> <span class="nx">slug</span> <span class="o">=</span> <span class="nf">getActiveGroupSlug</span><span class="p">();</span>
-  <span class="k">return</span> <span class="p">&lt;</span><span class="nc">Navigate</span> <span class="na">to</span><span class="p">=</span><span class="si">{</span><span class="s2">`/g/</span><span class="p">${</span><span class="nx">slug</span><span class="p">}${</span><span class="nx">loc</span><span class="p">.</span><span class="nx">pathname</span><span class="p">}${</span><span class="nx">loc</span><span class="p">.</span><span class="nx">search</span><span class="p">}${</span><span class="nx">loc</span><span class="p">.</span><span class="nx">hash</span><span class="p">}</span><span class="s2">`</span><span class="si">}</span> <span class="na">replace</span> <span class="p">/&gt;;</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>여기서만큼은 여전히 “활성 모임” localStorage 값을 쓴다 — 레거시 주소에는 모임 정보가 없으니 달리 방법이 없다. 대신 이 경로는 이제 “외부에서 옛 주소로 들어온 첫 진입” 한 번뿐이고, 리다이렉트된 순간부터는 URL이 진실이 된다. 커밋 기록 기준으로 tsc와 vite 빌드, 그리고 <code class="language-plaintext highlighter-rouge">groupHref</code> 판정 로직의 19개 케이스 검증을 통과시킨 뒤 배포했다.</p>
-
-<p><br></p>
-
+<p>라우트를 옮기면 기존 주소(<code>/users</code>)로 들어오는 북마크·딥링크·구버전 링크가 전부 404가 된다. 그래서 레거시 루트 경로에는 리다이렉트를 깔았다.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="tsx"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// packages/frontend/src/router.tsx</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 레거시 루트 경로(/users 등)로 진입하면 활성 모임 slug를 붙여 /g/:slug/... 로 보낸다.</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// (북마크·외부 딥링크·구버전 링크 호환. in-app 링크는 GLink가 이미 slug를 담아 여기 안 옴.)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">function</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> LegacyGroupRedirect</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  const</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> loc</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> useLocation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  const</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> slug</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> getActiveGroupSlug</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> &#x3C;</span><span style="color:#005CC5;--shiki-dark:#79B8FF">Navigate</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> to</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">`/g/${</span><span style="color:#24292E;--shiki-dark:#E1E4E8">slug</span><span style="color:#032F62;--shiki-dark:#9ECBFF">}${</span><span style="color:#24292E;--shiki-dark:#E1E4E8">loc</span><span style="color:#032F62;--shiki-dark:#9ECBFF">.</span><span style="color:#24292E;--shiki-dark:#E1E4E8">pathname</span><span style="color:#032F62;--shiki-dark:#9ECBFF">}${</span><span style="color:#24292E;--shiki-dark:#E1E4E8">loc</span><span style="color:#032F62;--shiki-dark:#9ECBFF">.</span><span style="color:#24292E;--shiki-dark:#E1E4E8">search</span><span style="color:#032F62;--shiki-dark:#9ECBFF">}${</span><span style="color:#24292E;--shiki-dark:#E1E4E8">loc</span><span style="color:#032F62;--shiki-dark:#9ECBFF">.</span><span style="color:#24292E;--shiki-dark:#E1E4E8">hash</span><span style="color:#032F62;--shiki-dark:#9ECBFF">}`</span><span style="color:#24292E;--shiki-dark:#E1E4E8">} </span><span style="color:#6F42C1;--shiki-dark:#B392F0">replace</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> />;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>여기서만큼은 여전히 “활성 모임” localStorage 값을 쓴다 — 레거시 주소에는 모임 정보가 없으니 달리 방법이 없다. 대신 이 경로는 이제 “외부에서 옛 주소로 들어온 첫 진입” 한 번뿐이고, 리다이렉트된 순간부터는 URL이 진실이 된다. 커밋 기록 기준으로 tsc와 vite 빌드, 그리고 <code>groupHref</code> 판정 로직의 19개 케이스 검증을 통과시킨 뒤 배포했다.</p>
+<br>
 <h2 id="정리">정리</h2>
-
 <ol>
-  <li>
-<strong>상태가 두 곳에 있으면 언젠가 어긋난다.</strong> “지금 어느 모임인가”가 URL(일부)과 localStorage(나머지)에 나뉘어 있던 게 근본 원인이었다. 동기화를 부지런히 하는 건 완화일 뿐, 원본(source of truth)을 하나로 만드는 것만이 해결이다.</li>
-  <li>
-<strong>웹에서 화면 컨텍스트의 원본은 URL이어야 한다.</strong> URL은 새 탭·북마크·뒤로가기·새로고침 전부에서 살아남는 유일한 상태다. 백엔드가 헤더로 스코프하는 구조라면, 그 헤더의 출처가 URL이 되는 순간 프론트 격리도 완성된다.</li>
-  <li>
-<strong>대량 마이그레이션은 인터페이스를 유지한 드롭인으로.</strong> 45개 파일의 JSX를 고치는 대신 <code class="language-plaintext highlighter-rouge">Link</code>/<code class="language-plaintext highlighter-rouge">useNavigate</code>와 시그니처가 같은 래퍼를 만들어 import만 바꿨다. 빠뜨림 위험이 “모든 링크”에서 “import 한 줄”로 줄어든다.</li>
-  <li>
-<strong>격리는 백엔드만의 일이 아니다.</strong> 10편까지는 “서버가 틀린 데이터를 주는” 사고였고, 이번 건 “프론트가 틀린 요청을 하는” 사고였다. 테넌시는 요청이 만들어지는 곳부터 응답이 조립되는 곳까지 전 구간의 일이라는 걸, 마지막 조각을 맞추고서야 실감했다.</li>
-</ol>
+<li><strong>상태가 두 곳에 있으면 언젠가 어긋난다.</strong> “지금 어느 모임인가”가 URL(일부)과 localStorage(나머지)에 나뉘어 있던 게 근본 원인이었다. 동기화를 부지런히 하는 건 완화일 뿐, 원본(source of truth)을 하나로 만드는 것만이 해결이다.</li>
+<li><strong>웹에서 화면 컨텍스트의 원본은 URL이어야 한다.</strong> URL은 새 탭·북마크·뒤로가기·새로고침 전부에서 살아남는 유일한 상태다. 백엔드가 헤더로 스코프하는 구조라면, 그 헤더의 출처가 URL이 되는 순간 프론트 격리도 완성된다.</li>
+<li><strong>대량 마이그레이션은 인터페이스를 유지한 드롭인으로.</strong> 45개 파일의 JSX를 고치는 대신 <code>Link</code>/<code>useNavigate</code>와 시그니처가 같은 래퍼를 만들어 import만 바꿨다. 빠뜨림 위험이 “모든 링크”에서 “import 한 줄”로 줄어든다.</li>
+<li><strong>격리는 백엔드만의 일이 아니다.</strong> 10편까지는 “서버가 틀린 데이터를 주는” 사고였고, 이번 건 “프론트가 틀린 요청을 하는” 사고였다. 테넌시는 요청이 만들어지는 곳부터 응답이 조립되는 곳까지 전 구간의 일이라는 걸, 마지막 조각을 맞추고서야 실감했다.</li>
+</ol></div></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/lol-moim-incidents-17-tenant-path-migration.html";
+const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
-
-    </div>
-
-</article>
-<div class="post-nav">
-<a class="previous" href="/journal/development%20diary/2026/07/27/lol-moim-incidents-16-zero-value-bugs.html" title="[ 롤모임 운영일지 ] - 16. 0점 입찰은 왜 자꾸 사라졌나 — falsy zero 버그 모음">[ 롤모임 운영일지 ] - 16....</a><a class="next" href="/journal/development%20diary/2026/07/27/lol-moim-incidents-18-rawinfo-r2-design.html" title="[ 롤모임 운영일지 ] - 18. DB를 다 먹는 테이블 하나 — rawInfo를 밖으로 빼는 설계">[ 롤모임 운영일지 ] - 18....</a>
-</div>
-<div class="post-related">
-      <div>Related Articles</div>
-      <ul>
-        <li class="">
-          <a class="post-link" href="/study/javascript/2025/01/15/angularjs.html" title="AngularJS">
-            AngularJS<span class="post-badges">
-  <span class="post-badge badge-top">TOP</span></span>
-</a>
-        </li>
-<li class="">
-          <a class="post-link" href="/journal/development%20diary/2026/07/22/k8s-study-02-pod.html" title="[ K8s 스터디 ] - 02. Pod, 컨테이너를 담는 박스">
-            [ K8s 스터디 ] - 02. Pod, 컨테이너를 담는 박스<span class="post-badges">
-  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
-</a>
-        </li>
-<li class="">
-          <a class="post-link" href="/study/datadog/2026/07/22/datadog-study-05-apm-instrumentation.html" title="데이터독(Datadog) 학습 정리 (5) - APM 트레이스 계측(Instrumentation) 원리">
-            데이터독(Datadog) 학습 정리 (5) - APM 트레이스 계측(Instrumentation) 원리<span class="post-badges">
-  <span class="post-badge badge-top">TOP</span><span class="post-badge badge-new">NEW</span></span>
-</a>
-        </li>
-<li class="">
-          <a class="post-link" href="/study/javascript/2024/12/31/for.html" title="javascript의 for는 함수가 아니야?">
-            javascript의 for는 함수가 아니야?<span class="post-badges">
-  <span class="post-badge badge-top">TOP</span></span>
-</a>
-        </li>
-</ul>
-    </div>
-<div class="post-comments">
-<div id="utterances-placeholder"></div>
-<script>
-  const utterancesThemeFromDataTheme = () => {
-    const dataTheme = document.documentElement.getAttribute('data-theme');
-    return `github-${dataTheme}`;
-  };
-
-  const setUtterancesTheme = () => {
-    const iframe = document.querySelector('.utterances-frame');
-    if (iframe) {
-      const message = {
-        type: 'set-theme',
-        theme: utterancesThemeFromDataTheme()
-      };
-      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
-    }
-  }
-
-  // dynamic change
-  const observer = new MutationObserver((mutationsList, observer) => {
-    for (let mutation of mutationsList) {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-        setUtterancesTheme();
-      }
-    }
-  });
-  observer.observe(document.documentElement, { attributes: true, childList: false, subtree: false });
-
-  let utterancesScript = document.createElement('script');
-  utterancesScript.async = true;
-  utterancesScript.src = 'https://utteranc.es/client.js';
-  utterancesScript.crossOrigin = 'anonymous';
-  utterancesScript.setAttribute('issue-term', 'title');
-  utterancesScript.setAttribute('label', 'utterances comment');
-  utterancesScript.setAttribute('repo', 'kimmand0o0/kimmand0o0.github.io');
-  utterancesScript.setAttribute('theme', utterancesThemeFromDataTheme());
-
-  const placeholder = document.getElementById('utterances-placeholder');
-  placeholder.parentNode.replaceChild(utterancesScript, placeholder);
-</script>
-</div></section>
-</div>
-
-  </section><section class="sidebar"><style type="text/css" media="screen">
-.post-menu ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-</style>
-
-<div class="post-menu">
-  <div class="post-menu-title">TOC</div>
-  <div class="post-menu-content"></div>
-</div>
-
-<script>
-  function generateContent() {
-    var menu = document.querySelector(".post-menu");
-    var menuContent =  menu.querySelector(".post-menu-content");
-    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
-
-    // Hide menu when no headings
-    if (headings.length === 0) {
-      return menu.style.display = "none";
-    }
-
-    // Generate post menu
-    var menuHTML = '';
-    for (var i = 0; i < headings.length; i++) {
-      var h = headings[i];
-      menuHTML += (
-        '<li class="h-' + h.tagName.toLowerCase() + '">'
-        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
-    }
-
-    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
-
-    // The header element
-    var header = document.querySelector('header.site-header');
-
-    function doMenuCollapse(index, over_items) {
-      var items = menuContent.firstChild.children;
-
-      if (over_items == undefined) {
-        over_items = 20;
-      }
-
-      if (items.length < over_items) {
-        return;
-      }
-
-      var activeItem = items[index];
-      var beginItem = activeItem
-      var endItem = activeItem
-      var beginIndex = index;
-      var endIndex = index + 1;
-      while (beginIndex >= 0
-        && !items[beginIndex].classList.contains('h-h2')) {
-        beginIndex -= 1;
-      }
-      while (endIndex < items.length
-        && !items[endIndex].classList.contains('h-h2')) {
-        endIndex += 1;
-      }
-      for (var i = 0; i < beginIndex; i++) {
-        item = items[i]
-        if (!item.classList.contains('h-h2')) {
-          item.style.display = 'none';
+        // 조회수 1회 기록 — 실패해도 페이지에는 영향 없음(검색 페이지의 "많이 본 글" 소스)
+        fetch(chatOrigin + '/api/view', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: viewPath }),
+          keepalive: true,
+        }).catch(function () {});
+      })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#증상--백엔드를-다-고쳤는데-왜-또-섞이나">증상 — 백엔드를 다 고쳤는데 왜 또 섞이나</a></li><li class="depth-2"><a href="#원인--모임-컨텍스트가-url-밖에-있었다">원인 — 모임 컨텍스트가 URL 밖에 있었다</a></li><li class="depth-2"><a href="#첫-수습--홈-진입-시-활성-모임을-확정하기">첫 수습 — 홈 진입 시 활성 모임을 확정하기</a></li><li class="depth-2"><a href="#근본-해결--url이-모임을-담게-하기">근본 해결 — URL이 모임을 담게 하기</a></li><li class="depth-2"><a href="#45개-파일을-안-고치고-고치는-법--드롭인-마이그레이션">45개 파일을 “안 고치고” 고치는 법 — 드롭인 마이그레이션</a></li><li class="depth-2"><a href="#레거시-경로-호환--북마크는-죄가-없다">레거시 경로 호환 — 북마크는 죄가 없다</a></li><li class="depth-2"><a href="#정리">정리</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+      // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
+      (function () {
+        var root = document.documentElement;
+        function sync() {
+          root.setAttribute('data-scrolled', window.scrollY > 8 ? 'true' : 'false');
         }
-      }
-      for (var i = beginIndex + 1; i < endIndex; i++) {
-        item = items[i]
-        // if (!item.classList.contains('h-h2')) {
-          item.style.display = '';
-        // }
-      }
-      for (var i = endIndex; i < items.length; i++) {
-        item = items[i]
-        if (!item.classList.contains('h-h2')) {
-          item.style.display = 'none';
-        }
-      }
-    }
+        sync();
+        window.addEventListener('scroll', sync, { passive: true });
+      })();
 
-    // Init menu collapsed
-    doMenuCollapse(-1);
-
-    // Active the menu item
-    window.addEventListener('scroll', function (event) {
-      var lastActive = menuContent.querySelector('.active');
-      var changed = true;
-      var activeIndex = -1;
-      for (var i = headings.length - 1; i >= 0; i--) {
-        var h = headings[i];
-        var headingRect = h.getBoundingClientRect();
-        var headerRect = header.getBoundingClientRect();
-        var headerTop = Math.floor(headerRect.top);
-        var headerHeight = Math.floor(headerRect.height);
-        var headerHeight = headerTop + headerHeight + 20;
-        if (headingRect.top <= headerHeight) {
-          var id = 'h-' + h.getAttribute('id');
-          var a = menuContent.querySelector('a[href="#' + id  + '"]');
-          var curActive = a.parentNode;
-          if (curActive) {
-            curActive.classList.add('active');
-            activeIndex = i;
+      // 목차 — 현재 읽고 있는 섹션 표시
+      (function () {
+        var links = document.querySelectorAll('.toc a');
+        if (!links.length) return;
+        var map = {};
+        var targets = [];
+        links.forEach(function (a) {
+          var id = decodeURIComponent(a.getAttribute('href').slice(1));
+          var el = document.getElementById(id);
+          if (el) {
+            map[id] = a;
+            targets.push(el);
           }
-          if (lastActive == curActive) {
-            changed = false;
-          }
-          break;
-        }
+        });
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (e) {
+              if (!e.isIntersecting) return;
+              links.forEach(function (a) { a.classList.remove('active'); });
+              var a = map[e.target.id];
+              if (a) a.classList.add('active');
+            });
+          },
+          // 헤더 아래 상단 밴드에 들어온 헤딩을 현재 섹션으로 본다
+          { rootMargin: '-72px 0px -75% 0px' }
+        );
+        targets.forEach(function (el) { io.observe(el); });
+      })();
+
+      document.getElementById('theme-toggle').addEventListener('click', function () {
+        var next =
+          document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+      });
+    </script> <script type="module">
+      // mermaid 클라이언트 렌더 (기존 Jekyll 셋업과 동일하게 mermaid@10 사용)
+      if (document.querySelector('pre.mermaid')) {
+        const { default: mermaid } = await import(
+          'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'
+        );
+        mermaid.initialize({
+          startOnLoad: false,
+          theme:
+            document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+        });
+        mermaid.run({ querySelector: 'pre.mermaid' });
       }
-      if (changed) {
-        if (lastActive) {
-          lastActive.classList.remove('active');
-        }
-        doMenuCollapse(activeIndex);
-      }
-      event.preventDefault();
-    });
-  }
-  generateContent();
-</script>
-</section>
-</div>
-
-    </div>
-  </main><footer class="site-footer h-card">
-  <data class="u-url" href="/"></data>
-
-  <div class="wrapper">
-    <div class="site-footer-inner">
-<div class="footer-social">
-        <a href="https://github.com/kimmand0o0" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>
-        <a href="mailto:maeran.dev.u@gmail.com" aria-label="Email"><i class="fa fa-envelope" aria-hidden="true"></i></a>
-        <a href="/feed.xml" aria-label="RSS"><i class="fa fa-rss" aria-hidden="true"></i></a>
-      </div>
-      <div>Unpublished Work <span class="copyleft">©</span> 2017-2026 Haeran</div>
-      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
-      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
-      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
-    </div>
-  </div>
-</footer>
-</body>
-
-</html>
+    </script> </body> </html>
