@@ -7,12 +7,23 @@ import { SITE } from '../lib/posts';
   <h1 class="page-title">Search</h1>
   <input id="search-input" type="search" placeholder="제목·태그·본문으로 검색…" autofocus />
 
-  <nav class="sort-bar" aria-label="정렬 기준">
-    <button type="button" class="sort-btn" data-sort="recent" aria-pressed="true">최신순</button>
-    <button type="button" class="sort-btn" data-sort="views" aria-pressed="false">조회순</button>
-    <button type="button" class="sort-btn" data-sort="comments" aria-pressed="false">댓글순</button>
-    <button type="button" class="sort-btn" data-sort="likes" aria-pressed="false">추천순</button>
-  </nav>
+  <div class="list-head">
+    <p class="post-count" id="post-count"></p>
+    <nav class="sort-bar" aria-label="정렬 기준">
+    <button type="button" class="sort-toggle" aria-expanded="false">
+      <span class="sort-current">최신순</span>
+      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="sort-menu">
+      <div class="sort-menu-inner">
+        <button type="button" class="sort-btn" data-sort="recent" aria-pressed="true">최신순</button>
+        <button type="button" class="sort-btn" data-sort="views" aria-pressed="false">조회순</button>
+        <button type="button" class="sort-btn" data-sort="comments" aria-pressed="false">댓글순</button>
+        <button type="button" class="sort-btn" data-sort="likes" aria-pressed="false">추천순</button>
+      </div>
+      </div>
+    </nav>
+  </div>
 
   <!-- 검색 전: 많이 본 글 상위 10 (조회수 API가 없으면 최근 글로 폴백) -->
   <section id="default-section">
@@ -72,6 +83,11 @@ import { SITE } from '../lib/posts';
         );
       }
 
+      var countEl = document.getElementById('post-count');
+      function setCount(n, label) {
+        countEl.innerHTML = label + ' <strong>' + n + '</strong>편';
+      }
+
       function render(el, list) {
         el.innerHTML = sorted(list).map(row).join('');
         if (window.fillViews) window.fillViews(el);
@@ -95,6 +111,7 @@ import { SITE } from '../lib/posts';
           defaultSection.hidden = false;
           resultSection.hidden = true;
           emptySection.hidden = true;
+          setCount(posts.length, '전체');
           return;
         }
         defaultSection.hidden = true;
@@ -102,11 +119,13 @@ import { SITE } from '../lib/posts';
         if (hits.length) {
           resultSection.hidden = false;
           emptySection.hidden = true;
-          resultTitle.textContent = '검색 결과 (' + hits.length + ')';
+          resultTitle.textContent = '검색 결과';
+          setCount(hits.length, '검색 결과');
           render(resultList, hits.slice(0, 50));
         } else {
           resultSection.hidden = true;
           emptySection.hidden = false;
+          setCount(0, '검색 결과');
           emptyMessage.textContent = '“' + q + '”에 해당하는 글이 없어요.';
           // 추천 5개는 기본 목록(많이 본 글 또는 최근 글)에서 가져온다
           render(emptyList, (window.__defaultPosts || posts).slice(0, 5));
@@ -140,6 +159,7 @@ import { SITE } from '../lib/posts';
           posts = json;
           // 기본값은 최근 글 — 조회수 데이터가 도착하면 그때 교체한다
           window.__defaultPosts = posts.slice(0, 10);
+          setCount(posts.length, '전체');
           render(defaultList, window.__defaultPosts);
           input.addEventListener('input', onInput);
 

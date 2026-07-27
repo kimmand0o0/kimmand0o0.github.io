@@ -182,31 +182,87 @@ html[data-scrolled='true'] .site-header {
 }
 #theme-toggle:hover { color: var(--accent); transform: rotate(180deg); }
 
-/* ── 정렬 필터 ─────────────────────────────── */
-.sort-bar {
-  display: flex; flex-wrap: wrap; gap: 0.35rem;
+/* ── 목록 머리 (좌: 글 수 / 우: 정렬 필터) ─────────────────────────────── */
+.list-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
   margin: 2rem 0 0;
 }
+.post-count {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.post-count strong {
+  color: var(--fg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 정렬 필터 (우측 정렬 + 접기/펼치기) ─────────────────────────────── */
+.sort-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* 오른쪽으로 */
+}
+.sort-toggle {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-family: inherit; font-size: 0.8rem; font-weight: 650;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  border-radius: 999px;
+  padding: 0.25rem 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.sort-toggle svg { transition: transform 0.25s ease; }
+.sort-bar.open .sort-toggle svg { transform: rotate(180deg); }
+
+/* grid-template-rows 0fr → 1fr 은 높이를 몰라도 부드럽게 펼쳐진다 */
+.sort-menu {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.2s ease;
+  opacity: 0;
+}
+.sort-bar.open .sort-menu { grid-template-rows: 1fr; opacity: 1; }
+.sort-menu-inner {
+  overflow: hidden; /* 0fr 일 때 내용이 삐져나오지 않게 */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  /* 접혔을 때 padding 이 남으면 높이가 0 이 되지 않는다 — 펼칠 때만 준다 */
+  padding-top: 0;
+  transition: padding-top 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sort-bar.open .sort-menu-inner { padding-top: 0.4rem; }
 .sort-btn {
   font-family: inherit;
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--muted);
   background: none;
-  border: 1px solid transparent;
+  border: 1px solid var(--border);
   border-radius: 999px;
   padding: 0.25rem 0.75rem;
   cursor: pointer;
   transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
-.sort-btn:hover { color: var(--accent); }
+.sort-btn:hover { color: var(--accent); border-color: var(--accent); }
 .sort-btn[aria-pressed='true'] {
   color: var(--accent);
   font-weight: 650;
   background: var(--accent-soft);
   border-color: color-mix(in srgb, var(--accent) 22%, transparent);
 }
-.post-list + .sort-bar, .sort-bar + .post-list { margin-top: 1rem; }
+@media (prefers-reduced-motion: reduce) {
+  .sort-menu { transition: none; }
+}
 
 /* ── 글 목록 ─────────────────────────────── */
 .post-list { list-style: none; margin: 2.25rem 0 0; padding: 0; }

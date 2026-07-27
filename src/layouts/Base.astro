@@ -277,6 +277,36 @@ const NAV = [
         }
       }
 
+      // 정렬 필터 접기/펼치기 — 선택된 항목만 보이고, 누르면 스르륵 펼쳐진다
+      {
+        const bar = document.querySelector('.sort-bar');
+        if (bar) {
+          const toggle = bar.querySelector('.sort-toggle');
+          const current = bar.querySelector('.sort-current');
+          const setOpen = (open) => {
+            bar.classList.toggle('open', open);
+            toggle.setAttribute('aria-expanded', String(open));
+          };
+          toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setOpen(!bar.classList.contains('open'));
+          });
+          // 항목을 고르면 라벨을 바꾸고 접는다 (정렬 자체는 각 페이지 스크립트가 처리)
+          bar.querySelectorAll('.sort-btn').forEach((b) => {
+            b.addEventListener('click', () => {
+              current.textContent = b.textContent.trim();
+              setOpen(false);
+            });
+          });
+          document.addEventListener('click', (e) => {
+            if (bar.classList.contains('open') && !bar.contains(e.target)) setOpen(false);
+          });
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') setOpen(false);
+          });
+        }
+      }
+
       // 모바일 햄버거 메뉴
       {
         const toggle = document.getElementById('nav-toggle');
