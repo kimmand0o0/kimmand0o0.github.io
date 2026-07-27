@@ -110,6 +110,59 @@ export function readingTip(post: Post): string {
   return `이 게시글을 읽는 데 ${readingMinutes(post)}분 정도 걸릴 것 같아요!`;
 }
 
+/**
+ * 제목에서 시리즈명과 회차를 뽑는다. 이 블로그에 실제로 쓰인 세 가지 형태만 인식한다:
+ *   [ 롤모임 운영일지 ] - 22. 부제
+ *   LLM 프롬프팅 논문 스터디 - 07. 부제
+ *   데이터독(Datadog) 학습 정리 (6) - 부제
+ * 못 알아보면 null — 시리즈가 아닌 단독 글이다.
+ */
+export function seriesOf(post: Post): { name: string; no: number } | null {
+  const title = post.data.title;
+  const bracket = title.match(/^\[\s*(.+?)\s*\]\s*[-–—]\s*(\d+)\.\s*/);
+  if (bracket) return { name: bracket[1], no: Number(bracket[2]) };
+
+  const paren = title.match(/^(.+?)\s*\((\d+)\)\s*[-–—]\s*/);
+  if (paren) return { name: paren[1], no: Number(paren[2]) };
+
+  const plain = title.match(/^(.+?)\s+[-–—]\s*(\d+)\.\s*/);
+  if (plain) return { name: plain[1], no: Number(plain[2]) };
+
+  return null;
+}
+
+export type SeriesNav = {
+  name: string;
+  index: number; // 1부터
+  total: number;
+  prev: { title: string; url: string } | null;
+  next: { title: string; url: string } | null;
+};
+
+/** 같은 시리즈 글들을 회차 순으로 세워 현재 글의 앞뒤를 찾는다 */
+export function seriesNavFor(post: Post, posts: Post[]): SeriesNav | null {
+  const me = seriesOf(post);
+  if (!me) return null;
+
+  const siblings = posts
+    .map((p) => ({ p, s: seriesOf(p) }))
+    .filter((x): x is { p: Post; s: { name: string; no: number } } => x.s?.name === me.name)
+    .sort((a, b) => a.s.no - b.s.no);
+
+  if (siblings.length < 2) return null; // 혼자면 시리즈로 보지 않는다
+
+  const at = siblings.findIndex((x) => x.p.id === post.id);
+  const link = (x?: { p: Post }) => (x ? { title: x.p.data.title, url: postPath(x.p) } : null);
+
+  return {
+    name: me.name,
+    index: at + 1,
+    total: siblings.length,
+    prev: link(siblings[at - 1]),
+    next: link(siblings[at + 1]),
+  };
+}
+
 export async function allPosts(): Promise<Post[]> {
   const posts = await getCollection('posts');
   return posts.sort((a, b) => postDate(b).getTime() - postDate(a).getTime());

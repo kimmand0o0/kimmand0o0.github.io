@@ -301,12 +301,82 @@ async function handleListComments(url: URL, env: Env): Promise<Response> {
   if (!isPostPath(path)) return jsonResponse({ error: 'invalid_path' }, 400, env);
 
   const { results } = await env.CHAT_LOGS_DB.prepare(
-    'SELECT id, author, body, created_at FROM comments WHERE path = ? AND hidden = 0 ORDER BY id ASC LIMIT 500'
+    'SELECT id, author, body, created_at, is_bot, parent_id FROM comments WHERE path = ? AND hidden = 0 ORDER BY id ASC LIMIT 500'
   )
     .bind(path)
-    .all<{ id: number; author: string; body: string; created_at: string }>();
+    .all<{ id: number; author: string; body: string; created_at: string; is_bot: number; parent_id: number | null }>();
 
   return jsonResponse({ items: results ?? [] }, 200, env);
+}
+
+const BOT_NAME = '만두봇';
+
+/**
+ * 댓글이 달리면 (1) 스팸인지 판정하고 (2) 스팸이 아니면 대댓글을 단다.
+ * 응답을 기다리게 하지 않으려고 ctx.waitUntil 로 뒤에서 돈다.
+ * 실패는 전부 삼킨다 — 봇이 죽어도 댓글 자체는 남아야 한다.
+ */
+async function moderateAndReply(
+  env: Env,
+  comment: { id: number; path: string; author: string; body: string; parentId: number | null }
+): Promise<void> {
+  try {
+    // 봇이 자기 말에 다시 답하는 무한 루프를 막는 1차 방어
+    if (comment.author === BOT_NAME) return;
+    if (await isBudgetExceeded(env)) return;
+
+    // 1) 스팸 판정 — 애매하면 통과시킨다(오탐으로 진짜 댓글을 숨기는 쪽이 더 나쁘다)
+    const verdictRes = await callOpenAi(env, '/v1/chat/completions', {
+      model: env.CHAT_MODEL,
+      max_tokens: 5,
+      temperature: 0,
+      messages: [
+        {
+          role: 'system',
+          content:
+            '너는 개인 기술 블로그의 댓글 스팸 필터다. 광고, 도박/성인 사이트 홍보, 무의미한 문자열, 링크 낚시만 스팸으로 본다. ' +
+            '비판·반말·짧은 감상은 스팸이 아니다. 확신이 없으면 ham 이라고 답한다. ' +
+            'spam 또는 ham 한 단어로만 답하라.',
+        },
+        { role: 'user', content: `작성자: ${comment.author}\n내용: ${comment.body}` },
+      ],
+    });
+
+    if (verdictRes.ok) {
+      const v = (await verdictRes.json()) as { choices: Array<{ message: { content: string } }> };
+      if (v.choices[0].message.content.trim().toLowerCase().startsWith('spam')) {
+        await env.CHAT_LOGS_DB.prepare('UPDATE comments SET hidden = 1 WHERE id = ?')
+          .bind(comment.id)
+          .run();
+        return; // 스팸에는 답하지 않는다
+      }
+    }
+
+    // 2) 대댓글 — 글 제목(경로)과 댓글만 근거로, 짧게
+    const { answer } = await callChatModel(
+      env,
+      `블로그 글 "${comment.path}" 에 아래 댓글이 달렸어. 블로그 주인을 대신하지 말고, ` +
+        `블로그 도우미 "${BOT_NAME}" 로서 2~3문장으로 짧고 친근하게 답해줘. ` +
+        `모르는 내용은 아는 척하지 말고, 글 내용에 대한 질문이면 아는 범위에서만 답해.\n\n` +
+        `작성자: ${comment.author}\n댓글: ${comment.body}`
+    );
+
+    if (!answer) return;
+
+    await env.CHAT_LOGS_DB.prepare(
+      'INSERT INTO comments (path, author, body, created_at, is_bot, parent_id) VALUES (?, ?, ?, ?, 1, ?)'
+    )
+      .bind(
+        comment.path,
+        BOT_NAME,
+        answer.slice(0, MAX_BODY),
+        new Date().toISOString(),
+        comment.parentId ?? comment.id
+      )
+      .run();
+  } catch (err) {
+    console.error('moderateAndReply failed:', err);
+  }
 }
 
 /** 목록 화면이 글마다 댓글 수를 한 번에 채우기 위한 집계 */
@@ -318,7 +388,11 @@ async function handleCommentCounts(env: Env): Promise<Response> {
   return jsonResponse({ items: results ?? [] }, 200, env);
 }
 
-async function handleCreateComment(request: Request, env: Env): Promise<Response> {
+async function handleCreateComment(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext
+): Promise<Response> {
   const clientIp = request.headers.get('CF-Connecting-IP') ?? 'unknown';
   const { success } = await env.COMMENT_RATE_LIMITER.limit({ key: clientIp });
   if (!success) return jsonResponse({ error: 'rate_limited' }, 429, env);
@@ -339,14 +413,36 @@ async function handleCreateComment(request: Request, env: Env): Promise<Response
   if (!author || author.length > MAX_AUTHOR) return jsonResponse({ error: 'invalid_author' }, 400, env);
   if (!text || text.length > MAX_BODY) return jsonResponse({ error: 'invalid_comment' }, 400, env);
 
+  // 답글 대상 — 같은 글의 살아있는 댓글이어야 하고, 답글의 답글이면 그 부모로 끌어올린다
+  let parentId: number | null = null;
+  if (Number.isInteger(body.parentId)) {
+    const row = await env.CHAT_LOGS_DB.prepare(
+      'SELECT id, parent_id FROM comments WHERE id = ? AND path = ? AND hidden = 0'
+    )
+      .bind(body.parentId, path)
+      .first<{ id: number; parent_id: number | null }>();
+    if (row) parentId = row.parent_id ?? row.id;
+  }
+
   const now = new Date().toISOString();
   const ipHash = (await sha256(clientIp)).slice(0, 16);
 
   const { meta } = await env.CHAT_LOGS_DB.prepare(
-    'INSERT INTO comments (path, author, body, created_at, ip_hash) VALUES (?, ?, ?, ?, ?)'
+    'INSERT INTO comments (path, author, body, created_at, ip_hash, parent_id) VALUES (?, ?, ?, ?, ?, ?)'
   )
-    .bind(path, author, text, now, ipHash)
+    .bind(path, author, text, now, ipHash, parentId)
     .run();
+
+  // 스팸 판정 + 대댓글은 응답을 막지 않고 뒤에서 처리한다
+  ctx.waitUntil(
+    moderateAndReply(env, {
+      id: Number(meta.last_row_id),
+      path,
+      author,
+      body: text,
+      parentId,
+    })
+  );
 
   return jsonResponse(
     { item: { id: meta.last_row_id, author, body: text, created_at: now } },
@@ -374,7 +470,7 @@ export default {
         return await handleListComments(url, env);
       }
       if (url.pathname === '/api/comments' && request.method === 'POST') {
-        return await handleCreateComment(request, env);
+        return await handleCreateComment(request, env, ctx);
       }
       if (url.pathname === '/api/comments/counts' && request.method === 'GET') {
         return await handleCommentCounts(env);

@@ -73,20 +73,26 @@ const NAV = [
           {/* 글 제목이 화면 밖으로 나가면 소개 문구 자리에 제목이 대신 뜬다 */}
           <p class="header-post-title" hidden></p>
         </div>
-        <nav>
-          {
-            NAV.map((item) => (
-              <a
-                href={item.href}
-                class={path === item.href ? 'active' : undefined}
-                aria-current={path === item.href ? 'page' : undefined}
-              >
-                {item.label}
-              </a>
-            ))
-          }
+        <div class="header-actions">
+          <nav id="site-nav">
+            {
+              NAV.map((item) => (
+                <a
+                  href={item.href}
+                  class={path === item.href ? 'active' : undefined}
+                  aria-current={path === item.href ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
+              ))
+            }
+          </nav>
           <button id="theme-toggle" aria-label="테마 전환">◐</button>
-        </nav>
+          {/* 모바일에서만 보이는 햄버거 — 위 nav 를 드롭다운으로 연다 */}
+          <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
       </div>
     </header>
     <div class="wrap">
@@ -207,6 +213,29 @@ const NAV = [
           );
           io.observe(postTitle);
         }
+      }
+
+      // 모바일 햄버거 메뉴
+      {
+        const toggle = document.getElementById('nav-toggle');
+        const nav = document.getElementById('site-nav');
+        const setOpen = (open) => {
+          nav.classList.toggle('open', open);
+          toggle.setAttribute('aria-expanded', String(open));
+          toggle.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+          toggle.classList.toggle('is-open', open);
+        };
+        toggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          setOpen(!nav.classList.contains('open'));
+        });
+        // 메뉴 밖을 누르거나 ESC 를 누르면 닫는다
+        document.addEventListener('click', (e) => {
+          if (nav.classList.contains('open') && !nav.contains(e.target)) setOpen(false);
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') setOpen(false);
+        });
       }
 
       document.getElementById('theme-toggle').addEventListener('click', () => {
