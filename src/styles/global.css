@@ -143,18 +143,28 @@ html[data-scrolled='true'] .site-header {
 .post-list { list-style: none; margin: 1rem 0 0; padding: 0; }
 .post-list li { padding: 1.4rem 0; border-bottom: 1px solid var(--border); }
 .post-list li:last-child { border-bottom: none; }
+/* 제목 줄: 제목은 왼쪽에서 늘어나고, 분량은 오른쪽 끝에 고정 */
+.post-list .title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
 .post-list .title {
-  display: block;
+  flex: 1;
+  min-width: 0;
   font-size: 1.06rem;
   font-weight: 700;
   line-height: 1.6;
   letter-spacing: -0.022em;
 }
+.post-list .title-row .reading { flex: none; white-space: nowrap; }
 .post-list .title:hover { color: var(--accent); }
 .post-list .meta {
   display: flex; align-items: center; gap: 0.55rem;
   margin-top: 0.5rem; font-size: 0.78rem; color: var(--muted);
 }
+/* 날짜는 같은 줄 맨 오른쪽으로 */
+.post-list .meta time { margin-left: auto; }
 .post-list time { font-variant-numeric: tabular-nums; color: var(--faint); }
 .post-list .excerpt {
   margin: 0.45rem 0 0;

@@ -25,15 +25,17 @@ const initial = posts.slice(0, INITIAL);
     {
       initial.map((post) => (
         <li>
-          <a class="title" href={postPath(post)}>
-            {post.data.title}
-          </a>
+          <div class="title-row">
+            <a class="title" href={postPath(post)}>
+              {post.data.title}
+            </a>
+            <span class="reading tip" data-tip={readingTip(post)}>{readingLabel(post)}</span>
+          </div>
           <p class="excerpt">{excerptOf(post, 150)}</p>
           <div class="meta">
-            <time>{formatDate(post)}</time>
             <span class="chip">{categoriesOf(post).at(-1)}</span>
-            <span class="reading tip" data-tip={readingTip(post)}>{readingLabel(post)}</span>
             <span class="views" data-views-path={postPath(post)} hidden />
+            <time>{formatDate(post)}</time>
           </div>
         </li>
       ))
@@ -71,14 +73,16 @@ const initial = posts.slice(0, INITIAL);
               : '';
             return (
               '<li>' +
+              '<div class="title-row">' +
               '<a class="title" href="' + p.url + '">' + esc(p.title) + '</a>' +
-              '<p class="excerpt">' + esc(p.excerpt || '') + '</p>' +
-              '<div class="meta">' +
-              '<time>' + esc(p.date.replace(/-/g, '.')) + '</time>' +
-              (cat ? '<span class="chip">' + esc(cat) + '</span>' : '') +
               '<span class="reading tip" data-tip="이 게시글을 읽는 데 ' + (p.minutes || 1) +
                 '분 정도 걸릴 것 같아요!">' + (p.minutes || 1) + '분 분량</span>' +
+              '</div>' +
+              '<p class="excerpt">' + esc(p.excerpt || '') + '</p>' +
+              '<div class="meta">' +
+              (cat ? '<span class="chip">' + esc(cat) + '</span>' : '') +
               '<span class="views" data-views-path="' + p.url + '" hidden></span>' +
+              '<time>' + esc(p.date.replace(/-/g, '.')) + '</time>' +
               '</div></li>'
             );
           })

@@ -23,15 +23,17 @@ const olderHref = `/page${page + 1}/`;
   {
     posts.map((post) => (
       <li>
-        <a class="title" href={postPath(post)}>
-          {post.data.title}
-        </a>
+        <div class="title-row">
+          <a class="title" href={postPath(post)}>
+            {post.data.title}
+          </a>
+          <span class="reading tip" data-tip={readingTip(post)}>{readingLabel(post)}</span>
+        </div>
         <p class="excerpt">{excerptOf(post, 150)}</p>
         <div class="meta">
-          <time>{formatDate(post)}</time>
           <span class="chip">{categoriesOf(post).at(-1)}</span>
-          <span class="reading tip" data-tip={readingTip(post)}>{readingLabel(post)}</span>
           <span class="views" data-views-path={postPath(post)} hidden />
+          <time>{formatDate(post)}</time>
         </div>
       </li>
     ))

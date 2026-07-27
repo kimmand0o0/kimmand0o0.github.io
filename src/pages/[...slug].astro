@@ -81,13 +81,23 @@ if (kind === 'post' && post) {
         is:inline
         define:vars={{ viewPath: postPath(post), chatOrigin: 'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev' }}
       >
-        // 조회수 1회 기록 — 실패해도 페이지에는 영향 없음(검색 페이지의 "많이 본 글" 소스)
-        fetch(chatOrigin + '/api/view', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: viewPath }),
-          keepalive: true,
-        }).catch(function () {});
+        // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
+        // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
+        (function () {
+          var key = 'viewed:' + viewPath;
+          try {
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+          } catch (e) {
+            // 프라이빗 모드 등으로 storage 가 막히면 중복 제거 없이 그냥 기록한다
+          }
+          fetch(chatOrigin + '/api/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: viewPath }),
+            keepalive: true,
+          }).catch(function () {});
+        })();
       </script>
       {toc.length > 1 && (
         <aside class="toc">
