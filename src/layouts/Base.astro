@@ -33,6 +33,15 @@ const pageTitle = title ? `${title} | ${SITE.title}` : SITE.title;
         document.documentElement.setAttribute('data-theme', t);
       })();
     </script>
+    <!-- Google Analytics (GA4) — Jekyll 시절 _config.yml의 google_analytics 값 그대로 -->
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-ZNXE6HSKMS"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-ZNXE6HSKMS');
+    </script>
+
     <!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js -->
     <script
       is:inline
@@ -41,8 +50,9 @@ const pageTitle = title ? `${title} | ${SITE.title}` : SITE.title;
       defer></script>
   </head>
   <body>
-    <div class="wrap">
-      <header class="site-header">
+    <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 -->
+    <header class="site-header">
+      <div class="header-inner">
         <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a>
         <nav>
           <a href="/archives.html">Archives</a>
@@ -51,16 +61,20 @@ const pageTitle = title ? `${title} | ${SITE.title}` : SITE.title;
           <a href="/search.html">Search</a>
           <button id="theme-toggle" aria-label="테마 전환">◐</button>
         </nav>
-      </header>
+      </div>
+    </header>
+    <div class="wrap">
       <main><slot /></main>
-      <footer class="site-footer">
+    </div>
+    <footer class="site-footer">
+      <div class="footer-inner">
         <span>© {new Date().getFullYear()} Haeran</span>
         <span class="links">
           <a href="https://github.com/kimmand0o0">GitHub</a>
           <a href="/feed.xml">RSS</a>
         </span>
-      </footer>
-    </div>
+      </div>
+    </footer>
 
     <script is:inline>
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용

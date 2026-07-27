@@ -75,6 +75,18 @@ if (kind === 'post' && post) {
           <Content />
         </div>
       </article>
+      <script
+        is:inline
+        define:vars={{ viewPath: postPath(post), chatOrigin: 'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev' }}
+      >
+        // 조회수 1회 기록 — 실패해도 페이지에는 영향 없음(검색 페이지의 "많이 본 글" 소스)
+        fetch(chatOrigin + '/api/view', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: viewPath }),
+          keepalive: true,
+        }).catch(function () {});
+      </script>
       {toc.length > 1 && (
         <aside class="toc">
           <p class="toc-title">목차</p>

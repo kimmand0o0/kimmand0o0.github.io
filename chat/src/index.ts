@@ -19,7 +19,7 @@ const REFUSAL_MESSAGE = '만두봇은 블로그 글이나 혜란에 대한 질�
 function corsHeaders(env: Env): Record<string, string> {
   return {
     'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   };
 }
@@ -248,6 +248,38 @@ async function handleChat(request: Request, env: Env, ctx: ExecutionContext): Pr
   return jsonResponse(responseBody, 200, env);
 }
 
+// 블로그 글 조회수 — 글 페이지에서 1회 ping, 검색 페이지가 상위 목록을 읽어간다.
+// 정렬 가능한 집계가 필요해 KV 대신 D1을 쓴다(원자적 UPSERT + ORDER BY).
+async function handleViewPing(request: Request, env: Env): Promise<Response> {
+  const body = (await request.json().catch(() => null)) as { path?: unknown } | null;
+  const path = typeof body?.path === 'string' ? body.path : '';
+
+  // 이 워커에 임의의 키를 쌓지 못하게, 블로그 글 URL 형태만 받는다
+  if (!path.startsWith('/') || !path.endsWith('.html') || path.length > 300) {
+    return jsonResponse({ error: 'invalid_path' }, 400, env);
+  }
+
+  await env.CHAT_LOGS_DB.prepare(
+    `INSERT INTO post_views (path, views, updated_at) VALUES (?, 1, ?)
+     ON CONFLICT(path) DO UPDATE SET views = views + 1, updated_at = excluded.updated_at`
+  )
+    .bind(path, new Date().toISOString())
+    .run();
+
+  return jsonResponse({ ok: true }, 200, env);
+}
+
+async function handleTopViews(url: URL, env: Env): Promise<Response> {
+  const limit = Math.min(Math.max(Number(url.searchParams.get('limit')) || 10, 1), 50);
+  const { results } = await env.CHAT_LOGS_DB.prepare(
+    'SELECT path, views FROM post_views ORDER BY views DESC, path ASC LIMIT ?'
+  )
+    .bind(limit)
+    .all<{ path: string; views: number }>();
+
+  return jsonResponse({ items: results ?? [] }, 200, env);
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     if (request.method === 'OPTIONS') {
@@ -255,14 +287,20 @@ export default {
     }
 
     const url = new URL(request.url);
-    if (url.pathname !== '/api/chat' || request.method !== 'POST') {
-      return jsonResponse({ error: 'not_found' }, 404, env);
-    }
 
     try {
-      return await handleChat(request, env, ctx);
+      if (url.pathname === '/api/view' && request.method === 'POST') {
+        return await handleViewPing(request, env);
+      }
+      if (url.pathname === '/api/views/top' && request.method === 'GET') {
+        return await handleTopViews(url, env);
+      }
+      if (url.pathname === '/api/chat' && request.method === 'POST') {
+        return await handleChat(request, env, ctx);
+      }
+      return jsonResponse({ error: 'not_found' }, 404, env);
     } catch (err) {
-      console.error('chat handler error:', err);
+      console.error('handler error:', err);
       return jsonResponse({ error: 'internal_error' }, 500, env);
     }
   },

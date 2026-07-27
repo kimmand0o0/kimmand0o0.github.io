@@ -10,33 +10,236 @@ for (const post of posts) {
     byTag.get(tag)!.push(post);
   }
 }
-// 글 수 많은 순
-const tags = [...byTag.entries()].sort((a, b) => b[1].length - a[1].length);
+
+// 글 수 많은 순으로 배치 — 중심에 큰 태그가 오도록
+const entries = [...byTag.entries()].sort((a, b) => b[1].length - a[1].length);
+const maxCount = Math.max(...entries.map(([, list]) => list.length));
+const minCount = Math.min(...entries.map(([, list]) => list.length));
+
+// 황금각(137.5°) 나선 배치 — 난수 없이 결정적이면서 겹치지 않고 흩어진다
+// 배치는 여기서 씨앗만 잡고, 실제 겹침 해소는 클라이언트에서 측정 후 처리한다
+// (글자 폭은 폰트가 로드돼야 알 수 있어서 빌드 시점에는 계산할 수 없다)
+const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
+const scatter = entries.map(([tag, list], i) => {
+  const radius = Math.sqrt(i / entries.length) * 44; // % 단위, 중심에서의 거리
+  const angle = i * GOLDEN_ANGLE;
+  const t = maxCount === minCount ? 1 : (list.length - minCount) / (maxCount - minCount);
+  return {
+    tag,
+    count: list.length,
+    left: 50 + radius * Math.cos(angle) * 1.35,
+    top: 50 + radius * Math.sin(angle),
+    size: 0.8 + t * 1.1, // rem
+    weight: t > 0.55 ? 700 : t > 0.25 ? 600 : 500,
+  };
+});
+
+const tagData = Object.fromEntries(
+  entries.map(([tag, list]) => [
+    tag,
+    list.map((p) => ({ title: p.data.title, url: postPath(p), date: formatDate(p) })),
+  ])
+);
 ---
 
 <Base title="Tags">
   <h1 class="page-title">Tags</h1>
-  <ul class="chips">
-    {tags.map(([tag, list]) => (
-      <li>
-        <a href={`#${tag}`}>{tag} ({list.length})</a>
-      </li>
-    ))}
-  </ul>
-  {
-    tags.map(([tag, list]) => (
-      <section>
-        {/* 기존 /tags.html#태그명 앵커 링크 호환을 위해 id는 태그명 원문 그대로 */}
-        <h2 class="group-title" id={tag}>#{tag}</h2>
-        <ul class="archive-list">
-          {list.map((post) => (
-            <li>
-              <time>{formatDate(post)}</time>
-              <a href={postPath(post)}>{post.data.title}</a>
-            </li>
-          ))}
-        </ul>
-      </section>
-    ))
-  }
+  <p class="tags-hint muted">태그를 눌러 관련 글을 볼 수 있어요. 크기는 글 수에 비례해요.</p>
+
+  <div class="tag-scatter" id="tag-scatter">
+    {
+      scatter.map((s) => (
+        <button
+          class="tag-dot"
+          data-tag={s.tag}
+          data-seed-left={s.left}
+          data-seed-top={s.top}
+          style={`left:${s.left}%; top:${s.top}%; font-size:${s.size}rem; font-weight:${s.weight};`}
+        >
+          {s.tag}
+          <span class="tag-count">{s.count}</span>
+        </button>
+      ))
+    }
+  </div>
+
+  <section id="tag-posts" class="tag-posts" hidden>
+    <h2 class="group-title" id="tag-posts-title"></h2>
+    <ul class="archive-list" id="tag-posts-list"></ul>
+  </section>
+
+  <script type="application/json" id="tag-data" set:html={JSON.stringify(tagData)} />
+
+  <script is:inline>
+    // 겹침 해소 — 씨앗 좌표에서 시작해 서로 밀어내고 컨테이너 안으로 가둔다
+    (function () {
+      var box = document.getElementById('tag-scatter');
+      var dots = Array.prototype.slice.call(box.querySelectorAll('.tag-dot'));
+      if (!dots.length) return;
+
+      function layout() {
+        var W = box.clientWidth;
+        var H = box.clientHeight;
+        var PAD = 6; // 태그 사이 최소 여백(px)
+
+        var items = dots.map(function (el) {
+          var w = el.offsetWidth;
+          var h = el.offsetHeight;
+          return {
+            el: el,
+            w: w,
+            h: h,
+            // 씨앗 좌표(%)를 픽셀 중심으로 변환
+            x: (parseFloat(el.dataset.seedLeft) / 100) * W,
+            y: (parseFloat(el.dataset.seedTop) / 100) * H,
+          };
+        });
+
+        function clamp(it) {
+          it.x = Math.min(Math.max(it.x, it.w / 2 + 2), W - it.w / 2 - 2);
+          it.y = Math.min(Math.max(it.y, it.h / 2 + 2), H - it.h / 2 - 2);
+        }
+        items.forEach(clamp);
+
+        for (var pass = 0; pass < 80; pass++) {
+          var moved = false;
+          for (var i = 0; i < items.length; i++) {
+            for (var j = i + 1; j < items.length; j++) {
+              var a = items[i];
+              var b = items[j];
+              var dx = b.x - a.x;
+              var dy = b.y - a.y;
+              var minX = (a.w + b.w) / 2 + PAD;
+              var minY = (a.h + b.h) / 2 + PAD;
+              var ox = minX - Math.abs(dx);
+              var oy = minY - Math.abs(dy);
+              if (ox <= 0 || oy <= 0) continue; // 안 겹침
+
+              moved = true;
+              // 덜 밀어내도 되는 축으로만 분리 — 배치가 덜 흐트러진다
+              if (ox < oy) {
+                var sx = (dx || 1) > 0 ? 1 : -1;
+                a.x -= (sx * ox) / 2;
+                b.x += (sx * ox) / 2;
+              } else {
+                var sy = (dy || 1) > 0 ? 1 : -1;
+                a.y -= (sy * oy) / 2;
+                b.y += (sy * oy) / 2;
+              }
+              clamp(a);
+              clamp(b);
+            }
+          }
+          if (!moved) break;
+        }
+
+        items.forEach(function (it) {
+          it.el.style.left = it.x + 'px';
+          it.el.style.top = it.y + 'px';
+        });
+        box.classList.add('ready');
+      }
+
+      // 폰트 로드 후 측정해야 폭이 정확하다
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(layout);
+      } else {
+        window.addEventListener('load', layout);
+      }
+      var t;
+      window.addEventListener('resize', function () {
+        clearTimeout(t);
+        t = setTimeout(layout, 150);
+      });
+    })();
+
+    (function () {
+      var data = JSON.parse(document.getElementById('tag-data').textContent);
+      var section = document.getElementById('tag-posts');
+      var titleEl = document.getElementById('tag-posts-title');
+      var listEl = document.getElementById('tag-posts-list');
+      var buttons = document.querySelectorAll('.tag-dot');
+
+      function select(tag, scroll) {
+        var posts = data[tag];
+        if (!posts) return;
+        buttons.forEach(function (b) {
+          b.classList.toggle('selected', b.dataset.tag === tag);
+        });
+        titleEl.textContent = '#' + tag + ' (' + posts.length + ')';
+        listEl.innerHTML = posts
+          .map(function (p) {
+            return (
+              '<li><time>' + p.date + '</time><a href="' + p.url + '">' +
+              p.title.replace(/</g, '&lt;') + '</a></li>'
+            );
+          })
+          .join('');
+        section.hidden = false;
+        if (scroll) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', '#' + tag);
+      }
+
+      buttons.forEach(function (b) {
+        b.addEventListener('click', function () { select(b.dataset.tag, true); });
+      });
+
+      // 기존 /tags.html#태그명 링크 호환 — 해시가 있으면 그 태그를 바로 연다
+      var hash = decodeURIComponent(location.hash.slice(1));
+      if (hash && data[hash]) select(hash, true);
+    })();
+  </script>
 </Base>
+
+<style is:global>
+  .tags-hint { margin: -1rem 0 1.5rem; font-size: 0.86rem; }
+
+  .tag-scatter {
+    position: relative;
+    width: 100%;
+    height: 34rem;
+    margin: 0 0 1rem;
+    /* 배치가 끝나기 전 겹친 상태가 보이지 않게 */
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .tag-scatter.ready { opacity: 1; }
+  .tag-dot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    border: none;
+    background: none;
+    padding: 0.1em 0.25em;
+    cursor: pointer;
+    color: var(--muted);
+    font-family: inherit;
+    line-height: 1.2;
+    white-space: nowrap;
+    border-radius: 6px;
+    transition: color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+  }
+  .tag-dot .tag-count {
+    font-size: 0.62em;
+    margin-left: 0.3em;
+    color: var(--faint);
+    vertical-align: super;
+    font-weight: 500;
+  }
+  .tag-dot:hover {
+    color: var(--accent);
+    background: var(--accent-soft);
+    transform: translate(-50%, -50%) scale(1.35);
+    z-index: 5;
+  }
+  .tag-dot:hover .tag-count { color: var(--accent); }
+  .tag-dot.selected {
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  /* sticky 헤더에 제목이 가리지 않도록 */
+  .tag-posts { margin-top: 1rem; scroll-margin-top: 5rem; }
+
+  @media (max-width: 760px) {
+    .tag-scatter { height: 42rem; }
+  }
+</style>

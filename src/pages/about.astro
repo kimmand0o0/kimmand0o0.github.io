@@ -1,10 +1,22 @@
 ---
 import Base from '../layouts/Base.astro';
+
+// 포스트와 같은 목차 레일 — 손으로 쓴 페이지라 앵커를 직접 선언한다
+const toc = [
+  { depth: 2, slug: 'introduce', text: 'Introduce' },
+  { depth: 2, slug: 'skills', text: 'Skills' },
+  { depth: 2, slug: 'work-experience', text: 'Work Experience' },
+  { depth: 3, slug: 'bunkerkids', text: '벙커키즈 주식회사' },
+  { depth: 3, slug: 'jakga', text: '작가 주식회사' },
+  { depth: 2, slug: 'project', text: 'Project' },
+  { depth: 3, slug: 'lol-moim', text: '롤모임' },
+];
 ---
 
 <Base title="About">
+  <div class="post-layout">
   <div class="prose about">
-    <h2>Introduce</h2>
+    <h2 id="introduce">Introduce</h2>
     <hr />
     <h3>Product Developer</h3>
     <p>
@@ -19,7 +31,7 @@ import Base from '../layouts/Base.astro';
       <li><strong>Github:</strong> <a href="https://github.com/kimmand0o0">https://github.com/kimmand0o0</a></li>
     </ul>
 
-    <h2>Skills</h2>
+    <h2 id="skills">Skills</h2>
     <hr />
     <div class="skills-grid">
       <div>
@@ -48,9 +60,9 @@ import Base from '../layouts/Base.astro';
       </div>
     </div>
 
-    <h2>Work Experience</h2>
+    <h2 id="work-experience">Work Experience</h2>
     <hr />
-    <h3><a href="https://www.whif.io/">벙커키즈 주식회사</a></h3>
+    <h3 id="bunkerkids"><a href="https://www.whif.io/">벙커키즈 주식회사</a></h3>
     <p>
       <strong>Product Developer</strong> (2025. 07 ~ 현재)
       <br />
@@ -93,7 +105,7 @@ import Base from '../layouts/Base.astro';
       <li>Claude Code 기반 AI 페어 프로그래밍 워크플로우(커스텀 스킬/서브에이전트 자동화)를 팀 개발 표준으로 도입·정착</li>
     </ul>
 
-    <h3><a href="https://prospacebrowser.com/">작가 주식회사</a></h3>
+    <h3 id="jakga"><a href="https://prospacebrowser.com/">작가 주식회사</a></h3>
     <p>
       <strong>Product Developer</strong> (2024. 02 ~ 2024. 12)
       <br />
@@ -116,9 +128,9 @@ import Base from '../layouts/Base.astro';
       <li>color-picker를 이용해 확장성 높은 색상 팔레트 구현 및 cwag기준에 맞는 텍스트 컬러 변경</li>
     </ul>
 
-    <h2>Project</h2>
+    <h2 id="project">Project</h2>
     <hr />
-    <h3><a href="https://lol-mo-im.vercel.app/?home=1">롤모임 — 리그 오브 레전드 사설 내전 커뮤니티 플랫폼</a></h3>
+    <h3 id="lol-moim"><a href="https://lol-mo-im.vercel.app/?home=1">롤모임 — 리그 오브 레전드 사설 내전 커뮤니티 플랫폼</a></h3>
     <p>
       <a href="/tags.html#운영일지"><strong>개발 일지</strong></a>
       (2026. 05 ~ 운영 중)
@@ -144,9 +156,28 @@ import Base from '../layouts/Base.astro';
       <span>운영하며 겪은 사고와 설계 결정들은 <a href="/tags.html#운영일지">개발 일지 시리즈</a>에 기록하고 있습니다.</span>
     </p>
   </div>
+  <aside class="toc">
+    <p class="toc-title">목차</p>
+    <nav>
+      <ul>
+        {toc.map((h) => (
+          <li class={h.depth === 3 ? 'depth-3' : 'depth-2'}>
+            <a href={`#${h.slug}`}>{h.text}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </aside>
+  </div>
 </Base>
 
 <style is:global>
+  /* about의 hr은 섹션 구분선 — 제목에 붙여 쓰므로 본문 hr보다 여백을 좁힌다 */
+  .about h2 { margin-bottom: 0.4rem; }
+  .about hr { margin: 0 0 1.3rem; }
+  .about hr + h3 { margin-top: 0; }
+  .about h3 { margin-top: 1.9rem; }
+  .about h4 { margin-top: 1.5rem; }
   .about .skills-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
