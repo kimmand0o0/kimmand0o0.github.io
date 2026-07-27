@@ -138,6 +138,63 @@ const tagData = Object.fromEntries(
           it.el.style.top = it.y + 'px';
         });
         box.classList.add('ready');
+        bindRepel(items);
+      }
+
+      // 마우스를 올린 태그가 커지면서 주변 태그들을 밀어낸다
+      var boundItems = null;
+      function bindRepel(items) {
+        // layout()은 리사이즈마다 다시 도니, 리스너는 한 번만 건다
+        boundItems = items;
+        if (bindRepel.done) return;
+        bindRepel.done = true;
+
+        var HOVER_SCALE = 1.4;
+
+        function repel(from) {
+          var src = null;
+          for (var i = 0; i < boundItems.length; i++) {
+            if (boundItems[i].el === from) { src = boundItems[i]; break; }
+          }
+          if (!src) return;
+
+          // 커진 만큼이 밀어내는 힘 — 큰 태그일수록 더 크게 번진다
+          var growX = (src.w * (HOVER_SCALE - 1)) / 2;
+          var growY = (src.h * (HOVER_SCALE - 1)) / 2;
+          var reach = Math.max(src.w, src.h) * 1.15 + 75;
+
+          boundItems.forEach(function (it) {
+            if (it === src) return;
+            var dx = it.x - src.x;
+            var dy = it.y - src.y;
+            var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            if (dist > reach) {
+              it.el.style.setProperty('--px', '0px');
+              it.el.style.setProperty('--py', '0px');
+              return;
+            }
+            // 가까울수록 강하게, 멀수록 부드럽게 사그라든다
+            var falloff = 1 - dist / reach;
+            var push = (Math.max(growX, growY) + 22) * Math.pow(falloff, 1.35);
+            it.el.style.setProperty('--px', ((dx / dist) * push).toFixed(1) + 'px');
+            it.el.style.setProperty('--py', ((dy / dist) * push).toFixed(1) + 'px');
+          });
+        }
+
+        function release() {
+          boundItems.forEach(function (it) {
+            it.el.style.setProperty('--px', '0px');
+            it.el.style.setProperty('--py', '0px');
+          });
+        }
+
+        dots.forEach(function (el) {
+          el.addEventListener('mouseenter', function () { repel(el); });
+          el.addEventListener('focus', function () { repel(el); });
+        });
+
+        box.addEventListener('mouseleave', release);
+        box.addEventListener('focusout', release);
       }
 
       // 폰트 로드 후 측정해야 폭이 정확하다
@@ -206,7 +263,8 @@ const tagData = Object.fromEntries(
   .tag-scatter.ready { opacity: 1; }
   .tag-dot {
     position: absolute;
-    transform: translate(-50%, -50%);
+    /* --px/--py 는 이웃이 밀려나는 변위 (JS가 hover 때 계산) */
+    transform: translate(-50%, -50%) translate(var(--px, 0px), var(--py, 0px));
     border: none;
     background: none;
     padding: 0.1em 0.25em;
@@ -216,7 +274,10 @@ const tagData = Object.fromEntries(
     line-height: 1.2;
     white-space: nowrap;
     border-radius: 6px;
-    transition: color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+    transition:
+      color 0.18s ease,
+      background 0.18s ease,
+      transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   }
   .tag-dot .tag-count {
     font-size: 0.62em;
@@ -225,10 +286,11 @@ const tagData = Object.fromEntries(
     vertical-align: super;
     font-weight: 500;
   }
-  .tag-dot:hover {
+  .tag-dot:hover,
+  .tag-dot:focus-visible {
     color: var(--accent);
     background: var(--accent-soft);
-    transform: translate(-50%, -50%) scale(1.35);
+    transform: translate(-50%, -50%) scale(1.4);
     z-index: 5;
   }
   .tag-dot:hover .tag-count { color: var(--accent); }
