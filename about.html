@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BcCsiAtZ.css">
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.B8jJpMyz.css">
 <style>.about h2{margin-bottom:.4rem}.about hr{margin:0 0 1.3rem}.about hr+h3{margin-top:0}.about h3{margin-top:1.9rem}.about h4{margin-top:1.5rem}.about .skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem 1.5rem}.about .skills-grid p{margin:.4rem 0}.stat-highlight{color:#0d9488;font-weight:600}html[data-theme=dark] .stat-highlight{color:#2dd4bf}
 </style></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html" class="active" aria-current="page"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main> <div class="post-layout"> <div class="prose about"> <h2 id="introduce">Introduce</h2> <hr> <h3>Product Developer</h3> <p>
 저는 단순히 기능을 구현하는 것이 아니라, <strong>문제의 본질을 파악하고 해결하는 과정</strong>을 중요하게 생각합니다.
@@ -45,6 +45,8 @@
           '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
         comments:
           '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg>',
+        likes:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>',
       };
 
       function fillViews(root) {
@@ -60,6 +62,7 @@
         };
         put('data-views-path', window.__views, METRIC_ICON.views, '조회수');
         put('data-comments-path', window.__comments, METRIC_ICON.comments, '댓글 수');
+        put('data-likes-path', window.__likes, METRIC_ICON.likes, '추천 수');
       }
       window.fillViews = fillViews;
 
@@ -69,11 +72,13 @@
         window.__viewsReady = Promise.all([
           get(api + '/api/views/top?limit=1000'),
           get(api + '/api/comments/counts'),
-        ]).then(([views, comments]) => {
+          get(api + '/api/likes/top?limit=1000'),
+        ]).then(([views, comments, likes]) => {
           window.__views = Object.fromEntries((views?.items ?? []).map((i) => [i.path, i.views]));
           window.__comments = Object.fromEntries(
             (comments?.items ?? []).map((i) => [i.path, i.count])
           );
+          window.__likes = Object.fromEntries((likes?.items ?? []).map((i) => [i.path, i.likes]));
           fillViews(document);
           return window.__views;
         });

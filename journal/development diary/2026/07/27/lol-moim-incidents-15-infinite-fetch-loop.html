@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BcCsiAtZ.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 15. 서비스가 자기 자신을 DDoS하던 날 — 무한 요청 루프 2연타</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/lol-moim-incidents-15-infinite-fetch-loop.html" hidden></span><span class="comments-metric" data-comments-path="/journal/development diary/2026/07/27/lol-moim-incidents-15-infinite-fetch-loop.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#React">#React</a><a href="/tags.html#useEffect">#useEffect</a><a href="/tags.html#useCallback">#useCallback</a><a href="/tags.html#프론트엔드">#프론트엔드</a></span></div></header><div class="prose"><p><a href="/journal/development%20diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html">04편</a>에서 “요청 1개가 쿼리 130개로 터지는” N+1 이야기를 했는데, 이번 편은 그보다 한 단계 더 나쁜 케이스다. 요청 1개가 쿼리 N개가 되는 게 아니라, <strong>요청 자체가 무한</strong>이 되는 버그. 그것도 일주일 사이에 두 번, 서로 다른 훅에서 같은 원리로 터졌다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.B8jJpMyz.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 15. 서비스가 자기 자신을 DDoS하던 날 — 무한 요청 루프 2연타</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/lol-moim-incidents-15-infinite-fetch-loop.html" hidden></span><span class="comments-metric" data-comments-path="/journal/development diary/2026/07/27/lol-moim-incidents-15-infinite-fetch-loop.html" hidden></span><span class="likes-metric" data-likes-path="/journal/development diary/2026/07/27/lol-moim-incidents-15-infinite-fetch-loop.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#React">#React</a><a href="/tags.html#useEffect">#useEffect</a><a href="/tags.html#useCallback">#useCallback</a><a href="/tags.html#프론트엔드">#프론트엔드</a></span></div></header><div class="prose"><p><a href="/journal/development%20diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html">04편</a>에서 “요청 1개가 쿼리 130개로 터지는” N+1 이야기를 했는데, 이번 편은 그보다 한 단계 더 나쁜 케이스다. 요청 1개가 쿼리 N개가 되는 게 아니라, <strong>요청 자체가 무한</strong>이 되는 버그. 그것도 일주일 사이에 두 번, 서로 다른 훅에서 같은 원리로 터졌다.</p>
 <p>서버 입장에서 보면 이건 사실상 DDoS다. 다만 공격자가 외부가 아니라 우리가 배포한 프론트엔드 코드라는 점이 다를 뿐이다.</p>
 <h2 id="tldr">TL;DR</h2>
 <ul>
@@ -134,7 +134,7 @@
 <li><strong>effect deps에는 가능하면 원시값을 넣는다.</strong> 함수나 객체 대신 그 함수로 계산한 boolean/string을 넣으면, 참조 안정성 문제 자체가 사라진다.</li>
 <li><strong>이런 버그는 코드 리뷰보다 서버 로그가 먼저 알려준다.</strong> 클라이언트에서는 “좀 느린데?” 정도로 보이지만, 서버 로그에서는 동일 클라이언트의 같은 요청이 초당 10회씩 찍히는 게 한눈에 보인다. 프론트엔드 버그를 백엔드 로그로 잡았다.</li>
 <li><strong>출시 15분 만의 긴급 수정도 기록할 가치가 있다.</strong> 같은 원리로 두 번 터졌다는 걸 나란히 놓고 보니, 개별 버그가 아니라 패턴이 보였다.</li>
-</ol></div><nav class="series-nav" aria-label="시리즈 이동"><p class="series-head"><span class="series-name">롤모임 운영일지</span><span class="series-pos">22편 중 15번째</span></p><div class="series-links"><a class="series-prev" href="/journal/development diary/2026/07/27/lol-moim-incidents-14-product-retrospective.html"><span class="series-dir">← 이전 편</span><span class="series-title">[ 롤모임 운영일지 ] - 14. 숫자보다 오래 남는 것들 — 기획 관점에서 돌아본 두 달</span></a><a class="series-next" href="/journal/development diary/2026/07/27/lol-moim-incidents-16-zero-value-bugs.html"><span class="series-dir">다음 편 →</span><span class="series-title">[ 롤모임 운영일지 ] - 16. 0점 입찰은 왜 자꾸 사라졌나 — falsy zero 버그 모음</span></a></div></nav><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><p class="reply-to" id="reply-to" hidden><span id="reply-to-label"></span><button type="button" id="reply-cancel">취소</button></p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/lol-moim-incidents-15-infinite-fetch-loop.html";
+</ol></div><div class="like-box"><button type="button" id="like-btn" class="tip" data-tip="이 게시글이 마음에 든다면 따봉을 눌러주세요!" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg><span id="like-count">0</span></button></div><nav class="series-nav" aria-label="시리즈 이동"><p class="series-head"><span class="series-name">롤모임 운영일지</span><span class="series-pos">22편 중 15번째</span></p><div class="series-links"><a class="series-prev" href="/journal/development diary/2026/07/27/lol-moim-incidents-14-product-retrospective.html"><span class="series-dir">← 이전 편</span><span class="series-title">[ 롤모임 운영일지 ] - 14. 숫자보다 오래 남는 것들 — 기획 관점에서 돌아본 두 달</span></a><a class="series-next" href="/journal/development diary/2026/07/27/lol-moim-incidents-16-zero-value-bugs.html"><span class="series-dir">다음 편 →</span><span class="series-title">[ 롤모임 운영일지 ] - 16. 0점 입찰은 왜 자꾸 사라졌나 — falsy zero 버그 모음</span></a></div></nav><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><p class="reply-to" id="reply-to" hidden><span id="reply-to-label"></span><button type="button" id="reply-cancel">취소</button></p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/lol-moim-incidents-15-infinite-fetch-loop.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
         // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
@@ -154,6 +154,56 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             keepalive: true,
           }).catch(() => {});
         })();
+      })();</script><script>(function(){const likePath = "/journal/development diary/2026/07/27/lol-moim-incidents-15-infinite-fetch-loop.html";
+const likeApi = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        {
+          const btn = document.getElementById('like-btn');
+          const countEl = document.getElementById('like-count');
+          const key = 'liked:' + likePath;
+          // "이미 눌렀는지"는 브라우저가 기억한다 — 로그인이 없으니 여기까지가 최선
+          const likedNow = () => {
+            try { return localStorage.getItem(key) === '1'; } catch { return false; }
+          };
+          const paint = (n) => {
+            countEl.textContent = n;
+            const on = likedNow();
+            btn.classList.toggle('liked', on);
+            btn.setAttribute('aria-pressed', String(on));
+            btn.dataset.tip = on
+              ? '추천을 취소하려면 다시 눌러주세요'
+              : '이 게시글이 마음에 든다면 따봉을 눌러주세요!';
+          };
+
+          fetch(`${likeApi}/api/likes/top?limit=1000`)
+            .then((r) => (r.ok ? r.json() : null))
+            .then((json) => {
+              const hit = (json?.items ?? []).find((i) => i.path === likePath);
+              paint(hit ? hit.likes : 0);
+            })
+            .catch(() => paint(0));
+
+          btn.addEventListener('click', async () => {
+            const on = likedNow();
+            btn.disabled = true;
+            try {
+              const res = await fetch(`${likeApi}/api/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: likePath, action: on ? 'remove' : 'add' }),
+              });
+              if (res.ok) {
+                const { likes } = await res.json();
+                try { on ? localStorage.removeItem(key) : localStorage.setItem(key, '1'); } catch {}
+                paint(likes);
+              }
+            } catch {
+              /* 추천 실패는 조용히 넘긴다 — 글 읽기에 영향 없음 */
+            } finally {
+              btn.disabled = false;
+            }
+          });
+        }
       })();</script><script>(function(){const commentPath = "/journal/development diary/2026/07/27/lol-moim-incidents-15-infinite-fetch-loop.html";
 const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
@@ -305,6 +355,8 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
         comments:
           '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg>',
+        likes:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>',
       };
 
       function fillViews(root) {
@@ -320,6 +372,7 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
         };
         put('data-views-path', window.__views, METRIC_ICON.views, '조회수');
         put('data-comments-path', window.__comments, METRIC_ICON.comments, '댓글 수');
+        put('data-likes-path', window.__likes, METRIC_ICON.likes, '추천 수');
       }
       window.fillViews = fillViews;
 
@@ -329,11 +382,13 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
         window.__viewsReady = Promise.all([
           get(api + '/api/views/top?limit=1000'),
           get(api + '/api/comments/counts'),
-        ]).then(([views, comments]) => {
+          get(api + '/api/likes/top?limit=1000'),
+        ]).then(([views, comments, likes]) => {
           window.__views = Object.fromEntries((views?.items ?? []).map((i) => [i.path, i.views]));
           window.__comments = Object.fromEntries(
             (comments?.items ?? []).map((i) => [i.path, i.count])
           );
+          window.__likes = Object.fromEntries((likes?.items ?? []).map((i) => [i.path, i.likes]));
           fillViews(document);
           return window.__views;
         });

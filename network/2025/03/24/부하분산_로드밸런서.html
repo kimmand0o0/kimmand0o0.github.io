@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BcCsiAtZ.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">로드 밸런싱(Load balancing) 종류와 알고리즘</h1><div class="post-meta"><time>2025.03.24</time><span class="chip">NETWORK</span><span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span><span class="views" data-views-path="/network/2025/03/24/부하분산_로드밸런서.html" hidden></span><span class="comments-metric" data-comments-path="/network/2025/03/24/부하분산_로드밸런서.html" hidden></span><span class="tags"><a href="/tags.html#NETWORK">#NETWORK</a><a href="/tags.html#LoadBalancer">#LoadBalancer</a></span></div></header><div class="prose"><h2 id="로드-밸런싱load-balancing과-로드-밸런서load-balancer">로드 밸런싱(load balancing)과 로드 밸런서(Load Balancer)</h2>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.B8jJpMyz.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">로드 밸런싱(Load balancing) 종류와 알고리즘</h1><div class="post-meta"><time>2025.03.24</time><span class="chip">NETWORK</span><span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span><span class="views" data-views-path="/network/2025/03/24/부하분산_로드밸런서.html" hidden></span><span class="comments-metric" data-comments-path="/network/2025/03/24/부하분산_로드밸런서.html" hidden></span><span class="likes-metric" data-likes-path="/network/2025/03/24/부하분산_로드밸런서.html" hidden></span><span class="tags"><a href="/tags.html#NETWORK">#NETWORK</a><a href="/tags.html#LoadBalancer">#LoadBalancer</a></span></div></header><div class="prose"><h2 id="로드-밸런싱load-balancing과-로드-밸런서load-balancer">로드 밸런싱(load balancing)과 로드 밸런서(Load Balancer)</h2>
 <p>부하분산 또는 로드 밸런싱(load balancing)은 컴퓨터 네트워크 기술의 일종으로 둘 혹은 셋 이상의 중앙처리장치 혹은 저장장치와 같은 컴퓨터 자원들에게 네트워크 트래픽을 여러 서버로 분산하여 작업해 시스템의 성능과 가용성을 높이는 것을 의미합니다.</p>
 <p><strong>그럼 로드 밸런서는 뭘까?</strong></p>
 <p>로드 밸런서는 로드 밸런싱의 트래픽을 여러 서버로 분배하는 기술을 제공하는 서비스 또는 장치(하드웨어, 소프트웨어)입니다.</p>
@@ -202,7 +202,7 @@ IP 주소를 기반으로 패킷을 목적지까지 라우팅<br>
 
 
 
-<table><thead><tr><th><strong>구분</strong></th><th><strong>AWS ELB</strong></th><th><strong>Nginx</strong></th><th><strong>HAProxy</strong></th></tr></thead><tbody><tr><td><strong>유형</strong></td><td>클라우드 기반 로드밸런서</td><td>소프트웨어 기반 리버스 프록시 &#x26; 로드밸런서</td><td>소프트웨어 기반 로드밸런서</td></tr><tr><td><strong>설치 방식</strong></td><td>AWS 관리형 서비스 (설치 불필요)</td><td>수동 설치 (서버에서 실행)</td><td>수동 설치 (서버에서 실행)</td></tr><tr><td><strong>지원 계층</strong></td><td>L4 (NLB), L7 (ALB)</td><td>L7 (HTTP/HTTPS) + 일부 L4</td><td>L4, L7 (완벽 지원)</td></tr><tr><td><strong>로드밸런싱 알고리즘</strong></td><td>라운드 로빈, Least Outstanding Requests, IP 해시</td><td>라운드 로빈, Least Connections, IP 해시</td><td>라운드 로빈, Least Connections, IP 해시, 가중 라운드 로빈</td></tr><tr><td><strong>SSL 종료</strong></td><td>지원 (ALB, NLB)</td><td>지원 (단, 별도 설정 필요)</td><td>지원 (단, 별도 설정 필요)</td></tr><tr><td><strong>세션 유지 (Sticky Session)</strong></td><td>지원</td><td>쿠키 기반 설정 가능</td><td>지원</td></tr><tr><td><strong>헬스 체크 (Health Check)</strong></td><td>기본 제공</td><td>별도 설정 필요</td><td>기본 제공</td></tr><tr><td><strong>고가용성</strong></td><td>AWS가 자동으로 관리</td><td>Active-Passive 설정 가능</td><td>Active-Passive 및 Active-Active 설정 가능</td></tr><tr><td><strong>확장성</strong></td><td>자동 스케일링 지원</td><td>수동 확장 필요</td><td>수동 확장 필요</td></tr><tr><td><strong>사용 사례</strong></td><td>클라우드 환경에서 확장성과 관리 편의성을 중시하는 경우</td><td>웹 서버와 함께 사용하는 리버스 프록시 &#x26; 로드밸런서</td><td>고성능, 저지연이 필요한 로드밸런싱 환경</td></tr><tr><td><strong>주요 특징</strong></td><td>AWS 서비스와 통합, 자동 확장 및 복원력 제공</td><td>정적 콘텐츠 캐싱, 리버스 프록시 기능 포함</td><td>높은 성능과 낮은 리소스 사용량</td></tr></tbody></table></div><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><p class="reply-to" id="reply-to" hidden><span id="reply-to-label"></span><button type="button" id="reply-cancel">취소</button></p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/network/2025/03/24/부하분산_로드밸런서.html";
+<table><thead><tr><th><strong>구분</strong></th><th><strong>AWS ELB</strong></th><th><strong>Nginx</strong></th><th><strong>HAProxy</strong></th></tr></thead><tbody><tr><td><strong>유형</strong></td><td>클라우드 기반 로드밸런서</td><td>소프트웨어 기반 리버스 프록시 &#x26; 로드밸런서</td><td>소프트웨어 기반 로드밸런서</td></tr><tr><td><strong>설치 방식</strong></td><td>AWS 관리형 서비스 (설치 불필요)</td><td>수동 설치 (서버에서 실행)</td><td>수동 설치 (서버에서 실행)</td></tr><tr><td><strong>지원 계층</strong></td><td>L4 (NLB), L7 (ALB)</td><td>L7 (HTTP/HTTPS) + 일부 L4</td><td>L4, L7 (완벽 지원)</td></tr><tr><td><strong>로드밸런싱 알고리즘</strong></td><td>라운드 로빈, Least Outstanding Requests, IP 해시</td><td>라운드 로빈, Least Connections, IP 해시</td><td>라운드 로빈, Least Connections, IP 해시, 가중 라운드 로빈</td></tr><tr><td><strong>SSL 종료</strong></td><td>지원 (ALB, NLB)</td><td>지원 (단, 별도 설정 필요)</td><td>지원 (단, 별도 설정 필요)</td></tr><tr><td><strong>세션 유지 (Sticky Session)</strong></td><td>지원</td><td>쿠키 기반 설정 가능</td><td>지원</td></tr><tr><td><strong>헬스 체크 (Health Check)</strong></td><td>기본 제공</td><td>별도 설정 필요</td><td>기본 제공</td></tr><tr><td><strong>고가용성</strong></td><td>AWS가 자동으로 관리</td><td>Active-Passive 설정 가능</td><td>Active-Passive 및 Active-Active 설정 가능</td></tr><tr><td><strong>확장성</strong></td><td>자동 스케일링 지원</td><td>수동 확장 필요</td><td>수동 확장 필요</td></tr><tr><td><strong>사용 사례</strong></td><td>클라우드 환경에서 확장성과 관리 편의성을 중시하는 경우</td><td>웹 서버와 함께 사용하는 리버스 프록시 &#x26; 로드밸런서</td><td>고성능, 저지연이 필요한 로드밸런싱 환경</td></tr><tr><td><strong>주요 특징</strong></td><td>AWS 서비스와 통합, 자동 확장 및 복원력 제공</td><td>정적 콘텐츠 캐싱, 리버스 프록시 기능 포함</td><td>높은 성능과 낮은 리소스 사용량</td></tr></tbody></table></div><div class="like-box"><button type="button" id="like-btn" class="tip" data-tip="이 게시글이 마음에 든다면 따봉을 눌러주세요!" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg><span id="like-count">0</span></button></div><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><p class="reply-to" id="reply-to" hidden><span id="reply-to-label"></span><button type="button" id="reply-cancel">취소</button></p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/network/2025/03/24/부하분산_로드밸런서.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
         // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
@@ -222,6 +222,56 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             keepalive: true,
           }).catch(() => {});
         })();
+      })();</script><script>(function(){const likePath = "/network/2025/03/24/부하분산_로드밸런서.html";
+const likeApi = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        {
+          const btn = document.getElementById('like-btn');
+          const countEl = document.getElementById('like-count');
+          const key = 'liked:' + likePath;
+          // "이미 눌렀는지"는 브라우저가 기억한다 — 로그인이 없으니 여기까지가 최선
+          const likedNow = () => {
+            try { return localStorage.getItem(key) === '1'; } catch { return false; }
+          };
+          const paint = (n) => {
+            countEl.textContent = n;
+            const on = likedNow();
+            btn.classList.toggle('liked', on);
+            btn.setAttribute('aria-pressed', String(on));
+            btn.dataset.tip = on
+              ? '추천을 취소하려면 다시 눌러주세요'
+              : '이 게시글이 마음에 든다면 따봉을 눌러주세요!';
+          };
+
+          fetch(`${likeApi}/api/likes/top?limit=1000`)
+            .then((r) => (r.ok ? r.json() : null))
+            .then((json) => {
+              const hit = (json?.items ?? []).find((i) => i.path === likePath);
+              paint(hit ? hit.likes : 0);
+            })
+            .catch(() => paint(0));
+
+          btn.addEventListener('click', async () => {
+            const on = likedNow();
+            btn.disabled = true;
+            try {
+              const res = await fetch(`${likeApi}/api/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: likePath, action: on ? 'remove' : 'add' }),
+              });
+              if (res.ok) {
+                const { likes } = await res.json();
+                try { on ? localStorage.removeItem(key) : localStorage.setItem(key, '1'); } catch {}
+                paint(likes);
+              }
+            } catch {
+              /* 추천 실패는 조용히 넘긴다 — 글 읽기에 영향 없음 */
+            } finally {
+              btn.disabled = false;
+            }
+          });
+        }
       })();</script><script>(function(){const commentPath = "/network/2025/03/24/부하분산_로드밸런서.html";
 const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
@@ -373,6 +423,8 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
         comments:
           '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg>',
+        likes:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>',
       };
 
       function fillViews(root) {
@@ -388,6 +440,7 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
         };
         put('data-views-path', window.__views, METRIC_ICON.views, '조회수');
         put('data-comments-path', window.__comments, METRIC_ICON.comments, '댓글 수');
+        put('data-likes-path', window.__likes, METRIC_ICON.likes, '추천 수');
       }
       window.fillViews = fillViews;
 
@@ -397,11 +450,13 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
         window.__viewsReady = Promise.all([
           get(api + '/api/views/top?limit=1000'),
           get(api + '/api/comments/counts'),
-        ]).then(([views, comments]) => {
+          get(api + '/api/likes/top?limit=1000'),
+        ]).then(([views, comments, likes]) => {
           window.__views = Object.fromEntries((views?.items ?? []).map((i) => [i.path, i.views]));
           window.__comments = Object.fromEntries(
             (comments?.items ?? []).map((i) => [i.path, i.count])
           );
+          window.__likes = Object.fromEntries((likes?.items ?? []).map((i) => [i.path, i.likes]));
           fillViews(document);
           return window.__views;
         });

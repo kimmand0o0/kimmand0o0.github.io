@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BcCsiAtZ.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 18. DB를 다 먹는 테이블 하나 — rawInfo를 밖으로 빼는 설계</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 6분 정도 걸릴 것 같아요!">6분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/lol-moim-incidents-18-rawinfo-r2-design.html" hidden></span><span class="comments-metric" data-comments-path="/journal/development diary/2026/07/27/lol-moim-incidents-18-rawinfo-r2-design.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#데이터베이스">#데이터베이스</a><a href="/tags.html#Postgres">#Postgres</a><a href="/tags.html#오브젝트스토리지">#오브젝트스토리지</a><a href="/tags.html#비용최적화">#비용최적화</a><a href="/tags.html#설계">#설계</a></span></div></header><div class="prose"><blockquote>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.B8jJpMyz.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 18. DB를 다 먹는 테이블 하나 — rawInfo를 밖으로 빼는 설계</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 6분 정도 걸릴 것 같아요!">6분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/lol-moim-incidents-18-rawinfo-r2-design.html" hidden></span><span class="comments-metric" data-comments-path="/journal/development diary/2026/07/27/lol-moim-incidents-18-rawinfo-r2-design.html" hidden></span><span class="likes-metric" data-likes-path="/journal/development diary/2026/07/27/lol-moim-incidents-18-rawinfo-r2-design.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#데이터베이스">#데이터베이스</a><a href="/tags.html#Postgres">#Postgres</a><a href="/tags.html#오브젝트스토리지">#오브젝트스토리지</a><a href="/tags.html#비용최적화">#비용최적화</a><a href="/tags.html#설계">#설계</a></span></div></header><div class="prose"><blockquote>
 <p><strong>설계 기록.</strong> 아직 실행하지 않았다. 코드도 인프라도 건드리지 않은 상태이고, 이 글은 <a href="/journal/development%20diary/2026/07/27/lol-moim-incidents-13-realtime-to-ws.html">13편</a>에서 “별도 글감”이라고 미뤄뒀던 그 설계를 실측과 함께 정리해두는 것이다. 실행하고 나면 계획과 실제가 어디서 달랐는지 이어서 기록할 예정이다.</p>
 </blockquote>
 <p>Supabase 요금 조사에서 나온 두 가지 원인 중 Realtime은 13편에서 정리했다. 남은 하나가 이번 주제다 — <code>RiotMatch.rawInfo</code>, Riot API에서 받아온 전적 원본 JSON을 통째로 담고 있는 컬럼. 이게 DB 용량의 90% 이상을 혼자 먹고 있다.</p>
@@ -98,7 +98,7 @@
 <li>쓰는 곳 한 곳, 읽는 곳 한 곳 — 옮기기 제일 좋은 형태의 데이터다. 뜨거운 통계는 이미 Participant 테이블로 분리돼 있었던 게 과거의 나가 잘한 일이다.</li>
 <li>설계의 뼈대: 키는 matchId 그대로, 마커는 빈 문자열, 읽기는 lazy-fetch + DB 폴백, 마이그레이션은 이중쓰기 → 백필 → 검증 → 비우기 → VACUUM 순서.</li>
 <li>실행하면 이어서 기록한다 — 특히 gzip 압축률과 상세 페이지 지연이 계획과 얼마나 다른지.</li>
-</ul></div><nav class="series-nav" aria-label="시리즈 이동"><p class="series-head"><span class="series-name">롤모임 운영일지</span><span class="series-pos">22편 중 18번째</span></p><div class="series-links"><a class="series-prev" href="/journal/development diary/2026/07/27/lol-moim-incidents-17-tenant-path-migration.html"><span class="series-dir">← 이전 편</span><span class="series-title">[ 롤모임 운영일지 ] - 17. 주소가 곧 격리다 — 세부 페이지를 /g/:slug로 옮긴 이유</span></a><a class="series-next" href="/journal/development diary/2026/07/27/lol-moim-incidents-19-season-pass-build.html"><span class="series-dir">다음 편 →</span><span class="series-title">[ 롤모임 운영일지 ] - 19. 스포일러 없는 티저부터 저주 아이템까지 — 시즌패스 구현기</span></a></div></nav><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><p class="reply-to" id="reply-to" hidden><span id="reply-to-label"></span><button type="button" id="reply-cancel">취소</button></p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/lol-moim-incidents-18-rawinfo-r2-design.html";
+</ul></div><div class="like-box"><button type="button" id="like-btn" class="tip" data-tip="이 게시글이 마음에 든다면 따봉을 눌러주세요!" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg><span id="like-count">0</span></button></div><nav class="series-nav" aria-label="시리즈 이동"><p class="series-head"><span class="series-name">롤모임 운영일지</span><span class="series-pos">22편 중 18번째</span></p><div class="series-links"><a class="series-prev" href="/journal/development diary/2026/07/27/lol-moim-incidents-17-tenant-path-migration.html"><span class="series-dir">← 이전 편</span><span class="series-title">[ 롤모임 운영일지 ] - 17. 주소가 곧 격리다 — 세부 페이지를 /g/:slug로 옮긴 이유</span></a><a class="series-next" href="/journal/development diary/2026/07/27/lol-moim-incidents-19-season-pass-build.html"><span class="series-dir">다음 편 →</span><span class="series-title">[ 롤모임 운영일지 ] - 19. 스포일러 없는 티저부터 저주 아이템까지 — 시즌패스 구현기</span></a></div></nav><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><p class="reply-to" id="reply-to" hidden><span id="reply-to-label"></span><button type="button" id="reply-cancel">취소</button></p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/lol-moim-incidents-18-rawinfo-r2-design.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
         // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
@@ -118,6 +118,56 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             keepalive: true,
           }).catch(() => {});
         })();
+      })();</script><script>(function(){const likePath = "/journal/development diary/2026/07/27/lol-moim-incidents-18-rawinfo-r2-design.html";
+const likeApi = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        {
+          const btn = document.getElementById('like-btn');
+          const countEl = document.getElementById('like-count');
+          const key = 'liked:' + likePath;
+          // "이미 눌렀는지"는 브라우저가 기억한다 — 로그인이 없으니 여기까지가 최선
+          const likedNow = () => {
+            try { return localStorage.getItem(key) === '1'; } catch { return false; }
+          };
+          const paint = (n) => {
+            countEl.textContent = n;
+            const on = likedNow();
+            btn.classList.toggle('liked', on);
+            btn.setAttribute('aria-pressed', String(on));
+            btn.dataset.tip = on
+              ? '추천을 취소하려면 다시 눌러주세요'
+              : '이 게시글이 마음에 든다면 따봉을 눌러주세요!';
+          };
+
+          fetch(`${likeApi}/api/likes/top?limit=1000`)
+            .then((r) => (r.ok ? r.json() : null))
+            .then((json) => {
+              const hit = (json?.items ?? []).find((i) => i.path === likePath);
+              paint(hit ? hit.likes : 0);
+            })
+            .catch(() => paint(0));
+
+          btn.addEventListener('click', async () => {
+            const on = likedNow();
+            btn.disabled = true;
+            try {
+              const res = await fetch(`${likeApi}/api/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: likePath, action: on ? 'remove' : 'add' }),
+              });
+              if (res.ok) {
+                const { likes } = await res.json();
+                try { on ? localStorage.removeItem(key) : localStorage.setItem(key, '1'); } catch {}
+                paint(likes);
+              }
+            } catch {
+              /* 추천 실패는 조용히 넘긴다 — 글 읽기에 영향 없음 */
+            } finally {
+              btn.disabled = false;
+            }
+          });
+        }
       })();</script><script>(function(){const commentPath = "/journal/development diary/2026/07/27/lol-moim-incidents-18-rawinfo-r2-design.html";
 const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
@@ -269,6 +319,8 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
         comments:
           '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg>',
+        likes:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>',
       };
 
       function fillViews(root) {
@@ -284,6 +336,7 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
         };
         put('data-views-path', window.__views, METRIC_ICON.views, '조회수');
         put('data-comments-path', window.__comments, METRIC_ICON.comments, '댓글 수');
+        put('data-likes-path', window.__likes, METRIC_ICON.likes, '추천 수');
       }
       window.fillViews = fillViews;
 
@@ -293,11 +346,13 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
         window.__viewsReady = Promise.all([
           get(api + '/api/views/top?limit=1000'),
           get(api + '/api/comments/counts'),
-        ]).then(([views, comments]) => {
+          get(api + '/api/likes/top?limit=1000'),
+        ]).then(([views, comments, likes]) => {
           window.__views = Object.fromEntries((views?.items ?? []).map((i) => [i.path, i.views]));
           window.__comments = Object.fromEntries(
             (comments?.items ?? []).map((i) => [i.path, i.count])
           );
+          window.__likes = Object.fromEntries((likes?.items ?? []).map((i) => [i.path, i.likes]));
           fillViews(document);
           return window.__views;
         });

@@ -10,9 +10,9 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BcCsiAtZ.css">
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.B8jJpMyz.css">
 <style>.search-empty{margin:2rem 0 0;font-size:.98rem;color:var(--muted)}
-</style></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html" class="active" aria-current="page"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main> <h1 class="page-title">Search</h1> <input id="search-input" type="search" placeholder="제목·태그·본문으로 검색…" autofocus>  <section id="default-section"> <h2 class="group-title" id="default-title">최근 글</h2> <ul class="archive-list" id="default-list"></ul> </section>  <section id="result-section" hidden> <h2 class="group-title" id="result-title"></h2> <ul class="archive-list" id="result-list"></ul> </section>  <section id="empty-section" hidden> <p class="search-empty" id="empty-message"></p> <h2 class="group-title">이런 글은 어때요</h2> <ul class="archive-list" id="empty-list"></ul> </section> <script>(function(){const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+</style></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html" class="active" aria-current="page"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main> <h1 class="page-title">Search</h1> <input id="search-input" type="search" placeholder="제목·태그·본문으로 검색…" autofocus> <nav class="sort-bar" aria-label="정렬 기준"> <button type="button" class="sort-btn" data-sort="recent" aria-pressed="true">최신순</button> <button type="button" class="sort-btn" data-sort="views" aria-pressed="false">조회순</button> <button type="button" class="sort-btn" data-sort="comments" aria-pressed="false">댓글순</button> <button type="button" class="sort-btn" data-sort="likes" aria-pressed="false">추천순</button> </nav>  <section id="default-section"> <h2 class="group-title" id="default-title">최근 글</h2> <ul class="archive-list" id="default-list"></ul> </section>  <section id="result-section" hidden> <h2 class="group-title" id="result-title"></h2> <ul class="archive-list" id="result-list"></ul> </section>  <section id="empty-section" hidden> <p class="search-empty" id="empty-message"></p> <h2 class="group-title">이런 글은 어때요</h2> <ul class="archive-list" id="empty-list"></ul> </section> <script>(function(){const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
     (() => {
       const input = document.getElementById('search-input');
@@ -27,16 +27,33 @@
       const emptyList = document.getElementById('empty-list');
       let posts = [];
 
+      var sort = 'recent';
+
+      function metricOf(p) {
+        if (sort === 'views') return (window.__views || {})[p.url] || 0;
+        if (sort === 'comments') return (window.__comments || {})[p.url] || 0;
+        if (sort === 'likes') return (window.__likes || {})[p.url] || 0;
+        return 0;
+      }
+
+      // posts 는 최신순이므로 동점이면 그 순서가 유지된다(안정 정렬)
+      function sorted(list) {
+        if (sort === 'recent') return list;
+        return list.slice().sort(function (a, b) { return metricOf(b) - metricOf(a); });
+      }
+
       function row(p) {
         return (
           '<li><time>' + p.date + '</time><a href="' + p.url + '">' +
           p.title.replace(/</g, '&lt;') + '</a>' +
-          '<span class="views" data-views-path="' + p.url + '" hidden></span></li>'
+          '<span class="views" data-views-path="' + p.url + '" hidden></span>' +
+          '<span class="comments-metric" data-comments-path="' + p.url + '" hidden></span>' +
+          '<span class="likes-metric" data-likes-path="' + p.url + '" hidden></span></li>'
         );
       }
 
       function render(el, list) {
-        el.innerHTML = list.map(row).join('');
+        el.innerHTML = sorted(list).map(row).join('');
         if (window.fillViews) window.fillViews(el);
       }
 
@@ -76,6 +93,27 @@
         }
       }
 
+      function rerender() {
+        var q = input.value.trim();
+        if (!q) {
+          render(defaultList, window.__defaultPosts || posts.slice(0, 10));
+        } else {
+          onInput();
+        }
+      }
+
+      document.querySelectorAll('.sort-btn').forEach(function (b) {
+        b.addEventListener('click', function () {
+          if (b.dataset.sort === sort) return;
+          sort = b.dataset.sort;
+          document.querySelectorAll('.sort-btn').forEach(function (x) {
+            x.setAttribute('aria-pressed', String(x.dataset.sort === sort));
+          });
+          var ready = window.__viewsReady || Promise.resolve();
+          ready.then(rerender);
+        });
+      });
+
       fetch('/search.json')
         .then((r) => { return r.json(); })
         .then((json) => {
@@ -111,6 +149,8 @@
           '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
         comments:
           '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg>',
+        likes:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>',
       };
 
       function fillViews(root) {
@@ -126,6 +166,7 @@
         };
         put('data-views-path', window.__views, METRIC_ICON.views, '조회수');
         put('data-comments-path', window.__comments, METRIC_ICON.comments, '댓글 수');
+        put('data-likes-path', window.__likes, METRIC_ICON.likes, '추천 수');
       }
       window.fillViews = fillViews;
 
@@ -135,11 +176,13 @@
         window.__viewsReady = Promise.all([
           get(api + '/api/views/top?limit=1000'),
           get(api + '/api/comments/counts'),
-        ]).then(([views, comments]) => {
+          get(api + '/api/likes/top?limit=1000'),
+        ]).then(([views, comments, likes]) => {
           window.__views = Object.fromEntries((views?.items ?? []).map((i) => [i.path, i.views]));
           window.__comments = Object.fromEntries(
             (comments?.items ?? []).map((i) => [i.path, i.count])
           );
+          window.__likes = Object.fromEntries((likes?.items ?? []).map((i) => [i.path, i.likes]));
           fillViews(document);
           return window.__views;
         });
