@@ -52,17 +52,11 @@ body {
 a { color: inherit; text-decoration: none; transition: color 0.15s ease; }
 img { max-width: 100%; height: auto; }
 ::selection { background: var(--accent-soft); }
-/* 본문 폭은 두 종류 — narrow: 단일 칼럼(홈·아카이브·검색) / wide: 본문 + 목차 레일(글·About·태그).
-   단, 헤더·푸터(사이트 프레임)는 페이지마다 흔들리면 안 되므로 항상 --frame-w 로 고정한다. */
-:root { --page-w: 52rem; --frame-w: 66rem; }
-html[data-width='wide'] { --page-w: 66rem; }
-/* 목차 레일이 숨는 폭(<1000px)에서는 wide 셸도 좁힌다 —
-   안 그러면 본문(46rem)만 남아 오른쪽이 통째로 빈다 */
-@media (max-width: 999px) {
-  html[data-width='wide'] { --page-w: 52rem; }
-}
+/* 폭은 하나로 통일한다 — 헤더·본문·푸터가 어느 페이지에서든 같은 선에서 시작하고 끝난다.
+   페이지마다 다르게 뒀더니 이동할 때마다 레이아웃이 흔들려 보였다. */
+:root { --frame-w: 66rem; }
 
-.wrap { max-width: var(--page-w); margin: 0 auto; padding: 0 1.6rem; }
+.wrap { max-width: var(--frame-w); margin: 0 auto; padding: 0 1.6rem; }
 .muted { color: var(--muted); }
 
 /* ── 헤더 (전체 폭 sticky) ─────────────────────────────── */

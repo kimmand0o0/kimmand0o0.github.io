@@ -6,8 +6,8 @@ interface Props {
   title?: string;
   description?: string;
   /**
-   * 페이지 폭. 목차 레일이 붙는 화면(글·About)과 태그 산포 화면만 'wide',
-   * 단일 칼럼 화면은 'narrow' — 넓은 셸에 한 칼럼만 두면 폭이 들쭉날쭉해 보인다.
+   * 목차 레일이 붙는 화면 표시용. 폭 자체는 전 페이지 동일하고(--frame-w),
+   * 이 값은 data-width 속성으로만 남아 페이지 성격을 구분한다.
    */
   width?: 'narrow' | 'wide';
   /** 글 페이지용 SEO 정보 — 넘기면 og:type=article 과 JSON-LD 를 함께 낸다 */
