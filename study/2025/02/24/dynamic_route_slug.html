@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="ko" data-width="wide"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>다이나믹 라우트(Dynamic Route)의 슬러그(Slug)가 뭐지? | Haeran&#39;s blog</title><meta name="description" content="문제의 본질을 파악하고 해결하는 과정을 기록합니다."><link rel="icon" href="/assets/images/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png"><link rel="alternate" type="application/rss+xml" title="Haeran's blog" href="/feed.xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"><script>
       // FOUC 방지: 렌더 전에 저장된 테마 적용
-      (function () {
-        var t = localStorage.getItem('theme');
+      (() => {
+        let t = localStorage.getItem('theme');
         if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', t);
       })();
@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.CVj1H0WB.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">다이나믹 라우트(Dynamic Route)의 슬러그(Slug)가 뭐지?</h1><div class="post-meta"><time>2025.02.24</time><span class="chip">Study</span><span class="reading tip" data-tip="이 게시글을 읽는 데 3분 정도 걸릴 것 같아요!">3분 분량</span><span class="views" data-views-path="/study/2025/02/24/dynamic_route_slug.html" hidden></span><span class="tags"><a href="/tags.html#Study">#Study</a><a href="/tags.html#Next.js">#Next.js</a></span></div></header><div class="prose"><h3 id="nextjs에서-다이나믹-라우트dynamic-route에서-슬러그slug">Next.js에서 다이나믹 라우트(Dynamic Route)에서 슬러그(Slug)</h3>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BLA6ZwLA.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">다이나믹 라우트(Dynamic Route)의 슬러그(Slug)가 뭐지?</h1><div class="post-meta"><time>2025.02.24</time><span class="chip">Study</span><span class="reading tip" data-tip="이 게시글을 읽는 데 3분 정도 걸릴 것 같아요!">3분 분량</span><span class="views" data-views-path="/study/2025/02/24/dynamic_route_slug.html" hidden></span><span class="tags"><a href="/tags.html#Study">#Study</a><a href="/tags.html#Next.js">#Next.js</a></span></div></header><div class="prose"><h3 id="nextjs에서-다이나믹-라우트dynamic-route에서-슬러그slug">Next.js에서 다이나믹 라우트(Dynamic Route)에서 슬러그(Slug)</h3>
 <p>Next.js에서 다이나믹 라우트에서 <strong>슬러그(Slug)</strong> 는 URL의 특정 부분을 변수처럼 다루는 역할을 합니다.</p>
 <h3 id="-슬러그slug의-의미">📌 “슬러그(Slug)“의 의미</h3>
 <p>“슬러그(Slug)“는 웹 개발에서 <strong>URL의 식별자 역할을 하는 문자열</strong>을 의미해요.<br>
@@ -98,8 +98,8 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
         // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
         // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
-        (function () {
-          var key = 'viewed:' + viewPath;
+        (() => {
+          const key = 'viewed:' + viewPath;
           try {
             if (sessionStorage.getItem(key)) return;
             sessionStorage.setItem(key, '1');
@@ -111,7 +111,7 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ path: viewPath }),
             keepalive: true,
-          }).catch(function () {});
+          }).catch(() => {});
         })();
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-3"><a href="#nextjs에서-다이나믹-라우트dynamic-route에서-슬러그slug">Next.js에서 다이나믹 라우트(Dynamic Route)에서 슬러그(Slug)</a></li><li class="depth-3"><a href="#-슬러그slug의-의미">📌 “슬러그(Slug)“의 의미</a></li><li class="depth-3"><a href="#-슬러그-예제">📌 슬러그 예제</a></li><li class="depth-3"><a href="#-다중-슬러그-catch-all-routes">📌 다중 슬러그 (Catch-all Routes)</a></li><li class="depth-3"><a href="#-왜-slug라고-부를까">📌 왜 “Slug”라고 부를까?</a></li><li class="depth-3"><a href="#-슬러그의-특징">📌 슬러그의 특징</a></li><li class="depth-3"><a href="#-정리">📌 정리</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
       // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
@@ -119,23 +119,23 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
       window.__viewsReady = fetch(
         'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
       )
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (json) {
-          var map = {};
+        .then((r) => { return r.ok ? r.json() : null; })
+        .then((json) => {
+          let map = {};
           if (json && json.items) {
-            json.items.forEach(function (i) { map[i.path] = i.views; });
+            json.items.forEach((i) => { map[i.path] = i.views; });
           }
           window.__views = map;
           fillViews(document);
           return map;
         })
-        .catch(function () { window.__views = {}; return {}; });
+        .catch(() => { window.__views = {}; return {}; });
 
       function fillViews(root) {
-        var map = window.__views;
+        let map = window.__views;
         if (!map) return;
-        root.querySelectorAll('[data-views-path]').forEach(function (el) {
-          var n = map[el.dataset.viewsPath];
+        root.querySelectorAll('[data-views-path]').forEach((el) => {
+          const n = map[el.dataset.viewsPath];
           if (!n) return;
           el.textContent = '조회 ' + n.toLocaleString();
           el.hidden = false;
@@ -144,8 +144,8 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
       window.fillViews = fillViews;
 
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
-      (function () {
-        var root = document.documentElement;
+      (() => {
+        const root = document.documentElement;
         function sync() {
           root.setAttribute('data-scrolled', window.scrollY > 8 ? 'true' : 'false');
         }
@@ -154,36 +154,55 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
       })();
 
       // 목차 — 현재 읽고 있는 섹션 표시
-      (function () {
-        var links = document.querySelectorAll('.toc a');
+      (() => {
+        const links = document.querySelectorAll('.toc a');
         if (!links.length) return;
-        var map = {};
-        var targets = [];
-        links.forEach(function (a) {
-          var id = decodeURIComponent(a.getAttribute('href').slice(1));
-          var el = document.getElementById(id);
+        const map = {};
+        const targets = [];
+        links.forEach((a) => {
+          const id = decodeURIComponent(a.getAttribute('href').slice(1));
+          const el = document.getElementById(id);
           if (el) {
             map[id] = a;
             targets.push(el);
           }
         });
-        var io = new IntersectionObserver(
-          function (entries) {
-            entries.forEach(function (e) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
               if (!e.isIntersecting) return;
-              links.forEach(function (a) { a.classList.remove('active'); });
-              var a = map[e.target.id];
+              links.forEach((a) => { a.classList.remove('active'); });
+              const a = map[e.target.id];
               if (a) a.classList.add('active');
             });
           },
           // 헤더 아래 상단 밴드에 들어온 헤딩을 현재 섹션으로 본다
           { rootMargin: '-72px 0px -75% 0px' }
         );
-        targets.forEach(function (el) { io.observe(el); });
+        targets.forEach((el) => { io.observe(el); });
       })();
 
-      document.getElementById('theme-toggle').addEventListener('click', function () {
-        var next =
+      // 글 제목이 헤더 위로 지나가면, 소개 문구 자리를 제목으로 바꿔치기
+      {
+        const postTitle = document.querySelector('article.post h1.post-title');
+        const slot = document.querySelector('.header-post-title');
+        const tagline = document.querySelector('.tagline');
+        if (postTitle && slot && tagline) {
+          slot.textContent = postTitle.textContent.trim();
+          const io = new IntersectionObserver(
+            ([entry]) => {
+              const hidden = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+              slot.hidden = !hidden;
+              tagline.hidden = hidden;
+            },
+            { rootMargin: '-4px 0px 0px 0px', threshold: 0 }
+          );
+          io.observe(postTitle);
+        }
+      }
+
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const next =
           document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);

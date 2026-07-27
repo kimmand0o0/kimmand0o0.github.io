@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="ko" data-width="narrow"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>글 목록 10페이지 | Haeran&#39;s blog</title><meta name="description" content="문제의 본질을 파악하고 해결하는 과정을 기록합니다."><link rel="icon" href="/assets/images/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png"><link rel="alternate" type="application/rss+xml" title="Haeran's blog" href="/feed.xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"><script>
       // FOUC 방지: 렌더 전에 저장된 테마 적용
-      (function () {
-        var t = localStorage.getItem('theme');
+      (() => {
+        let t = localStorage.getItem('theme');
         if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', t);
       })();
@@ -10,29 +10,29 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.CVj1H0WB.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><ul class="post-list"> <li> <div class="title-row"> <a class="title" href="/journal/development diary/2026/07/12/lol-moim-incidents-02-multitenancy.html"> [ 롤모임 운영일지 ] - 02. 모임 하나짜리 서비스를 멀티테넌시로 바꾸기 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span> </div> <p class="excerpt">원래 이 서비스는 딱 하나의 롤 내전 모임(&quot;이세계롤모임&quot;)만을 위한 앱이었다. 그런데 다른 모임에서도 써보고 싶다는 얘기가 나오면서, 같은 코드베이스와 DB로 여러 &quot;모임&quot;을 동시에 운영하는 멀티테넌트 구조로 바꾸는 작업을 시작했다. 이번 편은 그 과정에서 세운 원칙</p> <div class="meta"> <span class="chip">Development Diary</span> <span class="views" data-views-path="/journal/development diary/2026/07/12/lol-moim-incidents-02-multitenancy.html" hidden></span> <time>2026.07.12</time> </div> </li><li> <div class="title-row"> <a class="title" href="/journal/development diary/2026/07/11/lol-moim-incidents-01.html"> [ 롤모임 운영일지 ] - 01. 배포하다가 겪은 사고 모음 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 4분 정도 걸릴 것 같아요!">4분 분량</span> </div> <p class="excerpt">사이드 프로젝트로 만든 롤 내전 모임 서비스(모노레포: packages/frontend - Vite/React, packages/api - Express/Prisma)를 실제로 운영하면서 크고 작은 사고를 겪었다. 코드 몇 줄 잘못 짜서 나는 버그와는 결이 다른, 배포</p> <div class="meta"> <span class="chip">Development Diary</span> <span class="views" data-views-path="/journal/development diary/2026/07/11/lol-moim-incidents-01.html" hidden></span> <time>2026.07.11</time> </div> </li><li> <div class="title-row"> <a class="title" href="/network/2025/03/24/MAC_주소와_ARP_프로토콜.html"> MAC 주소와 ARP 프로토콜 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span> </div> <p class="excerpt">MAC 주소 (Media Access Control Address, 물리적 주소) MAC 주소는 네트워크 인터페이스 카드(NIC, Network Interface Card)에 할당된 고유한 하드웨어(물리적인) 주소 입니다. IP(논리적인 주소) 만으로 통신을 하게 되면</p> <div class="meta"> <span class="chip">NETWORK</span> <span class="views" data-views-path="/network/2025/03/24/MAC_주소와_ARP_프로토콜.html" hidden></span> <time>2025.03.24</time> </div> </li><li> <div class="title-row"> <a class="title" href="/network/2025/03/24/네트워크_주소_변환.html"> Network Address Translation, 네트워크 주소 변환 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 3분 정도 걸릴 것 같아요!">3분 분량</span> </div> <p class="excerpt">NAT (Network Address Translation, 네트워크 주소 변환) 네트워크 주소 변환(network address translation, 줄여서 NAT)은 컴퓨터 네트워킹에서 쓰이는 용어로서, IP패킷의 TCP/UDP 포트 숫자와 소스 및 목적지의 IP</p> <div class="meta"> <span class="chip">NETWORK</span> <span class="views" data-views-path="/network/2025/03/24/네트워크_주소_변환.html" hidden></span> <time>2025.03.24</time> </div> </li><li> <div class="title-row"> <a class="title" href="/network/2025/03/24/부하분산_로드밸런서.html"> 로드 밸런싱(Load balancing) 종류와 알고리즘 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span> </div> <p class="excerpt">로드 밸런싱(load balancing)과 로드 밸런서(Load Balancer) 부하분산 또는 로드 밸런싱(load balancing)은 컴퓨터 네트워크 기술의 일종으로 둘 혹은 셋 이상의 중앙처리장치 혹은 저장장치와 같은 컴퓨터 자원들에게 네트워크 트래픽을 여러 서</p> <div class="meta"> <span class="chip">NETWORK</span> <span class="views" data-views-path="/network/2025/03/24/부하분산_로드밸런서.html" hidden></span> <time>2025.03.24</time> </div> </li> </ul> <nav class="pagination"> <span><a href="/page9/">← 최근 글</a></span> <span class="count">10 / 18</span> <span><a href="/page11/">지난 글 →</a></span> </nav></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BLA6ZwLA.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><ul class="post-list"> <li> <div class="title-row"> <a class="title" href="/journal/development diary/2026/07/12/lol-moim-incidents-02-multitenancy.html"> [ 롤모임 운영일지 ] - 02. 모임 하나짜리 서비스를 멀티테넌시로 바꾸기 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span> </div> <p class="excerpt">원래 이 서비스는 딱 하나의 롤 내전 모임(&quot;이세계롤모임&quot;)만을 위한 앱이었다. 그런데 다른 모임에서도 써보고 싶다는 얘기가 나오면서, 같은 코드베이스와 DB로 여러 &quot;모임&quot;을 동시에 운영하는 멀티테넌트 구조로 바꾸는 작업을 시작했다. 이번 편은 그 과정에서 세운 원칙</p> <div class="meta"> <span class="chip">Development Diary</span> <span class="views" data-views-path="/journal/development diary/2026/07/12/lol-moim-incidents-02-multitenancy.html" hidden></span> <time>2026.07.12</time> </div> </li><li> <div class="title-row"> <a class="title" href="/journal/development diary/2026/07/11/lol-moim-incidents-01.html"> [ 롤모임 운영일지 ] - 01. 배포하다가 겪은 사고 모음 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 4분 정도 걸릴 것 같아요!">4분 분량</span> </div> <p class="excerpt">사이드 프로젝트로 만든 롤 내전 모임 서비스(모노레포: packages/frontend - Vite/React, packages/api - Express/Prisma)를 실제로 운영하면서 크고 작은 사고를 겪었다. 코드 몇 줄 잘못 짜서 나는 버그와는 결이 다른, 배포</p> <div class="meta"> <span class="chip">Development Diary</span> <span class="views" data-views-path="/journal/development diary/2026/07/11/lol-moim-incidents-01.html" hidden></span> <time>2026.07.11</time> </div> </li><li> <div class="title-row"> <a class="title" href="/network/2025/03/24/MAC_주소와_ARP_프로토콜.html"> MAC 주소와 ARP 프로토콜 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span> </div> <p class="excerpt">MAC 주소 (Media Access Control Address, 물리적 주소) MAC 주소는 네트워크 인터페이스 카드(NIC, Network Interface Card)에 할당된 고유한 하드웨어(물리적인) 주소 입니다. IP(논리적인 주소) 만으로 통신을 하게 되면</p> <div class="meta"> <span class="chip">NETWORK</span> <span class="views" data-views-path="/network/2025/03/24/MAC_주소와_ARP_프로토콜.html" hidden></span> <time>2025.03.24</time> </div> </li><li> <div class="title-row"> <a class="title" href="/network/2025/03/24/네트워크_주소_변환.html"> Network Address Translation, 네트워크 주소 변환 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 3분 정도 걸릴 것 같아요!">3분 분량</span> </div> <p class="excerpt">NAT (Network Address Translation, 네트워크 주소 변환) 네트워크 주소 변환(network address translation, 줄여서 NAT)은 컴퓨터 네트워킹에서 쓰이는 용어로서, IP패킷의 TCP/UDP 포트 숫자와 소스 및 목적지의 IP</p> <div class="meta"> <span class="chip">NETWORK</span> <span class="views" data-views-path="/network/2025/03/24/네트워크_주소_변환.html" hidden></span> <time>2025.03.24</time> </div> </li><li> <div class="title-row"> <a class="title" href="/network/2025/03/24/부하분산_로드밸런서.html"> 로드 밸런싱(Load balancing) 종류와 알고리즘 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span> </div> <p class="excerpt">로드 밸런싱(load balancing)과 로드 밸런서(Load Balancer) 부하분산 또는 로드 밸런싱(load balancing)은 컴퓨터 네트워크 기술의 일종으로 둘 혹은 셋 이상의 중앙처리장치 혹은 저장장치와 같은 컴퓨터 자원들에게 네트워크 트래픽을 여러 서</p> <div class="meta"> <span class="chip">NETWORK</span> <span class="views" data-views-path="/network/2025/03/24/부하분산_로드밸런서.html" hidden></span> <time>2025.03.24</time> </div> </li> </ul> <nav class="pagination"> <span><a href="/page9/">← 최근 글</a></span> <span class="count">10 / 18</span> <span><a href="/page11/">지난 글 →</a></span> </nav></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
       // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
       // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
       window.__viewsReady = fetch(
         'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
       )
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (json) {
-          var map = {};
+        .then((r) => { return r.ok ? r.json() : null; })
+        .then((json) => {
+          let map = {};
           if (json && json.items) {
-            json.items.forEach(function (i) { map[i.path] = i.views; });
+            json.items.forEach((i) => { map[i.path] = i.views; });
           }
           window.__views = map;
           fillViews(document);
           return map;
         })
-        .catch(function () { window.__views = {}; return {}; });
+        .catch(() => { window.__views = {}; return {}; });
 
       function fillViews(root) {
-        var map = window.__views;
+        let map = window.__views;
         if (!map) return;
-        root.querySelectorAll('[data-views-path]').forEach(function (el) {
-          var n = map[el.dataset.viewsPath];
+        root.querySelectorAll('[data-views-path]').forEach((el) => {
+          const n = map[el.dataset.viewsPath];
           if (!n) return;
           el.textContent = '조회 ' + n.toLocaleString();
           el.hidden = false;
@@ -41,8 +41,8 @@
       window.fillViews = fillViews;
 
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
-      (function () {
-        var root = document.documentElement;
+      (() => {
+        const root = document.documentElement;
         function sync() {
           root.setAttribute('data-scrolled', window.scrollY > 8 ? 'true' : 'false');
         }
@@ -51,36 +51,55 @@
       })();
 
       // 목차 — 현재 읽고 있는 섹션 표시
-      (function () {
-        var links = document.querySelectorAll('.toc a');
+      (() => {
+        const links = document.querySelectorAll('.toc a');
         if (!links.length) return;
-        var map = {};
-        var targets = [];
-        links.forEach(function (a) {
-          var id = decodeURIComponent(a.getAttribute('href').slice(1));
-          var el = document.getElementById(id);
+        const map = {};
+        const targets = [];
+        links.forEach((a) => {
+          const id = decodeURIComponent(a.getAttribute('href').slice(1));
+          const el = document.getElementById(id);
           if (el) {
             map[id] = a;
             targets.push(el);
           }
         });
-        var io = new IntersectionObserver(
-          function (entries) {
-            entries.forEach(function (e) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
               if (!e.isIntersecting) return;
-              links.forEach(function (a) { a.classList.remove('active'); });
-              var a = map[e.target.id];
+              links.forEach((a) => { a.classList.remove('active'); });
+              const a = map[e.target.id];
               if (a) a.classList.add('active');
             });
           },
           // 헤더 아래 상단 밴드에 들어온 헤딩을 현재 섹션으로 본다
           { rootMargin: '-72px 0px -75% 0px' }
         );
-        targets.forEach(function (el) { io.observe(el); });
+        targets.forEach((el) => { io.observe(el); });
       })();
 
-      document.getElementById('theme-toggle').addEventListener('click', function () {
-        var next =
+      // 글 제목이 헤더 위로 지나가면, 소개 문구 자리를 제목으로 바꿔치기
+      {
+        const postTitle = document.querySelector('article.post h1.post-title');
+        const slot = document.querySelector('.header-post-title');
+        const tagline = document.querySelector('.tagline');
+        if (postTitle && slot && tagline) {
+          slot.textContent = postTitle.textContent.trim();
+          const io = new IntersectionObserver(
+            ([entry]) => {
+              const hidden = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+              slot.hidden = !hidden;
+              tagline.hidden = hidden;
+            },
+            { rootMargin: '-4px 0px 0px 0px', threshold: 0 }
+          );
+          io.observe(postTitle);
+        }
+      }
+
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const next =
           document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);

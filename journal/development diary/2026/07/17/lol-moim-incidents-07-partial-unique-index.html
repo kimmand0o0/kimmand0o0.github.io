@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="ko" data-width="wide"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>[ 롤모임 운영일지 ] - 07. 3분 만에 되돌린 인덱스 — partial unique의 함정 | Haeran&#39;s blog</title><meta name="description" content="문제의 본질을 파악하고 해결하는 과정을 기록합니다."><link rel="icon" href="/assets/images/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png"><link rel="alternate" type="application/rss+xml" title="Haeran's blog" href="/feed.xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"><script>
       // FOUC 방지: 렌더 전에 저장된 테마 적용
-      (function () {
-        var t = localStorage.getItem('theme');
+      (() => {
+        let t = localStorage.getItem('theme');
         if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', t);
       })();
@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.CVj1H0WB.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 07. 3분 만에 되돌린 인덱스 — partial unique의 함정</h1><div class="post-meta"><time>2026.07.17</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 4분 정도 걸릴 것 같아요!">4분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/17/lol-moim-incidents-07-partial-unique-index.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#PostgreSQL">#PostgreSQL</a><a href="/tags.html#Prisma">#Prisma</a><a href="/tags.html#아키텍처">#아키텍처</a></span></div></header><div class="prose"><p>가장 짧게 산 결정 이야기다. 도입하고 되돌리기까지 딱 3분 걸렸다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BLA6ZwLA.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 07. 3분 만에 되돌린 인덱스 — partial unique의 함정</h1><div class="post-meta"><time>2026.07.17</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 4분 정도 걸릴 것 같아요!">4분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/17/lol-moim-incidents-07-partial-unique-index.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#PostgreSQL">#PostgreSQL</a><a href="/tags.html#Prisma">#Prisma</a><a href="/tags.html#아키텍처">#아키텍처</a></span></div></header><div class="prose"><p>가장 짧게 산 결정 이야기다. 도입하고 되돌리기까지 딱 3분 걸렸다.</p>
 <h2 id="문제--소프트-삭제와-유니크-제약의-충돌">문제 — 소프트 삭제와 유니크 제약의 충돌</h2>
 <p>서비스 전체에 소프트 삭제(<code>deletedAt</code>)를 도입하면서, 이런 문제가 생겼다. 유저가 탈퇴(소프트 삭제)한 뒤 같은 닉네임으로 다시 가입하려 하면, 이미 있는 <code>@unique</code> 제약(<code>User.nickname</code>) 때문에 막힌다 — DB 입장에선 그 닉네임을 가진 row가 (삭제 표시만 됐을 뿐) 여전히 존재하니까.</p>
 <p>해결책으로 처음 택한 건 <strong>partial unique index</strong>였다. “살아있는 row 사이에서만” 유니크하게 만드는 방법이다.</p>
@@ -45,8 +45,8 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
         // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
         // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
-        (function () {
-          var key = 'viewed:' + viewPath;
+        (() => {
+          const key = 'viewed:' + viewPath;
           try {
             if (sessionStorage.getItem(key)) return;
             sessionStorage.setItem(key, '1');
@@ -58,7 +58,7 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ path: viewPath }),
             keepalive: true,
-          }).catch(function () {});
+          }).catch(() => {});
         })();
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#문제--소프트-삭제와-유니크-제약의-충돌">문제 — 소프트 삭제와 유니크 제약의 충돌</a></li><li class="depth-2"><a href="#3분-뒤--upsert가-전부-깨졌다">3분 뒤 — upsert가 전부 깨졌다</a></li><li class="depth-2"><a href="#되돌리기">되돌리기</a></li><li class="depth-2"><a href="#정리">정리</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
       // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
@@ -66,23 +66,23 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
       window.__viewsReady = fetch(
         'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
       )
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (json) {
-          var map = {};
+        .then((r) => { return r.ok ? r.json() : null; })
+        .then((json) => {
+          let map = {};
           if (json && json.items) {
-            json.items.forEach(function (i) { map[i.path] = i.views; });
+            json.items.forEach((i) => { map[i.path] = i.views; });
           }
           window.__views = map;
           fillViews(document);
           return map;
         })
-        .catch(function () { window.__views = {}; return {}; });
+        .catch(() => { window.__views = {}; return {}; });
 
       function fillViews(root) {
-        var map = window.__views;
+        let map = window.__views;
         if (!map) return;
-        root.querySelectorAll('[data-views-path]').forEach(function (el) {
-          var n = map[el.dataset.viewsPath];
+        root.querySelectorAll('[data-views-path]').forEach((el) => {
+          const n = map[el.dataset.viewsPath];
           if (!n) return;
           el.textContent = '조회 ' + n.toLocaleString();
           el.hidden = false;
@@ -91,8 +91,8 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
       window.fillViews = fillViews;
 
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
-      (function () {
-        var root = document.documentElement;
+      (() => {
+        const root = document.documentElement;
         function sync() {
           root.setAttribute('data-scrolled', window.scrollY > 8 ? 'true' : 'false');
         }
@@ -101,36 +101,55 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
       })();
 
       // 목차 — 현재 읽고 있는 섹션 표시
-      (function () {
-        var links = document.querySelectorAll('.toc a');
+      (() => {
+        const links = document.querySelectorAll('.toc a');
         if (!links.length) return;
-        var map = {};
-        var targets = [];
-        links.forEach(function (a) {
-          var id = decodeURIComponent(a.getAttribute('href').slice(1));
-          var el = document.getElementById(id);
+        const map = {};
+        const targets = [];
+        links.forEach((a) => {
+          const id = decodeURIComponent(a.getAttribute('href').slice(1));
+          const el = document.getElementById(id);
           if (el) {
             map[id] = a;
             targets.push(el);
           }
         });
-        var io = new IntersectionObserver(
-          function (entries) {
-            entries.forEach(function (e) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
               if (!e.isIntersecting) return;
-              links.forEach(function (a) { a.classList.remove('active'); });
-              var a = map[e.target.id];
+              links.forEach((a) => { a.classList.remove('active'); });
+              const a = map[e.target.id];
               if (a) a.classList.add('active');
             });
           },
           // 헤더 아래 상단 밴드에 들어온 헤딩을 현재 섹션으로 본다
           { rootMargin: '-72px 0px -75% 0px' }
         );
-        targets.forEach(function (el) { io.observe(el); });
+        targets.forEach((el) => { io.observe(el); });
       })();
 
-      document.getElementById('theme-toggle').addEventListener('click', function () {
-        var next =
+      // 글 제목이 헤더 위로 지나가면, 소개 문구 자리를 제목으로 바꿔치기
+      {
+        const postTitle = document.querySelector('article.post h1.post-title');
+        const slot = document.querySelector('.header-post-title');
+        const tagline = document.querySelector('.tagline');
+        if (postTitle && slot && tagline) {
+          slot.textContent = postTitle.textContent.trim();
+          const io = new IntersectionObserver(
+            ([entry]) => {
+              const hidden = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+              slot.hidden = !hidden;
+              tagline.hidden = hidden;
+            },
+            { rootMargin: '-4px 0px 0px 0px', threshold: 0 }
+          );
+          io.observe(postTitle);
+        }
+      }
+
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const next =
           document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);

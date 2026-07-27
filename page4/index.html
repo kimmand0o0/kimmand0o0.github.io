@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="ko" data-width="narrow"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>글 목록 4페이지 | Haeran&#39;s blog</title><meta name="description" content="문제의 본질을 파악하고 해결하는 과정을 기록합니다."><link rel="icon" href="/assets/images/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png"><link rel="alternate" type="application/rss+xml" title="Haeran's blog" href="/feed.xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"><script>
       // FOUC 방지: 렌더 전에 저장된 테마 적용
-      (function () {
-        var t = localStorage.getItem('theme');
+      (() => {
+        let t = localStorage.getItem('theme');
         if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', t);
       })();
@@ -10,29 +10,29 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.CVj1H0WB.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><ul class="post-list"> <li> <div class="title-row"> <a class="title" href="/journal/development diary/2026/07/27/k8s-study-07-namespace-rbac.html"> [ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이 나눠 쓰는 법 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 3분 정도 걸릴 것 같아요!">3분 분량</span> </div> <p class="excerpt">지난 편까지 Pod/Deployment/Service/Ingress로 앱 하나를 배포하고 노출하는 흐름을 정리했다. 이번 편은 조금 결이 다르다 — 클러스터 하나를 여러 팀이나 여러 환경이 같이 쓸 때 필요한 Namespace와 RBAC. TL;DR - Namespac</p> <div class="meta"> <span class="chip">Development Diary</span> <span class="views" data-views-path="/journal/development diary/2026/07/27/k8s-study-07-namespace-rbac.html" hidden></span> <time>2026.07.27</time> </div> </li><li> <div class="title-row"> <a class="title" href="/study/datadog/2026/07/23/datadog-study-06-monitor-alert-design.html"> 데이터독(Datadog) 학습 정리 (6) - 모니터 알림 조건 설계 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 6분 정도 걸릴 것 같아요!">6분 분량</span> </div> <p class="excerpt">1편에서 &quot;모니터는 임계값 초과 시 알림을 보내는 감시자&quot;라고만 짚었는데, 실제로 쓸모 있는 알림을 만들려면 그보다 훨씬 세밀한 설계가 필요하다. 공식 문서(docs.datadoghq.com/monitors)를 대조해서 정확한 용어까지 정리했다. TL;DR - 모니터는</p> <div class="meta"> <span class="chip">Datadog</span> <span class="views" data-views-path="/study/datadog/2026/07/23/datadog-study-06-monitor-alert-design.html" hidden></span> <time>2026.07.23</time> </div> </li><li> <div class="title-row"> <a class="title" href="/study/llm/2026/07/23/llm-prompting-paper-06-react.html"> LLM 프롬프팅 논문 스터디 - 06. ReAct, Synergizing Reasoning and Acting </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span> </div> <p class="excerpt">시리즈 여섯 번째 편이자 &quot;에이전트/툴 사용&quot; 트랙의 첫 편. 지금까지 다룬 CoT/Self-Consistency/Tree of Thoughts가 전부 모델 &quot;내부&quot;에서만 추론했다면, 이번에 다룰 ReAct: Synergizing Reasoning and Acting </p> <div class="meta"> <span class="chip">LLM</span> <span class="views" data-views-path="/study/llm/2026/07/23/llm-prompting-paper-06-react.html" hidden></span> <time>2026.07.23</time> </div> </li><li> <div class="title-row"> <a class="title" href="/journal/development diary/2026/07/23/k8s-study-06-ingress.html"> [ K8s 스터디 ] - 06. Ingress, 외부 트래픽은 어떻게 들어오는가 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 3분 정도 걸릴 것 같아요!">3분 분량</span> </div> <p class="excerpt">지난 편까지는 클러스터 내부(Service)까지만 다뤘다. 이번 편은 반대 방향 — 외부 사용자의 요청이 실제로 클러스터 안까지 어떻게 들어오는지, Ingress. TL;DR - Ingress는 &quot;도메인/경로 기준으로 트래픽을 여러 Service로 나눠주는 규칙 명세서</p> <div class="meta"> <span class="chip">Development Diary</span> <span class="views" data-views-path="/journal/development diary/2026/07/23/k8s-study-06-ingress.html" hidden></span> <time>2026.07.23</time> </div> </li><li> <div class="title-row"> <a class="title" href="/study/datadog/2026/07/22/datadog-study-05-apm-instrumentation.html"> 데이터독(Datadog) 학습 정리 (5) - APM 트레이스 계측(Instrumentation) 원리 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span> </div> <p class="excerpt">1편에서 &quot;trace id 하나로 여러 서비스를 이어붙인다&quot;고 정리했는데, 이번 편은 그게 실제로 어떻게 이어지는지 — 계측(instrumentation)의 원리를 다룬다. TL;DR - 계측은 코드 곳곳에 미리 심어둔 &quot;꼬리표 부착기&quot;다 — 각 서비스 코드 안에 &quot;지</p> <div class="meta"> <span class="chip">Datadog</span> <span class="views" data-views-path="/study/datadog/2026/07/22/datadog-study-05-apm-instrumentation.html" hidden></span> <time>2026.07.22</time> </div> </li> </ul> <nav class="pagination"> <span><a href="/page3/">← 최근 글</a></span> <span class="count">4 / 18</span> <span><a href="/page5/">지난 글 →</a></span> </nav></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BLA6ZwLA.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><ul class="post-list"> <li> <div class="title-row"> <a class="title" href="/journal/development diary/2026/07/27/k8s-study-07-namespace-rbac.html"> [ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이 나눠 쓰는 법 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 3분 정도 걸릴 것 같아요!">3분 분량</span> </div> <p class="excerpt">지난 편까지 Pod/Deployment/Service/Ingress로 앱 하나를 배포하고 노출하는 흐름을 정리했다. 이번 편은 조금 결이 다르다 — 클러스터 하나를 여러 팀이나 여러 환경이 같이 쓸 때 필요한 Namespace와 RBAC. TL;DR - Namespac</p> <div class="meta"> <span class="chip">Development Diary</span> <span class="views" data-views-path="/journal/development diary/2026/07/27/k8s-study-07-namespace-rbac.html" hidden></span> <time>2026.07.27</time> </div> </li><li> <div class="title-row"> <a class="title" href="/study/datadog/2026/07/23/datadog-study-06-monitor-alert-design.html"> 데이터독(Datadog) 학습 정리 (6) - 모니터 알림 조건 설계 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 6분 정도 걸릴 것 같아요!">6분 분량</span> </div> <p class="excerpt">1편에서 &quot;모니터는 임계값 초과 시 알림을 보내는 감시자&quot;라고만 짚었는데, 실제로 쓸모 있는 알림을 만들려면 그보다 훨씬 세밀한 설계가 필요하다. 공식 문서(docs.datadoghq.com/monitors)를 대조해서 정확한 용어까지 정리했다. TL;DR - 모니터는</p> <div class="meta"> <span class="chip">Datadog</span> <span class="views" data-views-path="/study/datadog/2026/07/23/datadog-study-06-monitor-alert-design.html" hidden></span> <time>2026.07.23</time> </div> </li><li> <div class="title-row"> <a class="title" href="/study/llm/2026/07/23/llm-prompting-paper-06-react.html"> LLM 프롬프팅 논문 스터디 - 06. ReAct, Synergizing Reasoning and Acting </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span> </div> <p class="excerpt">시리즈 여섯 번째 편이자 &quot;에이전트/툴 사용&quot; 트랙의 첫 편. 지금까지 다룬 CoT/Self-Consistency/Tree of Thoughts가 전부 모델 &quot;내부&quot;에서만 추론했다면, 이번에 다룰 ReAct: Synergizing Reasoning and Acting </p> <div class="meta"> <span class="chip">LLM</span> <span class="views" data-views-path="/study/llm/2026/07/23/llm-prompting-paper-06-react.html" hidden></span> <time>2026.07.23</time> </div> </li><li> <div class="title-row"> <a class="title" href="/journal/development diary/2026/07/23/k8s-study-06-ingress.html"> [ K8s 스터디 ] - 06. Ingress, 외부 트래픽은 어떻게 들어오는가 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 3분 정도 걸릴 것 같아요!">3분 분량</span> </div> <p class="excerpt">지난 편까지는 클러스터 내부(Service)까지만 다뤘다. 이번 편은 반대 방향 — 외부 사용자의 요청이 실제로 클러스터 안까지 어떻게 들어오는지, Ingress. TL;DR - Ingress는 &quot;도메인/경로 기준으로 트래픽을 여러 Service로 나눠주는 규칙 명세서</p> <div class="meta"> <span class="chip">Development Diary</span> <span class="views" data-views-path="/journal/development diary/2026/07/23/k8s-study-06-ingress.html" hidden></span> <time>2026.07.23</time> </div> </li><li> <div class="title-row"> <a class="title" href="/study/datadog/2026/07/22/datadog-study-05-apm-instrumentation.html"> 데이터독(Datadog) 학습 정리 (5) - APM 트레이스 계측(Instrumentation) 원리 </a> <span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span> </div> <p class="excerpt">1편에서 &quot;trace id 하나로 여러 서비스를 이어붙인다&quot;고 정리했는데, 이번 편은 그게 실제로 어떻게 이어지는지 — 계측(instrumentation)의 원리를 다룬다. TL;DR - 계측은 코드 곳곳에 미리 심어둔 &quot;꼬리표 부착기&quot;다 — 각 서비스 코드 안에 &quot;지</p> <div class="meta"> <span class="chip">Datadog</span> <span class="views" data-views-path="/study/datadog/2026/07/22/datadog-study-05-apm-instrumentation.html" hidden></span> <time>2026.07.22</time> </div> </li> </ul> <nav class="pagination"> <span><a href="/page3/">← 최근 글</a></span> <span class="count">4 / 18</span> <span><a href="/page5/">지난 글 →</a></span> </nav></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
       // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
       // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
       window.__viewsReady = fetch(
         'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
       )
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (json) {
-          var map = {};
+        .then((r) => { return r.ok ? r.json() : null; })
+        .then((json) => {
+          let map = {};
           if (json && json.items) {
-            json.items.forEach(function (i) { map[i.path] = i.views; });
+            json.items.forEach((i) => { map[i.path] = i.views; });
           }
           window.__views = map;
           fillViews(document);
           return map;
         })
-        .catch(function () { window.__views = {}; return {}; });
+        .catch(() => { window.__views = {}; return {}; });
 
       function fillViews(root) {
-        var map = window.__views;
+        let map = window.__views;
         if (!map) return;
-        root.querySelectorAll('[data-views-path]').forEach(function (el) {
-          var n = map[el.dataset.viewsPath];
+        root.querySelectorAll('[data-views-path]').forEach((el) => {
+          const n = map[el.dataset.viewsPath];
           if (!n) return;
           el.textContent = '조회 ' + n.toLocaleString();
           el.hidden = false;
@@ -41,8 +41,8 @@
       window.fillViews = fillViews;
 
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
-      (function () {
-        var root = document.documentElement;
+      (() => {
+        const root = document.documentElement;
         function sync() {
           root.setAttribute('data-scrolled', window.scrollY > 8 ? 'true' : 'false');
         }
@@ -51,36 +51,55 @@
       })();
 
       // 목차 — 현재 읽고 있는 섹션 표시
-      (function () {
-        var links = document.querySelectorAll('.toc a');
+      (() => {
+        const links = document.querySelectorAll('.toc a');
         if (!links.length) return;
-        var map = {};
-        var targets = [];
-        links.forEach(function (a) {
-          var id = decodeURIComponent(a.getAttribute('href').slice(1));
-          var el = document.getElementById(id);
+        const map = {};
+        const targets = [];
+        links.forEach((a) => {
+          const id = decodeURIComponent(a.getAttribute('href').slice(1));
+          const el = document.getElementById(id);
           if (el) {
             map[id] = a;
             targets.push(el);
           }
         });
-        var io = new IntersectionObserver(
-          function (entries) {
-            entries.forEach(function (e) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
               if (!e.isIntersecting) return;
-              links.forEach(function (a) { a.classList.remove('active'); });
-              var a = map[e.target.id];
+              links.forEach((a) => { a.classList.remove('active'); });
+              const a = map[e.target.id];
               if (a) a.classList.add('active');
             });
           },
           // 헤더 아래 상단 밴드에 들어온 헤딩을 현재 섹션으로 본다
           { rootMargin: '-72px 0px -75% 0px' }
         );
-        targets.forEach(function (el) { io.observe(el); });
+        targets.forEach((el) => { io.observe(el); });
       })();
 
-      document.getElementById('theme-toggle').addEventListener('click', function () {
-        var next =
+      // 글 제목이 헤더 위로 지나가면, 소개 문구 자리를 제목으로 바꿔치기
+      {
+        const postTitle = document.querySelector('article.post h1.post-title');
+        const slot = document.querySelector('.header-post-title');
+        const tagline = document.querySelector('.tagline');
+        if (postTitle && slot && tagline) {
+          slot.textContent = postTitle.textContent.trim();
+          const io = new IntersectionObserver(
+            ([entry]) => {
+              const hidden = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+              slot.hidden = !hidden;
+              tagline.hidden = hidden;
+            },
+            { rootMargin: '-4px 0px 0px 0px', threshold: 0 }
+          );
+          io.observe(postTitle);
+        }
+      }
+
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const next =
           document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);

@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="ko" data-width="wide"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Direction을 통한 dnd관리 | Haeran&#39;s blog</title><meta name="description" content="문제의 본질을 파악하고 해결하는 과정을 기록합니다."><link rel="icon" href="/assets/images/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png"><link rel="alternate" type="application/rss+xml" title="Haeran's blog" href="/feed.xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"><script>
       // FOUC 방지: 렌더 전에 저장된 테마 적용
-      (function () {
-        var t = localStorage.getItem('theme');
+      (() => {
+        let t = localStorage.getItem('theme');
         if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', t);
       })();
@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.CVj1H0WB.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">Direction을 통한 dnd관리</h1><div class="post-meta"><time>2025.02.16</time><span class="chip">Typescript</span><span class="reading tip" data-tip="이 게시글을 읽는 데 1분 정도 걸릴 것 같아요!">1분 분량</span><span class="views" data-views-path="/dnd-kit/typescript/2025/02/16/dnd_direction.html" hidden></span><span class="tags"><a href="/tags.html#dnd-kit">#dnd-kit</a><a href="/tags.html#Typescript">#Typescript</a></span></div></header><div class="prose"><p>여러 형태의 컴포넌트를 서로 드래그 앤 드랍하여 작업하기 위해서는 드래그가 가능한 것과 드랍이 가능한 컴포넌트를 분리하고, 방향을 정해주는 게 중요하다고 생각했습니다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BLA6ZwLA.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">Direction을 통한 dnd관리</h1><div class="post-meta"><time>2025.02.16</time><span class="chip">Typescript</span><span class="reading tip" data-tip="이 게시글을 읽는 데 1분 정도 걸릴 것 같아요!">1분 분량</span><span class="views" data-views-path="/dnd-kit/typescript/2025/02/16/dnd_direction.html" hidden></span><span class="tags"><a href="/tags.html#dnd-kit">#dnd-kit</a><a href="/tags.html#Typescript">#Typescript</a></span></div></header><div class="prose"><p>여러 형태의 컴포넌트를 서로 드래그 앤 드랍하여 작업하기 위해서는 드래그가 가능한 것과 드랍이 가능한 컴포넌트를 분리하고, 방향을 정해주는 게 중요하다고 생각했습니다.</p>
 <p>먼저 각각의 컴포넌트 타입을 정의합니다.
 그 후 드래그가 가능한 방향을 정의하고 값을 만들어주는 유틸을 만들었습니다.</p>
 <pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="typescript"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// type.ts</span></span>
@@ -42,8 +42,8 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
         // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
         // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
-        (function () {
-          var key = 'viewed:' + viewPath;
+        (() => {
+          const key = 'viewed:' + viewPath;
           try {
             if (sessionStorage.getItem(key)) return;
             sessionStorage.setItem(key, '1');
@@ -55,7 +55,7 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ path: viewPath }),
             keepalive: true,
-          }).catch(function () {});
+          }).catch(() => {});
         })();
       })();</script></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
       // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
@@ -63,23 +63,23 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
       window.__viewsReady = fetch(
         'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
       )
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (json) {
-          var map = {};
+        .then((r) => { return r.ok ? r.json() : null; })
+        .then((json) => {
+          let map = {};
           if (json && json.items) {
-            json.items.forEach(function (i) { map[i.path] = i.views; });
+            json.items.forEach((i) => { map[i.path] = i.views; });
           }
           window.__views = map;
           fillViews(document);
           return map;
         })
-        .catch(function () { window.__views = {}; return {}; });
+        .catch(() => { window.__views = {}; return {}; });
 
       function fillViews(root) {
-        var map = window.__views;
+        let map = window.__views;
         if (!map) return;
-        root.querySelectorAll('[data-views-path]').forEach(function (el) {
-          var n = map[el.dataset.viewsPath];
+        root.querySelectorAll('[data-views-path]').forEach((el) => {
+          const n = map[el.dataset.viewsPath];
           if (!n) return;
           el.textContent = '조회 ' + n.toLocaleString();
           el.hidden = false;
@@ -88,8 +88,8 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
       window.fillViews = fillViews;
 
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
-      (function () {
-        var root = document.documentElement;
+      (() => {
+        const root = document.documentElement;
         function sync() {
           root.setAttribute('data-scrolled', window.scrollY > 8 ? 'true' : 'false');
         }
@@ -98,36 +98,55 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
       })();
 
       // 목차 — 현재 읽고 있는 섹션 표시
-      (function () {
-        var links = document.querySelectorAll('.toc a');
+      (() => {
+        const links = document.querySelectorAll('.toc a');
         if (!links.length) return;
-        var map = {};
-        var targets = [];
-        links.forEach(function (a) {
-          var id = decodeURIComponent(a.getAttribute('href').slice(1));
-          var el = document.getElementById(id);
+        const map = {};
+        const targets = [];
+        links.forEach((a) => {
+          const id = decodeURIComponent(a.getAttribute('href').slice(1));
+          const el = document.getElementById(id);
           if (el) {
             map[id] = a;
             targets.push(el);
           }
         });
-        var io = new IntersectionObserver(
-          function (entries) {
-            entries.forEach(function (e) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
               if (!e.isIntersecting) return;
-              links.forEach(function (a) { a.classList.remove('active'); });
-              var a = map[e.target.id];
+              links.forEach((a) => { a.classList.remove('active'); });
+              const a = map[e.target.id];
               if (a) a.classList.add('active');
             });
           },
           // 헤더 아래 상단 밴드에 들어온 헤딩을 현재 섹션으로 본다
           { rootMargin: '-72px 0px -75% 0px' }
         );
-        targets.forEach(function (el) { io.observe(el); });
+        targets.forEach((el) => { io.observe(el); });
       })();
 
-      document.getElementById('theme-toggle').addEventListener('click', function () {
-        var next =
+      // 글 제목이 헤더 위로 지나가면, 소개 문구 자리를 제목으로 바꿔치기
+      {
+        const postTitle = document.querySelector('article.post h1.post-title');
+        const slot = document.querySelector('.header-post-title');
+        const tagline = document.querySelector('.tagline');
+        if (postTitle && slot && tagline) {
+          slot.textContent = postTitle.textContent.trim();
+          const io = new IntersectionObserver(
+            ([entry]) => {
+              const hidden = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+              slot.hidden = !hidden;
+              tagline.hidden = hidden;
+            },
+            { rootMargin: '-4px 0px 0px 0px', threshold: 0 }
+          );
+          io.observe(postTitle);
+        }
+      }
+
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const next =
           document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);
