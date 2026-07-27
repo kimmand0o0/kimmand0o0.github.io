@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.CLcIEeyr.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 04. 동시접속 100명도 안 되는 서비스에서 &quot;렉&quot;이 걸린 이유</h1><div class="post-meta"><time>2026.07.14</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html" hidden></span><span class="comments-metric" data-comments-path="/journal/development diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#성능최적화">#성능최적화</a><a href="/tags.html#N+1">#N+1</a><a href="/tags.html#PostgreSQL">#PostgreSQL</a><a href="/tags.html#Prisma">#Prisma</a></span></div></header><div class="prose"><p>이번 편은 배포 사고나 아키텍처 이야기가 아니라 성능 조사 이야기다. “시즌패스 출시 이후로 서버가 느려졌다”는 유저 신고 하나로 시작해서, 전혀 예상치 못한 곳에서 진짜 원인을 찾은 과정을 기록해둔다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.B0ZEe6gb.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 04. 동시접속 100명도 안 되는 서비스에서 &quot;렉&quot;이 걸린 이유</h1><div class="post-meta"><time>2026.07.14</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html" hidden></span><span class="comments-metric" data-comments-path="/journal/development diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#성능최적화">#성능최적화</a><a href="/tags.html#N+1">#N+1</a><a href="/tags.html#PostgreSQL">#PostgreSQL</a><a href="/tags.html#Prisma">#Prisma</a></span></div></header><div class="prose"><p>이번 편은 배포 사고나 아키텍처 이야기가 아니라 성능 조사 이야기다. “시즌패스 출시 이후로 서버가 느려졌다”는 유저 신고 하나로 시작해서, 전혀 예상치 못한 곳에서 진짜 원인을 찾은 과정을 기록해둔다.</p>
 <h2 id="tldr">TL;DR</h2>
 <ul>
 <li>“시즌패스 출시 이후로 서버가 느려졌다”는 유저 신고로 조사를 시작했다.</li>
@@ -326,7 +326,7 @@
 <li><strong>N+1을 고칠 때 호출부를 다 바꿀 필요는 없다.</strong> 공용 훅/함수 내부에 배칭 레이어를 한 겹 넣으면 22곳을 건드리지 않고도 문제를 해결할 수 있다.</li>
 </ol>
 <br>
-<p><em>이 글은 실제 프로덕션 서비스(리그 오브 레전드 사설 내전 커뮤니티, DAU 50~70명)에서 진행된 조사를 정리한 것입니다. 모든 수치는 <code>pg_stat_statements</code>(Postgres 확장, 2026-04-12부터 누적)를 통해 직접 측정했습니다.</em></p></div><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/journal/development diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html";
+<p><em>이 글은 실제 프로덕션 서비스(리그 오브 레전드 사설 내전 커뮤니티, DAU 50~70명)에서 진행된 조사를 정리한 것입니다. 모든 수치는 <code>pg_stat_statements</code>(Postgres 확장, 2026-04-12부터 누적)를 통해 직접 측정했습니다.</em></p></div><nav class="series-nav" aria-label="시리즈 이동"><p class="series-head"><span class="series-name">롤모임 운영일지</span><span class="series-pos">22편 중 4번째</span></p><div class="series-links"><a class="series-prev" href="/journal/development diary/2026/07/13/lol-moim-incidents-03-auction-phase.html"><span class="series-dir">← 이전 편</span><span class="series-title">[ 롤모임 운영일지 ] - 03. 두 서버가 같은 상태를 나눠 가지면 생기는 일 (실시간 경매 편)</span></a><a class="series-next" href="/journal/development diary/2026/07/15/lol-moim-incidents-05-gke-sketch.html"><span class="series-dir">다음 편 →</span><span class="series-title">[ 롤모임 운영일지 ] - 05. Cloud Run 서비스를 GKE로 옮긴다면 — 매니페스트 스케치</span></a></div></nav><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><p class="reply-to" id="reply-to" hidden><span id="reply-to-label"></span><button type="button" id="reply-cancel">취소</button></p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/journal/development diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
         // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
@@ -363,23 +363,73 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
           };
 
+          let replyTo = null;
+          const replyBar = document.getElementById('reply-to');
+          const replyLabel = document.getElementById('reply-to-label');
+
+          const setReplyTo = (c) => {
+            replyTo = c;
+            replyBar.hidden = !c;
+            if (c) {
+              replyLabel.textContent = `${c.author}님에게 답글`;
+              document.getElementById('comment-body').focus();
+            }
+          };
+          document.getElementById('reply-cancel').addEventListener('click', () => setReplyTo(null));
+
           // textContent 로만 넣는다 — 사용자 입력을 HTML 로 해석하지 않기 위해
+          const nodeFor = (c) => {
+            const li = document.createElement('li');
+            if (c.is_bot) li.classList.add('is-bot');
+            if (c.parent_id) li.classList.add('is-reply');
+
+            const head = document.createElement('div');
+            head.className = 'comment-head';
+            const who = document.createElement('span');
+            who.className = 'comment-author';
+            who.textContent = c.author;
+            if (c.is_bot) {
+              const badge = document.createElement('span');
+              badge.className = 'bot-badge';
+              badge.textContent = 'AI';
+              who.appendChild(badge);
+            }
+            const when = document.createElement('time');
+            when.textContent = fmt(c.created_at);
+            head.append(who, when);
+
+            const body = document.createElement('p');
+            body.className = 'comment-body';
+            body.textContent = c.body;
+
+            const reply = document.createElement('button');
+            reply.type = 'button';
+            reply.className = 'reply-btn';
+            reply.textContent = '답글';
+            reply.addEventListener('click', () => setReplyTo(c));
+
+            li.append(head, body, reply);
+            return li;
+          };
+
           const render = (items) => {
             list.textContent = '';
+            const children = new Map();
             for (const c of items) {
-              const li = document.createElement('li');
-              const head = document.createElement('div');
-              head.className = 'comment-head';
-              const who = document.createElement('span');
-              who.className = 'comment-author';
-              who.textContent = c.author;
-              const when = document.createElement('time');
-              when.textContent = fmt(c.created_at);
-              head.append(who, when);
-              const body = document.createElement('p');
-              body.className = 'comment-body';
-              body.textContent = c.body;
-              li.append(head, body);
+              if (!c.parent_id) continue;
+              if (!children.has(c.parent_id)) children.set(c.parent_id, []);
+              children.get(c.parent_id).push(c);
+            }
+            for (const c of items) {
+              if (c.parent_id) continue; // 답글은 부모 아래에서 그린다
+              const li = nodeFor(c);
+              const kids = children.get(c.id);
+              if (kids?.length) {
+                const sub = document.createElement('ul');
+                sub.className = 'comment-replies';
+                kids.forEach((k) => sub.appendChild(nodeFor(k)));
+                li.appendChild(sub);
+              }
               list.appendChild(li);
             }
             countEl.textContent = items.length ? items.length : '';
@@ -413,6 +463,7 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
                   path: commentPath,
                   author,
                   body,
+                  parentId: replyTo ? replyTo.id : undefined,
                   website: document.getElementById('comment-website').value,
                 }),
               });
@@ -422,8 +473,14 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
                 status.textContent = '등록에 실패했어요.';
               } else {
                 document.getElementById('comment-body').value = '';
-                status.textContent = '';
+                setReplyTo(null);
+                status.textContent = '만두봇이 읽는 중…';
                 await load();
+                // 봇 답글은 뒤에서 생성되므로 잠시 뒤 한 번 더 가져온다
+                setTimeout(async () => {
+                  await load();
+                  status.textContent = '';
+                }, 6000);
               }
             } catch {
               status.textContent = '등록에 실패했어요.';
@@ -537,6 +594,29 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           );
           io.observe(postTitle);
         }
+      }
+
+      // 모바일 햄버거 메뉴
+      {
+        const toggle = document.getElementById('nav-toggle');
+        const nav = document.getElementById('site-nav');
+        const setOpen = (open) => {
+          nav.classList.toggle('open', open);
+          toggle.setAttribute('aria-expanded', String(open));
+          toggle.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+          toggle.classList.toggle('is-open', open);
+        };
+        toggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          setOpen(!nav.classList.contains('open'));
+        });
+        // 메뉴 밖을 누르거나 ESC 를 누르면 닫는다
+        document.addEventListener('click', (e) => {
+          if (nav.classList.contains('open') && !nav.contains(e.target)) setOpen(false);
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') setOpen(false);
+        });
       }
 
       document.getElementById('theme-toggle').addEventListener('click', () => {

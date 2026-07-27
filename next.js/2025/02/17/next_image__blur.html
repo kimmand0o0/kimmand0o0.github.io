@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.CLcIEeyr.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">next image와 blur_image를 이용한 이미지 최적화</h1><div class="post-meta"><time>2025.02.17</time><span class="chip">Next.js</span><span class="reading tip" data-tip="이 게시글을 읽는 데 2분 정도 걸릴 것 같아요!">2분 분량</span><span class="views" data-views-path="/next.js/2025/02/17/next_image__blur.html" hidden></span><span class="comments-metric" data-comments-path="/next.js/2025/02/17/next_image__blur.html" hidden></span><span class="tags"><a href="/tags.html#Next.js">#Next.js</a></span></div></header><div class="prose"><h3 id="쇼핑몰의-단점-많은-이미지">쇼핑몰의 단점, 많은 이미지</h3>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.B0ZEe6gb.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">next image와 blur_image를 이용한 이미지 최적화</h1><div class="post-meta"><time>2025.02.17</time><span class="chip">Next.js</span><span class="reading tip" data-tip="이 게시글을 읽는 데 2분 정도 걸릴 것 같아요!">2분 분량</span><span class="views" data-views-path="/next.js/2025/02/17/next_image__blur.html" hidden></span><span class="comments-metric" data-comments-path="/next.js/2025/02/17/next_image__blur.html" hidden></span><span class="tags"><a href="/tags.html#Next.js">#Next.js</a></span></div></header><div class="prose"><h3 id="쇼핑몰의-단점-많은-이미지">쇼핑몰의 단점, 많은 이미지</h3>
 <p><img src="https://github.com/user-attachments/assets/3eeaa972-9ada-49cb-bd64-449c06c3fe35" alt="Feb-11-2025 22-45-31"></p>
 <p>가장 유명한 쇼핑몰인 쿠팡에서도 화면을 불러오는 데 2초 이상 걸리기도 합니다.
 쇼핑몰은 데이터도, 이미지도 많아 화면을 로딩하는 과정에서 유저의 이탈률이 많이 생긴다고 합니다.
@@ -23,7 +23,7 @@
 <li>공식문서는 이때 <a href="https://plaiceholder.co/docs">plaiceholder 라이브러리</a>를 추천합니다.</li>
 <li>！ plaiceholder 라이브러리는 client환경에서 이용할 수 없기 때문에, data를 가공하는 부분이 필요합니다. 해당 컴포넌트를 사용한다면 데이터를 가공하는 service 에서 유틸을 사용해 <code>blurImg</code>를 만들어주시기 바랍니다!</li>
 </ul>
-<p><img src="https://github.com/user-attachments/assets/c4dcdb73-52ba-454e-8e64-79563874e6be" alt="Feb-03-2025 22-24-51"></p></div><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/next.js/2025/02/17/next_image__blur.html";
+<p><img src="https://github.com/user-attachments/assets/c4dcdb73-52ba-454e-8e64-79563874e6be" alt="Feb-03-2025 22-24-51"></p></div><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><p class="reply-to" id="reply-to" hidden><span id="reply-to-label"></span><button type="button" id="reply-cancel">취소</button></p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/next.js/2025/02/17/next_image__blur.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
         // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
@@ -60,23 +60,73 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
           };
 
+          let replyTo = null;
+          const replyBar = document.getElementById('reply-to');
+          const replyLabel = document.getElementById('reply-to-label');
+
+          const setReplyTo = (c) => {
+            replyTo = c;
+            replyBar.hidden = !c;
+            if (c) {
+              replyLabel.textContent = `${c.author}님에게 답글`;
+              document.getElementById('comment-body').focus();
+            }
+          };
+          document.getElementById('reply-cancel').addEventListener('click', () => setReplyTo(null));
+
           // textContent 로만 넣는다 — 사용자 입력을 HTML 로 해석하지 않기 위해
+          const nodeFor = (c) => {
+            const li = document.createElement('li');
+            if (c.is_bot) li.classList.add('is-bot');
+            if (c.parent_id) li.classList.add('is-reply');
+
+            const head = document.createElement('div');
+            head.className = 'comment-head';
+            const who = document.createElement('span');
+            who.className = 'comment-author';
+            who.textContent = c.author;
+            if (c.is_bot) {
+              const badge = document.createElement('span');
+              badge.className = 'bot-badge';
+              badge.textContent = 'AI';
+              who.appendChild(badge);
+            }
+            const when = document.createElement('time');
+            when.textContent = fmt(c.created_at);
+            head.append(who, when);
+
+            const body = document.createElement('p');
+            body.className = 'comment-body';
+            body.textContent = c.body;
+
+            const reply = document.createElement('button');
+            reply.type = 'button';
+            reply.className = 'reply-btn';
+            reply.textContent = '답글';
+            reply.addEventListener('click', () => setReplyTo(c));
+
+            li.append(head, body, reply);
+            return li;
+          };
+
           const render = (items) => {
             list.textContent = '';
+            const children = new Map();
             for (const c of items) {
-              const li = document.createElement('li');
-              const head = document.createElement('div');
-              head.className = 'comment-head';
-              const who = document.createElement('span');
-              who.className = 'comment-author';
-              who.textContent = c.author;
-              const when = document.createElement('time');
-              when.textContent = fmt(c.created_at);
-              head.append(who, when);
-              const body = document.createElement('p');
-              body.className = 'comment-body';
-              body.textContent = c.body;
-              li.append(head, body);
+              if (!c.parent_id) continue;
+              if (!children.has(c.parent_id)) children.set(c.parent_id, []);
+              children.get(c.parent_id).push(c);
+            }
+            for (const c of items) {
+              if (c.parent_id) continue; // 답글은 부모 아래에서 그린다
+              const li = nodeFor(c);
+              const kids = children.get(c.id);
+              if (kids?.length) {
+                const sub = document.createElement('ul');
+                sub.className = 'comment-replies';
+                kids.forEach((k) => sub.appendChild(nodeFor(k)));
+                li.appendChild(sub);
+              }
               list.appendChild(li);
             }
             countEl.textContent = items.length ? items.length : '';
@@ -110,6 +160,7 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
                   path: commentPath,
                   author,
                   body,
+                  parentId: replyTo ? replyTo.id : undefined,
                   website: document.getElementById('comment-website').value,
                 }),
               });
@@ -119,8 +170,14 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
                 status.textContent = '등록에 실패했어요.';
               } else {
                 document.getElementById('comment-body').value = '';
-                status.textContent = '';
+                setReplyTo(null);
+                status.textContent = '만두봇이 읽는 중…';
                 await load();
+                // 봇 답글은 뒤에서 생성되므로 잠시 뒤 한 번 더 가져온다
+                setTimeout(async () => {
+                  await load();
+                  status.textContent = '';
+                }, 6000);
               }
             } catch {
               status.textContent = '등록에 실패했어요.';
@@ -234,6 +291,29 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           );
           io.observe(postTitle);
         }
+      }
+
+      // 모바일 햄버거 메뉴
+      {
+        const toggle = document.getElementById('nav-toggle');
+        const nav = document.getElementById('site-nav');
+        const setOpen = (open) => {
+          nav.classList.toggle('open', open);
+          toggle.setAttribute('aria-expanded', String(open));
+          toggle.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+          toggle.classList.toggle('is-open', open);
+        };
+        toggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          setOpen(!nav.classList.contains('open'));
+        });
+        // 메뉴 밖을 누르거나 ESC 를 누르면 닫는다
+        document.addEventListener('click', (e) => {
+          if (nav.classList.contains('open') && !nav.contains(e.target)) setOpen(false);
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') setOpen(false);
+        });
       }
 
       document.getElementById('theme-toggle').addEventListener('click', () => {

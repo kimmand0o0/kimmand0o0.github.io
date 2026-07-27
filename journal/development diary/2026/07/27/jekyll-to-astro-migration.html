@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.CLcIEeyr.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">블로그를 Jekyll에서 Astro로 옮겼다 — URL 하나도 안 깨뜨리고</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 9분 정도 걸릴 것 같아요!">9분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/jekyll-to-astro-migration.html" hidden></span><span class="comments-metric" data-comments-path="/journal/development diary/2026/07/27/jekyll-to-astro-migration.html" hidden></span><span class="tags"><a href="/tags.html#개발일지">#개발일지</a><a href="/tags.html#Astro">#Astro</a><a href="/tags.html#Jekyll">#Jekyll</a><a href="/tags.html#마이그레이션">#마이그레이션</a><a href="/tags.html#블로그">#블로그</a><a href="/tags.html#CSS">#CSS</a></span></div></header><div class="prose"><p>이 블로그는 2024년 2월부터 Jekyll(jekyll-theme-yat)로 굴러왔다. 오늘 Astro 5로 옮겼다. 시작은 거창한 기술 부채 청산이 아니라 이거였다 — <strong>“Jekyll 이름을 떼고 싶다.”</strong> 푸터에 박힌 “Powered by Jekyll”과, 테마가 정해준 모양대로만 살아야 하는 상태가 슬슬 답답했다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.B0ZEe6gb.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">블로그를 Jekyll에서 Astro로 옮겼다 — URL 하나도 안 깨뜨리고</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 9분 정도 걸릴 것 같아요!">9분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/jekyll-to-astro-migration.html" hidden></span><span class="comments-metric" data-comments-path="/journal/development diary/2026/07/27/jekyll-to-astro-migration.html" hidden></span><span class="tags"><a href="/tags.html#개발일지">#개발일지</a><a href="/tags.html#Astro">#Astro</a><a href="/tags.html#Jekyll">#Jekyll</a><a href="/tags.html#마이그레이션">#마이그레이션</a><a href="/tags.html#블로그">#블로그</a><a href="/tags.html#CSS">#CSS</a></span></div></header><div class="prose"><p>이 블로그는 2024년 2월부터 Jekyll(jekyll-theme-yat)로 굴러왔다. 오늘 Astro 5로 옮겼다. 시작은 거창한 기술 부채 청산이 아니라 이거였다 — <strong>“Jekyll 이름을 떼고 싶다.”</strong> 푸터에 박힌 “Powered by Jekyll”과, 테마가 정해준 모양대로만 살아야 하는 상태가 슬슬 답답했다.</p>
 <p>옮기면서 가장 신경 쓴 건 하나였다. <strong>글 89편의 URL을 단 하나도 깨뜨리지 않는 것.</strong> 2년 반 동안 공유된 링크들이 있고, 검색엔진에 색인된 주소가 있다. 디자인이야 마음에 안 들면 다시 고치면 되지만, 깨진 링크는 조용히 죽는다.</p>
 <p>결과부터 쓰면 성공했다. 그리고 그 과정에서 버그를 여섯 개 만났다.</p>
 <br>
@@ -125,7 +125,7 @@
 <li><strong>눈으로 본 것을 의심해야 할 때가 있다.</strong> 스크린샷의 “잘림”은 캡처 도구의 문제였고, 배포 직후의 404는 전파 지연이었다. 둘 다 그대로 믿었으면 없는 버그를 고쳤을 것이다. 반대로 폭이 어긋난 건 눈으로는 “뭔가 어색하다”까지만 알 수 있었고, 실제로 재보고서야 173px이라는 원인이 나왔다.</li>
 <li><strong>테마를 걷어낼 때는 테마가 아닌 것도 같이 걷힌다.</strong> GA4가 그랬다. 이관 후 “예전에 있었는데 지금 없는 것”을 한 번 훑어보는 절차가 필요하다.</li>
 </ul>
-<p>푸터에서 “Powered by Jekyll”은 사라졌다. 대신 이제 이 블로그가 어떻게 생겼는지는 전부 내 코드에 적혀 있다. 그게 원래 하고 싶었던 것이다.</p></div><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/jekyll-to-astro-migration.html";
+<p>푸터에서 “Powered by Jekyll”은 사라졌다. 대신 이제 이 블로그가 어떻게 생겼는지는 전부 내 코드에 적혀 있다. 그게 원래 하고 싶었던 것이다.</p></div><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><p class="reply-to" id="reply-to" hidden><span id="reply-to-label"></span><button type="button" id="reply-cancel">취소</button></p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/jekyll-to-astro-migration.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
         // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
@@ -162,23 +162,73 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
           };
 
+          let replyTo = null;
+          const replyBar = document.getElementById('reply-to');
+          const replyLabel = document.getElementById('reply-to-label');
+
+          const setReplyTo = (c) => {
+            replyTo = c;
+            replyBar.hidden = !c;
+            if (c) {
+              replyLabel.textContent = `${c.author}님에게 답글`;
+              document.getElementById('comment-body').focus();
+            }
+          };
+          document.getElementById('reply-cancel').addEventListener('click', () => setReplyTo(null));
+
           // textContent 로만 넣는다 — 사용자 입력을 HTML 로 해석하지 않기 위해
+          const nodeFor = (c) => {
+            const li = document.createElement('li');
+            if (c.is_bot) li.classList.add('is-bot');
+            if (c.parent_id) li.classList.add('is-reply');
+
+            const head = document.createElement('div');
+            head.className = 'comment-head';
+            const who = document.createElement('span');
+            who.className = 'comment-author';
+            who.textContent = c.author;
+            if (c.is_bot) {
+              const badge = document.createElement('span');
+              badge.className = 'bot-badge';
+              badge.textContent = 'AI';
+              who.appendChild(badge);
+            }
+            const when = document.createElement('time');
+            when.textContent = fmt(c.created_at);
+            head.append(who, when);
+
+            const body = document.createElement('p');
+            body.className = 'comment-body';
+            body.textContent = c.body;
+
+            const reply = document.createElement('button');
+            reply.type = 'button';
+            reply.className = 'reply-btn';
+            reply.textContent = '답글';
+            reply.addEventListener('click', () => setReplyTo(c));
+
+            li.append(head, body, reply);
+            return li;
+          };
+
           const render = (items) => {
             list.textContent = '';
+            const children = new Map();
             for (const c of items) {
-              const li = document.createElement('li');
-              const head = document.createElement('div');
-              head.className = 'comment-head';
-              const who = document.createElement('span');
-              who.className = 'comment-author';
-              who.textContent = c.author;
-              const when = document.createElement('time');
-              when.textContent = fmt(c.created_at);
-              head.append(who, when);
-              const body = document.createElement('p');
-              body.className = 'comment-body';
-              body.textContent = c.body;
-              li.append(head, body);
+              if (!c.parent_id) continue;
+              if (!children.has(c.parent_id)) children.set(c.parent_id, []);
+              children.get(c.parent_id).push(c);
+            }
+            for (const c of items) {
+              if (c.parent_id) continue; // 답글은 부모 아래에서 그린다
+              const li = nodeFor(c);
+              const kids = children.get(c.id);
+              if (kids?.length) {
+                const sub = document.createElement('ul');
+                sub.className = 'comment-replies';
+                kids.forEach((k) => sub.appendChild(nodeFor(k)));
+                li.appendChild(sub);
+              }
               list.appendChild(li);
             }
             countEl.textContent = items.length ? items.length : '';
@@ -212,6 +262,7 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
                   path: commentPath,
                   author,
                   body,
+                  parentId: replyTo ? replyTo.id : undefined,
                   website: document.getElementById('comment-website').value,
                 }),
               });
@@ -221,8 +272,14 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
                 status.textContent = '등록에 실패했어요.';
               } else {
                 document.getElementById('comment-body').value = '';
-                status.textContent = '';
+                setReplyTo(null);
+                status.textContent = '만두봇이 읽는 중…';
                 await load();
+                // 봇 답글은 뒤에서 생성되므로 잠시 뒤 한 번 더 가져온다
+                setTimeout(async () => {
+                  await load();
+                  status.textContent = '';
+                }, 6000);
               }
             } catch {
               status.textContent = '등록에 실패했어요.';
@@ -336,6 +393,29 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           );
           io.observe(postTitle);
         }
+      }
+
+      // 모바일 햄버거 메뉴
+      {
+        const toggle = document.getElementById('nav-toggle');
+        const nav = document.getElementById('site-nav');
+        const setOpen = (open) => {
+          nav.classList.toggle('open', open);
+          toggle.setAttribute('aria-expanded', String(open));
+          toggle.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+          toggle.classList.toggle('is-open', open);
+        };
+        toggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          setOpen(!nav.classList.contains('open'));
+        });
+        // 메뉴 밖을 누르거나 ESC 를 누르면 닫는다
+        document.addEventListener('click', (e) => {
+          if (nav.classList.contains('open') && !nav.contains(e.target)) setOpen(false);
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') setOpen(false);
+        });
       }
 
       document.getElementById('theme-toggle').addEventListener('click', () => {

@@ -10,9 +10,9 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.CLcIEeyr.css">
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.B0ZEe6gb.css">
 <style>.search-empty{margin:2rem 0 0;font-size:.98rem;color:var(--muted)}
-</style></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html" class="active" aria-current="page"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main> <h1 class="page-title">Search</h1> <input id="search-input" type="search" placeholder="제목·태그·본문으로 검색…" autofocus>  <section id="default-section"> <h2 class="group-title" id="default-title">최근 글</h2> <ul class="archive-list" id="default-list"></ul> </section>  <section id="result-section" hidden> <h2 class="group-title" id="result-title"></h2> <ul class="archive-list" id="result-list"></ul> </section>  <section id="empty-section" hidden> <p class="search-empty" id="empty-message"></p> <h2 class="group-title">이런 글은 어때요</h2> <ul class="archive-list" id="empty-list"></ul> </section> <script>(function(){const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+</style></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html" class="active" aria-current="page"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main> <h1 class="page-title">Search</h1> <input id="search-input" type="search" placeholder="제목·태그·본문으로 검색…" autofocus>  <section id="default-section"> <h2 class="group-title" id="default-title">최근 글</h2> <ul class="archive-list" id="default-list"></ul> </section>  <section id="result-section" hidden> <h2 class="group-title" id="result-title"></h2> <ul class="archive-list" id="result-list"></ul> </section>  <section id="empty-section" hidden> <p class="search-empty" id="empty-message"></p> <h2 class="group-title">이런 글은 어때요</h2> <ul class="archive-list" id="empty-list"></ul> </section> <script>(function(){const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
     (() => {
       const input = document.getElementById('search-input');
@@ -208,6 +208,29 @@
           );
           io.observe(postTitle);
         }
+      }
+
+      // 모바일 햄버거 메뉴
+      {
+        const toggle = document.getElementById('nav-toggle');
+        const nav = document.getElementById('site-nav');
+        const setOpen = (open) => {
+          nav.classList.toggle('open', open);
+          toggle.setAttribute('aria-expanded', String(open));
+          toggle.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+          toggle.classList.toggle('is-open', open);
+        };
+        toggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          setOpen(!nav.classList.contains('open'));
+        });
+        // 메뉴 밖을 누르거나 ESC 를 누르면 닫는다
+        document.addEventListener('click', (e) => {
+          if (nav.classList.contains('open') && !nav.contains(e.target)) setOpen(false);
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') setOpen(false);
+        });
       }
 
       document.getElementById('theme-toggle').addEventListener('click', () => {

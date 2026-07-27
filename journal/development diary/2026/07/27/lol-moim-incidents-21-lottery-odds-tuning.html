@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.CLcIEeyr.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 21. 꽝 82%까지 가는 길 — 복권 확률 튜닝 일지</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 4분 정도 걸릴 것 같아요!">4분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/lol-moim-incidents-21-lottery-odds-tuning.html" hidden></span><span class="comments-metric" data-comments-path="/journal/development diary/2026/07/27/lol-moim-incidents-21-lottery-odds-tuning.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#게임경제">#게임경제</a><a href="/tags.html#밸런싱">#밸런싱</a><a href="/tags.html#확률">#확률</a><a href="/tags.html#UX">#UX</a></span></div></header><div class="prose"><p>5월 중순, 배팅 포인트 상점에 스크래치 복권을 넣었다. 50P를 내면 황금 카드가 나오고, 손가락으로 긁으면 당첨금이 드러나는 단순한 장치다. 그런데 커밋 로그를 다시 보니 재미있는 기록이 남아 있었다 — <strong>출시하고 40여 분 동안 확률표를 네 번 고쳤다.</strong> 처음엔 당첨 확률을 두 번이나 올렸고, 30분 뒤엔 정반대로 꽝을 82%까지 끌어올렸다. 이번 편은 그 짧고 굵었던 밸런싱 시행착오의 기록이다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.B0ZEe6gb.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 21. 꽝 82%까지 가는 길 — 복권 확률 튜닝 일지</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 4분 정도 걸릴 것 같아요!">4분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/lol-moim-incidents-21-lottery-odds-tuning.html" hidden></span><span class="comments-metric" data-comments-path="/journal/development diary/2026/07/27/lol-moim-incidents-21-lottery-odds-tuning.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#게임경제">#게임경제</a><a href="/tags.html#밸런싱">#밸런싱</a><a href="/tags.html#확률">#확률</a><a href="/tags.html#UX">#UX</a></span></div></header><div class="prose"><p>5월 중순, 배팅 포인트 상점에 스크래치 복권을 넣었다. 50P를 내면 황금 카드가 나오고, 손가락으로 긁으면 당첨금이 드러나는 단순한 장치다. 그런데 커밋 로그를 다시 보니 재미있는 기록이 남아 있었다 — <strong>출시하고 40여 분 동안 확률표를 네 번 고쳤다.</strong> 처음엔 당첨 확률을 두 번이나 올렸고, 30분 뒤엔 정반대로 꽝을 82%까지 끌어올렸다. 이번 편은 그 짧고 굵었던 밸런싱 시행착오의 기록이다.</p>
 <br>
 <h2 id="시작--50p짜리-스크래치-카드">시작 — 50P짜리 스크래치 카드</h2>
 <p>구현 자체는 소박하다. 서버는 누적 확률 테이블에서 가중 랜덤으로 당첨금을 뽑고, 프론트는 canvas의 <code>destination-out</code> 합성으로 긁는 모션을 만든다. 50% 이상 긁으면 자동으로 전부 공개된다.</p>
@@ -161,7 +161,7 @@
 <li><strong>“자주 당첨”과 “많이 당첨”은 분리할 수 있다.</strong> 최종안의 본전 45%는 경제적으로는 거의 아무 일도 안 일어나는 결과지만, 체감상으로는 복권을 계속 긁게 만드는 핵심 장치다. 재미는 빈도에서, 회수는 금액에서 가져오면 된다.</li>
 <li><strong>연출이 있는 UI는 상태 반영 시점이 곧 스포일러 방어선이다.</strong> 잔액, 하이라이트, 확률표 — 전부 “이미 알고 있는 것”을 너무 일찍 보여줘서 생긴 문제였다.</li>
 <li>확률표는 그날 이후 두 달 넘게 그대로다. 한 시간도 안 되는 사이 극단을 오갔던 것치고는, 하루 자고 나서 정한 값이 꽤 오래 살아남았다.</li>
-</ul></div><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/lol-moim-incidents-21-lottery-odds-tuning.html";
+</ul></div><nav class="series-nav" aria-label="시리즈 이동"><p class="series-head"><span class="series-name">롤모임 운영일지</span><span class="series-pos">22편 중 21번째</span></p><div class="series-links"><a class="series-prev" href="/journal/development diary/2026/07/27/lol-moim-incidents-20-bubble-skin-9patch.html"><span class="series-dir">← 이전 편</span><span class="series-title">[ 롤모임 운영일지 ] - 20. 말풍선 하나에 커밋 열네 개 — 9-patch를 재발명하다 만난 border-image</span></a><a class="series-next" href="/journal/development diary/2026/07/27/lol-moim-incidents-22-coauthored-by.html"><span class="series-dir">다음 편 →</span><span class="series-title">[ 롤모임 운영일지 ] - 22. 내 커밋의 94%에는 같은 동료의 이름이 있다</span></a></div></nav><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><p class="reply-to" id="reply-to" hidden><span id="reply-to-label"></span><button type="button" id="reply-cancel">취소</button></p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/lol-moim-incidents-21-lottery-odds-tuning.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
         // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
@@ -198,23 +198,73 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
           };
 
+          let replyTo = null;
+          const replyBar = document.getElementById('reply-to');
+          const replyLabel = document.getElementById('reply-to-label');
+
+          const setReplyTo = (c) => {
+            replyTo = c;
+            replyBar.hidden = !c;
+            if (c) {
+              replyLabel.textContent = `${c.author}님에게 답글`;
+              document.getElementById('comment-body').focus();
+            }
+          };
+          document.getElementById('reply-cancel').addEventListener('click', () => setReplyTo(null));
+
           // textContent 로만 넣는다 — 사용자 입력을 HTML 로 해석하지 않기 위해
+          const nodeFor = (c) => {
+            const li = document.createElement('li');
+            if (c.is_bot) li.classList.add('is-bot');
+            if (c.parent_id) li.classList.add('is-reply');
+
+            const head = document.createElement('div');
+            head.className = 'comment-head';
+            const who = document.createElement('span');
+            who.className = 'comment-author';
+            who.textContent = c.author;
+            if (c.is_bot) {
+              const badge = document.createElement('span');
+              badge.className = 'bot-badge';
+              badge.textContent = 'AI';
+              who.appendChild(badge);
+            }
+            const when = document.createElement('time');
+            when.textContent = fmt(c.created_at);
+            head.append(who, when);
+
+            const body = document.createElement('p');
+            body.className = 'comment-body';
+            body.textContent = c.body;
+
+            const reply = document.createElement('button');
+            reply.type = 'button';
+            reply.className = 'reply-btn';
+            reply.textContent = '답글';
+            reply.addEventListener('click', () => setReplyTo(c));
+
+            li.append(head, body, reply);
+            return li;
+          };
+
           const render = (items) => {
             list.textContent = '';
+            const children = new Map();
             for (const c of items) {
-              const li = document.createElement('li');
-              const head = document.createElement('div');
-              head.className = 'comment-head';
-              const who = document.createElement('span');
-              who.className = 'comment-author';
-              who.textContent = c.author;
-              const when = document.createElement('time');
-              when.textContent = fmt(c.created_at);
-              head.append(who, when);
-              const body = document.createElement('p');
-              body.className = 'comment-body';
-              body.textContent = c.body;
-              li.append(head, body);
+              if (!c.parent_id) continue;
+              if (!children.has(c.parent_id)) children.set(c.parent_id, []);
+              children.get(c.parent_id).push(c);
+            }
+            for (const c of items) {
+              if (c.parent_id) continue; // 답글은 부모 아래에서 그린다
+              const li = nodeFor(c);
+              const kids = children.get(c.id);
+              if (kids?.length) {
+                const sub = document.createElement('ul');
+                sub.className = 'comment-replies';
+                kids.forEach((k) => sub.appendChild(nodeFor(k)));
+                li.appendChild(sub);
+              }
               list.appendChild(li);
             }
             countEl.textContent = items.length ? items.length : '';
@@ -248,6 +298,7 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
                   path: commentPath,
                   author,
                   body,
+                  parentId: replyTo ? replyTo.id : undefined,
                   website: document.getElementById('comment-website').value,
                 }),
               });
@@ -257,8 +308,14 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
                 status.textContent = '등록에 실패했어요.';
               } else {
                 document.getElementById('comment-body').value = '';
-                status.textContent = '';
+                setReplyTo(null);
+                status.textContent = '만두봇이 읽는 중…';
                 await load();
+                // 봇 답글은 뒤에서 생성되므로 잠시 뒤 한 번 더 가져온다
+                setTimeout(async () => {
+                  await load();
+                  status.textContent = '';
+                }, 6000);
               }
             } catch {
               status.textContent = '등록에 실패했어요.';
@@ -372,6 +429,29 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           );
           io.observe(postTitle);
         }
+      }
+
+      // 모바일 햄버거 메뉴
+      {
+        const toggle = document.getElementById('nav-toggle');
+        const nav = document.getElementById('site-nav');
+        const setOpen = (open) => {
+          nav.classList.toggle('open', open);
+          toggle.setAttribute('aria-expanded', String(open));
+          toggle.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+          toggle.classList.toggle('is-open', open);
+        };
+        toggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          setOpen(!nav.classList.contains('open'));
+        });
+        // 메뉴 밖을 누르거나 ESC 를 누르면 닫는다
+        document.addEventListener('click', (e) => {
+          if (nav.classList.contains('open') && !nav.contains(e.target)) setOpen(false);
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') setOpen(false);
+        });
       }
 
       document.getElementById('theme-toggle').addEventListener('click', () => {
