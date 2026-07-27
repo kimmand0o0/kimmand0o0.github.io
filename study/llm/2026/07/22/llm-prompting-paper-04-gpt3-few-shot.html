@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.B8jJpMyz.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">LLM 프롬프팅 논문 스터디 - 04. GPT-3, Language Models are Few-Shot Learners</h1><div class="post-meta"><time>2026.07.22</time><span class="chip">LLM</span><span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span><span class="views" data-views-path="/study/llm/2026/07/22/llm-prompting-paper-04-gpt3-few-shot.html" hidden></span><span class="comments-metric" data-comments-path="/study/llm/2026/07/22/llm-prompting-paper-04-gpt3-few-shot.html" hidden></span><span class="likes-metric" data-likes-path="/study/llm/2026/07/22/llm-prompting-paper-04-gpt3-few-shot.html" hidden></span><span class="tags"><a href="/tags.html#LLM">#LLM</a><a href="/tags.html#Prompt Engineering">#Prompt Engineering</a><a href="/tags.html#NLP">#NLP</a><a href="/tags.html#In-Context Learning">#In-Context Learning</a></span></div></header><div class="prose"><p>시리즈 네 번째 편. <a href="/study/llm/2026/07/22/llm-prompting-paper-03-tree-of-thoughts.html">프롬프팅 기법 트랙</a>에서 다룬 CoT/Self-Consistency/ToT가 전부 전제로 깔고 가는 개념, In-Context Learning(ICL)의 뿌리인 <a href="https://arxiv.org/abs/2005.14165"><strong>Language Models are Few-Shot Learners</strong></a> (Brown et al., 2020, NeurIPS) — 흔히 “GPT-3 논문”이라 불리는 그 논문이다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.Ee3Yaojx.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">LLM 프롬프팅 논문 스터디 - 04. GPT-3, Language Models are Few-Shot Learners</h1><div class="post-meta"><time>2026.07.22</time><span class="chip">LLM</span><span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span><span class="views" data-views-path="/study/llm/2026/07/22/llm-prompting-paper-04-gpt3-few-shot.html" hidden></span><span class="comments-metric" data-comments-path="/study/llm/2026/07/22/llm-prompting-paper-04-gpt3-few-shot.html" hidden></span><span class="likes-metric" data-likes-path="/study/llm/2026/07/22/llm-prompting-paper-04-gpt3-few-shot.html" hidden></span><span class="tags"><a href="/tags.html#LLM">#LLM</a><a href="/tags.html#Prompt Engineering">#Prompt Engineering</a><a href="/tags.html#NLP">#NLP</a><a href="/tags.html#In-Context Learning">#In-Context Learning</a></span></div></header><div class="prose"><p>시리즈 네 번째 편. <a href="/study/llm/2026/07/22/llm-prompting-paper-03-tree-of-thoughts.html">프롬프팅 기법 트랙</a>에서 다룬 CoT/Self-Consistency/ToT가 전부 전제로 깔고 가는 개념, In-Context Learning(ICL)의 뿌리인 <a href="https://arxiv.org/abs/2005.14165"><strong>Language Models are Few-Shot Learners</strong></a> (Brown et al., 2020, NeurIPS) — 흔히 “GPT-3 논문”이라 불리는 그 논문이다.</p>
 <h2 id="1-기본적인-이해부터">1. 기본적인 이해부터</h2>
 <p>쉽게 말하면, 이 논문은 **“모델을 다시 학습시키지 않고, 프롬프트 안에 예시 몇 개만 보여줘도 새 작업을 해낸다”**는 걸 처음으로 대규모로 증명한 논문이다. 175B 파라미터짜리 GPT-3라는 모델을 만들고, 그 모델에 가중치 업데이트(파인튜닝) 없이 <strong>프롬프트에 예시를 몇 개 넣는 것만으로</strong> 번역, 질의응답, 산수, 글쓰기 등 온갖 작업을 시켰더니 꽤 잘 해냈다는 걸 보여줬다. 지금 당연하게 쓰는 “프롬프트에 예시 넣기”라는 개념 자체가 이 논문에서 체계적으로 정의되고 검증된 것.</p>
 <h2 id="2-문제점배경">2. 문제점/배경</h2>
@@ -442,6 +442,36 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             { rootMargin: '-4px 0px 0px 0px', threshold: 0 }
           );
           io.observe(postTitle);
+        }
+      }
+
+      // 정렬 필터 접기/펼치기 — 선택된 항목만 보이고, 누르면 스르륵 펼쳐진다
+      {
+        const bar = document.querySelector('.sort-bar');
+        if (bar) {
+          const toggle = bar.querySelector('.sort-toggle');
+          const current = bar.querySelector('.sort-current');
+          const setOpen = (open) => {
+            bar.classList.toggle('open', open);
+            toggle.setAttribute('aria-expanded', String(open));
+          };
+          toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setOpen(!bar.classList.contains('open'));
+          });
+          // 항목을 고르면 라벨을 바꾸고 접는다 (정렬 자체는 각 페이지 스크립트가 처리)
+          bar.querySelectorAll('.sort-btn').forEach((b) => {
+            b.addEventListener('click', () => {
+              current.textContent = b.textContent.trim();
+              setOpen(false);
+            });
+          });
+          document.addEventListener('click', (e) => {
+            if (bar.classList.contains('open') && !bar.contains(e.target)) setOpen(false);
+          });
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') setOpen(false);
+          });
         }
       }
 

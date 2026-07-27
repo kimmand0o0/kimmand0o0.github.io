@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.B8jJpMyz.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 01. 배포하다가 겪은 사고 모음</h1><div class="post-meta"><time>2026.07.11</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 4분 정도 걸릴 것 같아요!">4분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/11/lol-moim-incidents-01.html" hidden></span><span class="comments-metric" data-comments-path="/journal/development diary/2026/07/11/lol-moim-incidents-01.html" hidden></span><span class="likes-metric" data-likes-path="/journal/development diary/2026/07/11/lol-moim-incidents-01.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#배포사고">#배포사고</a><a href="/tags.html#GCP">#GCP</a><a href="/tags.html#Vercel">#Vercel</a><a href="/tags.html#회고">#회고</a></span></div></header><div class="prose"><p>사이드 프로젝트로 만든 롤 내전 모임 서비스(모노레포: <code>packages/frontend</code> - Vite/React, <code>packages/api</code> - Express/Prisma)를 실제로 운영하면서 크고 작은 사고를 겪었다. 코드 몇 줄 잘못 짜서 나는 버그와는 결이 다른, <strong>배포 프로세스 자체에서 나는 사고</strong>들이라 따로 기록해두려 한다. 앞으로도 비슷한 일이 생기면 이 시리즈에 계속 추가할 예정이다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.Ee3Yaojx.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 01. 배포하다가 겪은 사고 모음</h1><div class="post-meta"><time>2026.07.11</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 4분 정도 걸릴 것 같아요!">4분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/11/lol-moim-incidents-01.html" hidden></span><span class="comments-metric" data-comments-path="/journal/development diary/2026/07/11/lol-moim-incidents-01.html" hidden></span><span class="likes-metric" data-likes-path="/journal/development diary/2026/07/11/lol-moim-incidents-01.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#배포사고">#배포사고</a><a href="/tags.html#GCP">#GCP</a><a href="/tags.html#Vercel">#Vercel</a><a href="/tags.html#회고">#회고</a></span></div></header><div class="prose"><p>사이드 프로젝트로 만든 롤 내전 모임 서비스(모노레포: <code>packages/frontend</code> - Vite/React, <code>packages/api</code> - Express/Prisma)를 실제로 운영하면서 크고 작은 사고를 겪었다. 코드 몇 줄 잘못 짜서 나는 버그와는 결이 다른, <strong>배포 프로세스 자체에서 나는 사고</strong>들이라 따로 기록해두려 한다. 앞으로도 비슷한 일이 생기면 이 시리즈에 계속 추가할 예정이다.</p>
 <br>
 <h2 id="사고-1-git과-운영이-서로-다른-코드를-가리키게-된-사건">사고 1. git과 운영이 서로 다른 코드를 가리키게 된 사건</h2>
 <p><code>origin/main</code>을 실서비스의 기준(Source of Truth)으로 삼고 있었는데, 운영 중에 급한 마음에 로컬의 커밋되지 않은 코드(gitDirty 상태)를 <code>vercel</code>/<code>gcloud</code> CLI로 바로 배포해버린 일이 반복됐다.</p>
@@ -401,6 +401,36 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             { rootMargin: '-4px 0px 0px 0px', threshold: 0 }
           );
           io.observe(postTitle);
+        }
+      }
+
+      // 정렬 필터 접기/펼치기 — 선택된 항목만 보이고, 누르면 스르륵 펼쳐진다
+      {
+        const bar = document.querySelector('.sort-bar');
+        if (bar) {
+          const toggle = bar.querySelector('.sort-toggle');
+          const current = bar.querySelector('.sort-current');
+          const setOpen = (open) => {
+            bar.classList.toggle('open', open);
+            toggle.setAttribute('aria-expanded', String(open));
+          };
+          toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setOpen(!bar.classList.contains('open'));
+          });
+          // 항목을 고르면 라벨을 바꾸고 접는다 (정렬 자체는 각 페이지 스크립트가 처리)
+          bar.querySelectorAll('.sort-btn').forEach((b) => {
+            b.addEventListener('click', () => {
+              current.textContent = b.textContent.trim();
+              setOpen(false);
+            });
+          });
+          document.addEventListener('click', (e) => {
+            if (bar.classList.contains('open') && !bar.contains(e.target)) setOpen(false);
+          });
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') setOpen(false);
+          });
         }
       }
 

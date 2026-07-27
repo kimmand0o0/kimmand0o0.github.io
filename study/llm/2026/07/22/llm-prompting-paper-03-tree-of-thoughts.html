@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.B8jJpMyz.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">LLM 프롬프팅 논문 스터디 - 03. Tree of Thoughts</h1><div class="post-meta"><time>2026.07.22</time><span class="chip">LLM</span><span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span><span class="views" data-views-path="/study/llm/2026/07/22/llm-prompting-paper-03-tree-of-thoughts.html" hidden></span><span class="comments-metric" data-comments-path="/study/llm/2026/07/22/llm-prompting-paper-03-tree-of-thoughts.html" hidden></span><span class="likes-metric" data-likes-path="/study/llm/2026/07/22/llm-prompting-paper-03-tree-of-thoughts.html" hidden></span><span class="tags"><a href="/tags.html#LLM">#LLM</a><a href="/tags.html#Prompt Engineering">#Prompt Engineering</a><a href="/tags.html#NLP">#NLP</a><a href="/tags.html#Chain-of-Thought">#Chain-of-Thought</a></span></div></header><div class="prose"><p>시리즈 세 번째 편이자 “프롬프팅 기법” 트랙의 마지막 편. <a href="/study/llm/2026/07/22/llm-prompting-paper-02-self-consistency.html">Self-Consistency</a>의 “여러 경로 다수결”을 “탐색+백트래킹이 가능한 트리”로 확장한 <a href="https://arxiv.org/abs/2305.10601"><strong>Tree of Thoughts: Deliberate Problem Solving with Large Language Models</strong></a> (Yao et al., 2023, NeurIPS)이다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.Ee3Yaojx.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">LLM 프롬프팅 논문 스터디 - 03. Tree of Thoughts</h1><div class="post-meta"><time>2026.07.22</time><span class="chip">LLM</span><span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span><span class="views" data-views-path="/study/llm/2026/07/22/llm-prompting-paper-03-tree-of-thoughts.html" hidden></span><span class="comments-metric" data-comments-path="/study/llm/2026/07/22/llm-prompting-paper-03-tree-of-thoughts.html" hidden></span><span class="likes-metric" data-likes-path="/study/llm/2026/07/22/llm-prompting-paper-03-tree-of-thoughts.html" hidden></span><span class="tags"><a href="/tags.html#LLM">#LLM</a><a href="/tags.html#Prompt Engineering">#Prompt Engineering</a><a href="/tags.html#NLP">#NLP</a><a href="/tags.html#Chain-of-Thought">#Chain-of-Thought</a></span></div></header><div class="prose"><p>시리즈 세 번째 편이자 “프롬프팅 기법” 트랙의 마지막 편. <a href="/study/llm/2026/07/22/llm-prompting-paper-02-self-consistency.html">Self-Consistency</a>의 “여러 경로 다수결”을 “탐색+백트래킹이 가능한 트리”로 확장한 <a href="https://arxiv.org/abs/2305.10601"><strong>Tree of Thoughts: Deliberate Problem Solving with Large Language Models</strong></a> (Yao et al., 2023, NeurIPS)이다.</p>
 <h2 id="1-기본적인-이해부터">1. 기본적인 이해부터</h2>
 <p>쉽게 말하면, Tree of Thoughts(ToT)는 <strong>“생각을 한 줄로 쭉 이어가지 않고, 여러 갈래로 뻗어보면서 막히면 되돌아가는” 방법</strong>이다. CoT가 하나의 선형 추론을, Self-Consistency가 여러 개의 독립적인 선형 추론을 다수결로 묶었다면, ToT는 추론 중간에 **“여기서 갈림길이다, 어느 쪽이 더 유망한지 스스로 평가하고, 아니다 싶으면 이전 지점으로 되돌아가서 다른 길을 시도”**하게 만든다.</p>
 <h2 id="2-문제점배경">2. 문제점/배경</h2>
@@ -427,6 +427,36 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             { rootMargin: '-4px 0px 0px 0px', threshold: 0 }
           );
           io.observe(postTitle);
+        }
+      }
+
+      // 정렬 필터 접기/펼치기 — 선택된 항목만 보이고, 누르면 스르륵 펼쳐진다
+      {
+        const bar = document.querySelector('.sort-bar');
+        if (bar) {
+          const toggle = bar.querySelector('.sort-toggle');
+          const current = bar.querySelector('.sort-current');
+          const setOpen = (open) => {
+            bar.classList.toggle('open', open);
+            toggle.setAttribute('aria-expanded', String(open));
+          };
+          toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setOpen(!bar.classList.contains('open'));
+          });
+          // 항목을 고르면 라벨을 바꾸고 접는다 (정렬 자체는 각 페이지 스크립트가 처리)
+          bar.querySelectorAll('.sort-btn').forEach((b) => {
+            b.addEventListener('click', () => {
+              current.textContent = b.textContent.trim();
+              setOpen(false);
+            });
+          });
+          document.addEventListener('click', (e) => {
+            if (bar.classList.contains('open') && !bar.contains(e.target)) setOpen(false);
+          });
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') setOpen(false);
+          });
         }
       }
 
