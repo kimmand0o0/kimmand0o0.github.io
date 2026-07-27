@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import { allPosts, formatDate, postPath, categoriesOf } from '../lib/posts';
+
+const posts = await allPosts();
+const byCategory = new Map<string, typeof posts>();
+for (const post of posts) {
+  const key = categoriesOf(post).join(' / ') || '(미분류)';
+  if (!byCategory.has(key)) byCategory.set(key, []);
+  byCategory.get(key)!.push(post);
+}
+const categories = [...byCategory.entries()].sort((a, b) => b[1].length - a[1].length);
+---
+
+<Base title="Categories">
+  <h1 class="page-title">Categories</h1>
+  <ul class="chips">
+    {categories.map(([name, list]) => (
+      <li>
+        <a href={`#${name}`}>{name} ({list.length})</a>
+      </li>
+    ))}
+  </ul>
+  {
+    categories.map(([name, list]) => (
+      <section>
+        <h2 class="group-title" id={name}>{name}</h2>
+        <ul class="archive-list">
+          {list.map((post) => (
+            <li>
+              <time>{formatDate(post)}</time>
+              <a href={postPath(post)}>{post.data.title}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</Base>

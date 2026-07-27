@@ -1,0 +1,32 @@
+---
+import { formatDate, postPath, categoriesOf, type Post } from '../lib/posts';
+
+interface Props {
+  posts: Post[];
+  page: number;
+  totalPages: number;
+}
+const { posts, page, totalPages } = Astro.props;
+const newerHref = page === 2 ? '/' : `/page${page - 1}/`;
+const olderHref = `/page${page + 1}/`;
+---
+
+<ul class="post-list">
+  {
+    posts.map((post) => (
+      <li>
+        <a class="title" href={postPath(post)}>
+          {post.data.title}
+        </a>
+        <div class="meta">
+          {formatDate(post)} · {categoriesOf(post).join(' / ')}
+        </div>
+      </li>
+    ))
+  }
+</ul>
+<nav class="pagination">
+  <span>{page > 1 ? <a href={newerHref}>← 최근 글</a> : null}</span>
+  <span class="muted">{page} / {totalPages}</span>
+  <span>{page < totalPages ? <a href={olderHref}>지난 글 →</a> : null}</span>
+</nav>

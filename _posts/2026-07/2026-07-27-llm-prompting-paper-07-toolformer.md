@@ -7,7 +7,7 @@ categories: [Study, LLM]
 tags: [LLM, Prompt Engineering, NLP, Agent, Tool Use, Fine-tuning]
 ---
 
-시리즈 일곱 번째 편이자 "에이전트/툴 사용" 트랙의 마지막 편. 지난 편에서 다룬 [ReAct]({% post_url 2026-07-23-llm-prompting-paper-06-react %})가 프롬프트로 "언제 툴을 쓸지" 예시를 보여주는 방식이었다면, 이번에 다룰 [**Toolformer: Language Models Can Teach Themselves to Use Tools**](https://arxiv.org/abs/2302.04761) (Schick et al., 2023, NeurIPS)는 그 판단 자체를 모델 가중치에 학습시키는 접근이라 흥미로운 대조가 된다.
+시리즈 일곱 번째 편이자 "에이전트/툴 사용" 트랙의 마지막 편. 지난 편에서 다룬 [ReAct](/study/llm/2026/07/23/llm-prompting-paper-06-react.html)가 프롬프트로 "언제 툴을 쓸지" 예시를 보여주는 방식이었다면, 이번에 다룰 [**Toolformer: Language Models Can Teach Themselves to Use Tools**](https://arxiv.org/abs/2302.04761) (Schick et al., 2023, NeurIPS)는 그 판단 자체를 모델 가중치에 학습시키는 접근이라 흥미로운 대조가 된다.
 
 ## 1. 기본적인 이해부터
 

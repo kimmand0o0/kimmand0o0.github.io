@@ -7,7 +7,7 @@ categories: [Journal, Development Diary]
 tags: [K8s, Kubernetes, 스터디, Service, 로드밸런싱]
 ---
 
-[지난 편]({% post_url 2026-07/2026-07-22-k8s-study-03-deployment-replicaset %})에서 롤링 업데이트 중에 Pod가 계속 죽고 새로 생긴다는 걸 봤다. 근데 Pod가 재생성될 때마다 IP가 바뀌는데, 그럼 다른 Pod가 얘를 어떻게 계속 찾아가는 걸까 — 이번 편은 [Service](https://kubernetes.io/docs/concepts/services-networking/service/).
+[지난 편](/journal/development%20diary/2026/07/22/k8s-study-03-deployment-replicaset.html)에서 롤링 업데이트 중에 Pod가 계속 죽고 새로 생긴다는 걸 봤다. 근데 Pod가 재생성될 때마다 IP가 바뀌는데, 그럼 다른 Pod가 얘를 어떻게 계속 찾아가는 걸까 — 이번 편은 [Service](https://kubernetes.io/docs/concepts/services-networking/service/).
 
 ## TL;DR
 

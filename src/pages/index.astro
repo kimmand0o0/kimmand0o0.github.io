@@ -1,0 +1,12 @@
+---
+import Base from '../layouts/Base.astro';
+import PostListPage from '../components/PostListPage.astro';
+import { allPosts, PER_PAGE } from '../lib/posts';
+
+const posts = await allPosts();
+const totalPages = Math.ceil(posts.length / PER_PAGE);
+---
+
+<Base>
+  <PostListPage posts={posts.slice(0, PER_PAGE)} page={1} totalPages={totalPages} />
+</Base>

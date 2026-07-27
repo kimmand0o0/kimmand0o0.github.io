@@ -7,7 +7,7 @@ categories: [Journal, Development Diary]
 tags: [운영일지, 데이터베이스, Postgres, 오브젝트스토리지, 비용최적화, 설계]
 ---
 
-> **설계 기록.** 아직 실행하지 않았다. 코드도 인프라도 건드리지 않은 상태이고, 이 글은 [13편]({% post_url 2026-07/2026-07-27-lol-moim-incidents-13-realtime-to-ws %})에서 "별도 글감"이라고 미뤄뒀던 그 설계를 실측과 함께 정리해두는 것이다. 실행하고 나면 계획과 실제가 어디서 달랐는지 이어서 기록할 예정이다.
+> **설계 기록.** 아직 실행하지 않았다. 코드도 인프라도 건드리지 않은 상태이고, 이 글은 [13편](/journal/development%20diary/2026/07/27/lol-moim-incidents-13-realtime-to-ws.html)에서 "별도 글감"이라고 미뤄뒀던 그 설계를 실측과 함께 정리해두는 것이다. 실행하고 나면 계획과 실제가 어디서 달랐는지 이어서 기록할 예정이다.
 
 Supabase 요금 조사에서 나온 두 가지 원인 중 Realtime은 13편에서 정리했다. 남은 하나가 이번 주제다 — `RiotMatch.rawInfo`, Riot API에서 받아온 전적 원본 JSON을 통째로 담고 있는 컬럼. 이게 DB 용량의 90% 이상을 혼자 먹고 있다.
 

@@ -7,7 +7,7 @@ categories: [Journal, Development Diary]
 tags: [운영일지, 멀티테넌시, React, react-router, 라우팅]
 ---
 
-[02편]({% post_url 2026-07/2026-07-12-lol-moim-incidents-02-multitenancy %})에서 멀티테넌시를 경로 방식(`X-Group-Slug` 헤더)으로 설계했고, [10편]({% post_url 2026-07/2026-07-20-lol-moim-incidents-10-cross-tenant-leak %})에서 백엔드의 격리 누락을 한바탕 잡았다. 그런데 그 뒤로도 "다른 모임 화면에 원조 모임(이세계) 멤버가 보인다"는 증상이 또 나왔다. 이번엔 백엔드가 아니었다. 백엔드는 받은 헤더대로 정확히 스코프하고 있었고, **프론트가 틀린 slug를 보내고 있었다.** 이번 편은 그 마지막 조각 — 프론트 라우팅을 `/g/:slug/*`로 옮긴 마이그레이션 기록이다.
+[02편](/journal/development%20diary/2026/07/12/lol-moim-incidents-02-multitenancy.html)에서 멀티테넌시를 경로 방식(`X-Group-Slug` 헤더)으로 설계했고, [10편](/journal/development%20diary/2026/07/20/lol-moim-incidents-10-cross-tenant-leak.html)에서 백엔드의 격리 누락을 한바탕 잡았다. 그런데 그 뒤로도 "다른 모임 화면에 원조 모임(이세계) 멤버가 보인다"는 증상이 또 나왔다. 이번엔 백엔드가 아니었다. 백엔드는 받은 헤더대로 정확히 스코프하고 있었고, **프론트가 틀린 slug를 보내고 있었다.** 이번 편은 그 마지막 조각 — 프론트 라우팅을 `/g/:slug/*`로 옮긴 마이그레이션 기록이다.
 
 <br/>
 

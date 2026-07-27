@@ -7,7 +7,7 @@ categories: [Journal, Development Diary]
 tags: [K8s, Kubernetes, 스터디, Namespace, RBAC]
 ---
 
-[지난 편]({% post_url 2026-07/2026-07-23-k8s-study-06-ingress %})까지 Pod/Deployment/Service/Ingress로 앱 하나를 배포하고 노출하는 흐름을 정리했다. 이번 편은 조금 결이 다르다 — 클러스터 하나를 여러 팀이나 여러 환경이 같이 쓸 때 필요한 Namespace와 RBAC.
+[지난 편](/journal/development%20diary/2026/07/23/k8s-study-06-ingress.html)까지 Pod/Deployment/Service/Ingress로 앱 하나를 배포하고 노출하는 흐름을 정리했다. 이번 편은 조금 결이 다르다 — 클러스터 하나를 여러 팀이나 여러 환경이 같이 쓸 때 필요한 Namespace와 RBAC.
 
 ## TL;DR
 

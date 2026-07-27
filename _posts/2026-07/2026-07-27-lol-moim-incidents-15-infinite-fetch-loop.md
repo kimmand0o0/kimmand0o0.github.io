@@ -7,7 +7,7 @@ categories: [Journal, Development Diary]
 tags: [운영일지, React, useEffect, useCallback, 프론트엔드]
 ---
 
-[04편]({% post_url 2026-07/2026-07-14-lol-moim-incidents-04-n-plus-one %})에서 "요청 1개가 쿼리 130개로 터지는" N+1 이야기를 했는데, 이번 편은 그보다 한 단계 더 나쁜 케이스다. 요청 1개가 쿼리 N개가 되는 게 아니라, **요청 자체가 무한**이 되는 버그. 그것도 일주일 사이에 두 번, 서로 다른 훅에서 같은 원리로 터졌다.
+[04편](/journal/development%20diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html)에서 "요청 1개가 쿼리 130개로 터지는" N+1 이야기를 했는데, 이번 편은 그보다 한 단계 더 나쁜 케이스다. 요청 1개가 쿼리 N개가 되는 게 아니라, **요청 자체가 무한**이 되는 버그. 그것도 일주일 사이에 두 번, 서로 다른 훅에서 같은 원리로 터졌다.
 
 서버 입장에서 보면 이건 사실상 DDoS다. 다만 공격자가 외부가 아니라 우리가 배포한 프론트엔드 코드라는 점이 다를 뿐이다.
 
@@ -21,7 +21,7 @@ tags: [운영일지, React, useEffect, useCallback, 프론트엔드]
 
 ## 1. 사건 1 — 마이그레이션 다음날 아침, 초당 10회
 
-7월 7일에 세부 페이지들을 `/g/:slug/*` 경로로 옮기는 테넌시 마이그레이션([17편]({% post_url 2026-07/2026-07-27-lol-moim-incidents-17-tenant-path-migration %})에서 자세히 다룬다)을 배포했다. 이때 `useNavigate`를 감싸서 모임 슬러그를 자동으로 붙여주는 `useGroupNav()`라는 훅을 새로 만들어 앱 전체에 깔았다.
+7월 7일에 세부 페이지들을 `/g/:slug/*` 경로로 옮기는 테넌시 마이그레이션([17편](/journal/development%20diary/2026/07/27/lol-moim-incidents-17-tenant-path-migration.html)에서 자세히 다룬다)을 배포했다. 이때 `useNavigate`를 감싸서 모임 슬러그를 자동으로 붙여주는 `useGroupNav()`라는 훅을 새로 만들어 앱 전체에 깔았다.
 
 다음날 아침부터 "사이트가 렉 걸린다", "로딩이 무한반복된다", "Failed to fetch가 계속 뜬다"는 증상이 몰려왔다. Cloud Run 로그를 열어보니 동일 클라이언트가 같은 경매 세션의 `/live-bid?slim=1`을 **초당 10회 이상** 쉬지 않고 호출하고 있었다.
 
@@ -103,7 +103,7 @@ export function useSeasonCosmetic(userId?: number) {
 
 `usePlugins()`가 리턴하는 `has`는 객체 리터럴 안의 인라인 화살표 함수라서 **매 렌더마다 새 참조**다. 그걸 deps에 넣었으니 사건 1과 완전히 같은 엔진이 돈다: fetch → `setEquipped` → 리렌더 → 새 `has` → effect 재실행 → fetch.
 
-더 아픈 건 이 훅이 걸려 있는 위치였다. `useSeasonCosmetic`은 닉네임을 그리는 공용 `Nickname` 컴포넌트에서 호출되는데, 이 컴포넌트는 랭킹·멤버 목록·채팅 등 [04편]({% post_url 2026-07/2026-07-14-lol-moim-incidents-04-n-plus-one %})에서 세어봤듯 22개 페이지에서 재사용된다. 유저 목록 하나에 닉네임이 50개 있으면 무한 루프도 50개다. 사이트 전반이 느려지고 요청이 무더기로 실패하는 것처럼 보인 이유다.
+더 아픈 건 이 훅이 걸려 있는 위치였다. `useSeasonCosmetic`은 닉네임을 그리는 공용 `Nickname` 컴포넌트에서 호출되는데, 이 컴포넌트는 랭킹·멤버 목록·채팅 등 [04편](/journal/development%20diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html)에서 세어봤듯 22개 페이지에서 재사용된다. 유저 목록 하나에 닉네임이 50개 있으면 무한 루프도 50개다. 사이트 전반이 느려지고 요청이 무더기로 실패하는 것처럼 보인 이유다.
 
 수정은 deps에서 함수를 빼고, effect가 실제로 의존하는 **판정 결과(원시값)**만 남기는 것이었다.
 

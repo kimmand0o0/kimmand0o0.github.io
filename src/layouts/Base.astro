@@ -1,0 +1,80 @@
+---
+import '../styles/global.css';
+import { SITE } from '../lib/posts';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title, description } = Astro.props;
+const pageTitle = title ? `${title} | ${SITE.title}` : SITE.title;
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description ?? SITE.description} />
+    <link rel="icon" href="/assets/images/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/feed.xml" />
+    <script is:inline>
+      // FOUC 방지: 렌더 전에 저장된 테마 적용
+      (function () {
+        var t = localStorage.getItem('theme');
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
+    <!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js -->
+    <script
+      is:inline
+      src="/assets/js/chat-widget.js"
+      data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat"
+      defer></script>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="site-header">
+        <a class="brand" href="/">{SITE.title}</a>
+        <nav>
+          <a href="/archives.html">Archives</a>
+          <a href="/tags.html">Tags</a>
+          <a href="/about.html">About</a>
+          <a href="/search.html">Search</a>
+          <button id="theme-toggle" aria-label="테마 전환">◐</button>
+        </nav>
+      </header>
+      <main><slot /></main>
+      <footer class="site-footer">
+        <p>© {new Date().getFullYear()} Haeran · <a href="/feed.xml">RSS</a></p>
+      </footer>
+    </div>
+
+    <script is:inline>
+      document.getElementById('theme-toggle').addEventListener('click', function () {
+        var next =
+          document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+      });
+    </script>
+    <script is:inline type="module">
+      // mermaid 클라이언트 렌더 (기존 Jekyll 셋업과 동일하게 mermaid@10 사용)
+      if (document.querySelector('pre.mermaid')) {
+        const { default: mermaid } = await import(
+          'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'
+        );
+        mermaid.initialize({
+          startOnLoad: false,
+          theme:
+            document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+        });
+        mermaid.run({ querySelector: 'pre.mermaid' });
+      }
+    </script>
+  </body>
+</html>

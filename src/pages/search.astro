@@ -1,0 +1,45 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Search">
+  <h1 class="page-title">Search</h1>
+  <input id="search-input" type="search" placeholder="제목·태그·본문으로 검색…" autofocus />
+  <ul class="archive-list" id="search-results" style="margin-top: 2rem;"></ul>
+
+  <script is:inline>
+    (async function () {
+      const input = document.getElementById('search-input');
+      const resultsEl = document.getElementById('search-results');
+      const res = await fetch('/search.json');
+      const posts = await res.json();
+
+      function renderResults(list) {
+        resultsEl.innerHTML = list
+          .slice(0, 30)
+          .map(function (p) {
+            return (
+              '<li><time>' + p.date + '</time><a href="' + p.url + '">' +
+              p.title.replace(/</g, '&lt;') + '</a></li>'
+            );
+          })
+          .join('');
+      }
+
+      input.addEventListener('input', function () {
+        const q = input.value.trim().toLowerCase();
+        if (!q) return renderResults([]);
+        renderResults(
+          posts.filter(function (p) {
+            return (
+              p.title.toLowerCase().includes(q) ||
+              (p.tags || []).some(function (t) { return t.toLowerCase().includes(q); }) ||
+              (p.categories || []).some(function (c) { return c.toLowerCase().includes(q); }) ||
+              (p.excerpt || '').toLowerCase().includes(q)
+            );
+          })
+        );
+      });
+    })();
+  </script>
+</Base>

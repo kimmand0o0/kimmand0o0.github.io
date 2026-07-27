@@ -7,7 +7,7 @@ categories: [Journal, Development Diary]
 tags: [K8s, Kubernetes, 스터디, 스케줄링, requests, limits, QoS]
 ---
 
-[지난 편]({% post_url 2026-07/2026-07-27-k8s-study-07-namespace-rbac %})까지 클러스터를 팀/환경별로 나누는 법을 봤다. 이번 편은 조금 더 물리적인 질문 — 노드(서버)가 여러 대인 클러스터에서, K8s는 새 Pod를 어디에 배치할지 어떻게 결정하는가.
+[지난 편](/journal/development%20diary/2026/07/27/k8s-study-07-namespace-rbac.html)까지 클러스터를 팀/환경별로 나누는 법을 봤다. 이번 편은 조금 더 물리적인 질문 — 노드(서버)가 여러 대인 클러스터에서, K8s는 새 Pod를 어디에 배치할지 어떻게 결정하는가.
 
 ## TL;DR
 

@@ -7,7 +7,7 @@ categories: [Journal, Development Diary]
 tags: [K8s, Kubernetes, 스터디, Deployment, ReplicaSet, 롤링업데이트]
 ---
 
-[지난 편]({% post_url 2026-07/2026-07-22-k8s-study-02-pod %})에서 Pod는 죽으면 재활용이 아니라 완전히 새로 교체되는 일회성 자원이라고 정리했다. 그럼 "항상 3개 떠있어야 한다"는 걸 누가 지켜주고, 새 버전 배포는 어떻게 무중단으로 되는 걸까 — 이번 편은 Deployment와 ReplicaSet.
+[지난 편](/journal/development%20diary/2026/07/22/k8s-study-02-pod.html)에서 Pod는 죽으면 재활용이 아니라 완전히 새로 교체되는 일회성 자원이라고 정리했다. 그럼 "항상 3개 떠있어야 한다"는 걸 누가 지켜주고, 새 버전 배포는 어떻게 무중단으로 되는 걸까 — 이번 편은 Deployment와 ReplicaSet.
 
 ## TL;DR
 

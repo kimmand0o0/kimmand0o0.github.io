@@ -7,7 +7,7 @@ categories: [Journal, Development Diary]
 tags: [K8s, Kubernetes, 스터디, Ingress, 로드밸런서]
 ---
 
-[지난 편]({% post_url 2026-07/2026-07-22-k8s-study-05-configmap-secret %})까지는 클러스터 내부(Service)까지만 다뤘다. 이번 편은 반대 방향 — 외부 사용자의 요청이 실제로 클러스터 안까지 어떻게 들어오는지, [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/).
+[지난 편](/journal/development%20diary/2026/07/22/k8s-study-05-configmap-secret.html)까지는 클러스터 내부(Service)까지만 다뤘다. 이번 편은 반대 방향 — 외부 사용자의 요청이 실제로 클러스터 안까지 어떻게 들어오는지, [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/).
 
 ## TL;DR
 

@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import { allPosts, formatDate, postPath, postDateParts } from '../lib/posts';
+
+const posts = await allPosts();
+const byYear = new Map<string, typeof posts>();
+for (const post of posts) {
+  const { y } = postDateParts(post);
+  if (!byYear.has(y)) byYear.set(y, []);
+  byYear.get(y)!.push(post);
+}
+const years = [...byYear.entries()].sort((a, b) => Number(b[0]) - Number(a[0]));
+---
+
+<Base title="Archives">
+  <h1 class="page-title">Archives</h1>
+  {
+    years.map(([year, list]) => (
+      <section>
+        <h2 class="group-title" id={year}>{year} <span class="muted">({list.length})</span></h2>
+        <ul class="archive-list">
+          {list.map((post) => (
+            <li>
+              <time>{formatDate(post)}</time>
+              <a href={postPath(post)}>{post.data.title}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</Base>

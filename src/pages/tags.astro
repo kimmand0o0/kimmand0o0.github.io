@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import { allPosts, formatDate, postPath, tagsOf } from '../lib/posts';
+
+const posts = await allPosts();
+const byTag = new Map<string, typeof posts>();
+for (const post of posts) {
+  for (const tag of tagsOf(post)) {
+    if (!byTag.has(tag)) byTag.set(tag, []);
+    byTag.get(tag)!.push(post);
+  }
+}
+// 글 수 많은 순
+const tags = [...byTag.entries()].sort((a, b) => b[1].length - a[1].length);
+---
+
+<Base title="Tags">
+  <h1 class="page-title">Tags</h1>
+  <ul class="chips">
+    {tags.map(([tag, list]) => (
+      <li>
+        <a href={`#${tag}`}>{tag} ({list.length})</a>
+      </li>
+    ))}
+  </ul>
+  {
+    tags.map(([tag, list]) => (
+      <section>
+        {/* 기존 /tags.html#태그명 앵커 링크 호환을 위해 id는 태그명 원문 그대로 */}
+        <h2 class="group-title" id={tag}>#{tag}</h2>
+        <ul class="archive-list">
+          {list.map((post) => (
+            <li>
+              <time>{formatDate(post)}</time>
+              <a href={postPath(post)}>{post.data.title}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</Base>
