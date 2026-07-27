@@ -250,7 +250,9 @@ const tagData = Object.fromEntries(
           s.el.style.fontSize = (0.8 + t * 1.1).toFixed(3) + 'rem';
           s.el.style.fontWeight = t > 0.55 ? 700 : t > 0.25 ? 600 : 500;
           s.el.style.setProperty('--tone', t.toFixed(3));
-          if (s.views > 0) s.el.title = s.tag + ' — 글 ' + s.count + '개 · 조회 ' + s.views;
+          if (s.views > 0) {
+            s.el.title = s.el.dataset.tag + ' — 글 ' + s.count + '개 · 조회 ' + s.views;
+          }
         });
         layout(); // 크기가 바뀌었으니 겹침을 다시 푼다
       }
