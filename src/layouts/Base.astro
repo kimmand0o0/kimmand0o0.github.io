@@ -67,7 +67,10 @@ const NAV = [
     <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 -->
     <header class="site-header">
       <div class="header-inner">
-        <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a>
+        <div class="brand-block">
+          <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a>
+          <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>
+        </div>
         <nav>
           {
             NAV.map((item) => (
