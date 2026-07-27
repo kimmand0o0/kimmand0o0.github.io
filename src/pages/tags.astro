@@ -21,13 +21,13 @@ const minCount = Math.min(...entries.map(([, list]) => list.length));
 // (글자 폭은 폰트가 로드돼야 알 수 있어서 빌드 시점에는 계산할 수 없다)
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 const scatter = entries.map(([tag, list], i) => {
-  const radius = Math.sqrt(i / entries.length) * 44; // % 단위, 중심에서의 거리
+  const radius = Math.sqrt(i / entries.length) * 47; // % 단위, 중심에서의 거리
   const angle = i * GOLDEN_ANGLE;
   const t = maxCount === minCount ? 1 : (list.length - minCount) / (maxCount - minCount);
   return {
     tag,
     count: list.length,
-    left: 50 + radius * Math.cos(angle) * 1.35,
+    left: 50 + radius * Math.cos(angle) * 1.22,
     top: 50 + radius * Math.sin(angle),
     size: 0.8 + t * 1.1, // rem
     weight: t > 0.55 ? 700 : t > 0.25 ? 600 : 500,
@@ -70,7 +70,10 @@ const tagData = Object.fromEntries(
   </div>
 
   <section id="tag-posts" class="tag-posts" hidden>
-    <h2 class="group-title" id="tag-posts-title"></h2>
+    <header class="tag-posts-head">
+      <h2 id="tag-posts-title"></h2>
+      <button type="button" id="tag-posts-close" aria-label="닫기">✕</button>
+    </header>
     <ul class="archive-list" id="tag-posts-list"></ul>
   </section>
 
@@ -86,7 +89,7 @@ const tagData = Object.fromEntries(
       function layout() {
         var W = box.clientWidth;
         var H = box.clientHeight;
-        var PAD = 6; // 태그 사이 최소 여백(px)
+        var PAD = 4; // 태그 사이 최소 여백(px) — 작을수록 빽빽하게
 
         var items = dots.map(function (el) {
           var w = el.offsetWidth;
@@ -139,15 +142,19 @@ const tagData = Object.fromEntries(
           if (!moved) break;
         }
 
-        items.forEach(function (it) {
+        items.forEach(function (it, i) {
           it.el.style.left = it.x + 'px';
           it.el.style.top = it.y + 'px';
+          // 중심에서 바깥으로 퍼지듯 등장
+          if (!box.classList.contains('ready')) {
+            it.el.style.setProperty('--enter-delay', (i * 12) + 'ms');
+          }
         });
         box.classList.add('ready');
         bindRepel(items);
       }
 
-      // 마우스를 올린 태그가 커지면서 주변 태그들을 밀어낸다
+      // 커서 주변의 태그들이 물결처럼 밀려난다 (커서가 올라간 태그 자신은 제자리에서 커진다)
       var boundItems = null;
       function bindRepel(items) {
         // layout()은 리사이즈마다 다시 도니, 리스너는 한 번만 건다
@@ -155,51 +162,67 @@ const tagData = Object.fromEntries(
         if (bindRepel.done) return;
         bindRepel.done = true;
 
-        var HOVER_SCALE = 1.4;
+        var REACH = 165; // 커서 영향 반경(px)
+        var STRENGTH = 34; // 최대 밀림(px)
+        var pending = false;
+        var cursor = null;
 
-        function repel(from) {
-          var src = null;
-          for (var i = 0; i < boundItems.length; i++) {
-            if (boundItems[i].el === from) { src = boundItems[i]; break; }
-          }
-          if (!src) return;
-
-          // 커진 만큼이 밀어내는 힘 — 큰 태그일수록 더 크게 번진다
-          var growX = (src.w * (HOVER_SCALE - 1)) / 2;
-          var growY = (src.h * (HOVER_SCALE - 1)) / 2;
-          var reach = Math.max(src.w, src.h) * 1.15 + 75;
-
+        function apply() {
+          pending = false;
+          if (!cursor) return;
+          var hovered = box.querySelector('.tag-dot:hover');
           boundItems.forEach(function (it) {
-            if (it === src) return;
-            var dx = it.x - src.x;
-            var dy = it.y - src.y;
+            // 커서가 올라간 태그는 확대 효과가 있으니 밀지 않는다
+            if (it.el === hovered) {
+              it.el.style.setProperty('--px', '0px');
+              it.el.style.setProperty('--py', '0px');
+              return;
+            }
+            var dx = it.x - cursor.x;
+            var dy = it.y - cursor.y;
             var dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            if (dist > reach) {
+            if (dist > REACH) {
               it.el.style.setProperty('--px', '0px');
               it.el.style.setProperty('--py', '0px');
               return;
             }
             // 가까울수록 강하게, 멀수록 부드럽게 사그라든다
-            var falloff = 1 - dist / reach;
-            var push = (Math.max(growX, growY) + 22) * Math.pow(falloff, 1.35);
+            var push = STRENGTH * Math.pow(1 - dist / REACH, 1.3);
             it.el.style.setProperty('--px', ((dx / dist) * push).toFixed(1) + 'px');
             it.el.style.setProperty('--py', ((dy / dist) * push).toFixed(1) + 'px');
           });
         }
 
         function release() {
+          cursor = null;
           boundItems.forEach(function (it) {
             it.el.style.setProperty('--px', '0px');
             it.el.style.setProperty('--py', '0px');
           });
         }
 
-        dots.forEach(function (el) {
-          el.addEventListener('mouseenter', function () { repel(el); });
-          el.addEventListener('focus', function () { repel(el); });
+        box.addEventListener('mousemove', function (e) {
+          var r = box.getBoundingClientRect();
+          cursor = { x: e.clientX - r.left, y: e.clientY - r.top };
+          if (!pending) {
+            pending = true;
+            requestAnimationFrame(apply);
+          }
         });
-
         box.addEventListener('mouseleave', release);
+
+        // 키보드 이동 시에도 주변이 반응하도록
+        dots.forEach(function (el) {
+          el.addEventListener('focus', function () {
+            for (var i = 0; i < boundItems.length; i++) {
+              if (boundItems[i].el === el) {
+                cursor = { x: boundItems[i].x, y: boundItems[i].y };
+                apply();
+                break;
+              }
+            }
+          });
+        });
         box.addEventListener('focusout', release);
       }
 
@@ -229,7 +252,9 @@ const tagData = Object.fromEntries(
         buttons.forEach(function (b) {
           b.classList.toggle('selected', b.dataset.tag === tag);
         });
-        titleEl.textContent = '#' + tag + ' (' + posts.length + ')';
+        titleEl.innerHTML =
+          '<span class="tag-posts-chip">#' + tag.replace(/</g, '&lt;') + '</span>' +
+          '<span class="tag-posts-count">글 ' + posts.length + '개</span>';
         listEl.innerHTML = posts
           .map(function (p) {
             return (
@@ -247,6 +272,12 @@ const tagData = Object.fromEntries(
         b.addEventListener('click', function () { select(b.dataset.tag, true); });
       });
 
+      document.getElementById('tag-posts-close').addEventListener('click', function () {
+        section.hidden = true;
+        buttons.forEach(function (b) { b.classList.remove('selected'); });
+        history.replaceState(null, '', location.pathname);
+      });
+
       // 기존 /tags.html#태그명 링크 호환 — 해시가 있으면 그 태그를 바로 연다
       var hash = decodeURIComponent(location.hash.slice(1));
       if (hash && data[hash]) select(hash, true);
@@ -260,7 +291,7 @@ const tagData = Object.fromEntries(
   .tag-scatter {
     position: relative;
     width: 100%;
-    height: 34rem;
+    height: 36rem;
     margin: 0 0 1rem;
     /* 배치가 끝나기 전 겹친 상태가 보이지 않게 */
     opacity: 0;
@@ -292,11 +323,17 @@ const tagData = Object.fromEntries(
   /* 부유 애니메이션은 안쪽 span 에만 — 바깥 transform(위치/밀림)과 충돌하지 않게 */
   .tag-label {
     display: inline-block;
-    animation: tag-float var(--dur, 7s) ease-in-out var(--delay, 0s) infinite;
+    animation:
+      tag-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--enter-delay, 0ms) backwards,
+      tag-float var(--dur, 7s) ease-in-out var(--delay, 0s) infinite;
   }
   @keyframes tag-float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
+  }
+  @keyframes tag-enter {
+    from { opacity: 0; transform: scale(0.7); }
+    to { opacity: 1; transform: scale(1); }
   }
   @media (prefers-reduced-motion: reduce) {
     .tag-label { animation: none; }
@@ -331,7 +368,52 @@ const tagData = Object.fromEntries(
   .tag-dot:hover .tag-count,
   .tag-dot.selected .tag-count { opacity: 0.75; }
   /* sticky 헤더에 제목이 가리지 않도록 */
-  .tag-posts { margin-top: 1rem; scroll-margin-top: 5rem; }
+  .tag-posts {
+    margin-top: 1rem;
+    scroll-margin-top: 5rem;
+    padding: 1.4rem 1.6rem 1.6rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--accent) 3%, var(--bg));
+    animation: panel-in 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes panel-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .tag-posts-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+  }
+  .tag-posts-head h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin: 0;
+    font-size: 1rem;
+  }
+  .tag-posts-chip {
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .tag-posts-count { font-size: 0.82rem; font-weight: 500; color: var(--faint); }
+  #tag-posts-close {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1;
+    padding: 0.35rem;
+    border-radius: 6px;
+    color: var(--faint);
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+  #tag-posts-close:hover { color: var(--accent); background: var(--accent-soft); }
+  .tag-posts .archive-list li { margin: 0.5rem 0; }
 
   @media (max-width: 760px) {
     .tag-scatter { height: 42rem; }
