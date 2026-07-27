@@ -360,8 +360,9 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           });
         }
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#-middleware-개요">📌 Middleware 개요</a></li><li class="depth-2"><a href="#-middleware-기본-구조">📌 Middleware 기본 구조</a></li><li class="depth-3"><a href="#1️⃣-기본-예제">1️⃣ 기본 예제</a></li><li class="depth-2"><a href="#-middleware-실행-흐름">📌 Middleware 실행 흐름</a></li><li class="depth-2"><a href="#-middleware-주요-기능">📌 Middleware 주요 기능</a></li><li class="depth-3"><a href="#-1-리디렉션-redirect">✅ 1. 리디렉션 (Redirect)</a></li><li class="depth-3"><a href="#-2-url-재작성-rewrite">✅ 2. URL 재작성 (Rewrite)</a></li><li class="depth-3"><a href="#-3-헤더-변경">✅ 3. 헤더 변경</a></li><li class="depth-3"><a href="#-4-쿠키-조작">✅ 4. 쿠키 조작</a></li><li class="depth-2"><a href="#-특정-경로에만-middleware-적용-matcher">📌 특정 경로에만 Middleware 적용 (Matcher)</a></li><li class="depth-2"><a href="#-middleware-vs-api-route-vs-server-components">📌 Middleware vs API Route vs Server Components</a></li><li class="depth-2"><a href="#-실제-사용-예시-로그인-체크-및-리디렉트">✅ 실제 사용 예시: 로그인 체크 및 리디렉트</a></li><li class="depth-2"><a href="#-정리">📌 정리</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
-      // 조회수·댓글수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 자리에 넣는다.
-      // 워커가 죽어 있거나 아직 0이면 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
+      // 조회수·댓글수·추천수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 자리에 넣는다.
+      // 0도 그대로 보여준다(자리를 비우면 "기능이 사라진 것"처럼 보인다).
+      // 워커 응답 자체가 실패했을 때만 자리를 비워둔다.
       const METRIC_ICON = {
         views:
           '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
@@ -375,8 +376,7 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
         const put = (attr, map, icon, label) => {
           if (!map) return;
           root.querySelectorAll('[' + attr + ']').forEach((el) => {
-            const n = map[el.getAttribute(attr)];
-            if (!n) return;
+            const n = map[el.getAttribute(attr)] ?? 0;
             el.innerHTML = icon + '<span>' + n.toLocaleString() + '</span>';
             el.setAttribute('aria-label', label + ' ' + n);
             el.hidden = false;
@@ -396,6 +396,8 @@ const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
           get(api + '/api/comments/counts'),
           get(api + '/api/likes/top?limit=1000'),
         ]).then(([views, comments, likes]) => {
+          // 셋 다 실패했다면 지표 자체를 못 받은 것 — 0 을 지어내지 않고 자리를 비워둔다
+          if (!views && !comments && !likes) return {};
           window.__views = Object.fromEntries((views?.items ?? []).map((i) => [i.path, i.views]));
           window.__comments = Object.fromEntries(
             (comments?.items ?? []).map((i) => [i.path, i.count])
