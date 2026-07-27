@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 05. Cloud Run 서비스를 GKE로 옮긴다면 — 매니페스트 스케치</h1><div class="post-meta"><time>2026.07.15</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/15/lol-moim-incidents-05-gke-sketch.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#Kubernetes">#Kubernetes</a><a href="/tags.html#GKE">#GKE</a><a href="/tags.html#인프라">#인프라</a><a href="/tags.html#학습">#학습</a></span></div></header><div class="prose"><blockquote>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.RTRRCKAg.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 05. Cloud Run 서비스를 GKE로 옮긴다면 — 매니페스트 스케치</h1><div class="post-meta"><time>2026.07.15</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/15/lol-moim-incidents-05-gke-sketch.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#Kubernetes">#Kubernetes</a><a href="/tags.html#GKE">#GKE</a><a href="/tags.html#인프라">#인프라</a><a href="/tags.html#학습">#학습</a></span></div></header><div class="prose"><blockquote>
 <p><strong>연습/학습 목적 기록.</strong> 실제 클러스터에 적용하지 않았고, 프로덕션 코드도 건드리지 않았다. 지금 서비스는 Cloud Run(API) + GCE VM(WS, pm2) + Supabase(Postgres+Auth) 조합으로 잘 돌아가고 있고, <a href="/journal/development%20diary/2026/07/14/lol-moim-incidents-04-n-plus-one.html">지난 성능 조사</a>에서 확인했듯 지금 규모(DAU 50~70명)의 병목은 인프라가 아니라 애플리케이션 레벨 N+1 쿼리였다. 이 글은 “만약 k8s로 관리한다면”이라는 학습용 사고 실험이다.</p>
 </blockquote>
 <br>
@@ -114,13 +114,23 @@
 </ul></div></article><script>(function(){const viewPath = "/journal/development diary/2026/07/15/lol-moim-incidents-05-gke-sketch.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
-        // 조회수 1회 기록 — 실패해도 페이지에는 영향 없음(검색 페이지의 "많이 본 글" 소스)
-        fetch(chatOrigin + '/api/view', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: viewPath }),
-          keepalive: true,
-        }).catch(function () {});
+        // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
+        // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
+        (function () {
+          var key = 'viewed:' + viewPath;
+          try {
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+          } catch (e) {
+            // 프라이빗 모드 등으로 storage 가 막히면 중복 제거 없이 그냥 기록한다
+          }
+          fetch(chatOrigin + '/api/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: viewPath }),
+            keepalive: true,
+          }).catch(function () {});
+        })();
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#왜-이-조합인가">왜 이 조합인가</a></li><li class="depth-2"><a href="#매니페스트-구성">매니페스트 구성</a></li><li class="depth-3"><a href="#사이드카-패턴이-핵심이다">사이드카 패턴이 핵심이다</a></li><li class="depth-3"><a href="#커넥션-예산--오늘-배운-걸-그대로-적용">커넥션 예산 — 오늘 배운 걸 그대로 적용</a></li><li class="depth-2"><a href="#코드-변경-없이는-안-옮겨지는-부분">코드 변경 없이는 안 옮겨지는 부분</a></li><li class="depth-2"><a href="#postgres-이관-절차스케치--미실행">Postgres 이관 절차(스케치 — 미실행)</a></li><li class="depth-2"><a href="#정리">정리</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
       // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
       // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).

@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">Promises API, Callback API, Synchronous API</h1><div class="post-meta"><time>2025.01.09</time><span class="chip">JavaScript</span><span class="reading tip" data-tip="이 게시글을 읽는 데 2분 정도 걸릴 것 같아요!">2분 분량</span><span class="views" data-views-path="/study/javascript/2025/01/09/promises-callback-sync.html" hidden></span><span class="tags"><a href="/tags.html#JavaScript">#JavaScript</a></span></div></header><div class="prose"><h2 id="1-promises-api">1. Promises API</h2>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.RTRRCKAg.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">Promises API, Callback API, Synchronous API</h1><div class="post-meta"><time>2025.01.09</time><span class="chip">JavaScript</span><span class="reading tip" data-tip="이 게시글을 읽는 데 2분 정도 걸릴 것 같아요!">2분 분량</span><span class="views" data-views-path="/study/javascript/2025/01/09/promises-callback-sync.html" hidden></span><span class="tags"><a href="/tags.html#JavaScript">#JavaScript</a></span></div></header><div class="prose"><h2 id="1-promises-api">1. Promises API</h2>
 <h3 id="설명">설명</h3>
 <p>Promises는 비동기 작업을 관리하기 위한 JavaScript 객체입니다. 비동기 작업이 성공(success)하거나 실패(fail)했을 때 특정 동작을 실행할 수 있게 해줍니다.</p>
 <h3 id="장점">장점</h3>
@@ -134,13 +134,23 @@
 </ol></div></article><script>(function(){const viewPath = "/study/javascript/2025/01/09/promises-callback-sync.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
-        // 조회수 1회 기록 — 실패해도 페이지에는 영향 없음(검색 페이지의 "많이 본 글" 소스)
-        fetch(chatOrigin + '/api/view', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: viewPath }),
-          keepalive: true,
-        }).catch(function () {});
+        // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
+        // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
+        (function () {
+          var key = 'viewed:' + viewPath;
+          try {
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+          } catch (e) {
+            // 프라이빗 모드 등으로 storage 가 막히면 중복 제거 없이 그냥 기록한다
+          }
+          fetch(chatOrigin + '/api/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: viewPath }),
+            keepalive: true,
+          }).catch(function () {});
+        })();
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#1-promises-api">1. Promises API</a></li><li class="depth-3"><a href="#설명">설명</a></li><li class="depth-3"><a href="#장점">장점</a></li><li class="depth-3"><a href="#단점">단점</a></li><li class="depth-3"><a href="#예시">예시</a></li><li class="depth-2"><a href="#2-callback-api">2. Callback API</a></li><li class="depth-3"><a href="#설명-1">설명</a></li><li class="depth-3"><a href="#장점-1">장점</a></li><li class="depth-3"><a href="#단점-1">단점</a></li><li class="depth-3"><a href="#예시-1">예시</a></li><li class="depth-2"><a href="#3-synchronous-api">3. Synchronous API</a></li><li class="depth-3"><a href="#설명-2">설명</a></li><li class="depth-3"><a href="#장점-2">장점</a></li><li class="depth-3"><a href="#단점-2">단점</a></li><li class="depth-3"><a href="#예시-2">예시</a></li><li class="depth-2"><a href="#차이점-요약">차이점 요약</a></li><li class="depth-2"><a href="#결론">결론</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
       // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
       // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).

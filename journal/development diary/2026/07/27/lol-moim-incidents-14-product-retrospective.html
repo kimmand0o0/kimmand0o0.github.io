@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 14. 숫자보다 오래 남는 것들 — 기획 관점에서 돌아본 두 달</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/lol-moim-incidents-14-product-retrospective.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#프로덕트분석">#프로덕트분석</a><a href="/tags.html#기획">#기획</a><a href="/tags.html#회고">#회고</a></span></div></header><div class="prose"><p>지금까지 이 시리즈는 배포 사고, 성능 조사, 아키텍처 결정 위주로 기록했다. 전부 “코드를 어떻게 고쳤나”의 이야기였다. 그런데 두 달 정도 이 서비스를 운영해보니, 코드보다 오래 남는 건 오히려 <strong>그 코드를 왜 그렇게 짰는지에 대한 판단들</strong>이었다. 이번 편은 기술이 아니라 기획/제품 관점에서 돌아본 회고다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.RTRRCKAg.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 14. 숫자보다 오래 남는 것들 — 기획 관점에서 돌아본 두 달</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/lol-moim-incidents-14-product-retrospective.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#프로덕트분석">#프로덕트분석</a><a href="/tags.html#기획">#기획</a><a href="/tags.html#회고">#회고</a></span></div></header><div class="prose"><p>지금까지 이 시리즈는 배포 사고, 성능 조사, 아키텍처 결정 위주로 기록했다. 전부 “코드를 어떻게 고쳤나”의 이야기였다. 그런데 두 달 정도 이 서비스를 운영해보니, 코드보다 오래 남는 건 오히려 <strong>그 코드를 왜 그렇게 짰는지에 대한 판단들</strong>이었다. 이번 편은 기술이 아니라 기획/제품 관점에서 돌아본 회고다.</p>
 <h2 id="건수와-도달은-다른-숫자다">건수와 도달은 다른 숫자다</h2>
 <p>기능을 정리해야 할 시점이 왔을 때, 감으로 고르지 않고 DB를 직접 봤다. 그때 제일 크게 배운 게 하나 있다 — <strong>건수(volume)와 도달(reach)은 완전히 다른 지표</strong>라는 것.</p>
 <p>연승 베팅은 발생 건수로는 압도적 1위였다. 그런데 그 건수를 만든 사람은 26명뿐이었다. 반대로 평가 기능은 총 93건밖에 안 됐는데, 그마저도 작성자 7명이 대부분을 만든 거였다 — 소수가 헤비하게 쓰는 기능이었던 거다. 반면 구인(LFG) 글은 수 자체는 많지 않았지만, 실제로 가장 많은 사람이 거쳐가는 <strong>정문</strong> 역할을 하고 있었다.</p>
@@ -53,13 +53,23 @@
 </ul></div></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/lol-moim-incidents-14-product-retrospective.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
-        // 조회수 1회 기록 — 실패해도 페이지에는 영향 없음(검색 페이지의 "많이 본 글" 소스)
-        fetch(chatOrigin + '/api/view', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: viewPath }),
-          keepalive: true,
-        }).catch(function () {});
+        // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
+        // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
+        (function () {
+          var key = 'viewed:' + viewPath;
+          try {
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+          } catch (e) {
+            // 프라이빗 모드 등으로 storage 가 막히면 중복 제거 없이 그냥 기록한다
+          }
+          fetch(chatOrigin + '/api/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: viewPath }),
+            keepalive: true,
+          }).catch(function () {});
+        })();
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#건수와-도달은-다른-숫자다">건수와 도달은 다른 숫자다</a></li><li class="depth-2"><a href="#재사용률이-떨어진다는-신호를-외면하지-않기">“재사용률이 떨어진다”는 신호를 외면하지 않기</a></li><li class="depth-2"><a href="#성과를-부풀리지-않는-연습--시즌패스">성과를 부풀리지 않는 연습 — 시즌패스</a></li><li class="depth-2"><a href="#나중을-미리-깔아두는-설계">나중을 미리 깔아두는 설계</a></li><li class="depth-2"><a href="#문서를-자산으로-만들기">문서를 자산으로 만들기</a></li><li class="depth-2"><a href="#정리">정리</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
       // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
       // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).

@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">LLM 프롬프팅 논문 스터디 - 06. ReAct, Synergizing Reasoning and Acting</h1><div class="post-meta"><time>2026.07.23</time><span class="chip">LLM</span><span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span><span class="views" data-views-path="/study/llm/2026/07/23/llm-prompting-paper-06-react.html" hidden></span><span class="tags"><a href="/tags.html#LLM">#LLM</a><a href="/tags.html#Prompt Engineering">#Prompt Engineering</a><a href="/tags.html#NLP">#NLP</a><a href="/tags.html#Agent">#Agent</a><a href="/tags.html#Tool Use">#Tool Use</a></span></div></header><div class="prose"><p>시리즈 여섯 번째 편이자 “에이전트/툴 사용” 트랙의 첫 편. 지금까지 다룬 CoT/Self-Consistency/Tree of Thoughts가 전부 모델 “내부”에서만 추론했다면, 이번에 다룰 <a href="https://arxiv.org/abs/2210.03629"><strong>ReAct: Synergizing Reasoning and Acting in Language Models</strong></a> (Yao et al., 2022, ICLR 2023)는 처음으로 외부 세계(검색, 툴)와 상호작용하며 추론하는 구조다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.RTRRCKAg.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">LLM 프롬프팅 논문 스터디 - 06. ReAct, Synergizing Reasoning and Acting</h1><div class="post-meta"><time>2026.07.23</time><span class="chip">LLM</span><span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span><span class="views" data-views-path="/study/llm/2026/07/23/llm-prompting-paper-06-react.html" hidden></span><span class="tags"><a href="/tags.html#LLM">#LLM</a><a href="/tags.html#Prompt Engineering">#Prompt Engineering</a><a href="/tags.html#NLP">#NLP</a><a href="/tags.html#Agent">#Agent</a><a href="/tags.html#Tool Use">#Tool Use</a></span></div></header><div class="prose"><p>시리즈 여섯 번째 편이자 “에이전트/툴 사용” 트랙의 첫 편. 지금까지 다룬 CoT/Self-Consistency/Tree of Thoughts가 전부 모델 “내부”에서만 추론했다면, 이번에 다룰 <a href="https://arxiv.org/abs/2210.03629"><strong>ReAct: Synergizing Reasoning and Acting in Language Models</strong></a> (Yao et al., 2022, ICLR 2023)는 처음으로 외부 세계(검색, 툴)와 상호작용하며 추론하는 구조다.</p>
 <h2 id="1-기본적인-이해부터">1. 기본적인 이해부터</h2>
 <p>쉽게 말하면, ReAct는 <strong>“생각하고 → 행동하고 → 그 결과를 보고 → 다시 생각하는” 루프를 프롬프트로 만드는 방법</strong>이다. 모델이 머릿속으로만 추론하는 게 아니라, 중간중간 “검색해봐야겠다” 같은 **실제 행동(Action)**을 하고, 그 행동의 **결과(Observation)**를 다음 생각의 재료로 삼는다. Thought(생각) → Action(행동) → Observation(관찰)을 반복하다가 답이 나오면 끝낸다.</p>
 <h2 id="2-문제점배경">2. 문제점/배경</h2>
@@ -117,13 +117,23 @@
 <p>다음 편은 <strong>Toolformer (Schick et al., 2023)</strong> — ReAct가 프롬프트로 툴 호출 패턴을 가르치는 방식이라면, Toolformer는 모델이 스스로 “언제 툴을 써야 할지”까지 학습하는 접근이라 흥미로운 대조가 된다.</p></div></article><script>(function(){const viewPath = "/study/llm/2026/07/23/llm-prompting-paper-06-react.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
-        // 조회수 1회 기록 — 실패해도 페이지에는 영향 없음(검색 페이지의 "많이 본 글" 소스)
-        fetch(chatOrigin + '/api/view', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: viewPath }),
-          keepalive: true,
-        }).catch(function () {});
+        // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
+        // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
+        (function () {
+          var key = 'viewed:' + viewPath;
+          try {
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+          } catch (e) {
+            // 프라이빗 모드 등으로 storage 가 막히면 중복 제거 없이 그냥 기록한다
+          }
+          fetch(chatOrigin + '/api/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: viewPath }),
+            keepalive: true,
+          }).catch(function () {});
+        })();
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#1-기본적인-이해부터">1. 기본적인 이해부터</a></li><li class="depth-2"><a href="#2-문제점배경">2. 문제점/배경</a></li><li class="depth-2"><a href="#3-해결책의-핵심-아이디어">3. 해결책의 핵심 아이디어</a></li><li class="depth-2"><a href="#4-비유예시">4. 비유/예시</a></li><li class="depth-2"><a href="#5-실제-동작-과정">5. 실제 동작 과정</a></li><li class="depth-2"><a href="#그림으로-보기">그림으로 보기</a></li><li class="depth-2"><a href="#6-결과장점">6. 결과/장점</a></li><li class="depth-2"><a href="#실무-적용-아이디어">실무 적용 아이디어</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
       // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
       // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).

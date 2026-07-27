@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 19. 스포일러 없는 티저부터 저주 아이템까지 — 시즌패스 구현기</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/lol-moim-incidents-19-season-pass-build.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#시즌패스">#시즌패스</a><a href="/tags.html#기획">#기획</a><a href="/tags.html#게임화">#게임화</a><a href="/tags.html#라이브옵스">#라이브옵스</a></span></div></header><div class="prose"><p>7월에 시즌패스 “함께하는 여름방학”을 만들어 배포했다. 30레벨 단일 트랙(무료 5개 / 유료 25개 보상), 6주 진행, 일일/주간 미션으로 XP를 모아 레벨을 올리는 전형적인 배틀패스 구조다. 출발점은 거창한 게 아니라 “배팅 포인트가 쌓이기만 하고 쓸 데가 없다”는 경제 문제였다 — 포인트 소진처를 만들면서 리텐션도 노려보자는 것.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.RTRRCKAg.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ 롤모임 운영일지 ] - 19. 스포일러 없는 티저부터 저주 아이템까지 — 시즌패스 구현기</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/lol-moim-incidents-19-season-pass-build.html" hidden></span><span class="tags"><a href="/tags.html#운영일지">#운영일지</a><a href="/tags.html#시즌패스">#시즌패스</a><a href="/tags.html#기획">#기획</a><a href="/tags.html#게임화">#게임화</a><a href="/tags.html#라이브옵스">#라이브옵스</a></span></div></header><div class="prose"><p>7월에 시즌패스 “함께하는 여름방학”을 만들어 배포했다. 30레벨 단일 트랙(무료 5개 / 유료 25개 보상), 6주 진행, 일일/주간 미션으로 XP를 모아 레벨을 올리는 전형적인 배틀패스 구조다. 출발점은 거창한 게 아니라 “배팅 포인트가 쌓이기만 하고 쓸 데가 없다”는 경제 문제였다 — 포인트 소진처를 만들면서 리텐션도 노려보자는 것.</p>
 <p><a href="/journal/development%20diary/2026/07/27/lol-moim-incidents-14-product-retrospective.html">14편</a>에서 “이게 리텐션에 실제로 도움이 됐는지 아직 확정하지 않기로 했다”는 지표 이야기는 이미 했으니, 이번 편은 반대쪽 — 만드는 과정에서 했던 기획 판단들을 기록한다. 돌아보니 코드보다 “무엇을 보여주고 무엇을 가릴까”, “꽝을 어떻게 처리할까” 같은 결정에 시간을 더 쓴 작업이었다.</p>
 <br>
 <h2 id="1-티저--무엇을-가리고-무엇을-보여줄-것인가">1. 티저 — 무엇을 가리고 무엇을 보여줄 것인가</h2>
@@ -63,13 +63,23 @@
 <p>시즌패스를 만들며 겪은 사고들 — 코스메틱 조회 훅이 무한 요청 루프를 돈 사건, 신규 테이블에 soft-delete 필터가 자동 주입돼 전 라우트가 500을 낸 사건 — 은 각각 별도 편에서 다룬다.</p></div></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/lol-moim-incidents-19-season-pass-build.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
-        // 조회수 1회 기록 — 실패해도 페이지에는 영향 없음(검색 페이지의 "많이 본 글" 소스)
-        fetch(chatOrigin + '/api/view', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: viewPath }),
-          keepalive: true,
-        }).catch(function () {});
+        // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
+        // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
+        (function () {
+          var key = 'viewed:' + viewPath;
+          try {
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+          } catch (e) {
+            // 프라이빗 모드 등으로 storage 가 막히면 중복 제거 없이 그냥 기록한다
+          }
+          fetch(chatOrigin + '/api/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: viewPath }),
+            keepalive: true,
+          }).catch(function () {});
+        })();
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#1-티저--무엇을-가리고-무엇을-보여줄-것인가">1. 티저 — 무엇을 가리고 무엇을 보여줄 것인가</a></li><li class="depth-2"><a href="#2-박스-오픈-연출--감성이-기능만큼-커밋을-먹었다">2. 박스 오픈 연출 — “감성”이 기능만큼 커밋을 먹었다</a></li><li class="depth-2"><a href="#3-저주--꽝을-콘텐츠로-만들기">3. 저주 — 꽝을 콘텐츠로 만들기</a></li><li class="depth-2"><a href="#4-미션--enum이-아니라-정책이다">4. 미션 — enum이 아니라 정책이다</a></li><li class="depth-2"><a href="#정리">정리</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
       // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
       // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).

@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ K8s 스터디 ] - 08. 스케줄링과 requests/limits, Pod는 어디에 어떻게 배치되는가</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 3분 정도 걸릴 것 같아요!">3분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/k8s-study-08-scheduling-resources.html" hidden></span><span class="tags"><a href="/tags.html#K8s">#K8s</a><a href="/tags.html#Kubernetes">#Kubernetes</a><a href="/tags.html#스터디">#스터디</a><a href="/tags.html#스케줄링">#스케줄링</a><a href="/tags.html#requests">#requests</a><a href="/tags.html#limits">#limits</a><a href="/tags.html#QoS">#QoS</a></span></div></header><div class="prose"><p><a href="/journal/development%20diary/2026/07/27/k8s-study-07-namespace-rbac.html">지난 편</a>까지 클러스터를 팀/환경별로 나누는 법을 봤다. 이번 편은 조금 더 물리적인 질문 — 노드(서버)가 여러 대인 클러스터에서, K8s는 새 Pod를 어디에 배치할지 어떻게 결정하는가.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.RTRRCKAg.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ K8s 스터디 ] - 08. 스케줄링과 requests/limits, Pod는 어디에 어떻게 배치되는가</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 3분 정도 걸릴 것 같아요!">3분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/k8s-study-08-scheduling-resources.html" hidden></span><span class="tags"><a href="/tags.html#K8s">#K8s</a><a href="/tags.html#Kubernetes">#Kubernetes</a><a href="/tags.html#스터디">#스터디</a><a href="/tags.html#스케줄링">#스케줄링</a><a href="/tags.html#requests">#requests</a><a href="/tags.html#limits">#limits</a><a href="/tags.html#QoS">#QoS</a></span></div></header><div class="prose"><p><a href="/journal/development%20diary/2026/07/27/k8s-study-07-namespace-rbac.html">지난 편</a>까지 클러스터를 팀/환경별로 나누는 법을 봤다. 이번 편은 조금 더 물리적인 질문 — 노드(서버)가 여러 대인 클러스터에서, K8s는 새 Pod를 어디에 배치할지 어떻게 결정하는가.</p>
 <h2 id="tldr">TL;DR</h2>
 <ul>
 <li>스케줄러(kube-scheduler)는 Pod가 선언한 <strong>requests</strong>만 보고 배치할 노드를 결정한다 — limits는 배치 판단에 안 쓰인다</li>
@@ -112,13 +112,23 @@
 <p>스케줄링/QoS까지 정리했고, kubernetes.io로 재검증한 결과 스케줄러의 requests 기준 판단, CPU/메모리 초과 처리 차이, QoS 축출 순서 전부 정확했다(1.35 GA된 In-Place Resize만 추가). 다음 편은 <strong>Helm</strong> — 지금까지 써온 YAML 매니페스트 뭉치를 어떻게 패키징하고 재사용하는지.</p></div></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/k8s-study-08-scheduling-resources.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
-        // 조회수 1회 기록 — 실패해도 페이지에는 영향 없음(검색 페이지의 "많이 본 글" 소스)
-        fetch(chatOrigin + '/api/view', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: viewPath }),
-          keepalive: true,
-        }).catch(function () {});
+        // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
+        // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
+        (function () {
+          var key = 'viewed:' + viewPath;
+          try {
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+          } catch (e) {
+            // 프라이빗 모드 등으로 storage 가 막히면 중복 제거 없이 그냥 기록한다
+          }
+          fetch(chatOrigin + '/api/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: viewPath }),
+            keepalive: true,
+          }).catch(function () {});
+        })();
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#tldr">TL;DR</a></li><li class="depth-2"><a href="#1-리소스-선언-없이-배치하면-생기는-문제">1. 리소스 선언 없이 배치하면 생기는 문제</a></li><li class="depth-2"><a href="#2-핵심-아이디어">2. 핵심 아이디어</a></li><li class="depth-2"><a href="#3-비유--이사-갈-집-구하기">3. 비유 — 이사 갈 집 구하기</a></li><li class="depth-2"><a href="#4-실제로-이렇게-쓴다">4. 실제로 이렇게 쓴다</a></li><li class="depth-2"><a href="#지금-상태--다음에-할-일">지금 상태 / 다음에 할 일</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
       // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
       // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).

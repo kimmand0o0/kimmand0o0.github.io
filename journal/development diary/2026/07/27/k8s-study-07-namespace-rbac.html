@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이 나눠 쓰는 법</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 3분 정도 걸릴 것 같아요!">3분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/k8s-study-07-namespace-rbac.html" hidden></span><span class="tags"><a href="/tags.html#K8s">#K8s</a><a href="/tags.html#Kubernetes">#Kubernetes</a><a href="/tags.html#스터디">#스터디</a><a href="/tags.html#Namespace">#Namespace</a><a href="/tags.html#RBAC">#RBAC</a></span></div></header><div class="prose"><p><a href="/journal/development%20diary/2026/07/23/k8s-study-06-ingress.html">지난 편</a>까지 Pod/Deployment/Service/Ingress로 앱 하나를 배포하고 노출하는 흐름을 정리했다. 이번 편은 조금 결이 다르다 — 클러스터 하나를 여러 팀이나 여러 환경이 같이 쓸 때 필요한 Namespace와 RBAC.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.RTRRCKAg.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ K8s 스터디 ] - 07. Namespace와 RBAC, 클러스터 하나를 여러 팀이 나눠 쓰는 법</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 3분 정도 걸릴 것 같아요!">3분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/k8s-study-07-namespace-rbac.html" hidden></span><span class="tags"><a href="/tags.html#K8s">#K8s</a><a href="/tags.html#Kubernetes">#Kubernetes</a><a href="/tags.html#스터디">#스터디</a><a href="/tags.html#Namespace">#Namespace</a><a href="/tags.html#RBAC">#RBAC</a></span></div></header><div class="prose"><p><a href="/journal/development%20diary/2026/07/23/k8s-study-06-ingress.html">지난 편</a>까지 Pod/Deployment/Service/Ingress로 앱 하나를 배포하고 노출하는 흐름을 정리했다. 이번 편은 조금 결이 다르다 — 클러스터 하나를 여러 팀이나 여러 환경이 같이 쓸 때 필요한 Namespace와 RBAC.</p>
 <h2 id="tldr">TL;DR</h2>
 <ul>
 <li>Namespace는 클러스터 하나를 여러 논리적 구획으로 나누는 칸막이 — 지금까지 만든 Pod/Deployment 전부 사실 <code>default</code>라는 Namespace 안에 있었다</li>
@@ -134,13 +134,23 @@
 <p>Namespace/RBAC까지 정리하면서, kubernetes.io 공식 문서로 다시 대조해봤는데 이번 편은 전부 그대로 맞았다(apiVersion, Role/ClusterRole 구분, ResourceQuota 필드명, <code>kubectl auth can-i --as=</code> 문법 전부 정확). 다음 편은 <strong>스케줄링 &#x26; 리소스</strong> — 클러스터가 Pod를 어디에, 어떻게 배치하는지.</p></div></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/k8s-study-07-namespace-rbac.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
-        // 조회수 1회 기록 — 실패해도 페이지에는 영향 없음(검색 페이지의 "많이 본 글" 소스)
-        fetch(chatOrigin + '/api/view', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: viewPath }),
-          keepalive: true,
-        }).catch(function () {});
+        // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
+        // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
+        (function () {
+          var key = 'viewed:' + viewPath;
+          try {
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+          } catch (e) {
+            // 프라이빗 모드 등으로 storage 가 막히면 중복 제거 없이 그냥 기록한다
+          }
+          fetch(chatOrigin + '/api/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: viewPath }),
+            keepalive: true,
+          }).catch(function () {});
+        })();
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#tldr">TL;DR</a></li><li class="depth-2"><a href="#1-클러스터-하나를-여러-팀이-같이-쓰면-생기는-문제">1. 클러스터 하나를 여러 팀이 같이 쓰면 생기는 문제</a></li><li class="depth-2"><a href="#2-핵심-아이디어">2. 핵심 아이디어</a></li><li class="depth-2"><a href="#3-비유--공유-오피스-건물">3. 비유 — 공유 오피스 건물</a></li><li class="depth-2"><a href="#4-실제로-이렇게-쓴다">4. 실제로 이렇게 쓴다</a></li><li class="depth-2"><a href="#지금-상태--다음에-할-일">지금 상태 / 다음에 할 일</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
       // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
       // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).

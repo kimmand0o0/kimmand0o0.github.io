@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.UbBNvBjY.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">LLM 프롬프팅 논문 스터디 - 05. Rethinking the Role of Demonstrations</h1><div class="post-meta"><time>2026.07.22</time><span class="chip">LLM</span><span class="reading tip" data-tip="이 게시글을 읽는 데 4분 정도 걸릴 것 같아요!">4분 분량</span><span class="views" data-views-path="/study/llm/2026/07/22/llm-prompting-paper-05-rethinking-demonstrations.html" hidden></span><span class="tags"><a href="/tags.html#LLM">#LLM</a><a href="/tags.html#Prompt Engineering">#Prompt Engineering</a><a href="/tags.html#NLP">#NLP</a><a href="/tags.html#In-Context Learning">#In-Context Learning</a></span></div></header><div class="prose"><p>시리즈 다섯 번째 편이자 “In-Context Learning 원리” 트랙의 마지막 편. <a href="/study/llm/2026/07/22/llm-prompting-paper-04-gpt3-few-shot.html">GPT-3 논문</a>이 보여준 In-Context Learning이 정말 “예시에서 배우는” 건지 파고든 <a href="https://arxiv.org/abs/2202.12837"><strong>Rethinking the Role of Demonstrations: What Makes In-Context Learning Work?</strong></a> (Min et al., 2022, EMNLP)이다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.RTRRCKAg.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">LLM 프롬프팅 논문 스터디 - 05. Rethinking the Role of Demonstrations</h1><div class="post-meta"><time>2026.07.22</time><span class="chip">LLM</span><span class="reading tip" data-tip="이 게시글을 읽는 데 4분 정도 걸릴 것 같아요!">4분 분량</span><span class="views" data-views-path="/study/llm/2026/07/22/llm-prompting-paper-05-rethinking-demonstrations.html" hidden></span><span class="tags"><a href="/tags.html#LLM">#LLM</a><a href="/tags.html#Prompt Engineering">#Prompt Engineering</a><a href="/tags.html#NLP">#NLP</a><a href="/tags.html#In-Context Learning">#In-Context Learning</a></span></div></header><div class="prose"><p>시리즈 다섯 번째 편이자 “In-Context Learning 원리” 트랙의 마지막 편. <a href="/study/llm/2026/07/22/llm-prompting-paper-04-gpt3-few-shot.html">GPT-3 논문</a>이 보여준 In-Context Learning이 정말 “예시에서 배우는” 건지 파고든 <a href="https://arxiv.org/abs/2202.12837"><strong>Rethinking the Role of Demonstrations: What Makes In-Context Learning Work?</strong></a> (Min et al., 2022, EMNLP)이다.</p>
 <h2 id="1-기본적인-이해부터">1. 기본적인 이해부터</h2>
 <p>쉽게 말하면, 이 논문은 <strong>“Few-shot 예시에서 모델이 정확히 뭘 배우는지”를 실험으로 해부한 논문</strong>이다. 놀랍게도 예시의 <strong>정답 레이블을 일부러 틀리게(무작위로) 바꿔도</strong> 모델 성능이 거의 안 떨어진다는 걸 발견했다. 즉 GPT-3가 예시를 보고 “입력→정답”이라는 논리적 매핑을 진짜로 학습하는 게 아니라, 다른 것들을 참고한다는 뜻이었다.</p>
 <h2 id="2-문제점배경">2. 문제점/배경</h2>
@@ -116,13 +116,23 @@
 <p>이걸로 “In-Context Learning 원리” 트랙까지 두 트랙을 마무리한다. 다음은 에이전트/툴 사용 트랙(ReAct, Toolformer)과 정렬/안전성 트랙(InstructGPT, Constitutional AI)으로 이어갈 예정.</p></div></article><script>(function(){const viewPath = "/study/llm/2026/07/22/llm-prompting-paper-05-rethinking-demonstrations.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
-        // 조회수 1회 기록 — 실패해도 페이지에는 영향 없음(검색 페이지의 "많이 본 글" 소스)
-        fetch(chatOrigin + '/api/view', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: viewPath }),
-          keepalive: true,
-        }).catch(function () {});
+        // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
+        // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
+        (function () {
+          var key = 'viewed:' + viewPath;
+          try {
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+          } catch (e) {
+            // 프라이빗 모드 등으로 storage 가 막히면 중복 제거 없이 그냥 기록한다
+          }
+          fetch(chatOrigin + '/api/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: viewPath }),
+            keepalive: true,
+          }).catch(function () {});
+        })();
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#1-기본적인-이해부터">1. 기본적인 이해부터</a></li><li class="depth-2"><a href="#2-문제점배경">2. 문제점/배경</a></li><li class="depth-2"><a href="#3-해결책의-핵심-아이디어">3. 해결책의 핵심 아이디어</a></li><li class="depth-2"><a href="#4-비유예시">4. 비유/예시</a></li><li class="depth-2"><a href="#5-실제-동작-과정">5. 실제 동작 과정</a></li><li class="depth-2"><a href="#그림으로-보기">그림으로 보기</a></li><li class="depth-2"><a href="#6-결과장점">6. 결과/장점</a></li><li class="depth-2"><a href="#실무-적용-아이디어">실무 적용 아이디어</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
       // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
       // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
