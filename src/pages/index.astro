@@ -6,7 +6,6 @@ import {
   postPath,
   categoriesOf,
   excerptOf,
-  readingMinutes,
   readingLabel,
   readingTip,
 } from '../lib/posts';
@@ -14,9 +13,26 @@ import {
 const posts = await allPosts();
 const INITIAL = 10; // 나머지는 스크롤하며 search.json 에서 이어붙인다
 const initial = posts.slice(0, INITIAL);
+
+const SORTS = [
+  { key: 'recent', label: '최신순' },
+  { key: 'views', label: '조회순' },
+  { key: 'comments', label: '댓글순' },
+  { key: 'likes', label: '추천순' },
+];
 ---
 
 <Base>
+  <nav class="sort-bar" aria-label="정렬 기준">
+    {
+      SORTS.map((s) => (
+        <button type="button" class="sort-btn" data-sort={s.key} aria-pressed={s.key === 'recent'}>
+          {s.label}
+        </button>
+      ))
+    }
+  </nav>
+
   <ul class="post-list" id="post-list">
     {
       initial.map((post) => (
@@ -32,6 +48,7 @@ const initial = posts.slice(0, INITIAL);
             <span class="chip">{categoriesOf(post).at(-1)}</span>
             <span class="views" data-views-path={postPath(post)} hidden />
             <span class="comments-metric" data-comments-path={postPath(post)} hidden />
+            <span class="likes-metric" data-likes-path={postPath(post)} hidden />
             <time>{formatDate(post)}</time>
           </div>
         </li>
@@ -47,85 +64,112 @@ const initial = posts.slice(0, INITIAL);
       const list = document.getElementById('post-list');
       const sentinel = document.getElementById('scroll-sentinel');
       const endMsg = document.getElementById('list-end');
-      let offset = initialCount;
       const STEP = 10;
-      let all = null;
+
+      let all = null; // search.json 전체 (최신순)
+      let ordered = null; // 현재 정렬 기준으로 세운 목록
+      let offset = initialCount;
       let loading = false;
+      let sort = 'recent';
 
-      if (offset >= total) {
-        sentinel.remove();
-        endMsg.hidden = false;
-        return;
-      }
+      const esc = (s) =>
+        String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-      function esc(s) {
-        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      }
+      const itemHtml = (p) => {
+        const cat = p.categories?.length ? p.categories[p.categories.length - 1] : '';
+        return (
+          '<li>' +
+          '<div class="title-row">' +
+          `<a class="title" href="${p.url}">${esc(p.title)}</a>` +
+          `<span class="reading tip" data-tip="이 게시글을 읽는 데 ${p.minutes || 1}분 정도 걸릴 것 같아요!">${p.minutes || 1}분 분량</span>` +
+          '</div>' +
+          `<p class="excerpt">${esc(p.excerpt || '')}</p>` +
+          '<div class="meta">' +
+          (cat ? `<span class="chip">${esc(cat)}</span>` : '') +
+          `<span class="views" data-views-path="${p.url}" hidden></span>` +
+          `<span class="comments-metric" data-comments-path="${p.url}" hidden></span>` +
+          `<span class="likes-metric" data-likes-path="${p.url}" hidden></span>` +
+          `<time>${esc(p.date.replace(/-/g, '.'))}</time>` +
+          '</div></li>'
+        );
+      };
 
-      function append(items) {
-        const html = items
-          .map((p) => {
-            const cat = (p.categories && p.categories.length)
-              ? p.categories[p.categories.length - 1]
-              : '';
-            return (
-              '<li>' +
-              '<div class="title-row">' +
-              '<a class="title" href="' + p.url + '">' + esc(p.title) + '</a>' +
-              '<span class="reading tip" data-tip="이 게시글을 읽는 데 ' + (p.minutes || 1) +
-                '분 정도 걸릴 것 같아요!">' + (p.minutes || 1) + '분 분량</span>' +
-              '</div>' +
-              '<p class="excerpt">' + esc(p.excerpt || '') + '</p>' +
-              '<div class="meta">' +
-              (cat ? '<span class="chip">' + esc(cat) + '</span>' : '') +
-              '<span class="views" data-views-path="' + p.url + '" hidden></span>' +
-              '<time>' + esc(p.date.replace(/-/g, '.')) + '</time>' +
-              '</div></li>'
-            );
-          })
-          .join('');
-        list.insertAdjacentHTML('beforeend', html);
-        // 새로 붙은 항목에도 조회수를 채운다
+      const append = (items) => {
+        list.insertAdjacentHTML('beforeend', items.map(itemHtml).join(''));
         if (window.fillViews) window.fillViews(list);
-      }
+      };
+
+      const metricOf = (p) => {
+        if (sort === 'views') return window.__views?.[p.url] ?? 0;
+        if (sort === 'comments') return window.__comments?.[p.url] ?? 0;
+        if (sort === 'likes') return window.__likes?.[p.url] ?? 0;
+        return 0;
+      };
+
+      const ensureData = () =>
+        all
+          ? Promise.resolve(all)
+          : fetch('/search.json')
+              .then((r) => r.json())
+              .then((json) => (all = json));
 
       function loadMore() {
-        if (loading || offset >= total) return;
+        if (loading) return;
+        const src = ordered ?? all;
+        if (src && offset >= src.length) return;
         loading = true;
 
-        const ready = all
-          ? Promise.resolve(all)
-          : fetch('/search.json').then((r) => { return r.json(); });
-
-        ready
-          .then((json) => {
-            all = json;
-            append(all.slice(offset, offset + STEP));
+        ensureData()
+          .then(() => {
+            const source = ordered ?? all;
+            append(source.slice(offset, offset + STEP));
             offset += STEP;
             loading = false;
-            if (offset >= total) {
-              io.disconnect();
+            if (offset >= source.length) {
               sentinel.remove();
               endMsg.hidden = false;
               return;
             }
-            // IntersectionObserver 는 "교차 상태가 바뀔 때"만 부르므로,
-            // 한 번 더 붙여도 sentinel 이 계속 보이는 화면(긴 뷰포트)에서는 멈춰버린다.
-            // 아직 트리거 영역 안이면 직접 이어서 부른다.
+            // 교차 상태가 안 바뀌는 긴 화면에서도 이어지도록 직접 확인
             requestAnimationFrame(() => {
               const r = sentinel.getBoundingClientRect();
               if (r.top < window.innerHeight + 500) loadMore();
             });
           })
           .catch(() => {
-            // 실패하면 무한 스크롤만 포기하고, 기존 페이지 목록으로 안내
             loading = false;
-            io.disconnect();
             sentinel.remove();
             endMsg.textContent = '목록을 더 불러오지 못했어요.';
             endMsg.hidden = false;
           });
       }
+
+      // 정렬 기준이 바뀌면 목록을 통째로 다시 세운다
+      const applySort = async (next) => {
+        sort = next;
+        document
+          .querySelectorAll('.sort-btn')
+          .forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.sort === next)));
+
+        await ensureData();
+        // 지표가 도착해야 정렬할 수 있다
+        if (window.__viewsReady) await window.__viewsReady;
+
+        // all 은 이미 최신순 — 동점이면 그 순서가 유지된다(안정 정렬)
+        ordered = sort === 'recent' ? all.slice() : all.slice().sort((a, b) => metricOf(b) - metricOf(a));
+
+        list.textContent = '';
+        offset = 0;
+        endMsg.hidden = true;
+        if (!sentinel.isConnected) list.after(sentinel);
+        loadMore();
+      };
+
+      document.querySelectorAll('.sort-btn').forEach((b) => {
+        b.addEventListener('click', () => {
+          if (b.dataset.sort !== sort) applySort(b.dataset.sort);
+        });
+      });
 
       // 화면 아래 500px 전에 미리 불러온다
       const io = new IntersectionObserver(
@@ -134,7 +178,12 @@ const initial = posts.slice(0, INITIAL);
         },
         { rootMargin: '500px 0px' }
       );
-      io.observe(sentinel);
+      if (initialCount >= total) {
+        sentinel.remove();
+        endMsg.hidden = false;
+      } else {
+        io.observe(sentinel);
+      }
     })();
   </script>
 </Base>

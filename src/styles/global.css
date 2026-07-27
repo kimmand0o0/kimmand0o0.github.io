@@ -182,6 +182,32 @@ html[data-scrolled='true'] .site-header {
 }
 #theme-toggle:hover { color: var(--accent); transform: rotate(180deg); }
 
+/* ── 정렬 필터 ─────────────────────────────── */
+.sort-bar {
+  display: flex; flex-wrap: wrap; gap: 0.35rem;
+  margin: 2rem 0 0;
+}
+.sort-btn {
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.sort-btn:hover { color: var(--accent); }
+.sort-btn[aria-pressed='true'] {
+  color: var(--accent);
+  font-weight: 650;
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.post-list + .sort-bar, .sort-bar + .post-list { margin-top: 1rem; }
+
 /* ── 글 목록 ─────────────────────────────── */
 .post-list { list-style: none; margin: 2.25rem 0 0; padding: 0; }
 .post-list li { padding: 1.4rem 0; border-bottom: 1px solid var(--border); }
@@ -220,7 +246,7 @@ html[data-scrolled='true'] .site-header {
   overflow: hidden;
 }
 .reading { color: var(--faint); font-size: 0.78em; }
-.views, .comments-metric {
+.views, .comments-metric, .likes-metric {
   display: inline-flex;
   align-items: center;
   gap: 0.22em;
@@ -228,10 +254,11 @@ html[data-scrolled='true'] .site-header {
   font-size: 0.88em;
   font-variant-numeric: tabular-nums;
 }
-.views svg, .comments-metric svg { flex: none; opacity: 0.8; }
+.views svg, .comments-metric svg, .likes-metric svg { flex: none; opacity: 0.8; }
 /* 아카이브형 목록에서는 오른쪽 끝에 붙인다 */
 .archive-list li .views { margin-left: auto; flex: none; }
-.archive-list li .comments-metric { flex: none; }
+.archive-list li .comments-metric,
+.archive-list li .likes-metric { flex: none; }
 
 /* ── 툴팁 ─────────────────────────────── */
 .tip { position: relative; cursor: help; }
@@ -426,6 +453,31 @@ html[data-theme='dark'] .astro-code span {
   display: flex; justify-content: center;
   background: transparent; border: none; padding: 0.5rem 0;
 }
+
+/* ── 추천(따봉) ─────────────────────────────── */
+.like-box { display: flex; justify-content: center; margin: 3.5rem 0 0; max-width: 46rem; }
+#like-btn {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  padding: 0.5rem 1.2rem;
+  font-family: inherit; font-size: 0.92rem; font-weight: 600;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease, transform 0.12s ease;
+}
+#like-btn:hover { color: var(--accent); border-color: var(--accent); }
+#like-btn:active { transform: scale(0.96); }
+#like-btn.liked {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+#like-btn.liked svg { fill: color-mix(in srgb, var(--accent) 22%, transparent); }
+#like-btn:disabled { opacity: 0.6; cursor: default; }
+/* 버튼 위쪽에 뜨는 툴팁이 잘리지 않도록 가운데 정렬 유지 */
+#like-btn.tip::after { white-space: nowrap; }
 
 /* ── 시리즈 이동 ─────────────────────────────── */
 .series-nav {

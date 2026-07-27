@@ -269,6 +269,54 @@ async function handleViewPing(request: Request, env: Env): Promise<Response> {
   return jsonResponse({ ok: true }, 200, env);
 }
 
+/** 추천 토글 — 브라우저가 "이미 눌렀는지"를 기억하고, 서버는 합계만 증감한다 */
+async function handleLike(request: Request, env: Env): Promise<Response> {
+  const clientIp = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+  const { success } = await env.COMMENT_RATE_LIMITER.limit({ key: `like:${clientIp}` });
+  if (!success) return jsonResponse({ error: 'rate_limited' }, 429, env);
+
+  const body = (await request.json().catch(() => null)) as
+    | { path?: unknown; action?: unknown }
+    | null;
+  const path = body?.path;
+  const remove = body?.action === 'remove';
+  if (!isPostPath(path)) return jsonResponse({ error: 'invalid_path' }, 400, env);
+
+  const now = new Date().toISOString();
+  if (remove) {
+    // 0 밑으로는 내려가지 않게
+    await env.CHAT_LOGS_DB.prepare(
+      'UPDATE post_likes SET likes = MAX(likes - 1, 0), updated_at = ? WHERE path = ?'
+    )
+      .bind(now, path)
+      .run();
+  } else {
+    await env.CHAT_LOGS_DB.prepare(
+      `INSERT INTO post_likes (path, likes, updated_at) VALUES (?, 1, ?)
+       ON CONFLICT(path) DO UPDATE SET likes = likes + 1, updated_at = excluded.updated_at`
+    )
+      .bind(path, now)
+      .run();
+  }
+
+  const row = await env.CHAT_LOGS_DB.prepare('SELECT likes FROM post_likes WHERE path = ?')
+    .bind(path)
+    .first<{ likes: number }>();
+
+  return jsonResponse({ likes: row?.likes ?? 0 }, 200, env);
+}
+
+async function handleTopLikes(url: URL, env: Env): Promise<Response> {
+  const limit = Math.min(Math.max(Number(url.searchParams.get('limit')) || 10, 1), 1000);
+  const { results } = await env.CHAT_LOGS_DB.prepare(
+    'SELECT path, likes FROM post_likes WHERE likes > 0 ORDER BY likes DESC, path ASC LIMIT ?'
+  )
+    .bind(limit)
+    .all<{ path: string; likes: number }>();
+
+  return jsonResponse({ items: results ?? [] }, 200, env);
+}
+
 async function handleTopViews(url: URL, env: Env): Promise<Response> {
   // 목록/글 페이지가 조회수를 한 번에 받아 채우므로 전체 글 수(수백)까지 허용한다
   const limit = Math.min(Math.max(Number(url.searchParams.get('limit')) || 10, 1), 1000);
@@ -471,6 +519,12 @@ export default {
       }
       if (url.pathname === '/api/comments' && request.method === 'POST') {
         return await handleCreateComment(request, env, ctx);
+      }
+      if (url.pathname === '/api/like' && request.method === 'POST') {
+        return await handleLike(request, env);
+      }
+      if (url.pathname === '/api/likes/top' && request.method === 'GET') {
+        return await handleTopLikes(url, env);
       }
       if (url.pathname === '/api/comments/counts' && request.method === 'GET') {
         return await handleCommentCounts(env);

@@ -73,6 +73,7 @@ if (kind === 'post' && post) {
             <span class="reading tip" data-tip={readingTip(post)}>{readingLabel(post)}</span>
             <span class="views" data-views-path={postPath(post)} hidden />
             <span class="comments-metric" data-comments-path={postPath(post)} hidden />
+              <span class="likes-metric" data-likes-path={postPath(post)} hidden />
             {tagsOf(post).length > 0 && (
               <span class="tags">
                 {tagsOf(post).map((t) => (
@@ -84,6 +85,19 @@ if (kind === 'post' && post) {
         </header>
         <div class="prose">
           <Content />
+        </div>
+
+        <div class="like-box">
+          <button
+            type="button"
+            id="like-btn"
+            class="tip"
+            data-tip="이 게시글이 마음에 든다면 따봉을 눌러주세요!"
+            aria-pressed="false"
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+            <span id="like-count">0</span>
+          </button>
         </div>
 
         {series && (
@@ -167,6 +181,59 @@ if (kind === 'post' && post) {
             keepalive: true,
           }).catch(() => {});
         })();
+      </script>
+
+      <script
+        is:inline
+        define:vars={{ likePath: postPath(post), likeApi: 'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev' }}
+      >
+        {
+          const btn = document.getElementById('like-btn');
+          const countEl = document.getElementById('like-count');
+          const key = 'liked:' + likePath;
+          // "이미 눌렀는지"는 브라우저가 기억한다 — 로그인이 없으니 여기까지가 최선
+          const likedNow = () => {
+            try { return localStorage.getItem(key) === '1'; } catch { return false; }
+          };
+          const paint = (n) => {
+            countEl.textContent = n;
+            const on = likedNow();
+            btn.classList.toggle('liked', on);
+            btn.setAttribute('aria-pressed', String(on));
+            btn.dataset.tip = on
+              ? '추천을 취소하려면 다시 눌러주세요'
+              : '이 게시글이 마음에 든다면 따봉을 눌러주세요!';
+          };
+
+          fetch(`${likeApi}/api/likes/top?limit=1000`)
+            .then((r) => (r.ok ? r.json() : null))
+            .then((json) => {
+              const hit = (json?.items ?? []).find((i) => i.path === likePath);
+              paint(hit ? hit.likes : 0);
+            })
+            .catch(() => paint(0));
+
+          btn.addEventListener('click', async () => {
+            const on = likedNow();
+            btn.disabled = true;
+            try {
+              const res = await fetch(`${likeApi}/api/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: likePath, action: on ? 'remove' : 'add' }),
+              });
+              if (res.ok) {
+                const { likes } = await res.json();
+                try { on ? localStorage.removeItem(key) : localStorage.setItem(key, '1'); } catch {}
+                paint(likes);
+              }
+            } catch {
+              /* 추천 실패는 조용히 넘긴다 — 글 읽기에 영향 없음 */
+            } finally {
+              btn.disabled = false;
+            }
+          });
+        }
       </script>
 
       <script
