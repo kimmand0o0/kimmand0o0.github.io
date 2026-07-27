@@ -1,0 +1,236 @@
+<!DOCTYPE html><html lang="ko" data-width="wide"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>블로그를 Jekyll에서 Astro로 옮겼다 — URL 하나도 안 깨뜨리고 | Haeran&#39;s blog</title><meta name="description" content="문제의 본질을 파악하고 해결하는 과정을 기록합니다."><link rel="icon" href="/assets/images/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png"><link rel="alternate" type="application/rss+xml" title="Haeran's blog" href="/feed.xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"><script>
+      // FOUC 방지: 렌더 전에 저장된 테마 적용
+      (function () {
+        var t = localStorage.getItem('theme');
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script><!-- Google Analytics (GA4) — Jekyll 시절 _config.yml의 google_analytics 값 그대로 --><script async src="https://www.googletagmanager.com/gtag/js?id=G-ZNXE6HSKMS"></script><script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-ZNXE6HSKMS');
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.RTRRCKAg.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">블로그를 Jekyll에서 Astro로 옮겼다 — URL 하나도 안 깨뜨리고</h1><div class="post-meta"><time>2026.07.27</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 9분 정도 걸릴 것 같아요!">9분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/27/jekyll-to-astro-migration.html" hidden></span><span class="tags"><a href="/tags.html#개발일지">#개발일지</a><a href="/tags.html#Astro">#Astro</a><a href="/tags.html#Jekyll">#Jekyll</a><a href="/tags.html#마이그레이션">#마이그레이션</a><a href="/tags.html#블로그">#블로그</a><a href="/tags.html#CSS">#CSS</a></span></div></header><div class="prose"><p>이 블로그는 2024년 2월부터 Jekyll(jekyll-theme-yat)로 굴러왔다. 오늘 Astro 5로 옮겼다. 시작은 거창한 기술 부채 청산이 아니라 이거였다 — <strong>“Jekyll 이름을 떼고 싶다.”</strong> 푸터에 박힌 “Powered by Jekyll”과, 테마가 정해준 모양대로만 살아야 하는 상태가 슬슬 답답했다.</p>
+<p>옮기면서 가장 신경 쓴 건 하나였다. <strong>글 89편의 URL을 단 하나도 깨뜨리지 않는 것.</strong> 2년 반 동안 공유된 링크들이 있고, 검색엔진에 색인된 주소가 있다. 디자인이야 마음에 안 들면 다시 고치면 되지만, 깨진 링크는 조용히 죽는다.</p>
+<p>결과부터 쓰면 성공했다. 그리고 그 과정에서 버그를 여섯 개 만났다.</p>
+<br>
+<h2 id="원칙-_posts는-손대지-않는다">원칙: <code>_posts/</code>는 손대지 않는다</h2>
+<p>이관에서 가장 먼저 정한 건 “글 파일은 한 글자도 안 바꾼다”였다.</p>
+<p>Jekyll의 <code>_posts/YYYY-MM/YYYY-MM-DD-slug.md</code> 구조와 프론트매터(<code>layout</code>, <code>title</code>, <code>author</code>, <code>date</code>, <code>categories</code>, <code>tags</code>)를 그대로 두고, Astro가 그걸 읽게 만들었다. 글 쓰는 방식이 바뀌면 그동안 만들어둔 글쓰기 자동화가 전부 깨지기 때문이다.</p>
+<p>Astro의 glob 로더로 <code>_posts</code>를 그대로 읽되, 기본 ID 생성기가 슬러그화를 하면서 한글·대소문자·언더스코어를 뭉개는 게 문제였다. 원본 경로를 그대로 쓰도록 바꿨다.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="ts"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// src/content.config.ts</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> posts</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> defineCollection</span><span style="color:#24292E;--shiki-dark:#E1E4E8">({</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  loader: </span><span style="color:#6F42C1;--shiki-dark:#B392F0">glob</span><span style="color:#24292E;--shiki-dark:#E1E4E8">({</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    pattern: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'**/*.md'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    base: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'./_posts'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 기본 generateId는 슬러그화를 거치므로, 한글·대소문자·언더스코어가 보존되도록 원본 경로를 그대로 쓴다</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    generateId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: ({ </span><span style="color:#E36209;--shiki-dark:#FFAB70">entry</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }) </span><span style="color:#D73A49;--shiki-dark:#F97583">=></span><span style="color:#24292E;--shiki-dark:#E1E4E8"> entry.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">replace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">/</span><span style="color:#22863A;--shiki-light-font-weight:bold;--shiki-dark:#85E89D;--shiki-dark-font-weight:bold">\.</span><span style="color:#032F62;--shiki-dark:#DBEDFF">md</span><span style="color:#D73A49;--shiki-dark:#F97583">$</span><span style="color:#032F62;--shiki-dark:#9ECBFF">/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">''</span><span style="color:#24292E;--shiki-dark:#E1E4E8">),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  schema: z.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">object</span><span style="color:#24292E;--shiki-dark:#E1E4E8">({ </span><span style="color:#6A737D;--shiki-dark:#6A737D">/* ... */</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }).</span><span style="color:#6F42C1;--shiki-dark:#B392F0">passthrough</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(), </span><span style="color:#6A737D;--shiki-dark:#6A737D">// banner: 등 yat 시절 필드는 무시하고 통과</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">});</span></span></code></pre>
+<p><code>passthrough()</code>가 중요했다. 예전 글 39편에 yat 테마용 <code>banner:</code> 블록이 남아 있는데, 스키마를 엄격하게 잡으면 전부 빌드 에러가 난다. 안 쓰는 필드는 통과시키고 무시한다.</p>
+<br>
+<h2 id="url-재현--공백과-한글이-들어간-경로">URL 재현 — 공백과 한글이 들어간 경로</h2>
+<p>Jekyll 기본 permalink는 <code>/:categories/:year/:month/:day/:title.html</code>이다. 문제는 이 블로그의 카테고리에 <strong>공백과 한글이 섞여 있다</strong>는 것.</p>
+<ul>
+<li><code>categories: [Journal, Development Diary]</code> → <code>/journal/development diary/2026/07/22/....html</code></li>
+<li><code>/study/book/쏙쏙 들어오는 함수형 코딩/2024/09/20/grokking-simplicity-01.html</code></li>
+<li><code>/network/2025/03/24/부하분산_로드밸런서.html</code></li>
+</ul>
+<p>카테고리는 소문자로 바뀌지만 <strong>공백은 그대로 남는다.</strong> 이걸 그대로 재현해야 했다.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="ts"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// src/lib/posts.ts</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">export</span><span style="color:#D73A49;--shiki-dark:#F97583"> function</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> postPath</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">post</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Post</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  const</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> { </span><span style="color:#005CC5;--shiki-dark:#79B8FF">y</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">m</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">d</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> } </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> postDateParts</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(post);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  const</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> cats</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> categoriesOf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(post).</span><span style="color:#6F42C1;--shiki-dark:#B392F0">map</span><span style="color:#24292E;--shiki-dark:#E1E4E8">((</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">=></span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">toLowerCase</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '/'</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [</span><span style="color:#D73A49;--shiki-dark:#F97583">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">cats, y, m, d, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">postSlug</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(post)].</span><span style="color:#6F42C1;--shiki-dark:#B392F0">join</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'/'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '.html'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>날짜도 함정이 있었다. 프론트매터의 <code>date</code>는 <code>2026-07-27 22:30:00 +0900</code> 형태인데, YAML 파서가 이걸 Date 객체로 읽을 때와 문자열로 남길 때가 다르다. Date로 바뀌면 시간대 변환이 끼어들어 <strong>하루가 밀릴 수 있다.</strong> 문자열이면 리터럴 그대로 쓰고, Date면 KST 기준으로 포맷하도록 나눴다.</p>
+<br>
+<h2 id="안전장치-url-parity-검사">안전장치: URL parity 검사</h2>
+<p>“안 깨졌겠지”를 믿지 않기로 했다. 기존 배포 산출물(<code>gh-pages</code> 브랜치)에 있는 모든 경로를 새 빌드 결과와 대조하는 스크립트를 만들고, 빌드할 때마다 돌렸다.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="js"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// scripts/url-parity.mjs</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// core.quotePath=false: 한글 경로가 "\354..." 옥탈 이스케이프로 인용되는 것 방지</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> raw</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> execSync</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'git -c core.quotePath=false ls-tree -r origin/gh-pages --name-only'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  encoding: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'utf8'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">});</span></span></code></pre>
+<p>이 스크립트를 만들면서 두 가지를 배웠다.</p>
+<p><strong>하나.</strong> git은 기본적으로 한글 경로를 <code>"\354\217\231..."</code> 같은 옥탈 이스케이프로 출력한다. <code>core.quotePath=false</code>를 켜야 실제 문자열이 나온다. 이걸 모르고 한동안 “한글 경로 7개가 사라졌다”는 오탐을 쫓았다.</p>
+<p><strong>둘.</strong> macOS 파일시스템은 한글을 NFD(자모 분리)로 저장하는데 git은 NFC로 다룬다. 로컬에서만 나는 불일치라, 두 정규화 형태를 모두 허용하도록 했다.</p>
+<p>이 스크립트 덕분에 이관 내내 “지금 이 변경이 URL을 깨뜨렸나”를 즉시 알 수 있었다. 실제로 배포 후 라이브에서 공백 포함 카테고리, 한글 파일명, 점이 들어간 슬러그(<code>e.preventDefault_and_e.stopPropagation.html</code>)까지 전부 200을 확인했다.</p>
+<br>
+<h2 id="liquid를-떠나며---post_url--28건">Liquid를 떠나며 — <code>{% post_url %}</code> 28건</h2>
+<p>Jekyll에서는 글끼리 링크할 때 <code>{% post_url 2026-07/2026-07-11-lol-moim-incidents-01 %}</code> 같은 Liquid 태그를 쓴다. Astro에는 Liquid가 없으니 이게 그대로 화면에 노출된다.</p>
+<p>23개 파일, 28곳을 스크립트로 절대경로로 치환했다. 수동으로 고치면 반드시 하나를 놓친다.</p>
+<p>재미있는 건, <strong>바로 그날 아침에 이 Liquid 때문에 사이트 빌드가 통째로 깨졌었다</strong>는 것이다. 말풍선 스킨 글(20편)에 JSX 코드를 붙여넣었는데, 코드 블록 안의 <code>style={{ ... }}</code>를 Jekyll이 Liquid 변수로 파싱해서 빌드가 5분 돌다 실패했다. 그때는 <code>{% raw %}</code>로 감싸서 급히 막았는데, 몇 시간 뒤 Astro로 옮기면서 그 방어막 자체가 필요 없어졌다. 이관의 부수 효과 중 가장 통쾌한 부분이었다.</p>
+<br>
+<h2 id="만난-버그들">만난 버그들</h2>
+<h3 id="1-page2가-404--trailingslash">1. <code>/page2/</code>가 404 — trailingSlash</h3>
+<p>페이지네이션 링크를 눌렀는데 404가 났다. 원인은 내가 넣은 설정 한 줄이었다.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="js"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">trailingSlash</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'never'</span></span></code></pre>
+<p>링크는 <code>/page2/</code>(슬래시 포함)로 생성되는데, 그 형태를 404로 처리하도록 설정해둔 것이다. 예전 Jekyll 링크가 전부 슬래시 붙은 형태라 <code>'ignore'</code>로 바꿔서 둘 다 받도록 했다.</p>
+<h3 id="2-무한-스크롤이-한-번만-로드되고-멈춤">2. 무한 스크롤이 한 번만 로드되고 멈춤</h3>
+<p>페이지네이션을 무한 스크롤로 바꿨는데, <strong>화면이 긴 모니터에서 10개를 더 불러온 뒤 멈췄다.</strong></p>
+<p>IntersectionObserver는 “교차 상태가 <strong>바뀔 때</strong>”만 콜백을 부른다. 감시 지점이 계속 화면 안에 남아 있으면 다시 안 불린다. 일반적인 화면 높이에서는 항목이 붙으면서 감시 지점이 아래로 밀려나 우연히 동작하지만, 화면이 길면 그대로 정지한다.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="js"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 아직 트리거 영역 안이면 직접 이어서 부른다</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">requestAnimationFrame</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">function</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> () {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> r </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> sentinel.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getBoundingClientRect</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (r.top </span><span style="color:#D73A49;--shiki-dark:#F97583">&#x3C;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> window.innerHeight </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 500</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">loadMore</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">});</span></span></code></pre>
+<p>20000px 높이 창으로 테스트해서 20개에서 멈추는 걸 재현했고, 고친 뒤 89개 전량이 로드되는 걸 확인했다.</p>
+<h3 id="3-제목과-본문-미리보기의-폭이-173px-어긋남">3. 제목과 본문 미리보기의 폭이 173px 어긋남</h3>
+<p>목록이 어딘가 어색해 보였다. 눈으로는 원인을 못 찾아서 각 요소의 폭을 실제로 재봤다.</p>
+<ul>
+<li>제목: 1005px (칼럼 전체)</li>
+<li>발췌: 832px (내가 걸어둔 max-width)</li>
+</ul>
+<p>같은 항목 안에서 두 요소가 다른 선에서 끝나고 있었다. 셸을 넓히면서 발췌에만 상한이 남아 있던 게 원인이다.</p>
+<p>폭을 두 종류로 정리했다. 목차 레일이 붙는 화면(글·About)은 넓게, 단일 칼럼 화면(홈·아카이브·검색)은 좁게. 헤더·본문·푸터가 항상 같은 선에서 시작하고 끝나도록 CSS 변수 하나로 묶었다.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="css"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">:root</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> { </span><span style="color:#E36209;--shiki-dark:#FFAB70">--page-w</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">52</span><span style="color:#D73A49;--shiki-dark:#F97583">rem</span><span style="color:#24292E;--shiki-dark:#E1E4E8">; }</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">html</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[</span><span style="color:#6F42C1;--shiki-dark:#B392F0">data-width</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'wide'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] { </span><span style="color:#E36209;--shiki-dark:#FFAB70">--page-w</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">66</span><span style="color:#D73A49;--shiki-dark:#F97583">rem</span><span style="color:#24292E;--shiki-dark:#E1E4E8">; }</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/* 목차 레일이 숨는 폭(&#x3C;1000px)에서는 wide 셸도 좁힌다 —</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">   안 그러면 본문(46rem)만 남아 오른쪽이 통째로 빈다 */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">@media</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#005CC5;--shiki-dark:#79B8FF">max-width</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">999</span><span style="color:#D73A49;--shiki-dark:#F97583">px</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  html</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[</span><span style="color:#6F42C1;--shiki-dark:#B392F0">data-width</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'wide'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] { </span><span style="color:#E36209;--shiki-dark:#FFAB70">--page-w</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">52</span><span style="color:#D73A49;--shiki-dark:#F97583">rem</span><span style="color:#24292E;--shiki-dark:#E1E4E8">; }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>마지막 미디어 쿼리는 폭을 재보다가 추가로 발견한 것이다. 1000px 미만에서 목차가 숨는데 셸은 그대로 넓어서, 오른쪽이 통째로 비어 있었다.</p>
+<h3 id="4-헤드리스-브라우저의-함정--있지도-않은-버그">4. 헤드리스 브라우저의 함정 — 있지도 않은 버그</h3>
+<p>모바일 화면을 캡처했더니 헤더가 잘리고 본문이 오른쪽으로 넘쳐 보였다. 반응형이 깨진 줄 알고 파고들다가, 페이지에 측정 코드를 심어서 실제 값을 찍어봤다.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>vw=500 doc=500 (넘치는 요소 없음)</span></span></code></pre>
+<p><strong><code>--window-size=430</code>을 줬는데 브라우저는 500px로 레이아웃하고 있었다.</strong> 그걸 430px 폭으로 잘라 저장하니 잘려 보였던 것이다. 레이아웃은 멀쩡했다. 스크린샷만 보고 판단했으면 없는 버그를 고치느라 시간을 썼을 것이다.</p>
+<h3 id="5-배포-직후의-유령--전파-지연">5. 배포 직후의 유령 — 전파 지연</h3>
+<p>조회수 기능을 켜고 나서 3번 기록했는데 1만 올라갔다. 잘못된 입력에 400을 줘야 하는데 404가 왔다. 코드가 틀린 줄 알았는데, 잠시 뒤 다시 재보니 5번이 정확히 5로 올라가고 상태 코드도 정상이었다.</p>
+<p><strong>배포 직후 몇 초간은 옛 버전과 새 버전이 섞여서 응답한다.</strong> 배포하자마자 나온 첫 응답으로 코드를 판단하면 오진한다.</p>
+<h3 id="6-undefined">6. <code>undefined</code></h3>
+<p>태그마다 툴팁을 붙였는데 <code>undefined — 글 22개 · 조회 1</code>이 떴다. <code>scores</code> 배열에 <code>tag</code>를 안 담아놓고 <code>s.tag</code>를 참조하고 있었다. 라이브에서 눈으로 보고서야 알았다. 평범한 실수지만, <strong>로컬 빌드가 통과했다고 화면까지 맞는 건 아니라는</strong> 걸 다시 확인했다.</p>
+<br>
+<h2 id="덤으로-얻은-것들">덤으로 얻은 것들</h2>
+<p>이관 자체는 “같은 것을 다르게 만드는” 일이라 눈에 보이는 성과가 적다. 그래서 옮기는 김에 몇 가지를 새로 만들었다.</p>
+<p><strong>태그 페이지를 흩뿌렸다.</strong> 태그 목록이 그냥 나열이라 재미가 없어서, 황금각(137.5°) 나선으로 씨앗 좌표를 잡고 클라이언트에서 겹침을 풀어 흩어놓았다. 커서를 움직이면 주변 태그가 물결처럼 밀려나고, 클릭하면 그 태그의 글 목록이 카드로 열린다. 글자 크기는 글 수와 조회수를 반반 섞어서 정한다.</p>
+<p><strong>조회수를 직접 만들었다.</strong> GA4가 붙어 있지만 그 숫자를 사이트에 표시하려면 별도 API 연동이 필요하다. 마침 이 블로그에는 RAG 챗봇용 Cloudflare Worker가 이미 있어서, 거기에 D1 테이블 하나와 엔드포인트 두 개를 얹었다.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">INSERT INTO</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> post_views (</span><span style="color:#D73A49;--shiki-dark:#F97583">path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, views, updated_at) </span><span style="color:#D73A49;--shiki-dark:#F97583">VALUES</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (?, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, ?)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">ON</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> CONFLICT(</span><span style="color:#D73A49;--shiki-dark:#F97583">path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) DO </span><span style="color:#D73A49;--shiki-dark:#F97583">UPDATE</span><span style="color:#D73A49;--shiki-dark:#F97583"> SET</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> views </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> views </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, updated_at </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> excluded</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">updated_at</span></span></code></pre>
+<p>KV가 아니라 D1을 쓴 건 정렬이 필요해서다. “많이 본 글” 목록을 만들려면 <code>ORDER BY views DESC</code>가 있어야 하는데, KV로 하려면 전체를 읽어와 애플리케이션에서 정렬해야 한다. 그리고 카운터는 원자적 증가가 필요하다.</p>
+<p>새로고침할 때마다 올라가는 건 <code>sessionStorage</code>로 막았다. 같은 탭에서는 글당 한 번만 센다.</p>
+<p><strong>목차를 되살렸다.</strong> yat 테마에 있던 우측 목차가 이관하면서 사라졌는데, 넓어진 화면의 여백을 그 레일로 쓰기로 했다. IntersectionObserver로 현재 읽고 있는 섹션을 표시한다. About 페이지에도 붙였다.</p>
+<br>
+<h2 id="회귀-하나--ga4가-사라져-있었다">회귀 하나 — GA4가 사라져 있었다</h2>
+<p>이관을 끝내고 확인하다가, <strong>Google Analytics가 통째로 빠져 있는 걸</strong> 발견했다. Jekyll 테마의 <code>_includes/head.html</code>을 걷어낼 때 그 안에 있던 GA4 스크립트도 같이 날아간 것이다.</p>
+<p>테마 파일을 지울 때 “테마가 제공하던 기능”과 “내가 설정한 것”이 같은 파일에 섞여 있으면 이런 일이 난다. 다행히 배포 당일에 발견해서 복구했다.</p>
+<p>이관에서 진짜 위험한 건 큰 구조가 아니라 이런 것들이다. 큰 건 안 되면 바로 눈에 보이지만, 분석 스크립트는 없어도 화면이 멀쩡해서 <strong>몇 달 뒤에야 “왜 데이터가 없지?”로 발견된다.</strong></p>
+<br>
+<h2 id="정리">정리</h2>
+<ul>
+<li><strong>URL 보존은 믿음이 아니라 검증으로 한다.</strong> 기존 산출물과 새 빌드를 자동 대조하는 스크립트 하나가, 이관 내내 “지금 뭔가 깨졌나”를 즉시 알려줬다. 한글·공백 경로처럼 사람이 눈으로 못 훑는 영역일수록 더 그렇다.</li>
+<li><strong>글 파일을 안 건드린 게 가장 잘한 결정이었다.</strong> 저장 구조와 프론트매터를 그대로 두니 이관 중에도 다른 작업으로 글이 계속 올라올 수 있었고(실제로 이관 도중 새 글이 하나 push됐다), 글쓰기 자동화도 링크 문법만 바꾸면 됐다.</li>
+<li><strong>눈으로 본 것을 의심해야 할 때가 있다.</strong> 스크린샷의 “잘림”은 캡처 도구의 문제였고, 배포 직후의 404는 전파 지연이었다. 둘 다 그대로 믿었으면 없는 버그를 고쳤을 것이다. 반대로 폭이 어긋난 건 눈으로는 “뭔가 어색하다”까지만 알 수 있었고, 실제로 재보고서야 173px이라는 원인이 나왔다.</li>
+<li><strong>테마를 걷어낼 때는 테마가 아닌 것도 같이 걷힌다.</strong> GA4가 그랬다. 이관 후 “예전에 있었는데 지금 없는 것”을 한 번 훑어보는 절차가 필요하다.</li>
+</ul>
+<p>푸터에서 “Powered by Jekyll”은 사라졌다. 대신 이제 이 블로그가 어떻게 생겼는지는 전부 내 코드에 적혀 있다. 그게 원래 하고 싶었던 것이다.</p></div></article><script>(function(){const viewPath = "/journal/development diary/2026/07/27/jekyll-to-astro-migration.html";
+const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
+        // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
+        (function () {
+          var key = 'viewed:' + viewPath;
+          try {
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+          } catch (e) {
+            // 프라이빗 모드 등으로 storage 가 막히면 중복 제거 없이 그냥 기록한다
+          }
+          fetch(chatOrigin + '/api/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: viewPath }),
+            keepalive: true,
+          }).catch(function () {});
+        })();
+      })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#원칙-_posts는-손대지-않는다">원칙: _posts/는 손대지 않는다</a></li><li class="depth-2"><a href="#url-재현--공백과-한글이-들어간-경로">URL 재현 — 공백과 한글이 들어간 경로</a></li><li class="depth-2"><a href="#안전장치-url-parity-검사">안전장치: URL parity 검사</a></li><li class="depth-2"><a href="#liquid를-떠나며---post_url--28건">Liquid를 떠나며 — {% post_url %} 28건</a></li><li class="depth-2"><a href="#만난-버그들">만난 버그들</a></li><li class="depth-3"><a href="#1-page2가-404--trailingslash">1. /page2/가 404 — trailingSlash</a></li><li class="depth-3"><a href="#2-무한-스크롤이-한-번만-로드되고-멈춤">2. 무한 스크롤이 한 번만 로드되고 멈춤</a></li><li class="depth-3"><a href="#3-제목과-본문-미리보기의-폭이-173px-어긋남">3. 제목과 본문 미리보기의 폭이 173px 어긋남</a></li><li class="depth-3"><a href="#4-헤드리스-브라우저의-함정--있지도-않은-버그">4. 헤드리스 브라우저의 함정 — 있지도 않은 버그</a></li><li class="depth-3"><a href="#5-배포-직후의-유령--전파-지연">5. 배포 직후의 유령 — 전파 지연</a></li><li class="depth-3"><a href="#6-undefined">6. undefined</a></li><li class="depth-2"><a href="#덤으로-얻은-것들">덤으로 얻은 것들</a></li><li class="depth-2"><a href="#회귀-하나--ga4가-사라져-있었다">회귀 하나 — GA4가 사라져 있었다</a></li><li class="depth-2"><a href="#정리">정리</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+      // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
+      // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
+      window.__viewsReady = fetch(
+        'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
+      )
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (json) {
+          var map = {};
+          if (json && json.items) {
+            json.items.forEach(function (i) { map[i.path] = i.views; });
+          }
+          window.__views = map;
+          fillViews(document);
+          return map;
+        })
+        .catch(function () { window.__views = {}; return {}; });
+
+      function fillViews(root) {
+        var map = window.__views;
+        if (!map) return;
+        root.querySelectorAll('[data-views-path]').forEach(function (el) {
+          var n = map[el.dataset.viewsPath];
+          if (!n) return;
+          el.textContent = '조회 ' + n.toLocaleString();
+          el.hidden = false;
+        });
+      }
+      window.fillViews = fillViews;
+
+      // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
+      (function () {
+        var root = document.documentElement;
+        function sync() {
+          root.setAttribute('data-scrolled', window.scrollY > 8 ? 'true' : 'false');
+        }
+        sync();
+        window.addEventListener('scroll', sync, { passive: true });
+      })();
+
+      // 목차 — 현재 읽고 있는 섹션 표시
+      (function () {
+        var links = document.querySelectorAll('.toc a');
+        if (!links.length) return;
+        var map = {};
+        var targets = [];
+        links.forEach(function (a) {
+          var id = decodeURIComponent(a.getAttribute('href').slice(1));
+          var el = document.getElementById(id);
+          if (el) {
+            map[id] = a;
+            targets.push(el);
+          }
+        });
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (e) {
+              if (!e.isIntersecting) return;
+              links.forEach(function (a) { a.classList.remove('active'); });
+              var a = map[e.target.id];
+              if (a) a.classList.add('active');
+            });
+          },
+          // 헤더 아래 상단 밴드에 들어온 헤딩을 현재 섹션으로 본다
+          { rootMargin: '-72px 0px -75% 0px' }
+        );
+        targets.forEach(function (el) { io.observe(el); });
+      })();
+
+      document.getElementById('theme-toggle').addEventListener('click', function () {
+        var next =
+          document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+      });
+    </script> <script type="module">
+      // mermaid 클라이언트 렌더 (기존 Jekyll 셋업과 동일하게 mermaid@10 사용)
+      if (document.querySelector('pre.mermaid')) {
+        const { default: mermaid } = await import(
+          'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'
+        );
+        mermaid.initialize({
+          startOnLoad: false,
+          theme:
+            document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+        });
+        mermaid.run({ querySelector: 'pre.mermaid' });
+      }
+    </script> </body> </html>
