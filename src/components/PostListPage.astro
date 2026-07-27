@@ -1,5 +1,5 @@
 ---
-import { formatDate, postPath, categoriesOf, type Post } from '../lib/posts';
+import { formatDate, postPath, categoriesOf, excerptOf, readingMinutes, type Post } from '../lib/posts';
 
 interface Props {
   posts: Post[];
@@ -18,8 +18,11 @@ const olderHref = `/page${page + 1}/`;
         <a class="title" href={postPath(post)}>
           {post.data.title}
         </a>
+        <p class="excerpt">{excerptOf(post, 150)}</p>
         <div class="meta">
-          {formatDate(post)} · {categoriesOf(post).join(' / ')}
+          <time>{formatDate(post)}</time>
+          <span class="chip">{categoriesOf(post).at(-1)}</span>
+          <span class="reading">{readingMinutes(post)}분</span>
         </div>
       </li>
     ))
@@ -27,6 +30,6 @@ const olderHref = `/page${page + 1}/`;
 </ul>
 <nav class="pagination">
   <span>{page > 1 ? <a href={newerHref}>← 최근 글</a> : null}</span>
-  <span class="muted">{page} / {totalPages}</span>
+  <span class="count">{page} / {totalPages}</span>
   <span>{page < totalPages ? <a href={olderHref}>지난 글 →</a> : null}</span>
 </nav>

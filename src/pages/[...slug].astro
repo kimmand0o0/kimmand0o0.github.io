@@ -8,6 +8,7 @@ import {
   postPath,
   categoriesOf,
   tagsOf,
+  readingMinutes,
   PER_PAGE,
   type Post,
 } from '../lib/posts';
@@ -42,29 +43,31 @@ export async function getStaticPaths() {
 
 const { kind, post, page, posts, totalPages } = Astro.props;
 let Content = null;
-if (kind === 'post' && post) ({ Content } = await render(post));
+let toc: { depth: number; slug: string; text: string }[] = [];
+if (kind === 'post' && post) {
+  const rendered = await render(post);
+  Content = rendered.Content;
+  toc = rendered.headings.filter((h) => h.depth === 2 || h.depth === 3);
+}
 ---
 
 {
   kind === 'post' && post ? (
     <Base title={post.data.title}>
+      <div class="post-layout">
       <article class="post">
         <header>
           <h1 class="post-title">{post.data.title}</h1>
           <div class="post-meta">
             <time>{formatDate(post)}</time>
-            {' · '}
-            {categoriesOf(post).join(' / ')}
+            <span class="chip">{categoriesOf(post).at(-1)}</span>
+            <span class="reading">{readingMinutes(post)}분 읽기</span>
             {tagsOf(post).length > 0 && (
-              <>
-                {' · '}
-                {tagsOf(post).map((t, i) => (
-                  <>
-                    {i > 0 && ' '}
-                    <a href={`/tags.html#${t}`}>#{t}</a>
-                  </>
+              <span class="tags">
+                {tagsOf(post).map((t) => (
+                  <a href={`/tags.html#${t}`}>#{t}</a>
                 ))}
-              </>
+              </span>
             )}
           </div>
         </header>
@@ -72,6 +75,21 @@ if (kind === 'post' && post) ({ Content } = await render(post));
           <Content />
         </div>
       </article>
+      {toc.length > 1 && (
+        <aside class="toc">
+          <p class="toc-title">목차</p>
+          <nav>
+            <ul>
+              {toc.map((h) => (
+                <li class={h.depth === 3 ? 'depth-3' : 'depth-2'}>
+                  <a href={`#${h.slug}`}>{h.text}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </aside>
+      )}
+      </div>
     </Base>
   ) : (
     <Base title={`글 목록 ${page}페이지`}>

@@ -73,6 +73,27 @@ export function formatDate(post: Post): string {
   return `${y}.${m}.${d}`;
 }
 
+/** 마크다운/HTML을 벗겨낸 본문 발췌 (목록 미리보기·검색용) */
+export function excerptOf(post: Post, length = 160): string {
+  const body = post.body ?? '';
+  return body
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/{%[\s\S]*?%}/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/[#>*_`|]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, length);
+}
+
+/** 한국어 기준 대략적인 읽는 시간 (분당 500자) */
+export function readingMinutes(post: Post): number {
+  const chars = (post.body ?? '').replace(/\s+/g, '').length;
+  return Math.max(1, Math.round(chars / 500));
+}
+
 export async function allPosts(): Promise<Post[]> {
   const posts = await getCollection('posts');
   return posts.sort((a, b) => postDate(b).getTime() - postDate(a).getTime());
