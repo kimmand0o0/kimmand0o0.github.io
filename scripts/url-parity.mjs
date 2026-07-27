@@ -15,6 +15,9 @@ const IGNORE = [
   /^assets\/css\//, // Astro가 자체 번들 CSS 생성
   /^assets\/css\/main\.css\.map$/,
   /^assets\/js\/main\.js$/, // yat 테마 전용 JS — 새 디자인에서 미사용
+  // Astro가 내용 해시로 이름 짓는 번들 — 빌드마다 파일명이 바뀌는 게 정상이다.
+  // 이 스크립트가 지키려는 건 "글 URL이 안 깨졌는가"이지 자산 파일명이 아니다.
+  /^_astro\//,
 ];
 
 // core.quotePath=false: 한글 경로가 "\354..." 옥탈 이스케이프로 인용되는 것 방지
