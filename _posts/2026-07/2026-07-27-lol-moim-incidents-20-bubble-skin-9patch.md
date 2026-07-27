@@ -57,6 +57,7 @@ tags: [운영일지, CSS, 프론트엔드, border-image, React]
 
 그리고 이 문제를 풀면서, 처음부터 존재했던 표준을 만났다. CSS `border-image`. "가장자리는 고정하고 중간만 늘린다"는, 내가 하루 종일 손으로 재발명하던 바로 그 9-patch가 CSS 명세에 이미 들어 있다.
 
+{% raw %}
 ```tsx
 // packages/frontend/src/components/BubbleSkinBox.tsx
 style={{
@@ -72,6 +73,7 @@ style={{
   borderImageRepeat: "stretch",
 }}
 ```
+{% endraw %}
 
 `BubbleSkin`에 `capSliceTopPx`/`capSliceBottomPx` 필드(기본 26px)를 추가해서, 스킨마다 "위/아래 몇 px을 고정 영역으로 볼지"를 어드민 등록 화면에서 지정할 수 있게 했다. 캡의 꼬리·장식은 고정된 채 그 사이만 늘어난다.
 
