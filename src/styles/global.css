@@ -44,8 +44,17 @@ body {
 a { color: inherit; text-decoration: none; transition: color 0.15s ease; }
 img { max-width: 100%; height: auto; }
 ::selection { background: var(--accent-soft); }
-/* 셸은 넓게 — 본문(46rem) + 목차 레일(15rem)이 나란히 들어가는 폭 */
-.wrap { max-width: 66rem; margin: 0 auto; padding: 0 1.6rem; }
+/* 페이지 폭은 두 종류만 — 헤더·본문·푸터가 항상 같은 선에서 시작하고 끝난다.
+   narrow: 단일 칼럼(홈·아카이브·검색)  /  wide: 본문 + 목차 레일(글·About·태그) */
+:root { --page-w: 52rem; }
+html[data-width='wide'] { --page-w: 66rem; }
+/* 목차 레일이 숨는 폭(<1000px)에서는 wide 셸도 좁힌다 —
+   안 그러면 본문(46rem)만 남아 오른쪽이 통째로 빈다 */
+@media (max-width: 999px) {
+  html[data-width='wide'] { --page-w: 52rem; }
+}
+
+.wrap { max-width: var(--page-w); margin: 0 auto; padding: 0 1.6rem; }
 .muted { color: var(--muted); }
 
 /* ── 헤더 (전체 폭 sticky) ─────────────────────────────── */
@@ -63,7 +72,7 @@ img { max-width: 100%; height: auto; }
 }
 /* 헤더 바는 전체 폭, 안쪽 내용은 본문과 같은 폭·같은 좌우 여백으로 정렬 */
 .header-inner {
-  max-width: 66rem;
+  max-width: var(--page-w);
   margin: 0 auto;
   padding: 1.1rem 1.6rem;
   display: flex;
@@ -149,7 +158,6 @@ html[data-scrolled='true'] .site-header {
 .post-list time { font-variant-numeric: tabular-nums; color: var(--faint); }
 .post-list .excerpt {
   margin: 0.45rem 0 0;
-  max-width: 52rem;
   font-size: 0.86rem;
   line-height: 1.7;
   color: var(--muted);
@@ -237,8 +245,11 @@ article.post .post-meta time { font-variant-numeric: tabular-nums; color: var(--
 article.post .post-meta .tags a { color: var(--muted); margin-right: 0.5rem; }
 article.post .post-meta .tags a:hover { color: var(--accent); }
 
-/* 읽기 좋은 줄 길이 유지 — 셸이 넓어져도 본문은 46rem을 넘기지 않는다 */
-.prose { font-size: 0.98rem; max-width: 46rem; }
+/* 읽기 좋은 줄 길이 유지 — 목차 레일과 나란히 설 때만 46rem으로 묶는다 */
+.prose { font-size: 0.98rem; }
+@media (min-width: 1000px) {
+  .prose { max-width: 46rem; }
+}
 .prose h2 {
   font-size: 1.28rem; font-weight: 750; line-height: 1.5;
   margin: 3.25rem 0 1rem; letter-spacing: -0.025em;
@@ -348,7 +359,7 @@ html[data-theme='dark'] .astro-code span {
   color: var(--muted);
 }
 .footer-inner {
-  max-width: 66rem;
+  max-width: var(--page-w);
   margin: 0 auto;
   padding: 1.75rem 1.6rem 3rem;
   display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
