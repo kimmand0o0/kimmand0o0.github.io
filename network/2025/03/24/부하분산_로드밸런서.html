@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BLA6ZwLA.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">로드 밸런싱(Load balancing) 종류와 알고리즘</h1><div class="post-meta"><time>2025.03.24</time><span class="chip">NETWORK</span><span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span><span class="views" data-views-path="/network/2025/03/24/부하분산_로드밸런서.html" hidden></span><span class="tags"><a href="/tags.html#NETWORK">#NETWORK</a><a href="/tags.html#LoadBalancer">#LoadBalancer</a></span></div></header><div class="prose"><h2 id="로드-밸런싱load-balancing과-로드-밸런서load-balancer">로드 밸런싱(load balancing)과 로드 밸런서(Load Balancer)</h2>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.CLcIEeyr.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">로드 밸런싱(Load balancing) 종류와 알고리즘</h1><div class="post-meta"><time>2025.03.24</time><span class="chip">NETWORK</span><span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span><span class="views" data-views-path="/network/2025/03/24/부하분산_로드밸런서.html" hidden></span><span class="comments-metric" data-comments-path="/network/2025/03/24/부하분산_로드밸런서.html" hidden></span><span class="tags"><a href="/tags.html#NETWORK">#NETWORK</a><a href="/tags.html#LoadBalancer">#LoadBalancer</a></span></div></header><div class="prose"><h2 id="로드-밸런싱load-balancing과-로드-밸런서load-balancer">로드 밸런싱(load balancing)과 로드 밸런서(Load Balancer)</h2>
 <p>부하분산 또는 로드 밸런싱(load balancing)은 컴퓨터 네트워크 기술의 일종으로 둘 혹은 셋 이상의 중앙처리장치 혹은 저장장치와 같은 컴퓨터 자원들에게 네트워크 트래픽을 여러 서버로 분산하여 작업해 시스템의 성능과 가용성을 높이는 것을 의미합니다.</p>
 <p><strong>그럼 로드 밸런서는 뭘까?</strong></p>
 <p>로드 밸런서는 로드 밸런싱의 트래픽을 여러 서버로 분배하는 기술을 제공하는 서비스 또는 장치(하드웨어, 소프트웨어)입니다.</p>
@@ -202,7 +202,7 @@ IP 주소를 기반으로 패킷을 목적지까지 라우팅<br>
 
 
 
-<table><thead><tr><th><strong>구분</strong></th><th><strong>AWS ELB</strong></th><th><strong>Nginx</strong></th><th><strong>HAProxy</strong></th></tr></thead><tbody><tr><td><strong>유형</strong></td><td>클라우드 기반 로드밸런서</td><td>소프트웨어 기반 리버스 프록시 &#x26; 로드밸런서</td><td>소프트웨어 기반 로드밸런서</td></tr><tr><td><strong>설치 방식</strong></td><td>AWS 관리형 서비스 (설치 불필요)</td><td>수동 설치 (서버에서 실행)</td><td>수동 설치 (서버에서 실행)</td></tr><tr><td><strong>지원 계층</strong></td><td>L4 (NLB), L7 (ALB)</td><td>L7 (HTTP/HTTPS) + 일부 L4</td><td>L4, L7 (완벽 지원)</td></tr><tr><td><strong>로드밸런싱 알고리즘</strong></td><td>라운드 로빈, Least Outstanding Requests, IP 해시</td><td>라운드 로빈, Least Connections, IP 해시</td><td>라운드 로빈, Least Connections, IP 해시, 가중 라운드 로빈</td></tr><tr><td><strong>SSL 종료</strong></td><td>지원 (ALB, NLB)</td><td>지원 (단, 별도 설정 필요)</td><td>지원 (단, 별도 설정 필요)</td></tr><tr><td><strong>세션 유지 (Sticky Session)</strong></td><td>지원</td><td>쿠키 기반 설정 가능</td><td>지원</td></tr><tr><td><strong>헬스 체크 (Health Check)</strong></td><td>기본 제공</td><td>별도 설정 필요</td><td>기본 제공</td></tr><tr><td><strong>고가용성</strong></td><td>AWS가 자동으로 관리</td><td>Active-Passive 설정 가능</td><td>Active-Passive 및 Active-Active 설정 가능</td></tr><tr><td><strong>확장성</strong></td><td>자동 스케일링 지원</td><td>수동 확장 필요</td><td>수동 확장 필요</td></tr><tr><td><strong>사용 사례</strong></td><td>클라우드 환경에서 확장성과 관리 편의성을 중시하는 경우</td><td>웹 서버와 함께 사용하는 리버스 프록시 &#x26; 로드밸런서</td><td>고성능, 저지연이 필요한 로드밸런싱 환경</td></tr><tr><td><strong>주요 특징</strong></td><td>AWS 서비스와 통합, 자동 확장 및 복원력 제공</td><td>정적 콘텐츠 캐싱, 리버스 프록시 기능 포함</td><td>높은 성능과 낮은 리소스 사용량</td></tr></tbody></table></div></article><script>(function(){const viewPath = "/network/2025/03/24/부하분산_로드밸런서.html";
+<table><thead><tr><th><strong>구분</strong></th><th><strong>AWS ELB</strong></th><th><strong>Nginx</strong></th><th><strong>HAProxy</strong></th></tr></thead><tbody><tr><td><strong>유형</strong></td><td>클라우드 기반 로드밸런서</td><td>소프트웨어 기반 리버스 프록시 &#x26; 로드밸런서</td><td>소프트웨어 기반 로드밸런서</td></tr><tr><td><strong>설치 방식</strong></td><td>AWS 관리형 서비스 (설치 불필요)</td><td>수동 설치 (서버에서 실행)</td><td>수동 설치 (서버에서 실행)</td></tr><tr><td><strong>지원 계층</strong></td><td>L4 (NLB), L7 (ALB)</td><td>L7 (HTTP/HTTPS) + 일부 L4</td><td>L4, L7 (완벽 지원)</td></tr><tr><td><strong>로드밸런싱 알고리즘</strong></td><td>라운드 로빈, Least Outstanding Requests, IP 해시</td><td>라운드 로빈, Least Connections, IP 해시</td><td>라운드 로빈, Least Connections, IP 해시, 가중 라운드 로빈</td></tr><tr><td><strong>SSL 종료</strong></td><td>지원 (ALB, NLB)</td><td>지원 (단, 별도 설정 필요)</td><td>지원 (단, 별도 설정 필요)</td></tr><tr><td><strong>세션 유지 (Sticky Session)</strong></td><td>지원</td><td>쿠키 기반 설정 가능</td><td>지원</td></tr><tr><td><strong>헬스 체크 (Health Check)</strong></td><td>기본 제공</td><td>별도 설정 필요</td><td>기본 제공</td></tr><tr><td><strong>고가용성</strong></td><td>AWS가 자동으로 관리</td><td>Active-Passive 설정 가능</td><td>Active-Passive 및 Active-Active 설정 가능</td></tr><tr><td><strong>확장성</strong></td><td>자동 스케일링 지원</td><td>수동 확장 필요</td><td>수동 확장 필요</td></tr><tr><td><strong>사용 사례</strong></td><td>클라우드 환경에서 확장성과 관리 편의성을 중시하는 경우</td><td>웹 서버와 함께 사용하는 리버스 프록시 &#x26; 로드밸런서</td><td>고성능, 저지연이 필요한 로드밸런싱 환경</td></tr><tr><td><strong>주요 특징</strong></td><td>AWS 서비스와 통합, 자동 확장 및 복원력 제공</td><td>정적 콘텐츠 캐싱, 리버스 프록시 기능 포함</td><td>높은 성능과 낮은 리소스 사용량</td></tr></tbody></table></div><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/network/2025/03/24/부하분산_로드밸런서.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
         // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
@@ -222,35 +222,133 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             keepalive: true,
           }).catch(() => {});
         })();
+      })();</script><script>(function(){const commentPath = "/network/2025/03/24/부하분산_로드밸런서.html";
+const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        {
+          const list = document.getElementById('comment-list');
+          const empty = document.getElementById('comment-empty');
+          const countEl = document.getElementById('comments-count');
+          const form = document.getElementById('comment-form');
+          const status = document.getElementById('comment-status');
+          const submit = document.getElementById('comment-submit');
+
+          const fmt = (iso) => {
+            const d = new Date(iso);
+            const p = (n) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+          };
+
+          // textContent 로만 넣는다 — 사용자 입력을 HTML 로 해석하지 않기 위해
+          const render = (items) => {
+            list.textContent = '';
+            for (const c of items) {
+              const li = document.createElement('li');
+              const head = document.createElement('div');
+              head.className = 'comment-head';
+              const who = document.createElement('span');
+              who.className = 'comment-author';
+              who.textContent = c.author;
+              const when = document.createElement('time');
+              when.textContent = fmt(c.created_at);
+              head.append(who, when);
+              const body = document.createElement('p');
+              body.className = 'comment-body';
+              body.textContent = c.body;
+              li.append(head, body);
+              list.appendChild(li);
+            }
+            countEl.textContent = items.length ? items.length : '';
+            empty.hidden = items.length > 0;
+          };
+
+          const load = () =>
+            fetch(`${api}/api/comments?path=${encodeURIComponent(commentPath)}`)
+              .then((r) => (r.ok ? r.json() : null))
+              .then((json) => render(json?.items ?? []))
+              .catch(() => {
+                empty.textContent = '댓글을 불러오지 못했어요.';
+                empty.hidden = false;
+              });
+
+          load();
+
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const author = document.getElementById('comment-author').value.trim();
+            const body = document.getElementById('comment-body').value.trim();
+            if (!author || !body) return;
+
+            submit.disabled = true;
+            status.textContent = '등록 중…';
+            try {
+              const res = await fetch(`${api}/api/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  path: commentPath,
+                  author,
+                  body,
+                  website: document.getElementById('comment-website').value,
+                }),
+              });
+              if (res.status === 429) {
+                status.textContent = '조금 뒤에 다시 시도해주세요.';
+              } else if (!res.ok) {
+                status.textContent = '등록에 실패했어요.';
+              } else {
+                document.getElementById('comment-body').value = '';
+                status.textContent = '';
+                await load();
+              }
+            } catch {
+              status.textContent = '등록에 실패했어요.';
+            } finally {
+              submit.disabled = false;
+            }
+          });
+        }
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#로드-밸런싱load-balancing과-로드-밸런서load-balancer">로드 밸런싱(load balancing)과 로드 밸런서(Load Balancer)</a></li><li class="depth-2"><a href="#로드-밸런싱-방식">로드 밸런싱 방식</a></li><li class="depth-2"><a href="#로드-밸런싱의-종류">로드 밸런싱의 종류</a></li><li class="depth-2"><a href="#nlb와-alb">NLB와 ALB</a></li><li class="depth-3"><a href="#nlbnetwork-loadbalancer">NLB(Network LoadBalancer)</a></li><li class="depth-3"><a href="#albapplication-loadbalancer">ALB(Application LoadBalancer)</a></li><li class="depth-2"><a href="#load-balancing-algorithm-종류">Load Balancing algorithm 종류</a></li><li class="depth-3"><a href="#라운드-로빈-방식">라운드 로빈 방식</a></li><li class="depth-3"><a href="#가중-라운드-로빈-방식">가중 라운드 로빈 방식</a></li><li class="depth-3"><a href="#최소-연결-방식">최소 연결 방식</a></li><li class="depth-2"><a href="#로드-밸런서의-종류와-비교">로드 밸런서의 종류와 비교</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
-      // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
-      // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
-      window.__viewsReady = fetch(
-        'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
-      )
-        .then((r) => { return r.ok ? r.json() : null; })
-        .then((json) => {
-          let map = {};
-          if (json && json.items) {
-            json.items.forEach((i) => { map[i.path] = i.views; });
-          }
-          window.__views = map;
-          fillViews(document);
-          return map;
-        })
-        .catch(() => { window.__views = {}; return {}; });
+      // 조회수·댓글수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 자리에 넣는다.
+      // 워커가 죽어 있거나 아직 0이면 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
+      const METRIC_ICON = {
+        views:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
+        comments:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg>',
+      };
 
       function fillViews(root) {
-        let map = window.__views;
-        if (!map) return;
-        root.querySelectorAll('[data-views-path]').forEach((el) => {
-          const n = map[el.dataset.viewsPath];
-          if (!n) return;
-          el.textContent = '조회 ' + n.toLocaleString();
-          el.hidden = false;
-        });
+        const put = (attr, map, icon, label) => {
+          if (!map) return;
+          root.querySelectorAll('[' + attr + ']').forEach((el) => {
+            const n = map[el.getAttribute(attr)];
+            if (!n) return;
+            el.innerHTML = icon + '<span>' + n.toLocaleString() + '</span>';
+            el.setAttribute('aria-label', label + ' ' + n);
+            el.hidden = false;
+          });
+        };
+        put('data-views-path', window.__views, METRIC_ICON.views, '조회수');
+        put('data-comments-path', window.__comments, METRIC_ICON.comments, '댓글 수');
       }
       window.fillViews = fillViews;
+
+      {
+        const api = 'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev';
+        const get = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+        window.__viewsReady = Promise.all([
+          get(api + '/api/views/top?limit=1000'),
+          get(api + '/api/comments/counts'),
+        ]).then(([views, comments]) => {
+          window.__views = Object.fromEntries((views?.items ?? []).map((i) => [i.path, i.views]));
+          window.__comments = Object.fromEntries(
+            (comments?.items ?? []).map((i) => [i.path, i.count])
+          );
+          fillViews(document);
+          return window.__views;
+        });
+      }
 
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
       (() => {
@@ -297,7 +395,14 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
         const slot = document.querySelector('.header-post-title');
         const tagline = document.querySelector('.tagline');
         if (postTitle && slot && tagline) {
-          slot.textContent = postTitle.textContent.trim();
+          // 제목은 span 으로 감싼다 — 넘칠 때 이 span 만 흐르게 하려고
+          const inner = document.createElement('span');
+          inner.textContent = postTitle.textContent.trim();
+          slot.appendChild(inner);
+          // 슬롯 폭보다 길면 잘라내는 대신 흐르게 한다
+          requestAnimationFrame(() => {
+            if (inner.scrollWidth > slot.clientWidth + 2) slot.classList.add('is-long');
+          });
           const io = new IntersectionObserver(
             ([entry]) => {
               const hidden = !entry.isIntersecting && entry.boundingClientRect.top < 0;

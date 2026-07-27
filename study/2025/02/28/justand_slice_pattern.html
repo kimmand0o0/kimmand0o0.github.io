@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BLA6ZwLA.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">Zustand의 Slice 패턴</h1><div class="post-meta"><time>2025.02.28</time><span class="chip">Study</span><span class="reading tip" data-tip="이 게시글을 읽는 데 2분 정도 걸릴 것 같아요!">2분 분량</span><span class="views" data-views-path="/study/2025/02/28/justand_slice_pattern.html" hidden></span><span class="tags"><a href="/tags.html#Zustand">#Zustand</a></span></div></header><div class="prose"><h3 id="-우리-프로젝트에서-zustand-사용-방식">💻 우리 프로젝트에서 Zustand 사용 방식</h3>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.CLcIEeyr.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">Zustand의 Slice 패턴</h1><div class="post-meta"><time>2025.02.28</time><span class="chip">Study</span><span class="reading tip" data-tip="이 게시글을 읽는 데 2분 정도 걸릴 것 같아요!">2분 분량</span><span class="views" data-views-path="/study/2025/02/28/justand_slice_pattern.html" hidden></span><span class="comments-metric" data-comments-path="/study/2025/02/28/justand_slice_pattern.html" hidden></span><span class="tags"><a href="/tags.html#Zustand">#Zustand</a></span></div></header><div class="prose"><h3 id="-우리-프로젝트에서-zustand-사용-방식">💻 우리 프로젝트에서 Zustand 사용 방식</h3>
 <p><code>zustand</code>는 React 상태 관리를 위한 경량 상태 관리 라이브러리입니다. <code>zustand</code>를 사용하여 애플리케이션의 상태를 관리하고, <code>localStorage</code>에 상태를 지속(persist)하도록 설정하고 있습니다.</p>
 <p>저희의 zustand 구조는 <a href="https://zustand.docs.pmnd.rs/migrations/migrating-to-v4#statecreator">v4</a>를 기반으로 두고 있습니다. 최근(24년 10월 14일) v5가 나왔지만, 아직 익숙하지 않아서 적용 시키지는 못했습니다. 좋은 블로그글이 있어 공유합니다 <a href="https://j-ho.dev/50/">(블로그)</a></p>
 <p>현재 패턴은 슬라이스(Slice) 패턴을 사용하고 있습니다.
@@ -80,7 +80,7 @@ Zustand의 <strong>슬라이스(slice) 패턴</strong>은 상태(store)를 모�
 <li>애플리케이션 상태가 점점 커질 때</li>
 <li>여러 상태(예: <code>user</code>, <code>theme</code>, <code>cart</code> 등)를 관리해야 할 때</li>
 <li>코드의 가독성과 유지보수를 개선하고 싶을 때</li>
-</ul></div></article><script>(function(){const viewPath = "/study/2025/02/28/justand_slice_pattern.html";
+</ul></div><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/study/2025/02/28/justand_slice_pattern.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
         // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
@@ -100,35 +100,133 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             keepalive: true,
           }).catch(() => {});
         })();
+      })();</script><script>(function(){const commentPath = "/study/2025/02/28/justand_slice_pattern.html";
+const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        {
+          const list = document.getElementById('comment-list');
+          const empty = document.getElementById('comment-empty');
+          const countEl = document.getElementById('comments-count');
+          const form = document.getElementById('comment-form');
+          const status = document.getElementById('comment-status');
+          const submit = document.getElementById('comment-submit');
+
+          const fmt = (iso) => {
+            const d = new Date(iso);
+            const p = (n) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+          };
+
+          // textContent 로만 넣는다 — 사용자 입력을 HTML 로 해석하지 않기 위해
+          const render = (items) => {
+            list.textContent = '';
+            for (const c of items) {
+              const li = document.createElement('li');
+              const head = document.createElement('div');
+              head.className = 'comment-head';
+              const who = document.createElement('span');
+              who.className = 'comment-author';
+              who.textContent = c.author;
+              const when = document.createElement('time');
+              when.textContent = fmt(c.created_at);
+              head.append(who, when);
+              const body = document.createElement('p');
+              body.className = 'comment-body';
+              body.textContent = c.body;
+              li.append(head, body);
+              list.appendChild(li);
+            }
+            countEl.textContent = items.length ? items.length : '';
+            empty.hidden = items.length > 0;
+          };
+
+          const load = () =>
+            fetch(`${api}/api/comments?path=${encodeURIComponent(commentPath)}`)
+              .then((r) => (r.ok ? r.json() : null))
+              .then((json) => render(json?.items ?? []))
+              .catch(() => {
+                empty.textContent = '댓글을 불러오지 못했어요.';
+                empty.hidden = false;
+              });
+
+          load();
+
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const author = document.getElementById('comment-author').value.trim();
+            const body = document.getElementById('comment-body').value.trim();
+            if (!author || !body) return;
+
+            submit.disabled = true;
+            status.textContent = '등록 중…';
+            try {
+              const res = await fetch(`${api}/api/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  path: commentPath,
+                  author,
+                  body,
+                  website: document.getElementById('comment-website').value,
+                }),
+              });
+              if (res.status === 429) {
+                status.textContent = '조금 뒤에 다시 시도해주세요.';
+              } else if (!res.ok) {
+                status.textContent = '등록에 실패했어요.';
+              } else {
+                document.getElementById('comment-body').value = '';
+                status.textContent = '';
+                await load();
+              }
+            } catch {
+              status.textContent = '등록에 실패했어요.';
+            } finally {
+              submit.disabled = false;
+            }
+          });
+        }
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-3"><a href="#-우리-프로젝트에서-zustand-사용-방식">💻 우리 프로젝트에서 Zustand 사용 방식</a></li><li class="depth-3"><a href="#1-슬라이스-패턴이-필요한-이유">1. 슬라이스 패턴이 필요한 이유</a></li><li class="depth-3"><a href="#2-슬라이스slice-분리하기">2. 슬라이스(Slice) 분리하기</a></li><li class="depth-3"><a href="#3-정리">3. 정리</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
-      // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
-      // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
-      window.__viewsReady = fetch(
-        'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
-      )
-        .then((r) => { return r.ok ? r.json() : null; })
-        .then((json) => {
-          let map = {};
-          if (json && json.items) {
-            json.items.forEach((i) => { map[i.path] = i.views; });
-          }
-          window.__views = map;
-          fillViews(document);
-          return map;
-        })
-        .catch(() => { window.__views = {}; return {}; });
+      // 조회수·댓글수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 자리에 넣는다.
+      // 워커가 죽어 있거나 아직 0이면 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
+      const METRIC_ICON = {
+        views:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
+        comments:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg>',
+      };
 
       function fillViews(root) {
-        let map = window.__views;
-        if (!map) return;
-        root.querySelectorAll('[data-views-path]').forEach((el) => {
-          const n = map[el.dataset.viewsPath];
-          if (!n) return;
-          el.textContent = '조회 ' + n.toLocaleString();
-          el.hidden = false;
-        });
+        const put = (attr, map, icon, label) => {
+          if (!map) return;
+          root.querySelectorAll('[' + attr + ']').forEach((el) => {
+            const n = map[el.getAttribute(attr)];
+            if (!n) return;
+            el.innerHTML = icon + '<span>' + n.toLocaleString() + '</span>';
+            el.setAttribute('aria-label', label + ' ' + n);
+            el.hidden = false;
+          });
+        };
+        put('data-views-path', window.__views, METRIC_ICON.views, '조회수');
+        put('data-comments-path', window.__comments, METRIC_ICON.comments, '댓글 수');
       }
       window.fillViews = fillViews;
+
+      {
+        const api = 'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev';
+        const get = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+        window.__viewsReady = Promise.all([
+          get(api + '/api/views/top?limit=1000'),
+          get(api + '/api/comments/counts'),
+        ]).then(([views, comments]) => {
+          window.__views = Object.fromEntries((views?.items ?? []).map((i) => [i.path, i.views]));
+          window.__comments = Object.fromEntries(
+            (comments?.items ?? []).map((i) => [i.path, i.count])
+          );
+          fillViews(document);
+          return window.__views;
+        });
+      }
 
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
       (() => {
@@ -175,7 +273,14 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
         const slot = document.querySelector('.header-post-title');
         const tagline = document.querySelector('.tagline');
         if (postTitle && slot && tagline) {
-          slot.textContent = postTitle.textContent.trim();
+          // 제목은 span 으로 감싼다 — 넘칠 때 이 span 만 흐르게 하려고
+          const inner = document.createElement('span');
+          inner.textContent = postTitle.textContent.trim();
+          slot.appendChild(inner);
+          // 슬롯 폭보다 길면 잘라내는 대신 흐르게 한다
+          requestAnimationFrame(() => {
+            if (inner.scrollWidth > slot.clientWidth + 2) slot.classList.add('is-long');
+          });
           const io = new IntersectionObserver(
             ([entry]) => {
               const hidden = !entry.isIntersecting && entry.boundingClientRect.top < 0;

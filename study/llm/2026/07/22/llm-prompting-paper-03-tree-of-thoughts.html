@@ -10,7 +10,7 @@
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
       gtag('config', 'G-ZNXE6HSKMS');
-    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BLA6ZwLA.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">LLM 프롬프팅 논문 스터디 - 03. Tree of Thoughts</h1><div class="post-meta"><time>2026.07.22</time><span class="chip">LLM</span><span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span><span class="views" data-views-path="/study/llm/2026/07/22/llm-prompting-paper-03-tree-of-thoughts.html" hidden></span><span class="tags"><a href="/tags.html#LLM">#LLM</a><a href="/tags.html#Prompt Engineering">#Prompt Engineering</a><a href="/tags.html#NLP">#NLP</a><a href="/tags.html#Chain-of-Thought">#Chain-of-Thought</a></span></div></header><div class="prose"><p>시리즈 세 번째 편이자 “프롬프팅 기법” 트랙의 마지막 편. <a href="/study/llm/2026/07/22/llm-prompting-paper-02-self-consistency.html">Self-Consistency</a>의 “여러 경로 다수결”을 “탐색+백트래킹이 가능한 트리”로 확장한 <a href="https://arxiv.org/abs/2305.10601"><strong>Tree of Thoughts: Deliberate Problem Solving with Large Language Models</strong></a> (Yao et al., 2023, NeurIPS)이다.</p>
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.CLcIEeyr.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <nav> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> <button id="theme-toggle" aria-label="테마 전환">◐</button> </nav> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">LLM 프롬프팅 논문 스터디 - 03. Tree of Thoughts</h1><div class="post-meta"><time>2026.07.22</time><span class="chip">LLM</span><span class="reading tip" data-tip="이 게시글을 읽는 데 5분 정도 걸릴 것 같아요!">5분 분량</span><span class="views" data-views-path="/study/llm/2026/07/22/llm-prompting-paper-03-tree-of-thoughts.html" hidden></span><span class="comments-metric" data-comments-path="/study/llm/2026/07/22/llm-prompting-paper-03-tree-of-thoughts.html" hidden></span><span class="tags"><a href="/tags.html#LLM">#LLM</a><a href="/tags.html#Prompt Engineering">#Prompt Engineering</a><a href="/tags.html#NLP">#NLP</a><a href="/tags.html#Chain-of-Thought">#Chain-of-Thought</a></span></div></header><div class="prose"><p>시리즈 세 번째 편이자 “프롬프팅 기법” 트랙의 마지막 편. <a href="/study/llm/2026/07/22/llm-prompting-paper-02-self-consistency.html">Self-Consistency</a>의 “여러 경로 다수결”을 “탐색+백트래킹이 가능한 트리”로 확장한 <a href="https://arxiv.org/abs/2305.10601"><strong>Tree of Thoughts: Deliberate Problem Solving with Large Language Models</strong></a> (Yao et al., 2023, NeurIPS)이다.</p>
 <h2 id="1-기본적인-이해부터">1. 기본적인 이해부터</h2>
 <p>쉽게 말하면, Tree of Thoughts(ToT)는 <strong>“생각을 한 줄로 쭉 이어가지 않고, 여러 갈래로 뻗어보면서 막히면 되돌아가는” 방법</strong>이다. CoT가 하나의 선형 추론을, Self-Consistency가 여러 개의 독립적인 선형 추론을 다수결로 묶었다면, ToT는 추론 중간에 **“여기서 갈림길이다, 어느 쪽이 더 유망한지 스스로 평가하고, 아니다 싶으면 이전 지점으로 되돌아가서 다른 길을 시도”**하게 만든다.</p>
 <h2 id="2-문제점배경">2. 문제점/배경</h2>
@@ -103,7 +103,7 @@
 <h2 id="실무-적용-아이디어">실무 적용 아이디어</h2>
 <p>같은 입력에 대해 여러 번 다른 응답(리롤)을 생성해야 하는 대화형 서비스라면, 후보들을 처음부터 서로 다른 방향으로 명시적으로 분기시키고 스스로 “이전 후보와 얼마나 겹치는지” 평가해 가장 차별화된 후보를 고르는 방식을 응용해볼 수 있다. 리롤 결과끼리 너무 비슷해서 사용자가 “반복됐다”고 느끼는 문제를 생성 단계에서부터 완화하는 접근이 될 수 있는데, 다만 비용이 크게 늘어나므로 실시간 채팅보다는 오프라인 큐레이션에 먼저 적용해보는 게 현실적이다.</p>
 <hr>
-<p>이걸로 “프롬프팅 기법” 트랙을 마무리한다. 다음은 In-Context Learning의 뿌리인 <strong>GPT-3 (Brown et al., 2020)</strong> — 지금까지 본 CoT/Self-Consistency/ToT가 전부 이 논문의 전제 위에서 작동한다.</p></div></article><script>(function(){const viewPath = "/study/llm/2026/07/22/llm-prompting-paper-03-tree-of-thoughts.html";
+<p>이걸로 “프롬프팅 기법” 트랙을 마무리한다. 다음은 In-Context Learning의 뿌리인 <strong>GPT-3 (Brown et al., 2020)</strong> — 지금까지 본 CoT/Self-Consistency/ToT가 전부 이 논문의 전제 위에서 작동한다.</p></div><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/study/llm/2026/07/22/llm-prompting-paper-03-tree-of-thoughts.html";
 const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
 
         // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
@@ -123,35 +123,133 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
             keepalive: true,
           }).catch(() => {});
         })();
+      })();</script><script>(function(){const commentPath = "/study/llm/2026/07/22/llm-prompting-paper-03-tree-of-thoughts.html";
+const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        {
+          const list = document.getElementById('comment-list');
+          const empty = document.getElementById('comment-empty');
+          const countEl = document.getElementById('comments-count');
+          const form = document.getElementById('comment-form');
+          const status = document.getElementById('comment-status');
+          const submit = document.getElementById('comment-submit');
+
+          const fmt = (iso) => {
+            const d = new Date(iso);
+            const p = (n) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+          };
+
+          // textContent 로만 넣는다 — 사용자 입력을 HTML 로 해석하지 않기 위해
+          const render = (items) => {
+            list.textContent = '';
+            for (const c of items) {
+              const li = document.createElement('li');
+              const head = document.createElement('div');
+              head.className = 'comment-head';
+              const who = document.createElement('span');
+              who.className = 'comment-author';
+              who.textContent = c.author;
+              const when = document.createElement('time');
+              when.textContent = fmt(c.created_at);
+              head.append(who, when);
+              const body = document.createElement('p');
+              body.className = 'comment-body';
+              body.textContent = c.body;
+              li.append(head, body);
+              list.appendChild(li);
+            }
+            countEl.textContent = items.length ? items.length : '';
+            empty.hidden = items.length > 0;
+          };
+
+          const load = () =>
+            fetch(`${api}/api/comments?path=${encodeURIComponent(commentPath)}`)
+              .then((r) => (r.ok ? r.json() : null))
+              .then((json) => render(json?.items ?? []))
+              .catch(() => {
+                empty.textContent = '댓글을 불러오지 못했어요.';
+                empty.hidden = false;
+              });
+
+          load();
+
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const author = document.getElementById('comment-author').value.trim();
+            const body = document.getElementById('comment-body').value.trim();
+            if (!author || !body) return;
+
+            submit.disabled = true;
+            status.textContent = '등록 중…';
+            try {
+              const res = await fetch(`${api}/api/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  path: commentPath,
+                  author,
+                  body,
+                  website: document.getElementById('comment-website').value,
+                }),
+              });
+              if (res.status === 429) {
+                status.textContent = '조금 뒤에 다시 시도해주세요.';
+              } else if (!res.ok) {
+                status.textContent = '등록에 실패했어요.';
+              } else {
+                document.getElementById('comment-body').value = '';
+                status.textContent = '';
+                await load();
+              }
+            } catch {
+              status.textContent = '등록에 실패했어요.';
+            } finally {
+              submit.disabled = false;
+            }
+          });
+        }
       })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#1-기본적인-이해부터">1. 기본적인 이해부터</a></li><li class="depth-2"><a href="#2-문제점배경">2. 문제점/배경</a></li><li class="depth-2"><a href="#3-해결책의-핵심-아이디어">3. 해결책의 핵심 아이디어</a></li><li class="depth-2"><a href="#4-비유예시">4. 비유/예시</a></li><li class="depth-2"><a href="#5-실제-동작-과정">5. 실제 동작 과정</a></li><li class="depth-2"><a href="#그림으로-보기">그림으로 보기</a></li><li class="depth-2"><a href="#6-결과장점">6. 결과/장점</a></li><li class="depth-2"><a href="#실무-적용-아이디어">실무 적용 아이디어</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
-      // 조회수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 [data-views-path] 자리에 넣는다.
-      // 워커가 죽어 있거나 아직 0회인 글은 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
-      window.__viewsReady = fetch(
-        'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/views/top?limit=1000'
-      )
-        .then((r) => { return r.ok ? r.json() : null; })
-        .then((json) => {
-          let map = {};
-          if (json && json.items) {
-            json.items.forEach((i) => { map[i.path] = i.views; });
-          }
-          window.__views = map;
-          fillViews(document);
-          return map;
-        })
-        .catch(() => { window.__views = {}; return {}; });
+      // 조회수·댓글수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 자리에 넣는다.
+      // 워커가 죽어 있거나 아직 0이면 자리 자체를 비워둔다(0을 굳이 보여주지 않음).
+      const METRIC_ICON = {
+        views:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
+        comments:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg>',
+      };
 
       function fillViews(root) {
-        let map = window.__views;
-        if (!map) return;
-        root.querySelectorAll('[data-views-path]').forEach((el) => {
-          const n = map[el.dataset.viewsPath];
-          if (!n) return;
-          el.textContent = '조회 ' + n.toLocaleString();
-          el.hidden = false;
-        });
+        const put = (attr, map, icon, label) => {
+          if (!map) return;
+          root.querySelectorAll('[' + attr + ']').forEach((el) => {
+            const n = map[el.getAttribute(attr)];
+            if (!n) return;
+            el.innerHTML = icon + '<span>' + n.toLocaleString() + '</span>';
+            el.setAttribute('aria-label', label + ' ' + n);
+            el.hidden = false;
+          });
+        };
+        put('data-views-path', window.__views, METRIC_ICON.views, '조회수');
+        put('data-comments-path', window.__comments, METRIC_ICON.comments, '댓글 수');
       }
       window.fillViews = fillViews;
+
+      {
+        const api = 'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev';
+        const get = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+        window.__viewsReady = Promise.all([
+          get(api + '/api/views/top?limit=1000'),
+          get(api + '/api/comments/counts'),
+        ]).then(([views, comments]) => {
+          window.__views = Object.fromEntries((views?.items ?? []).map((i) => [i.path, i.views]));
+          window.__comments = Object.fromEntries(
+            (comments?.items ?? []).map((i) => [i.path, i.count])
+          );
+          fillViews(document);
+          return window.__views;
+        });
+      }
 
       // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
       (() => {
@@ -198,7 +296,14 @@ const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
         const slot = document.querySelector('.header-post-title');
         const tagline = document.querySelector('.tagline');
         if (postTitle && slot && tagline) {
-          slot.textContent = postTitle.textContent.trim();
+          // 제목은 span 으로 감싼다 — 넘칠 때 이 span 만 흐르게 하려고
+          const inner = document.createElement('span');
+          inner.textContent = postTitle.textContent.trim();
+          slot.appendChild(inner);
+          // 슬롯 폭보다 길면 잘라내는 대신 흐르게 한다
+          requestAnimationFrame(() => {
+            if (inner.scrollWidth > slot.clientWidth + 2) slot.classList.add('is-long');
+          });
           const io = new IntersectionObserver(
             ([entry]) => {
               const hidden = !entry.isIntersecting && entry.boundingClientRect.top < 0;
