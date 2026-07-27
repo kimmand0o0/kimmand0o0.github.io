@@ -31,7 +31,7 @@ tags: [Study, Datadog, LLM, Observability]
 **한 줄 요약:** LLM 호출을 일반 API 호출과 다르게 취급해서, 프롬프트·응답·품질 점수까지 추적·평가·비교하는 관측 계층.
 
 1. **[Span Kind 7종](https://docs.datadoghq.com/llm_observability/terms/)으로 세분화된 트레이스 기록** — LLM 호출 하나를 뭉뚱그리지 않고 **LLM / Workflow / Agent / Tool / Task / Embedding / Retrieval** 7가지 종류로 구분해서 기록한다. 각 span은 입출력(프롬프트/응답), `input_tokens`/`output_tokens`, 시작시각+소요시간, 에러 정보를 담는다
-2. **[MCP Server](https://docs.datadoghq.com/llm_observability/mcp_server/)를 통한 AI 코딩 도구 연동** — 데이터독 MCP Server가 Claude Code·Cursor 같은 AI 코딩 도구에 trace 데이터를 직접 노출한다. `/agent-observability-trace-rca` 스킬이 "왜 이 LLM 응답이 나빴는지"를 진단하고 코드베이스를 검색해서 구체적인 코드 diff까지 제안한다 — 세션 리플레이가 아니라 Agent Observability 자체 trace가 이 진단의 입력이다
+2. **[MCP Server](https://docs.datadoghq.com/llm_observability/mcp_server/)를 통한 AI 코딩 도구 연동** — 데이터독 MCP Server가 Claude Code·Cursor 같은 AI 코딩 도구에 trace 데이터를 직접 노출한다. ✅ **실제 datadog MCP 도구로 스킬 존재를 직접 확인**했다 — 정확한 이름은 `llm-obs-trace-rca`다(처음엔 이름을 잘못 적었었다). 신호를 Eval Signal(judge 판정)/Error Signal(런타임 에러)/Generic(구조적 이상치) 3가지 모드로 자동 분류하고, span tree를 증상에서 실제 근본원인으로 항해한 뒤, Claude Code에서 코드베이스 접근이 가능하면 시스템 프롬프트·툴 정의·라우팅 로직까지 검색해서 구체적인 코드 diff를 제안한다(유저 확인 후 적용, 자동 실행 아님) — 세션 리플레이가 아니라 Agent Observability 자체 trace가 이 진단의 입력이다
 3. **에러 발생 시 소스코드 연동** — 이건 Agent Observability 전용이 아니라 데이터독의 범용 **[Source Code Integration](https://docs.datadoghq.com/source_code/) / Error Tracking** 기능(GitHub 연동, Suspect Commits)이 여기도 적용된 것
 4. **[프롬프트 최적화 워크플로우](https://docs.datadoghq.com/llm_observability/experiments/setup/) (Experiments)** — Projects가 데이터셋+실험을 담는 조직 단위. 프로덕션 trace에서 실패 패턴 발견 → 그 패턴을 겨냥한 evaluator 자동 생성 → 실험 실행 → 결과 분석해서 개선 권고까지 이어지는 루프
 5. **이상탐지는 Watchdog(범용)** — "지금 이 패턴이 평소랑 다르다"를 잡아내는 Watchdog은 Agent Observability 전용이 아니라 데이터독 메트릭 전반에 쓰이는 범용 이상탐지 엔진이다
@@ -105,6 +105,7 @@ LLM 서비스를 운영하다 보면 보통 인프라 관측(APM/로그)과 LLM 
 - [Bits Investigation](https://docs.datadoghq.com/bits_ai/bits_ai_sre/)
 - [Source Code Integration](https://docs.datadoghq.com/source_code/)
 - [AI-Enhanced Static Code Analysis](https://docs.datadoghq.com/security/code_security/static_analysis/ai_enhanced_sast/)
+- `llm-obs-trace-rca` 스킬은 문서가 아니라 실제 datadog MCP 도구 조회로 직접 확인함
 
 ---
 
