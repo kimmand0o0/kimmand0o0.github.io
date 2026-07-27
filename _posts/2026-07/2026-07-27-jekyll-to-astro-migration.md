@@ -115,8 +115,8 @@ IntersectionObserver는 "교차 상태가 **바뀔 때**"만 콜백을 부른다
 
 ```js
 // 아직 트리거 영역 안이면 직접 이어서 부른다
-requestAnimationFrame(function () {
-  var r = sentinel.getBoundingClientRect();
+requestAnimationFrame(() => {
+  const r = sentinel.getBoundingClientRect();
   if (r.top < window.innerHeight + 500) loadMore();
 });
 ```

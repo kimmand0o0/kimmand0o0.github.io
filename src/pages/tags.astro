@@ -81,19 +81,19 @@ const tagData = Object.fromEntries(
 
   <script is:inline>
     // 겹침 해소 — 씨앗 좌표에서 시작해 서로 밀어내고 컨테이너 안으로 가둔다
-    (function () {
-      var box = document.getElementById('tag-scatter');
-      var dots = Array.prototype.slice.call(box.querySelectorAll('.tag-dot'));
+    (() => {
+      const box = document.getElementById('tag-scatter');
+      const dots = Array.prototype.slice.call(box.querySelectorAll('.tag-dot'));
       if (!dots.length) return;
 
       function layout() {
-        var W = box.clientWidth;
-        var H = box.clientHeight;
-        var PAD = 4; // 태그 사이 최소 여백(px) — 작을수록 빽빽하게
+        const W = box.clientWidth;
+        const H = box.clientHeight;
+        const PAD = 4; // 태그 사이 최소 여백(px) — 작을수록 빽빽하게
 
-        var items = dots.map(function (el) {
-          var w = el.offsetWidth;
-          var h = el.offsetHeight;
+        const items = dots.map((el) => {
+          const w = el.offsetWidth;
+          const h = el.offsetHeight;
           return {
             el: el,
             w: w,
@@ -110,28 +110,28 @@ const tagData = Object.fromEntries(
         }
         items.forEach(clamp);
 
-        for (var pass = 0; pass < 80; pass++) {
-          var moved = false;
-          for (var i = 0; i < items.length; i++) {
-            for (var j = i + 1; j < items.length; j++) {
-              var a = items[i];
-              var b = items[j];
-              var dx = b.x - a.x;
-              var dy = b.y - a.y;
-              var minX = (a.w + b.w) / 2 + PAD;
-              var minY = (a.h + b.h) / 2 + PAD;
-              var ox = minX - Math.abs(dx);
-              var oy = minY - Math.abs(dy);
+        for (let pass = 0; pass < 80; pass++) {
+          let moved = false;
+          for (let i = 0; i < items.length; i++) {
+            for (let j = i + 1; j < items.length; j++) {
+              const a = items[i];
+              const b = items[j];
+              let dx = b.x - a.x;
+              let dy = b.y - a.y;
+              const minX = (a.w + b.w) / 2 + PAD;
+              const minY = (a.h + b.h) / 2 + PAD;
+              const ox = minX - Math.abs(dx);
+              const oy = minY - Math.abs(dy);
               if (ox <= 0 || oy <= 0) continue; // 안 겹침
 
               moved = true;
               // 덜 밀어내도 되는 축으로만 분리 — 배치가 덜 흐트러진다
               if (ox < oy) {
-                var sx = (dx || 1) > 0 ? 1 : -1;
+                const sx = (dx || 1) > 0 ? 1 : -1;
                 a.x -= (sx * ox) / 2;
                 b.x += (sx * ox) / 2;
               } else {
-                var sy = (dy || 1) > 0 ? 1 : -1;
+                const sy = (dy || 1) > 0 ? 1 : -1;
                 a.y -= (sy * oy) / 2;
                 b.y += (sy * oy) / 2;
               }
@@ -142,7 +142,7 @@ const tagData = Object.fromEntries(
           if (!moved) break;
         }
 
-        items.forEach(function (it, i) {
+        items.forEach((it, i) => {
           it.el.style.left = it.x + 'px';
           it.el.style.top = it.y + 'px';
           // 중심에서 바깥으로 퍼지듯 등장
@@ -155,39 +155,39 @@ const tagData = Object.fromEntries(
       }
 
       // 커서 주변의 태그들이 물결처럼 밀려난다 (커서가 올라간 태그 자신은 제자리에서 커진다)
-      var boundItems = null;
+      let boundItems = null;
       function bindRepel(items) {
         // layout()은 리사이즈마다 다시 도니, 리스너는 한 번만 건다
         boundItems = items;
         if (bindRepel.done) return;
         bindRepel.done = true;
 
-        var REACH = 165; // 커서 영향 반경(px)
-        var STRENGTH = 34; // 최대 밀림(px)
-        var pending = false;
-        var cursor = null;
+        const REACH = 165; // 커서 영향 반경(px)
+        const STRENGTH = 34; // 최대 밀림(px)
+        let pending = false;
+        let cursor = null;
 
         function apply() {
           pending = false;
           if (!cursor) return;
-          var hovered = box.querySelector('.tag-dot:hover');
-          boundItems.forEach(function (it) {
+          const hovered = box.querySelector('.tag-dot:hover');
+          boundItems.forEach((it) => {
             // 커서가 올라간 태그는 확대 효과가 있으니 밀지 않는다
             if (it.el === hovered) {
               it.el.style.setProperty('--px', '0px');
               it.el.style.setProperty('--py', '0px');
               return;
             }
-            var dx = it.x - cursor.x;
-            var dy = it.y - cursor.y;
-            var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const dx = it.x - cursor.x;
+            const dy = it.y - cursor.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
             if (dist > REACH) {
               it.el.style.setProperty('--px', '0px');
               it.el.style.setProperty('--py', '0px');
               return;
             }
             // 가까울수록 강하게, 멀수록 부드럽게 사그라든다
-            var push = STRENGTH * Math.pow(1 - dist / REACH, 1.3);
+            const push = STRENGTH * Math.pow(1 - dist / REACH, 1.3);
             it.el.style.setProperty('--px', ((dx / dist) * push).toFixed(1) + 'px');
             it.el.style.setProperty('--py', ((dy / dist) * push).toFixed(1) + 'px');
           });
@@ -195,14 +195,14 @@ const tagData = Object.fromEntries(
 
         function release() {
           cursor = null;
-          boundItems.forEach(function (it) {
+          boundItems.forEach((it) => {
             it.el.style.setProperty('--px', '0px');
             it.el.style.setProperty('--py', '0px');
           });
         }
 
-        box.addEventListener('mousemove', function (e) {
-          var r = box.getBoundingClientRect();
+        box.addEventListener('mousemove', (e) => {
+          const r = box.getBoundingClientRect();
           cursor = { x: e.clientX - r.left, y: e.clientY - r.top };
           if (!pending) {
             pending = true;
@@ -212,9 +212,9 @@ const tagData = Object.fromEntries(
         box.addEventListener('mouseleave', release);
 
         // 키보드 이동 시에도 주변이 반응하도록
-        dots.forEach(function (el) {
-          el.addEventListener('focus', function () {
-            for (var i = 0; i < boundItems.length; i++) {
+        dots.forEach((el) => {
+          el.addEventListener('focus', () => {
+            for (let i = 0; i < boundItems.length; i++) {
               if (boundItems[i].el === el) {
                 cursor = { x: boundItems[i].x, y: boundItems[i].y };
                 apply();
@@ -230,23 +230,23 @@ const tagData = Object.fromEntries(
       // 빌드 시점 크기는 글 수 기준이고, 여기서 "글 수 + 조회수"로 갱신한다.
       function resizeByViews(map) {
         if (!map) return;
-        var data = JSON.parse(document.getElementById('tag-data').textContent);
-        var scores = [];
-        dots.forEach(function (el) {
-          var posts = data[el.dataset.tag] || [];
-          var views = posts.reduce(function (sum, p) { return sum + (map[p.url] || 0); }, 0);
+        let data = JSON.parse(document.getElementById('tag-data').textContent);
+        const scores = [];
+        dots.forEach((el) => {
+          let posts = data[el.dataset.tag] || [];
+          const views = posts.reduce((sum, p) => { return sum + (map[p.url] || 0); }, 0);
           // 글 수와 조회수를 반반 — 조회수가 0인 초기에도 배치가 무너지지 않는다
           scores.push({ el: el, count: posts.length, views: views });
         });
 
-        var maxCount = Math.max.apply(null, scores.map(function (s) { return s.count; }));
-        var minCount = Math.min.apply(null, scores.map(function (s) { return s.count; }));
-        var maxViews = Math.max.apply(null, scores.map(function (s) { return s.views; }));
+        const maxCount = Math.max.apply(null, scores.map((s) => { return s.count; }));
+        const minCount = Math.min.apply(null, scores.map((s) => { return s.count; }));
+        const maxViews = Math.max.apply(null, scores.map((s) => { return s.views; }));
 
-        scores.forEach(function (s) {
-          var byCount = maxCount === minCount ? 1 : (s.count - minCount) / (maxCount - minCount);
-          var byViews = maxViews > 0 ? s.views / maxViews : 0;
-          var t = maxViews > 0 ? byCount * 0.5 + byViews * 0.5 : byCount;
+        scores.forEach((s) => {
+          const byCount = maxCount === minCount ? 1 : (s.count - minCount) / (maxCount - minCount);
+          const byViews = maxViews > 0 ? s.views / maxViews : 0;
+          let t = maxViews > 0 ? byCount * 0.5 + byViews * 0.5 : byCount;
           s.el.style.fontSize = (0.8 + t * 1.1).toFixed(3) + 'rem';
           s.el.style.fontWeight = t > 0.55 ? 700 : t > 0.25 ? 600 : 500;
           s.el.style.setProperty('--tone', t.toFixed(3));
@@ -259,41 +259,41 @@ const tagData = Object.fromEntries(
 
       // 폰트 로드 후 측정해야 폭이 정확하다
       if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(function () {
+        document.fonts.ready.then(() => {
           layout();
           if (window.__viewsReady) window.__viewsReady.then(resizeByViews);
         });
       } else {
-        window.addEventListener('load', function () {
+        window.addEventListener('load', () => {
           layout();
           if (window.__viewsReady) window.__viewsReady.then(resizeByViews);
         });
       }
-      var t;
-      window.addEventListener('resize', function () {
+      let t;
+      window.addEventListener('resize', () => {
         clearTimeout(t);
         t = setTimeout(layout, 150);
       });
     })();
 
-    (function () {
-      var data = JSON.parse(document.getElementById('tag-data').textContent);
-      var section = document.getElementById('tag-posts');
-      var titleEl = document.getElementById('tag-posts-title');
-      var listEl = document.getElementById('tag-posts-list');
-      var buttons = document.querySelectorAll('.tag-dot');
+    (() => {
+      const data = JSON.parse(document.getElementById('tag-data').textContent);
+      const section = document.getElementById('tag-posts');
+      const titleEl = document.getElementById('tag-posts-title');
+      const listEl = document.getElementById('tag-posts-list');
+      const buttons = document.querySelectorAll('.tag-dot');
 
       function select(tag, scroll) {
-        var posts = data[tag];
+        const posts = data[tag];
         if (!posts) return;
-        buttons.forEach(function (b) {
+        buttons.forEach((b) => {
           b.classList.toggle('selected', b.dataset.tag === tag);
         });
         titleEl.innerHTML =
           '<span class="tag-posts-chip">#' + tag.replace(/</g, '&lt;') + '</span>' +
           '<span class="tag-posts-count">글 ' + posts.length + '개</span>';
         listEl.innerHTML = posts
-          .map(function (p) {
+          .map((p) => {
             return (
               '<li><time>' + p.date + '</time><a href="' + p.url + '">' +
               p.title.replace(/</g, '&lt;') + '</a>' +
@@ -307,18 +307,18 @@ const tagData = Object.fromEntries(
         history.replaceState(null, '', '#' + tag);
       }
 
-      buttons.forEach(function (b) {
-        b.addEventListener('click', function () { select(b.dataset.tag, true); });
+      buttons.forEach((b) => {
+        b.addEventListener('click', () => { select(b.dataset.tag, true); });
       });
 
-      document.getElementById('tag-posts-close').addEventListener('click', function () {
+      document.getElementById('tag-posts-close').addEventListener('click', () => {
         section.hidden = true;
-        buttons.forEach(function (b) { b.classList.remove('selected'); });
+        buttons.forEach((b) => { b.classList.remove('selected'); });
         history.replaceState(null, '', location.pathname);
       });
 
       // 기존 /tags.html#태그명 링크 호환 — 해시가 있으면 그 태그를 바로 연다
-      var hash = decodeURIComponent(location.hash.slice(1));
+      const hash = decodeURIComponent(location.hash.slice(1));
       if (hash && data[hash]) select(hash, true);
     })();
   </script>

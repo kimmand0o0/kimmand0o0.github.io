@@ -83,8 +83,8 @@ if (kind === 'post' && post) {
       >
         // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
         // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
-        (function () {
-          var key = 'viewed:' + viewPath;
+        (() => {
+          const key = 'viewed:' + viewPath;
           try {
             if (sessionStorage.getItem(key)) return;
             sessionStorage.setItem(key, '1');
@@ -96,7 +96,7 @@ if (kind === 'post' && post) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ path: viewPath }),
             keepalive: true,
-          }).catch(function () {});
+          }).catch(() => {});
         })();
       </script>
       {toc.length > 1 && (

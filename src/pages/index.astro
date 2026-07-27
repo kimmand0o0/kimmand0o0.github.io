@@ -42,14 +42,14 @@ const initial = posts.slice(0, INITIAL);
   <p id="list-end" class="list-end muted" hidden>마지막 글까지 다 봤어요.</p>
 
   <script is:inline define:vars={{ initialCount: INITIAL, total: posts.length }}>
-    (function () {
-      var list = document.getElementById('post-list');
-      var sentinel = document.getElementById('scroll-sentinel');
-      var endMsg = document.getElementById('list-end');
-      var offset = initialCount;
-      var STEP = 10;
-      var all = null;
-      var loading = false;
+    (() => {
+      const list = document.getElementById('post-list');
+      const sentinel = document.getElementById('scroll-sentinel');
+      const endMsg = document.getElementById('list-end');
+      let offset = initialCount;
+      const STEP = 10;
+      let all = null;
+      let loading = false;
 
       if (offset >= total) {
         sentinel.remove();
@@ -62,9 +62,9 @@ const initial = posts.slice(0, INITIAL);
       }
 
       function append(items) {
-        var html = items
-          .map(function (p) {
-            var cat = (p.categories && p.categories.length)
+        const html = items
+          .map((p) => {
+            const cat = (p.categories && p.categories.length)
               ? p.categories[p.categories.length - 1]
               : '';
             return (
@@ -92,12 +92,12 @@ const initial = posts.slice(0, INITIAL);
         if (loading || offset >= total) return;
         loading = true;
 
-        var ready = all
+        const ready = all
           ? Promise.resolve(all)
-          : fetch('/search.json').then(function (r) { return r.json(); });
+          : fetch('/search.json').then((r) => { return r.json(); });
 
         ready
-          .then(function (json) {
+          .then((json) => {
             all = json;
             append(all.slice(offset, offset + STEP));
             offset += STEP;
@@ -111,12 +111,12 @@ const initial = posts.slice(0, INITIAL);
             // IntersectionObserver 는 "교차 상태가 바뀔 때"만 부르므로,
             // 한 번 더 붙여도 sentinel 이 계속 보이는 화면(긴 뷰포트)에서는 멈춰버린다.
             // 아직 트리거 영역 안이면 직접 이어서 부른다.
-            requestAnimationFrame(function () {
-              var r = sentinel.getBoundingClientRect();
+            requestAnimationFrame(() => {
+              const r = sentinel.getBoundingClientRect();
               if (r.top < window.innerHeight + 500) loadMore();
             });
           })
-          .catch(function () {
+          .catch(() => {
             // 실패하면 무한 스크롤만 포기하고, 기존 페이지 목록으로 안내
             loading = false;
             io.disconnect();
@@ -127,8 +127,8 @@ const initial = posts.slice(0, INITIAL);
       }
 
       // 화면 아래 500px 전에 미리 불러온다
-      var io = new IntersectionObserver(
-        function (entries) {
+      const io = new IntersectionObserver(
+        (entries) => {
           if (entries[0].isIntersecting) loadMore();
         },
         { rootMargin: '500px 0px' }

@@ -27,18 +27,18 @@ import { SITE } from '../lib/posts';
   </section>
 
   <script is:inline define:vars={{ chatOrigin: 'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev' }}>
-    (function () {
-      var input = document.getElementById('search-input');
-      var defaultSection = document.getElementById('default-section');
-      var defaultTitle = document.getElementById('default-title');
-      var defaultList = document.getElementById('default-list');
-      var resultSection = document.getElementById('result-section');
-      var resultTitle = document.getElementById('result-title');
-      var resultList = document.getElementById('result-list');
-      var emptySection = document.getElementById('empty-section');
-      var emptyMessage = document.getElementById('empty-message');
-      var emptyList = document.getElementById('empty-list');
-      var posts = [];
+    (() => {
+      const input = document.getElementById('search-input');
+      const defaultSection = document.getElementById('default-section');
+      const defaultTitle = document.getElementById('default-title');
+      const defaultList = document.getElementById('default-list');
+      const resultSection = document.getElementById('result-section');
+      const resultTitle = document.getElementById('result-title');
+      const resultList = document.getElementById('result-list');
+      const emptySection = document.getElementById('empty-section');
+      const emptyMessage = document.getElementById('empty-message');
+      const emptyList = document.getElementById('empty-list');
+      let posts = [];
 
       function row(p) {
         return (
@@ -54,19 +54,19 @@ import { SITE } from '../lib/posts';
       }
 
       function search(q) {
-        var needle = q.toLowerCase();
-        return posts.filter(function (p) {
+        const needle = q.toLowerCase();
+        return posts.filter((p) => {
           return (
             p.title.toLowerCase().includes(needle) ||
-            (p.tags || []).some(function (t) { return t.toLowerCase().includes(needle); }) ||
-            (p.categories || []).some(function (c) { return c.toLowerCase().includes(needle); }) ||
+            (p.tags || []).some((t) => { return t.toLowerCase().includes(needle); }) ||
+            (p.categories || []).some((c) => { return c.toLowerCase().includes(needle); }) ||
             (p.excerpt || '').toLowerCase().includes(needle)
           );
         });
       }
 
       function onInput() {
-        var q = input.value.trim();
+        const q = input.value.trim();
         if (!q) {
           defaultSection.hidden = false;
           resultSection.hidden = true;
@@ -74,7 +74,7 @@ import { SITE } from '../lib/posts';
           return;
         }
         defaultSection.hidden = true;
-        var hits = search(q);
+        const hits = search(q);
         if (hits.length) {
           resultSection.hidden = false;
           emptySection.hidden = true;
@@ -90,8 +90,8 @@ import { SITE } from '../lib/posts';
       }
 
       fetch('/search.json')
-        .then(function (r) { return r.json(); })
-        .then(function (json) {
+        .then((r) => { return r.json(); })
+        .then((json) => {
           posts = json;
           // 기본값은 최근 글 — 조회수 데이터가 도착하면 그때 교체한다
           window.__defaultPosts = posts.slice(0, 10);
@@ -100,20 +100,20 @@ import { SITE } from '../lib/posts';
 
           // 조회수 상위 — 워커가 아직 배포 전이거나 데이터가 비면 조용히 최근 글 유지
           return fetch(chatOrigin + '/api/views/top?limit=10')
-            .then(function (r) { return r.ok ? r.json() : null; })
-            .then(function (top) {
+            .then((r) => { return r.ok ? r.json() : null; })
+            .then((top) => {
               if (!top || !top.items || !top.items.length) return;
-              var byUrl = {};
-              posts.forEach(function (p) { byUrl[p.url] = p; });
-              var ranked = top.items
-                .map(function (i) { return byUrl[i.path]; })
+              const byUrl = {};
+              posts.forEach((p) => { byUrl[p.url] = p; });
+              const ranked = top.items
+                .map((i) => { return byUrl[i.path]; })
                 .filter(Boolean);
               if (!ranked.length) return;
               window.__defaultPosts = ranked;
               defaultTitle.textContent = '많이 본 글';
               if (!input.value.trim()) render(defaultList, ranked);
             })
-            .catch(function () { /* 조회수는 부가 정보 — 실패해도 검색은 그대로 */ });
+            .catch(() => { /* 조회수는 부가 정보 — 실패해도 검색은 그대로 */ });
         });
     })();
   </script>

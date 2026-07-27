@@ -89,6 +89,21 @@ html[data-width='wide'] { --page-w: 66rem; }
   color: var(--muted);
 }
 .tagline strong { color: var(--fg); font-weight: 650; }
+/* 스크롤로 글 제목이 가려지면 소개 문구 대신 이 자리에 제목이 뜬다 */
+.header-post-title {
+  margin: 0.1rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--fg);
+  max-width: 34rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .header-post-title { display: none; }
+}
 /* 스크롤이 시작되면 경계선을 드러낸다 (JS가 data-scrolled를 토글) */
 html[data-scrolled='true'] .site-header {
   border-bottom-color: var(--border);
