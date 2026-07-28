@@ -1,0 +1,617 @@
+<!DOCTYPE html><html lang="ko" data-width="wide"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>[ K8s 스터디 ] - 09. Helm, YAML 뭉치를 패키지로 다루기 | Haeran&#39;s blog</title><meta name="description" content="지난 편까지 Pod를 어디에 어떻게 배치하는지를 봤다. 1강부터 8강까지 오면서 손에 남은 건 결국 YAML 파일 뭉치다. 이번 편은 그 뭉치를 어떻게 하나의 패키지로 묶어 재사용하고 되돌리는가 — Helm 이야기. TL;DR - Helm은 쿠버네티스용 패키지 매니저 다. Ch…"><link rel="canonical" href="https://kimmand0o0.github.io/journal/development%20diary/2026/07/28/k8s-study-09-helm.html"><meta property="og:type" content="article"><meta property="og:site_name" content="Haeran's blog"><meta property="og:title" content="[ K8s 스터디 ] - 09. Helm, YAML 뭉치를 패키지로 다루기"><meta property="og:description" content="지난 편까지 Pod를 어디에 어떻게 배치하는지를 봤다. 1강부터 8강까지 오면서 손에 남은 건 결국 YAML 파일 뭉치다. 이번 편은 그 뭉치를 어떻게 하나의 패키지로 묶어 재사용하고 되돌리는가 — Helm 이야기. TL;DR - Helm은 쿠버네티스용 패키지 매니저 다. Ch…"><meta property="og:url" content="https://kimmand0o0.github.io/journal/development%20diary/2026/07/28/k8s-study-09-helm.html"><meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpeg"><meta property="og:locale" content="ko_KR"><meta property="article:published_time" content="2026-07-28T01:00:00.000Z"><meta property="article:tag" content="K8s"><meta property="article:tag" content="Kubernetes"><meta property="article:tag" content="스터디"><meta property="article:tag" content="Helm"><meta property="article:tag" content="Chart"><meta property="article:tag" content="패키징"><meta property="article:tag" content="배포"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="[ K8s 스터디 ] - 09. Helm, YAML 뭉치를 패키지로 다루기"><meta name="twitter:description" content="지난 편까지 Pod를 어디에 어떻게 배치하는지를 봤다. 1강부터 8강까지 오면서 손에 남은 건 결국 YAML 파일 뭉치다. 이번 편은 그 뭉치를 어떻게 하나의 패키지로 묶어 재사용하고 되돌리는가 — Helm 이야기. TL;DR - Helm은 쿠버네티스용 패키지 매니저 다. Ch…"><meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpeg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"[ K8s 스터디 ] - 09. Helm, YAML 뭉치를 패키지로 다루기","description":"지난 편까지 Pod를 어디에 어떻게 배치하는지를 봤다. 1강부터 8강까지 오면서 손에 남은 건 결국 YAML 파일 뭉치다. 이번 편은 그 뭉치를 어떻게 하나의 패키지로 묶어 재사용하고 되돌리는가 — Helm 이야기. TL;DR - Helm은 쿠버네티스용 패키지 매니저 다. Ch…","url":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/28/k8s-study-09-helm.html","datePublished":"2026-07-28T01:00:00.000Z","dateModified":"2026-07-28T01:00:00.000Z","author":{"@type":"Person","name":"Haeran","url":"https://kimmand0o0.github.io"},"publisher":{"@type":"Person","name":"Haeran"},"keywords":"K8s, Kubernetes, 스터디, Helm, Chart, 패키징, 배포","inLanguage":"ko-KR","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/journal/development%20diary/2026/07/28/k8s-study-09-helm.html"}}</script><link rel="icon" href="/assets/images/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png"><link rel="alternate" type="application/rss+xml" title="Haeran's blog" href="/feed.xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"><script>
+      // FOUC 방지: 렌더 전에 저장된 테마 적용
+      (() => {
+        let t = localStorage.getItem('theme');
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script><!-- Google Analytics (GA4) — Jekyll 시절 _config.yml의 google_analytics 값 그대로 --><script async src="https://www.googletagmanager.com/gtag/js?id=G-ZNXE6HSKMS"></script><script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-ZNXE6HSKMS');
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BibuzG5J.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">[ K8s 스터디 ] - 09. Helm, YAML 뭉치를 패키지로 다루기</h1><div class="post-meta"><time>2026.07.28</time><span class="chip">Development Diary</span><span class="reading tip" data-tip="이 게시글을 읽는 데 9분 정도 걸릴 것 같아요!">9분 분량</span><span class="views" data-views-path="/journal/development diary/2026/07/28/k8s-study-09-helm.html" hidden></span><span class="comments-metric" data-comments-path="/journal/development diary/2026/07/28/k8s-study-09-helm.html" hidden></span><span class="likes-metric" data-likes-path="/journal/development diary/2026/07/28/k8s-study-09-helm.html" hidden></span><span class="tags"><a href="/tags.html#K8s">#K8s</a><a href="/tags.html#Kubernetes">#Kubernetes</a><a href="/tags.html#스터디">#스터디</a><a href="/tags.html#Helm">#Helm</a><a href="/tags.html#Chart">#Chart</a><a href="/tags.html#패키징">#패키징</a><a href="/tags.html#배포">#배포</a></span></div></header><div class="prose"><p><a href="/journal/development%20diary/2026/07/27/k8s-study-08-scheduling-resources.html">지난 편</a>까지 Pod를 어디에 어떻게 배치하는지를 봤다. 1강부터 8강까지 오면서 손에 남은 건 결국 YAML 파일 뭉치다. 이번 편은 그 뭉치를 어떻게 하나의 패키지로 묶어 재사용하고 되돌리는가 — <a href="https://helm.sh/docs/">Helm</a> 이야기.</p>
+<h2 id="tldr">TL;DR</h2>
+<ul>
+<li>Helm은 쿠버네티스용 <strong>패키지 매니저</strong>다. Chart(패키지 = 템플릿 묶음) / Values(주입할 설정값) / Release(설치된 결과물) 세 단어면 개념의 8할은 끝난다</li>
+<li>매니페스트에서 환경마다 달라지는 값을 <code>{{ .Values.x }}</code> 자리로 파내고, 그 값을 values 파일로 분리한다 → 환경이 몇 개든 차트는 한 벌</li>
+<li>렌더링은 <strong>내 노트북(또는 CI)에서</strong> 끝나고, 클러스터에 도착하는 건 평범한 YAML이다. 클러스터에 상주하는 Helm 서버 같은 건 없다</li>
+<li>설치 결과가 <strong>릴리스 리비전</strong>으로 기록되므로 <code>helm rollback</code> 한 줄로 이전 상태로 되돌아간다. 롤백조차 새 리비전으로 쌓여서 이력이 끊기지 않는다</li>
+<li>값이 겹치면 나중에 준 게 이긴다 — <code>--set</code> > 뒤에 온 <code>-f</code> > 앞에 온 <code>-f</code> > 차트의 <code>values.yaml</code></li>
+<li>참고로 <strong>Helm 4가 2025년 11월에 GA</strong> 됐다. 개념과 기본 명령어는 그대로지만 <code>--atomic</code> 같은 플래그 이름이 바뀌었다 (아래 각주)</li>
+</ul>
+<br>
+<h2 id="1-yaml이-쌓이면-생기는-문제">1. YAML이 쌓이면 생기는 문제</h2>
+<p>앱 하나를 제대로 배포하려면 Deployment, Service, ConfigMap, Secret, Ingress, HPA… 파일이 금방 5~10개가 된다. 여기서부터 문제가 시작된다.</p>
+<ul>
+<li><strong>환경별 복붙 지옥:</strong> dev/staging/prod가 99% 같은데 이미지 태그, replicas, 도메인, 리소스 크기만 다르다. 그래서 디렉터리를 3벌 복사하고, 시간이 지나면 세 벌이 조금씩 어긋난다(drift). “prod에만 왜 이 환경변수가 없지?”가 여기서 나온다</li>
+<li><strong>설치/삭제 단위가 없음:</strong> <code>kubectl apply -f ./</code>로 밀어 넣긴 쉬운데, “이 앱이 만든 리소스만 정확히 지워줘”가 어렵다</li>
+<li><strong>롤백 개념이 없음:</strong> 되돌리려면 이전 YAML을 git에서 찾아 다시 apply해야 하고, “어느 커밋이 마지막 정상이었더라”를 사람이 기억해야 한다</li>
+<li><strong>남의 앱 설치가 중노동:</strong> Redis, PostgreSQL, Prometheus를 올리려면 StatefulSet·Service·PVC를 직접 수십 줄씩 쓴다. 이미 세상 사람들이 다 똑같이 쓴 YAML인데도</li>
+</ul>
+<h2 id="2-핵심-아이디어">2. 핵심 아이디어</h2>
+<p><strong>핵심 한 줄 요약:</strong> 매니페스트에서 변하는 값을 템플릿 자리로 파내고 values로 분리한 뒤, 렌더링 결과 전체를 “릴리스”라는 버전 단위로 설치·업그레이드·롤백한다.</p>
+<ol>
+<li><strong>템플릿화:</strong> <code>image: nginx:1.25</code> → <code>image: {{ .Values.image.repository }}:{{ .Values.image.tag }}</code></li>
+<li><strong>기본값 선언:</strong> 차트 안 <code>values.yaml</code>에 기본값을 모아둔다</li>
+<li><strong>환경별 덮어쓰기:</strong> 설치할 때 <code>-f values-prod.yaml</code>이나 <code>--set replicaCount=5</code>로 필요한 값만 덮어쓴다</li>
+<li><strong>렌더링:</strong> Helm이 템플릿 + values를 합쳐 <strong>완성된 평범한 YAML</strong>을 만든다. 이 시점 이후는 1~8강에서 본 그 매니페스트와 똑같다</li>
+<li><strong>제출 &#x26; 기록:</strong> 렌더링된 매니페스트를 API 서버에 보내고, “무엇을 어떤 값으로 설치했는지”를 릴리스 리비전으로 클러스터 안에 기록한다</li>
+<li><strong>업그레이드/롤백:</strong> 다음 배포는 revision 2, 3…으로 쌓이고, 문제가 생기면 <code>helm rollback</code> 한 줄로 되돌린다</li>
+</ol>
+<pre class="mermaid">flowchart LR
+    subgraph Chart["Chart (패키지)"]
+        T["templates/*.yaml&#x3C;br/>값 자리가 비어있는 매니페스트"]
+        V["values.yaml&#x3C;br/>(기본값)"]
+    end
+    P["values-prod.yaml&#x3C;br/>--set replicaCount=5"] --> H
+    T --> H["helm 렌더링 엔진"]
+    V --> H
+    H --> M["완성된 일반 매니페스트&#x3C;br/>Deployment / Service / Ingress"]
+    M --> API["K8s API 서버"]
+    API --> R["Release: web-prod&#x3C;br/>revision 1, 2, 3..."]</pre>
+<p>여기서 중요한 감각 하나 — <strong>Helm은 클러스터에 상주하는 무언가가 아니다.</strong> 렌더링은 클라이언트에서 끝나고, 클러스터에 남는 Helm의 흔적은 “이 릴리스의 매니페스트가 이랬다”는 기록뿐이다.</p>
+<p>그 기록이 실제로 어디 있냐면 — <strong>릴리스와 같은 네임스페이스의 Secret</strong>이다(<a href="https://helm.sh/docs/topics/advanced/">공식문서</a>). <code>kubectl get secret -l owner=helm</code>으로 눈으로 확인된다. 다만 이 Secret에는 렌더링에 쓰인 values 전체가 들어가므로 <strong>비밀번호를 values로 넘겼다면 그것도 같이 들어있다</strong>. 공식문서가 직접 경고하는 부분이다.</p>
+<pre class="mermaid">sequenceDiagram
+    participant Me as 개발자 (helm CLI)
+    participant API as K8s API 서버
+    participant Store as 릴리스 기록
+
+    Me->>Me: 템플릿 + values 렌더링
+    Me->>API: 매니페스트 제출 (install)
+    API-->>Store: revision 1 저장
+    Note over Me,Store: 이미지 태그만 바꿔 재배포
+    Me->>API: 변경분 제출 (upgrade)
+    API-->>Store: revision 2 저장
+    Note over Me,Store: prod에서 장애 발견
+    Me->>API: helm rollback (revision 1)
+    API-->>Store: revision 3 저장 (내용은 1과 동일)</pre>
+<p>롤백조차 <strong>새 리비전으로 쌓인다</strong>는 점이 포인트다. 되돌리기가 기록을 지우는 게 아니라 “1번 상태로 돌아간 3번”을 새로 만드는 방식이라, 나중에 이력을 읽을 때 무슨 일이 있었는지가 그대로 보인다.</p>
+<h2 id="3-비유로-한-번-더">3. 비유로 한 번 더</h2>
+<p>메일 머지(mail merge)로 청첩장 100장을 만든다고 생각하면 거의 그대로 대응된다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Helm 개념</th><th>비유</th></tr></thead><tbody><tr><td>Chart의 templates/</td><td><code>{이름}님께</code> 자리가 비어있는 청첩장 서식</td></tr><tr><td>values.yaml</td><td>기본값이 채워진 명단</td></tr><tr><td><code>-f values-prod.yaml</code></td><td>특정 그룹만 다른 문구로 갈아끼우는 별도 명단</td></tr><tr><td>렌더링</td><td>서식 + 명단을 합쳐 실제 청첩장을 뽑는 순간</td></tr><tr><td>Release</td><td>실제로 발송된 청첩장 묶음 (누구에게 뭘 보냈는지 남음)</td></tr><tr><td>revision / rollback</td><td>“지난번 버전 그대로 다시” 가 가능한 발송 이력</td></tr></tbody></table>
+<p>서식과 명단이 분리돼 있으니 <strong>문구를 고치고 싶으면 서식 한 장만 고치면 100장에 다 반영된다.</strong> 복붙 방식은 100장을 다 고쳐야 하고, 그중 3장을 빼먹는다.</p>
+<h2 id="4-실제로-이렇게-쓴다">4. 실제로 이렇게 쓴다</h2>
+<p><strong>차트 구조</strong> (<a href="https://helm.sh/docs/topics/charts/">공식 Charts 문서</a>):</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>mychart/</span></span>
+<span class="line"><span>├── Chart.yaml          # 필수. apiVersion(v2) + name + version 3개가 필수 필드. 의존 차트도 여기 선언</span></span>
+<span class="line"><span>├── values.yaml         # 기본값 모음</span></span>
+<span class="line"><span>├── templates/          # 렌더링될 매니페스트 템플릿들</span></span>
+<span class="line"><span>│   ├── deployment.yaml</span></span>
+<span class="line"><span>│   ├── service.yaml</span></span>
+<span class="line"><span>│   ├── _helpers.tpl    # 재사용 조각. _ 로 시작하면 매니페스트로 출력되지 않음</span></span>
+<span class="line"><span>│   └── NOTES.txt       # 설치 완료 후 터미널에 뜨는 안내문</span></span>
+<span class="line"><span>├── charts/             # 의존하는 서브차트가 놓이는 자리</span></span>
+<span class="line"><span>└── .helmignore         # 패키징에서 제외할 파일 패턴</span></span></code></pre>
+<p><strong>템플릿</strong> — 3강의 Deployment에 구멍을 뚫은 것 (<a href="https://helm.sh/docs/chart_template_guide/">Chart Template Guide</a>):</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">apps/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Deployment</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {{ </span><span style="color:#032F62;--shiki-dark:#9ECBFF">.Release.Name</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">-web</span><span style="color:#6A737D;--shiki-dark:#6A737D">        # 릴리스 이름을 앞에 붙여 충돌 방지</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  replicas</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {{ </span><span style="color:#032F62;--shiki-dark:#9ECBFF">.Values.replicaCount</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }} </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 환경마다 다른 값</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  selector</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    matchLabels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {{ </span><span style="color:#032F62;--shiki-dark:#9ECBFF">.Release.Name</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">-web</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  template</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {{ </span><span style="color:#032F62;--shiki-dark:#9ECBFF">.Release.Name</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">-web</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">web</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"{{ .Values.image.repository }}:{{ .Values.image.tag }}"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          {{- </span><span style="color:#032F62;--shiki-dark:#9ECBFF">toYaml .Values.resources | nindent 10</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }}   </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 8강의 requests/limits 블록을 통째로 주입</span></span></code></pre>
+<ul>
+<li><code>.Values.*</code> — values 파일에서 온 값</li>
+<li><code>.Release.Name</code> — 설치할 때 정한 릴리스 이름 (Helm이 자동으로 채워준다)</li>
+<li><code>{{- ... }}</code> — 앞쪽 공백/줄바꿈을 먹으라는 표시. YAML은 들여쓰기가 문법이라 이게 없으면 결과가 깨진다</li>
+<li><code>nindent 10</code> — 주입되는 블록 전체를 10칸 들여쓴다</li>
+</ul>
+<p><strong>기본값과 환경별 덮어쓰기:</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># values.yaml — 기본값(개발 기준)</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">replicaCount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  repository</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  tag</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"1.25"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  requests</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: { </span><span style="color:#22863A;--shiki-dark:#85E89D">cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">100m</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#22863A;--shiki-dark:#85E89D">memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">128Mi</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  limits</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:   { </span><span style="color:#22863A;--shiki-dark:#85E89D">cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">200m</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#22863A;--shiki-dark:#85E89D">memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">256Mi</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># values-prod.yaml — 다른 것만 적는다</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">replicaCount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  requests</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: { </span><span style="color:#22863A;--shiki-dark:#85E89D">cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">500m</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#22863A;--shiki-dark:#85E89D">memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">512Mi</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  limits</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:   { </span><span style="color:#22863A;--shiki-dark:#85E89D">cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,    </span><span style="color:#22863A;--shiki-dark:#85E89D">memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">1Gi</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }</span></span></code></pre>
+<p><strong>명령어:</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 0. 렌더링 결과를 눈으로 먼저 확인 (클러스터에 아무것도 안 보냄) — 가장 자주 쓰게 된다</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> template</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> web-prod</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ./mychart</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> values-prod.yaml</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 1. 설치</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> install</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> web-prod</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ./mychart</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> values-prod.yaml</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">#     ^릴리스 이름   ^차트 경로</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 2. 배포. --install 을 붙이면 없으면 설치, 있으면 업그레이드</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> upgrade</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --install</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> web-prod</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ./mychart</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> values-prod.yaml</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --set</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> image.tag=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1.26</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 3. 이력 확인 → 문제 생기면 롤백</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> history</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> web-prod</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># REVISION  STATUS      DESCRIPTION</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 1         superseded  Install complete</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 2         deployed    Upgrade complete</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rollback</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> web-prod</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 4. 릴리스 목록 / 통째로 삭제</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> list</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> uninstall</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> web-prod</span><span style="color:#6A737D;--shiki-dark:#6A737D">          # 이 릴리스가 만든 리소스만 정확히 제거</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 5. 남이 만든 차트 쓰기 — StatefulSet/PVC 직접 안 써도 Redis가 뜬다</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> repo</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> add</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> bitnami</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> https://charts.bitnami.com/bitnami</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> repo</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> update</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> search</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> repo</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> redis</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> install</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> cache</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> bitnami/redis</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 주의: --set 으로 넘긴 값은 위에서 말한 릴리스 Secret에 그대로 들어간다.</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 비밀번호는 values 대신 별도 Secret을 만들어 참조시키는 편이 안전하다(5강 참고).</span></span></code></pre>
+<p>값이 겹칠 때의 우선순위 감각 하나: <strong>나중에 준 게 이긴다.</strong> 공식 순서는 <code>차트의 values.yaml</code> &#x3C; <code>부모 차트의 values.yaml</code> &#x3C; <code>-f 파일(여러 개면 오른쪽이 이김)</code> &#x3C; <code>--set</code>이다(<a href="https://helm.sh/docs/chart_template_guide/values_files/">공식문서</a>). 그래서 “기본값은 values.yaml, 환경 차이는 -f, 배포마다 바뀌는 이미지 태그는 —set(CI에서 주입)“이 흔한 조합이다.</p>
+<p>그리고 <code>helm search repo</code>는 인터넷을 뒤지는 게 아니라 <strong>내 컴퓨터에 받아둔 인덱스</strong>를 뒤진다. 새 버전이 안 보이면 십중팔구 <code>helm repo update</code>를 안 한 것이다.</p>
+<h2 id="5-얻는-것과-알고-시작할-것">5. 얻는 것과, 알고 시작할 것</h2>
+<p><strong>얻는 것</strong></p>
+<ul>
+<li><strong>중복 제거:</strong> 환경이 3개든 10개든 차트는 한 벌. 공통 수정이 한 곳에서 끝나 drift가 구조적으로 줄어든다</li>
+<li><strong>설치 단위:</strong> 흩어진 리소스 8개가 “web-prod 릴리스” 하나로 묶인다. <code>helm uninstall</code> 하나로 딱 그만큼만 사라진다</li>
+<li><strong>되돌릴 수 있는 배포:</strong> 롤백이 “git에서 옛날 YAML 찾기”가 아니라 명령 한 줄이 된다</li>
+<li><strong>생태계:</strong> Redis·PostgreSQL·Prometheus·cert-manager 같은 표준 컴포넌트를 검증된 차트로 몇 줄 만에 올린다</li>
+</ul>
+<p><strong>Helm의 그늘</strong></p>
+<ul>
+<li><strong>템플릿 가독성:</strong> 조건문·반복문이 겹겹이 쌓이면 “이 차트가 결국 뭘 만드는지”를 사람이 읽어내기 어려워진다. <code>helm template</code>으로 렌더링 결과를 확인하는 습관이 그래서 중요하다</li>
+<li><strong>YAML을 문자열로 다룬다:</strong> 구조를 이해하고 조립하는 게 아니라 텍스트를 이어붙인 뒤 파싱한다. 들여쓰기 한 칸 때문에 터지는 사고가 여기서 나온다(<code>nindent</code>가 필요한 이유)</li>
+<li><strong>대안도 있다:</strong> 템플릿 없이 “기본 YAML + 환경별 패치(overlay)“로 같은 문제를 푸는 <a href="https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/">Kustomize</a>는 <code>kubectl apply -k</code>로 kubectl에 내장돼 있다. 값 주입이 단순하면 Kustomize, 배포 대상이 패키지처럼 유통돼야 하면 Helm 정도로 나눠 쓰면 무리가 없다</li>
+</ul>
+<blockquote>
+<p><strong>최신 동향 (공식문서 검증):</strong> 이 글은 오래 표준이던 Helm 3 기준으로 썼는데, 정리하다 보니 <strong><a href="https://helm.sh/blog/helm-4-released/">Helm 4가 2025년 11월 12일에 GA</a></strong> 됐다는 걸 알게 됐다(2026년 7월 현재 최신 4.2.3, 6년 만의 메이저 업데이트). 위에 쓴 개념과 명령어는 4에서도 그대로 통하고, 공식 안내도 *“Helm 4는 기존 Helm 3 릴리스를 별도 마이그레이션 없이 관리할 수 있다”*고 명시한다. 다만 옮겨가며 걸릴 것 세 가지:</p>
+<ul>
+<li><strong>플래그 이름이 바뀜</strong> — 배포 실패 시 자동 롤백하는 <code>--atomic</code> → <code>--rollback-on-failure</code>, <code>--force</code> → <code>--force-replace</code>(구 이름은 당분간 동작하되 경고). <code>--wait</code>도 전략 선택형(<code>watcher</code>/<code>hookOnly</code>/<code>legacy</code>)으로 동작이 바뀌었다</li>
+<li><strong>Helm 3는 수명이 정해짐</strong> — <a href="https://helm.sh/blog/helm-v3-end-of-life/">공식 EOL 공지</a> 기준 마지막 마이너 릴리스 2026-09-09, 보안 패치 종료 2027-02-10</li>
+<li><strong>문서 사이트 기본값이 4</strong> — helm.sh/docs는 이제 Helm 4 문서를 보여준다. 3 기준 문법을 확인하려면 URL에 <code>/v3/</code>를 끼워야 한다(<code>helm.sh/docs/v3/helm/helm_install/</code>)</li>
+</ul>
+<p>새로 들어간 것 중엔 <strong>Server-Side Apply 지원</strong>과 <strong>WebAssembly 기반 플러그인 시스템</strong>이 눈에 띈다. 단, Helm 3 때 만들어진 기존 릴리스는 4로 올려도 기본은 client-side apply로 유지된다.</p>
+</blockquote>
+<blockquote>
+<p><strong>역사 한 조각:</strong> Helm 2에는 클러스터 안에 <strong>Tiller</strong>라는 서버 컴포넌트가 상주하면서 대신 배포를 수행했다. 강한 권한을 가진 채 떠 있어서 RBAC이 기본 활성화된 이후 보안상 다루기 까다로웠고, Helm 3에서 <strong>아예 제거</strong>됐다(<a href="https://helm.sh/docs/faq/changes_since_helm2/">공식 FAQ</a>). 지금 Helm이 “내 kubeconfig 권한으로 동작하는 순수 CLI”인 건 그 결과다. 오래된 글에서 Tiller 얘기가 나오면 Helm 2 시절 자료라고 보면 된다.</p>
+</blockquote>
+<h2 id="지금-상태--다음에-할-일">지금 상태 / 다음에 할 일</h2>
+<p>1강부터 9강까지, “왜 K8s인가”에서 시작해 Pod·Deployment·Service·ConfigMap/Secret·Ingress·Namespace/RBAC·스케줄링을 지나, 이제 그 전부를 하나의 패키지로 묶는 데까지 왔다. 개념 한 바퀴는 여기서 일단락. 다음은 배운 걸 실제 클러스터에 직접 굴려보면서 생기는 질문들을 모아볼 생각이다 — 아마 그쪽이 진짜 공부일 것 같다.</p></div><div class="like-box"><button type="button" id="like-btn" class="tip" data-tip="이 게시글이 마음에 든다면 따봉을 눌러주세요!" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg><span id="like-count">0</span></button></div><nav class="series-nav" aria-label="시리즈 이동"><p class="series-head"><span class="series-name">K8s 스터디</span><span class="series-pos">9편 중 9번째</span></p><div class="series-links"><a class="series-prev" href="/journal/development diary/2026/07/27/k8s-study-08-scheduling-resources.html"><span class="series-dir">← 이전 편</span><span class="series-title">[ K8s 스터디 ] - 08. 스케줄링과 requests/limits, Pod는 어디에 어떻게 배치되는가</span></a></div></nav><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><p class="reply-to" id="reply-to" hidden><span id="reply-to-label"></span><button type="button" id="reply-cancel">취소</button></p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/journal/development diary/2026/07/28/k8s-study-09-helm.html";
+const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
+        // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
+        (() => {
+          const key = 'viewed:' + viewPath;
+          try {
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+          } catch (e) {
+            // 프라이빗 모드 등으로 storage 가 막히면 중복 제거 없이 그냥 기록한다
+          }
+          fetch(chatOrigin + '/api/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: viewPath }),
+            keepalive: true,
+          }).catch(() => {});
+        })();
+      })();</script><script>(function(){const likePath = "/journal/development diary/2026/07/28/k8s-study-09-helm.html";
+const likeApi = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        {
+          const btn = document.getElementById('like-btn');
+          const countEl = document.getElementById('like-count');
+          const key = 'liked:' + likePath;
+          // "이미 눌렀는지"는 브라우저가 기억한다 — 로그인이 없으니 여기까지가 최선
+          const likedNow = () => {
+            try { return localStorage.getItem(key) === '1'; } catch { return false; }
+          };
+          const paint = (n) => {
+            countEl.textContent = n;
+            const on = likedNow();
+            btn.classList.toggle('liked', on);
+            btn.setAttribute('aria-pressed', String(on));
+            btn.dataset.tip = on
+              ? '추천을 취소하려면 다시 눌러주세요'
+              : '이 게시글이 마음에 든다면 따봉을 눌러주세요!';
+          };
+
+          fetch(`${likeApi}/api/likes/top?limit=1000`)
+            .then((r) => (r.ok ? r.json() : null))
+            .then((json) => {
+              const hit = (json?.items ?? []).find((i) => i.path === likePath);
+              paint(hit ? hit.likes : 0);
+            })
+            .catch(() => paint(0));
+
+          btn.addEventListener('click', async () => {
+            const on = likedNow();
+            btn.disabled = true;
+            try {
+              const res = await fetch(`${likeApi}/api/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: likePath, action: on ? 'remove' : 'add' }),
+              });
+              if (res.ok) {
+                const { likes } = await res.json();
+                try { on ? localStorage.removeItem(key) : localStorage.setItem(key, '1'); } catch {}
+                paint(likes);
+              }
+            } catch {
+              /* 추천 실패는 조용히 넘긴다 — 글 읽기에 영향 없음 */
+            } finally {
+              btn.disabled = false;
+            }
+          });
+        }
+      })();</script><script>(function(){const commentPath = "/journal/development diary/2026/07/28/k8s-study-09-helm.html";
+const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        {
+          const list = document.getElementById('comment-list');
+          const empty = document.getElementById('comment-empty');
+          const countEl = document.getElementById('comments-count');
+          const form = document.getElementById('comment-form');
+          const status = document.getElementById('comment-status');
+          const submit = document.getElementById('comment-submit');
+
+          const fmt = (iso) => {
+            const d = new Date(iso);
+            const p = (n) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+          };
+
+          let replyTo = null;
+          const replyBar = document.getElementById('reply-to');
+          const replyLabel = document.getElementById('reply-to-label');
+
+          const setReplyTo = (c) => {
+            replyTo = c;
+            replyBar.hidden = !c;
+            if (c) {
+              replyLabel.textContent = `${c.author}님에게 답글`;
+              document.getElementById('comment-body').focus();
+            }
+          };
+          document.getElementById('reply-cancel').addEventListener('click', () => setReplyTo(null));
+
+          // textContent 로만 넣는다 — 사용자 입력을 HTML 로 해석하지 않기 위해
+          const nodeFor = (c) => {
+            const li = document.createElement('li');
+            if (c.is_bot) li.classList.add('is-bot');
+            if (c.parent_id) li.classList.add('is-reply');
+
+            const head = document.createElement('div');
+            head.className = 'comment-head';
+            const who = document.createElement('span');
+            who.className = 'comment-author';
+            who.textContent = c.author;
+            if (c.is_bot) {
+              const badge = document.createElement('span');
+              badge.className = 'bot-badge';
+              badge.textContent = 'AI';
+              who.appendChild(badge);
+            }
+            const when = document.createElement('time');
+            when.textContent = fmt(c.created_at);
+            head.append(who, when);
+
+            const body = document.createElement('p');
+            body.className = 'comment-body';
+            body.textContent = c.body;
+
+            const reply = document.createElement('button');
+            reply.type = 'button';
+            reply.className = 'reply-btn';
+            reply.textContent = '답글';
+            reply.addEventListener('click', () => setReplyTo(c));
+
+            li.append(head, body, reply);
+            return li;
+          };
+
+          const render = (items) => {
+            list.textContent = '';
+            const children = new Map();
+            for (const c of items) {
+              if (!c.parent_id) continue;
+              if (!children.has(c.parent_id)) children.set(c.parent_id, []);
+              children.get(c.parent_id).push(c);
+            }
+            for (const c of items) {
+              if (c.parent_id) continue; // 답글은 부모 아래에서 그린다
+              const li = nodeFor(c);
+              const kids = children.get(c.id);
+              if (kids?.length) {
+                const sub = document.createElement('ul');
+                sub.className = 'comment-replies';
+                kids.forEach((k) => sub.appendChild(nodeFor(k)));
+                li.appendChild(sub);
+              }
+              list.appendChild(li);
+            }
+            countEl.textContent = items.length ? items.length : '';
+            empty.hidden = items.length > 0;
+          };
+
+          const load = () =>
+            fetch(`${api}/api/comments?path=${encodeURIComponent(commentPath)}`)
+              .then((r) => (r.ok ? r.json() : null))
+              .then((json) => render(json?.items ?? []))
+              .catch(() => {
+                empty.textContent = '댓글을 불러오지 못했어요.';
+                empty.hidden = false;
+              });
+
+          load();
+
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const author = document.getElementById('comment-author').value.trim();
+            const body = document.getElementById('comment-body').value.trim();
+            if (!author || !body) return;
+
+            submit.disabled = true;
+            status.textContent = '등록 중…';
+            try {
+              const res = await fetch(`${api}/api/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  path: commentPath,
+                  author,
+                  body,
+                  parentId: replyTo ? replyTo.id : undefined,
+                  website: document.getElementById('comment-website').value,
+                }),
+              });
+              if (res.status === 429) {
+                status.textContent = '조금 뒤에 다시 시도해주세요.';
+              } else if (!res.ok) {
+                status.textContent = '등록에 실패했어요.';
+              } else {
+                document.getElementById('comment-body').value = '';
+                setReplyTo(null);
+                status.textContent = '만두봇이 읽는 중…';
+                await load();
+                // 봇 답글은 뒤에서 생성되므로 잠시 뒤 한 번 더 가져온다
+                setTimeout(async () => {
+                  await load();
+                  status.textContent = '';
+                }, 6000);
+              }
+            } catch {
+              status.textContent = '등록에 실패했어요.';
+            } finally {
+              submit.disabled = false;
+            }
+          });
+        }
+      })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#tldr">TL;DR</a></li><li class="depth-2"><a href="#1-yaml이-쌓이면-생기는-문제">1. YAML이 쌓이면 생기는 문제</a></li><li class="depth-2"><a href="#2-핵심-아이디어">2. 핵심 아이디어</a></li><li class="depth-2"><a href="#3-비유로-한-번-더">3. 비유로 한 번 더</a></li><li class="depth-2"><a href="#4-실제로-이렇게-쓴다">4. 실제로 이렇게 쓴다</a></li><li class="depth-2"><a href="#5-얻는-것과-알고-시작할-것">5. 얻는 것과, 알고 시작할 것</a></li><li class="depth-2"><a href="#지금-상태--다음에-할-일">지금 상태 / 다음에 할 일</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+      // 조회수·댓글수·추천수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 자리에 넣는다.
+      // 0도 그대로 보여준다(자리를 비우면 "기능이 사라진 것"처럼 보인다).
+      // 워커 응답 자체가 실패했을 때만 자리를 비워둔다.
+      const METRIC_ICON = {
+        views:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
+        comments:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg>',
+        likes:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>',
+      };
+
+      function fillViews(root) {
+        const put = (attr, map, icon, label) => {
+          if (!map) return;
+          root.querySelectorAll('[' + attr + ']').forEach((el) => {
+            const n = map[el.getAttribute(attr)] ?? 0;
+            el.innerHTML = icon + '<span>' + n.toLocaleString() + '</span>';
+            el.setAttribute('aria-label', label + ' ' + n);
+            el.hidden = false;
+          });
+        };
+        put('data-views-path', window.__views, METRIC_ICON.views, '조회수');
+        put('data-comments-path', window.__comments, METRIC_ICON.comments, '댓글 수');
+        put('data-likes-path', window.__likes, METRIC_ICON.likes, '추천 수');
+      }
+      window.fillViews = fillViews;
+
+      {
+        const api = 'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev';
+        const get = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+        window.__viewsReady = Promise.all([
+          get(api + '/api/views/top?limit=1000'),
+          get(api + '/api/comments/counts'),
+          get(api + '/api/likes/top?limit=1000'),
+        ]).then(([views, comments, likes]) => {
+          // 셋 다 실패했다면 지표 자체를 못 받은 것 — 0 을 지어내지 않고 자리를 비워둔다
+          if (!views && !comments && !likes) return {};
+          window.__views = Object.fromEntries((views?.items ?? []).map((i) => [i.path, i.views]));
+          window.__comments = Object.fromEntries(
+            (comments?.items ?? []).map((i) => [i.path, i.count])
+          );
+          window.__likes = Object.fromEntries((likes?.items ?? []).map((i) => [i.path, i.likes]));
+          fillViews(document);
+          return window.__views;
+        });
+      }
+
+      // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
+      (() => {
+        const root = document.documentElement;
+        function sync() {
+          root.setAttribute('data-scrolled', window.scrollY > 8 ? 'true' : 'false');
+        }
+        sync();
+        window.addEventListener('scroll', sync, { passive: true });
+      })();
+
+      // 목차 — 현재 읽고 있는 섹션 표시
+      (() => {
+        const links = document.querySelectorAll('.toc a');
+        if (!links.length) return;
+        const map = {};
+        const targets = [];
+        links.forEach((a) => {
+          const id = decodeURIComponent(a.getAttribute('href').slice(1));
+          const el = document.getElementById(id);
+          if (el) {
+            map[id] = a;
+            targets.push(el);
+          }
+        });
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (!e.isIntersecting) return;
+              links.forEach((a) => { a.classList.remove('active'); });
+              const a = map[e.target.id];
+              if (a) a.classList.add('active');
+            });
+          },
+          // 헤더 아래 상단 밴드에 들어온 헤딩을 현재 섹션으로 본다
+          { rootMargin: '-72px 0px -75% 0px' }
+        );
+        targets.forEach((el) => { io.observe(el); });
+      })();
+
+      // 글 제목이 헤더 위로 지나가면, 소개 문구 자리를 제목으로 바꿔치기
+      {
+        const postTitle = document.querySelector('article.post h1.post-title');
+        const slot = document.querySelector('.header-post-title');
+        const tagline = document.querySelector('.tagline');
+        if (postTitle && slot && tagline) {
+          // 제목은 span 으로 감싼다 — 넘칠 때 이 span 만 흐르게 하려고
+          const inner = document.createElement('span');
+          inner.textContent = postTitle.textContent.trim();
+          slot.appendChild(inner);
+          // 슬롯 폭보다 길면 잘라내는 대신 흐르게 한다
+          requestAnimationFrame(() => {
+            if (inner.scrollWidth > slot.clientWidth + 2) slot.classList.add('is-long');
+          });
+          const io = new IntersectionObserver(
+            ([entry]) => {
+              const hidden = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+              slot.hidden = !hidden;
+              tagline.hidden = hidden;
+            },
+            { rootMargin: '-4px 0px 0px 0px', threshold: 0 }
+          );
+          io.observe(postTitle);
+        }
+      }
+
+      // 정렬 필터 접기/펼치기 — 선택된 항목만 보이고, 누르면 스르륵 펼쳐진다
+      {
+        const bar = document.querySelector('.sort-bar');
+        if (bar) {
+          const toggle = bar.querySelector('.sort-toggle');
+          const current = bar.querySelector('.sort-current');
+          const setOpen = (open) => {
+            bar.classList.toggle('open', open);
+            toggle.setAttribute('aria-expanded', String(open));
+          };
+          toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setOpen(!bar.classList.contains('open'));
+          });
+          // 항목을 고르면 라벨을 바꾸고 접는다 (정렬 자체는 각 페이지 스크립트가 처리)
+          bar.querySelectorAll('.sort-btn').forEach((b) => {
+            b.addEventListener('click', () => {
+              current.textContent = b.textContent.trim();
+              setOpen(false);
+            });
+          });
+          document.addEventListener('click', (e) => {
+            if (bar.classList.contains('open') && !bar.contains(e.target)) setOpen(false);
+          });
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') setOpen(false);
+          });
+        }
+      }
+
+      // 모바일 햄버거 메뉴
+      {
+        const toggle = document.getElementById('nav-toggle');
+        const nav = document.getElementById('site-nav');
+        const setOpen = (open) => {
+          nav.classList.toggle('open', open);
+          toggle.setAttribute('aria-expanded', String(open));
+          toggle.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+          toggle.classList.toggle('is-open', open);
+        };
+        toggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          setOpen(!nav.classList.contains('open'));
+        });
+        // 메뉴 밖을 누르거나 ESC 를 누르면 닫는다
+        document.addEventListener('click', (e) => {
+          if (nav.classList.contains('open') && !nav.contains(e.target)) setOpen(false);
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') setOpen(false);
+        });
+      }
+
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const next =
+          document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+      });
+    </script> <script type="module">
+      // mermaid 클라이언트 렌더 (기존 Jekyll 셋업과 동일하게 mermaid@10 사용)
+      if (document.querySelector('pre.mermaid')) {
+        const { default: mermaid } = await import(
+          'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'
+        );
+        mermaid.initialize({
+          startOnLoad: false,
+          theme:
+            document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+        });
+        mermaid.run({ querySelector: 'pre.mermaid' });
+      }
+    </script> </body> </html>
