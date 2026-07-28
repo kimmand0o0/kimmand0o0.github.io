@@ -1,0 +1,549 @@
+<!DOCTYPE html><html lang="ko" data-width="wide"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>LLM 프롬프팅 논문 스터디 - 08. InstructGPT | Haeran&#39;s blog</title><meta name="description" content="시리즈 여덟 번째 편이자 &#34;정렬(Alignment)/안전성&#34; 트랙의 첫 편. 지난 Toolformer까지가 &#34;모델을 어떻게 더 똑똑하게 쓸 것인가&#34;였다면, 이번에 다룰 Training language models to follow instructions with human fe…"><link rel="canonical" href="https://kimmand0o0.github.io/study/llm/2026/07/28/llm-prompting-paper-08-instructgpt.html"><meta property="og:type" content="article"><meta property="og:site_name" content="Haeran's blog"><meta property="og:title" content="LLM 프롬프팅 논문 스터디 - 08. InstructGPT"><meta property="og:description" content="시리즈 여덟 번째 편이자 &#34;정렬(Alignment)/안전성&#34; 트랙의 첫 편. 지난 Toolformer까지가 &#34;모델을 어떻게 더 똑똑하게 쓸 것인가&#34;였다면, 이번에 다룰 Training language models to follow instructions with human fe…"><meta property="og:url" content="https://kimmand0o0.github.io/study/llm/2026/07/28/llm-prompting-paper-08-instructgpt.html"><meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpeg"><meta property="og:locale" content="ko_KR"><meta property="article:published_time" content="2026-07-28T01:00:00.000Z"><meta property="article:tag" content="LLM"><meta property="article:tag" content="Prompt Engineering"><meta property="article:tag" content="NLP"><meta property="article:tag" content="Alignment"><meta property="article:tag" content="RLHF"><meta property="article:tag" content="InstructGPT"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="LLM 프롬프팅 논문 스터디 - 08. InstructGPT"><meta name="twitter:description" content="시리즈 여덟 번째 편이자 &#34;정렬(Alignment)/안전성&#34; 트랙의 첫 편. 지난 Toolformer까지가 &#34;모델을 어떻게 더 똑똑하게 쓸 것인가&#34;였다면, 이번에 다룰 Training language models to follow instructions with human fe…"><meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpeg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"LLM 프롬프팅 논문 스터디 - 08. InstructGPT","description":"시리즈 여덟 번째 편이자 \"정렬(Alignment)/안전성\" 트랙의 첫 편. 지난 Toolformer까지가 \"모델을 어떻게 더 똑똑하게 쓸 것인가\"였다면, 이번에 다룰 Training language models to follow instructions with human fe…","url":"https://kimmand0o0.github.io/study/llm/2026/07/28/llm-prompting-paper-08-instructgpt.html","datePublished":"2026-07-28T01:00:00.000Z","dateModified":"2026-07-28T01:00:00.000Z","author":{"@type":"Person","name":"Haeran","url":"https://kimmand0o0.github.io"},"publisher":{"@type":"Person","name":"Haeran"},"keywords":"LLM, Prompt Engineering, NLP, Alignment, RLHF, InstructGPT","inLanguage":"ko-KR","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/study/llm/2026/07/28/llm-prompting-paper-08-instructgpt.html"}}</script><link rel="icon" href="/assets/images/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png"><link rel="alternate" type="application/rss+xml" title="Haeran's blog" href="/feed.xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"><script>
+      // FOUC 방지: 렌더 전에 저장된 테마 적용
+      (() => {
+        let t = localStorage.getItem('theme');
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script><!-- Google Analytics (GA4) — Jekyll 시절 _config.yml의 google_analytics 값 그대로 --><script async src="https://www.googletagmanager.com/gtag/js?id=G-ZNXE6HSKMS"></script><script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-ZNXE6HSKMS');
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BibuzG5J.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">LLM 프롬프팅 논문 스터디 - 08. InstructGPT</h1><div class="post-meta"><time>2026.07.28</time><span class="chip">LLM</span><span class="reading tip" data-tip="이 게시글을 읽는 데 6분 정도 걸릴 것 같아요!">6분 분량</span><span class="views" data-views-path="/study/llm/2026/07/28/llm-prompting-paper-08-instructgpt.html" hidden></span><span class="comments-metric" data-comments-path="/study/llm/2026/07/28/llm-prompting-paper-08-instructgpt.html" hidden></span><span class="likes-metric" data-likes-path="/study/llm/2026/07/28/llm-prompting-paper-08-instructgpt.html" hidden></span><span class="tags"><a href="/tags.html#LLM">#LLM</a><a href="/tags.html#Prompt Engineering">#Prompt Engineering</a><a href="/tags.html#NLP">#NLP</a><a href="/tags.html#Alignment">#Alignment</a><a href="/tags.html#RLHF">#RLHF</a><a href="/tags.html#InstructGPT">#InstructGPT</a></span></div></header><div class="prose"><p>시리즈 여덟 번째 편이자 “정렬(Alignment)/안전성” 트랙의 첫 편. 지난 <a href="/study/llm/2026/07/27/llm-prompting-paper-07-toolformer.html">Toolformer</a>까지가 “모델을 어떻게 더 똑똑하게 쓸 것인가”였다면, 이번에 다룰 <a href="https://arxiv.org/abs/2203.02155"><strong>Training language models to follow instructions with human feedback</strong></a> (Ouyang et al., 2022, NeurIPS)은 질문 자체가 다르다 — **“똑똑한 것과 사용자가 원하는 대로 하는 것은 별개”**라는 이야기다. 흔히 InstructGPT라 불리고, 이후 ChatGPT로 이어지는 RLHF의 원형이 된 논문이다.</p>
+<h2 id="1-기본적인-이해부터">1. 기본적인 이해부터</h2>
+<p>쉽게 말하면, InstructGPT는 <strong>모델을 더 크게 만드는 대신 “사람이 더 좋아하는 답”을 하도록 가르친 방법</strong>이다. 순서는 세 단계다. ① 사람이 직접 모범 답변을 써서 보여주고, ② 모델이 만든 여러 답변에 사람이 “이게 저것보다 낫다”고 순위를 매기고, ③ 그 순위를 학습한 채점기의 점수가 높아지는 방향으로 모델을 강화학습시킨다.</p>
+<p>논문의 가장 유명한 결과 한 줄: <strong>13억(1.3B) 파라미터 InstructGPT의 답변이, 100배 큰 1,750억(175B) GPT-3의 답변보다 사람들에게 더 선호됐다.</strong></p>
+<h2 id="2-문제점배경">2. 문제점/배경</h2>
+<p>앞서 다룬 <a href="/study/llm/2026/07/22/llm-prompting-paper-04-gpt3-few-shot.html">GPT-3</a>는 “충분히 크면 예시 몇 개만으로 새 태스크를 한다”를 증명했다. 그런데 실제로 써보니 문제가 있었다 — <strong>모델이 학습한 목표와 사용자가 원하는 것이 애초에 다른 것이었다.</strong></p>
+<p>GPT-3의 학습 목표는 “인터넷 텍스트에서 다음 단어 맞히기”다. 반면 사용자가 원하는 건 “내 지시를 정확히, 사실에 맞게, 해롭지 않게 따르는 것”이다. 이 둘은 겹치는 부분이 많지만 같지 않다. 그래서 큰 모델일수록 유창해지긴 하는데, 동시에 **그럴듯한 거짓말(untruthful), 유해한 내용(toxic), 그냥 사용자에게 도움이 안 되는 답(not helpful)**도 유창하게 만들어냈다. 논문은 이 상태를 “모델이 사용자와 <strong>정렬(align)되지 않았다</strong>”고 부른다.</p>
+<p>핵심은, <strong>이 격차가 모델을 키운다고 저절로 좁혀지지 않는다</strong>는 점이다. 논문 첫 문장이 정확히 그 얘기다 — “언어 모델을 키운다고 해서 그 자체로 사용자 의도를 더 잘 따르게 되는 것은 아니다.” 이전 트랙이 “크기가 능력을 만든다”였다면, 이 논문은 **“능력과 의도 준수는 별개 축”**이라는 반대편 축을 세운 셈이다.</p>
+<h2 id="3-해결책의-핵심-아이디어">3. 해결책의 핵심 아이디어</h2>
+<p><strong>핵심 한 줄 요약:</strong> 사람의 선호(어느 답이 더 나은지)를 학습한 “채점기(보상 모델)“를 만들고, 그 점수를 최대화하도록 언어 모델을 강화학습시켜서 사전학습 목표와 사용자 의도 사이의 간극을 메운다.</p>
+<p><strong>단계별 설명 (3단계 파이프라인):</strong></p>
+<ol>
+<li><strong>SFT (지도 파인튜닝)</strong>: 라벨러가 직접 쓴 프롬프트 + API로 실제 제출된 프롬프트를 모아, 각각에 대해 <strong>라벨러가 이상적인 답변을 직접 작성</strong>한다. 이 (프롬프트, 모범답변) 쌍으로 GPT-3를 지도학습 파인튜닝 → <strong>SFT 모델</strong></li>
+<li><strong>RM (보상 모델 학습)</strong>: 같은 프롬프트에 대해 모델이 답변을 여러 개 생성하게 하고, <strong>라벨러가 좋은 순서대로 순위를 매긴다.</strong> 이 순위 데이터로 “이 답변을 사람이 얼마나 좋아할까”를 점수로 예측하는 별도 모델(보상 모델)을 학습
+<ul>
+<li>왜 점수를 직접 매기지 않고 <strong>순위</strong>를 매길까? 사람은 “이 답변 몇 점?”에는 일관성이 없지만 “A와 B 중 뭐가 나아?”에는 훨씬 일관되게 답한다. 비교는 안정적이고 절대 점수는 사람마다 들쭉날쭉하다</li>
+</ul>
+</li>
+<li><strong>RLHF (강화학습, PPO)</strong>: SFT 모델을 출발점으로, 답변을 생성 → 보상 모델이 점수를 매김 → 그 점수가 높아지는 방향으로 정책을 업데이트(PPO)한다. 이 루프를 반복한 결과물이 <strong>InstructGPT</strong>
+<ul>
+<li>이때 보상 점수만 좇으면 모델이 “채점기를 속이는 이상한 문장”으로 폭주할 수 있어서, **원래 모델에서 너무 멀어지지 않도록 붙잡는 페널티(KL 제약)**를 같이 건다. 채점기는 어디까지나 사람 선호의 근사치이지 사람 그 자체가 아니기 때문이다</li>
+</ul>
+</li>
+</ol>
+<p>여기서 중요한 관점 전환: <strong>사람이 정답을 다 써주는 게 아니라, 사람은 “판정”만 하고 그 판정을 모델(보상 모델)로 복제해서 무한히 쓴다.</strong> 사람이 매번 채점하면 확장이 안 되니, 사람의 취향을 학습한 채점기를 만들어 그걸 대신 돌리는 것이다.</p>
+<h2 id="4-비유예시">4. 비유/예시</h2>
+<p><strong>요리 견습생을 가르치는 과정에 비유하면:</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>단계</th><th>비유</th></tr></thead><tbody><tr><td>사전학습(GPT-3)</td><td>세상의 모든 요리책을 통째로 외운 사람 — 물어보면 뭐든 그럴듯하게 읊지만, 지금 이 손님이 뭘 원하는지에는 관심이 없다</td></tr><tr><td>1단계 SFT</td><td>선배가 옆에서 “손님이 이렇게 물으면 이렇게 내는 거야” 하고 <strong>모범 시범을 직접 보여줌</strong></td></tr><tr><td>2단계 RM</td><td>손님들에게 접시 여러 개를 내고 <strong>“어느 게 더 낫냐”고 순위만 받아서</strong>, 그걸로 “우리 손님들 입맛 예측기”를 만듦</td></tr><tr><td>3단계 RLHF</td><td>견습생이 매번 손님을 부르는 대신 <strong>그 입맛 예측기의 점수를 올리도록 계속 연습</strong></td></tr><tr><td>KL 제약</td><td>“예측기 점수만 노리다 요리가 이상해지지 않게, 원래 배운 기본기에서 너무 벗어나지 말 것”</td></tr></tbody></table>
+<p>핵심은 <strong>손님(사람)은 순위만 매기고, 실제 반복 훈련은 예측기가 대신 채점한다</strong>는 구조다. 사람의 시간은 비싸고 훈련 횟수는 많아야 하니까.</p>
+<h2 id="5-실제-동작-과정">5. 실제 동작 과정</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>[프롬프트: "6살 아이에게 달 착륙을 설명해줘"]</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>── 1단계: SFT (사람이 모범답변 작성) ──────────────</span></span>
+<span class="line"><span>라벨러가 직접 작성: "달은 밤하늘에 보이는 커다란 돌덩어리야.</span></span>
+<span class="line"><span>                    아주 오래전에 사람들이 로켓을 타고 거기까지 날아가서</span></span>
+<span class="line"><span>                    직접 발을 디뎠단다. ..."</span></span>
+<span class="line"><span>→ 이런 (프롬프트, 모범답변) 쌍 수천 개로 GPT-3 파인튜닝 → SFT 모델</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>── 2단계: RM (사람이 순위 매기기) ─────────────────</span></span>
+<span class="line"><span>같은 프롬프트에 SFT 모델이 답변 4개 생성:</span></span>
+<span class="line"><span>  A. "아폴로 11호는 1969년 7월 20일 정지궤도 전이 후 하강 단계에서..."  (어려움)</span></span>
+<span class="line"><span>  B. "달은 밤하늘의 큰 돌이야. 사람들이 로켓 타고 가서 걸었어!"        (눈높이 맞음)</span></span>
+<span class="line"><span>  C. "달 착륙은 조작이라는 주장도 있습니다."                          (부적절)</span></span>
+<span class="line"><span>  D. "설명할 수 없습니다."                                          (도움 안 됨)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>라벨러 순위:  B > A > D > C</span></span>
+<span class="line"><span>→ 이런 순위 데이터로 보상 모델 학습</span></span>
+<span class="line"><span>   보상모델(B)=높은 점수 / 보상모델(C)=낮은 점수  를 예측하게 됨</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>── 3단계: RLHF (보상 모델 점수를 최대화) ───────────</span></span>
+<span class="line"><span>SFT 모델이 답변 생성 → 보상 모델이 점수 매김 → PPO로 정책 업데이트</span></span>
+<span class="line"><span>                    ↑                                    │</span></span>
+<span class="line"><span>                    └────────── 반복 ────────────────────┘</span></span>
+<span class="line"><span>   (+ KL 페널티: 원래 SFT 모델에서 너무 멀어지면 감점)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>→ 결과: InstructGPT — 별도 few-shot 예시 없이도 지시를 의도대로 따름</span></span></code></pre>
+<p>주목할 점은 <strong>3단계 어디에도 “정답 텍스트”가 필요 없다</strong>는 것이다. 1단계만 사람이 답을 쓰고, 2·3단계는 “둘 중 뭐가 나아?”라는 비교 신호만으로 굴러간다. 정답을 정의하기 어려운 태스크(글쓰기, 상담, 대화)에도 적용할 수 있는 이유가 여기 있다.</p>
+<h2 id="그림으로-보기">그림으로 보기</h2>
+<pre class="mermaid">flowchart TB
+    subgraph S1["1단계 — SFT (지도 파인튜닝)"]
+        A1["프롬프트 수집&#x3C;br/>라벨러 작성 + API 실제 제출분"] --> A2["라벨러가 모범 답변 직접 작성"]
+        A2 --> A3["GPT-3 지도학습 파인튜닝&#x3C;br/>→ SFT 모델"]
+    end
+
+    subgraph S2["2단계 — RM (보상 모델)"]
+        B1["한 프롬프트에 답변 여러 개 생성"] --> B2["라벨러가 좋은 순서대로 순위 매김"]
+        B2 --> B3["순위 데이터로 보상 모델 학습&#x3C;br/>→ 사람 선호 점수 예측기"]
+    end
+
+    subgraph S3["3단계 — RLHF (PPO 강화학습)"]
+        C1["정책 모델이 답변 생성"] --> C2["보상 모델이 점수 부여"]
+        C2 --> C3["PPO로 정책 업데이트&#x3C;br/>+ KL 페널티로 이탈 방지"]
+        C3 --> C1
+    end
+
+    A3 --> B1
+    B3 --> C2
+    C3 --> D["InstructGPT"]
+
+    style D fill:#1e3a24,stroke:#27ae60,color:#fff</pre>
+<pre class="mermaid">flowchart LR
+    subgraph Scale["접근 A — 그냥 더 크게 만들기"]
+        direction TB
+        P1["175B GPT-3"] --> P2["다음 단어 예측은 매우 잘함"]
+        P2 --> P3["그러나 사용자 의도와 어긋남&#x3C;br/>거짓·유해·도움 안 되는 답"]
+    end
+
+    subgraph Align["접근 B — 사람 피드백으로 정렬"]
+        direction TB
+        Q1["1.3B InstructGPT"] --> Q2["사람 선호를 보상으로 학습"]
+        Q2 --> Q3["175B GPT-3보다 선호됨&#x3C;br/>파라미터는 100배 적음"]
+    end
+
+    style P3 fill:#4a1e1e,stroke:#c0392b,color:#fff
+    style Q3 fill:#1e3a24,stroke:#27ae60,color:#fff</pre>
+<p>위쪽은 SFT → RM → RLHF 3단계가 어떻게 물리는지를, 아래쪽은 이 논문의 핵심 대비(“크기”가 아니라 “정렬”이 사용자 만족을 만든다)를 보여준다.</p>
+<h2 id="6-결과장점">6. 결과/장점</h2>
+<ul>
+<li><strong>크기보다 정렬이 중요하다는 실증</strong>: 1.3B InstructGPT의 출력이 175B GPT-3보다 사람 평가에서 선호됐다. 파라미터 100배 차이를 정렬 기법이 뒤집은 것 — “성능을 올리려면 모델을 키워야 한다”는 스케일링 일변도 사고에 대한 강력한 반례</li>
+<li><strong>정답 없는 태스크에도 적용 가능</strong>: 비교(순위) 신호만 있으면 되므로, 글쓰기·요약·대화처럼 정답을 못 박기 어려운 영역에 쓸 수 있음</li>
+<li><strong>진실성 향상과 유해 출력 감소</strong>: 공개 NLP 벤치마크 성능 저하는 최소한으로 유지하면서 개선 — 다만 정렬 학습이 일부 벤치마크 성능을 깎는 현상은 **“정렬 세금(alignment tax)“**이라 불리며, 논문도 이를 완화 대상으로 다룬다</li>
+<li><strong>이 논문 이후의 표준이 됨</strong>: SFT → RM → RLHF 3단계는 이후 대화형 모델 학습의 사실상 기본 레시피가 됐다</li>
+</ul>
+<h2 id="실무-적용-아이디어">실무 적용 아이디어</h2>
+<p>캐릭터 기반 채팅 서비스를 운영하다 보면 사용자 신고 데이터가 쌓이는데, 보통은 개별 건의 판정과 보상 처리에만 쓰이고 거기서 끝난다. 이 논문의 관점을 빌리면 그건 <strong>이미 확보된 사람 피드백 데이터</strong>다. RLHF 파이프라인을 직접 돌리자는 얘기가 아니라(대부분의 서비스에선 비용·규모가 안 맞는다), 반복해서 올라오는 신고 유형을 정례적으로 모아 프롬프트와 가드레일 개정 주기에 투입하는 루프를 만드는 게 현실적인 축소판이다. 사람 판정에서 시스템 개선으로 이어지는 순환이 끊겨 있는 게 흔한 문제다.</p>
+<p>“순위가 절대 점수보다 안정적”이라는 부분도 그대로 실무에 옮길 수 있다. 응답 품질을 평가할 때 “이 응답 몇 점?”으로 재면 평가 기준 자체가 계속 흔들리는데, 같은 상황의 응답 두 개를 놓고 “어느 쪽이 더 나은가”를 묻는 형태로 바꾸면 판정 일관성이 올라간다. 논문이 보상 모델을 순위 데이터로 학습시킨 이유가 정확히 이것이다.</p>
+<p>마지막으로 <strong>정렬 세금</strong>은 이름을 알아두는 것만으로도 값어치가 있다. 안전 가드를 조일수록 응답의 표현력이나 재미가 깎이는 트레이드오프는 실제로 존재하고, 논문이 이를 측정 대상으로 명시했다. 가드레일을 강화할 때 “안전은 올랐는데 무언가 빠졌다”를 측정 없이 넘어가지 않는 게 중요하다 — 두 축을 같이 봐야 한다.</p>
+<hr>
+<p>다음은 정렬/안전성 트랙의 마지막 편, <strong>Constitutional AI (Bai et al., 2022)</strong> — 사람이 유해성 라벨을 달지 않고 원칙 목록만으로 모델을 정렬시키는 방법으로 이어간다.</p></div><div class="like-box"><button type="button" id="like-btn" class="tip" data-tip="이 게시글이 마음에 든다면 따봉을 눌러주세요!" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg><span id="like-count">0</span></button></div><nav class="series-nav" aria-label="시리즈 이동"><p class="series-head"><span class="series-name">LLM 프롬프팅 논문 스터디</span><span class="series-pos">9편 중 8번째</span></p><div class="series-links"><a class="series-prev" href="/study/llm/2026/07/27/llm-prompting-paper-07-toolformer.html"><span class="series-dir">← 이전 편</span><span class="series-title">LLM 프롬프팅 논문 스터디 - 07. Toolformer</span></a><a class="series-next" href="/study/llm/2026/07/28/llm-prompting-paper-09-constitutional-ai.html"><span class="series-dir">다음 편 →</span><span class="series-title">LLM 프롬프팅 논문 스터디 - 09. Constitutional AI</span></a></div></nav><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><p class="reply-to" id="reply-to" hidden><span id="reply-to-label"></span><button type="button" id="reply-cancel">취소</button></p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/study/llm/2026/07/28/llm-prompting-paper-08-instructgpt.html";
+const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
+        // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
+        (() => {
+          const key = 'viewed:' + viewPath;
+          try {
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+          } catch (e) {
+            // 프라이빗 모드 등으로 storage 가 막히면 중복 제거 없이 그냥 기록한다
+          }
+          fetch(chatOrigin + '/api/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: viewPath }),
+            keepalive: true,
+          }).catch(() => {});
+        })();
+      })();</script><script>(function(){const likePath = "/study/llm/2026/07/28/llm-prompting-paper-08-instructgpt.html";
+const likeApi = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        {
+          const btn = document.getElementById('like-btn');
+          const countEl = document.getElementById('like-count');
+          const key = 'liked:' + likePath;
+          // "이미 눌렀는지"는 브라우저가 기억한다 — 로그인이 없으니 여기까지가 최선
+          const likedNow = () => {
+            try { return localStorage.getItem(key) === '1'; } catch { return false; }
+          };
+          const paint = (n) => {
+            countEl.textContent = n;
+            const on = likedNow();
+            btn.classList.toggle('liked', on);
+            btn.setAttribute('aria-pressed', String(on));
+            btn.dataset.tip = on
+              ? '추천을 취소하려면 다시 눌러주세요'
+              : '이 게시글이 마음에 든다면 따봉을 눌러주세요!';
+          };
+
+          fetch(`${likeApi}/api/likes/top?limit=1000`)
+            .then((r) => (r.ok ? r.json() : null))
+            .then((json) => {
+              const hit = (json?.items ?? []).find((i) => i.path === likePath);
+              paint(hit ? hit.likes : 0);
+            })
+            .catch(() => paint(0));
+
+          btn.addEventListener('click', async () => {
+            const on = likedNow();
+            btn.disabled = true;
+            try {
+              const res = await fetch(`${likeApi}/api/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: likePath, action: on ? 'remove' : 'add' }),
+              });
+              if (res.ok) {
+                const { likes } = await res.json();
+                try { on ? localStorage.removeItem(key) : localStorage.setItem(key, '1'); } catch {}
+                paint(likes);
+              }
+            } catch {
+              /* 추천 실패는 조용히 넘긴다 — 글 읽기에 영향 없음 */
+            } finally {
+              btn.disabled = false;
+            }
+          });
+        }
+      })();</script><script>(function(){const commentPath = "/study/llm/2026/07/28/llm-prompting-paper-08-instructgpt.html";
+const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        {
+          const list = document.getElementById('comment-list');
+          const empty = document.getElementById('comment-empty');
+          const countEl = document.getElementById('comments-count');
+          const form = document.getElementById('comment-form');
+          const status = document.getElementById('comment-status');
+          const submit = document.getElementById('comment-submit');
+
+          const fmt = (iso) => {
+            const d = new Date(iso);
+            const p = (n) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+          };
+
+          let replyTo = null;
+          const replyBar = document.getElementById('reply-to');
+          const replyLabel = document.getElementById('reply-to-label');
+
+          const setReplyTo = (c) => {
+            replyTo = c;
+            replyBar.hidden = !c;
+            if (c) {
+              replyLabel.textContent = `${c.author}님에게 답글`;
+              document.getElementById('comment-body').focus();
+            }
+          };
+          document.getElementById('reply-cancel').addEventListener('click', () => setReplyTo(null));
+
+          // textContent 로만 넣는다 — 사용자 입력을 HTML 로 해석하지 않기 위해
+          const nodeFor = (c) => {
+            const li = document.createElement('li');
+            if (c.is_bot) li.classList.add('is-bot');
+            if (c.parent_id) li.classList.add('is-reply');
+
+            const head = document.createElement('div');
+            head.className = 'comment-head';
+            const who = document.createElement('span');
+            who.className = 'comment-author';
+            who.textContent = c.author;
+            if (c.is_bot) {
+              const badge = document.createElement('span');
+              badge.className = 'bot-badge';
+              badge.textContent = 'AI';
+              who.appendChild(badge);
+            }
+            const when = document.createElement('time');
+            when.textContent = fmt(c.created_at);
+            head.append(who, when);
+
+            const body = document.createElement('p');
+            body.className = 'comment-body';
+            body.textContent = c.body;
+
+            const reply = document.createElement('button');
+            reply.type = 'button';
+            reply.className = 'reply-btn';
+            reply.textContent = '답글';
+            reply.addEventListener('click', () => setReplyTo(c));
+
+            li.append(head, body, reply);
+            return li;
+          };
+
+          const render = (items) => {
+            list.textContent = '';
+            const children = new Map();
+            for (const c of items) {
+              if (!c.parent_id) continue;
+              if (!children.has(c.parent_id)) children.set(c.parent_id, []);
+              children.get(c.parent_id).push(c);
+            }
+            for (const c of items) {
+              if (c.parent_id) continue; // 답글은 부모 아래에서 그린다
+              const li = nodeFor(c);
+              const kids = children.get(c.id);
+              if (kids?.length) {
+                const sub = document.createElement('ul');
+                sub.className = 'comment-replies';
+                kids.forEach((k) => sub.appendChild(nodeFor(k)));
+                li.appendChild(sub);
+              }
+              list.appendChild(li);
+            }
+            countEl.textContent = items.length ? items.length : '';
+            empty.hidden = items.length > 0;
+          };
+
+          const load = () =>
+            fetch(`${api}/api/comments?path=${encodeURIComponent(commentPath)}`)
+              .then((r) => (r.ok ? r.json() : null))
+              .then((json) => render(json?.items ?? []))
+              .catch(() => {
+                empty.textContent = '댓글을 불러오지 못했어요.';
+                empty.hidden = false;
+              });
+
+          load();
+
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const author = document.getElementById('comment-author').value.trim();
+            const body = document.getElementById('comment-body').value.trim();
+            if (!author || !body) return;
+
+            submit.disabled = true;
+            status.textContent = '등록 중…';
+            try {
+              const res = await fetch(`${api}/api/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  path: commentPath,
+                  author,
+                  body,
+                  parentId: replyTo ? replyTo.id : undefined,
+                  website: document.getElementById('comment-website').value,
+                }),
+              });
+              if (res.status === 429) {
+                status.textContent = '조금 뒤에 다시 시도해주세요.';
+              } else if (!res.ok) {
+                status.textContent = '등록에 실패했어요.';
+              } else {
+                document.getElementById('comment-body').value = '';
+                setReplyTo(null);
+                status.textContent = '만두봇이 읽는 중…';
+                await load();
+                // 봇 답글은 뒤에서 생성되므로 잠시 뒤 한 번 더 가져온다
+                setTimeout(async () => {
+                  await load();
+                  status.textContent = '';
+                }, 6000);
+              }
+            } catch {
+              status.textContent = '등록에 실패했어요.';
+            } finally {
+              submit.disabled = false;
+            }
+          });
+        }
+      })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#1-기본적인-이해부터">1. 기본적인 이해부터</a></li><li class="depth-2"><a href="#2-문제점배경">2. 문제점/배경</a></li><li class="depth-2"><a href="#3-해결책의-핵심-아이디어">3. 해결책의 핵심 아이디어</a></li><li class="depth-2"><a href="#4-비유예시">4. 비유/예시</a></li><li class="depth-2"><a href="#5-실제-동작-과정">5. 실제 동작 과정</a></li><li class="depth-2"><a href="#그림으로-보기">그림으로 보기</a></li><li class="depth-2"><a href="#6-결과장점">6. 결과/장점</a></li><li class="depth-2"><a href="#실무-적용-아이디어">실무 적용 아이디어</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+      // 조회수·댓글수·추천수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 자리에 넣는다.
+      // 0도 그대로 보여준다(자리를 비우면 "기능이 사라진 것"처럼 보인다).
+      // 워커 응답 자체가 실패했을 때만 자리를 비워둔다.
+      const METRIC_ICON = {
+        views:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
+        comments:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg>',
+        likes:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>',
+      };
+
+      function fillViews(root) {
+        const put = (attr, map, icon, label) => {
+          if (!map) return;
+          root.querySelectorAll('[' + attr + ']').forEach((el) => {
+            const n = map[el.getAttribute(attr)] ?? 0;
+            el.innerHTML = icon + '<span>' + n.toLocaleString() + '</span>';
+            el.setAttribute('aria-label', label + ' ' + n);
+            el.hidden = false;
+          });
+        };
+        put('data-views-path', window.__views, METRIC_ICON.views, '조회수');
+        put('data-comments-path', window.__comments, METRIC_ICON.comments, '댓글 수');
+        put('data-likes-path', window.__likes, METRIC_ICON.likes, '추천 수');
+      }
+      window.fillViews = fillViews;
+
+      {
+        const api = 'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev';
+        const get = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+        window.__viewsReady = Promise.all([
+          get(api + '/api/views/top?limit=1000'),
+          get(api + '/api/comments/counts'),
+          get(api + '/api/likes/top?limit=1000'),
+        ]).then(([views, comments, likes]) => {
+          // 셋 다 실패했다면 지표 자체를 못 받은 것 — 0 을 지어내지 않고 자리를 비워둔다
+          if (!views && !comments && !likes) return {};
+          window.__views = Object.fromEntries((views?.items ?? []).map((i) => [i.path, i.views]));
+          window.__comments = Object.fromEntries(
+            (comments?.items ?? []).map((i) => [i.path, i.count])
+          );
+          window.__likes = Object.fromEntries((likes?.items ?? []).map((i) => [i.path, i.likes]));
+          fillViews(document);
+          return window.__views;
+        });
+      }
+
+      // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
+      (() => {
+        const root = document.documentElement;
+        function sync() {
+          root.setAttribute('data-scrolled', window.scrollY > 8 ? 'true' : 'false');
+        }
+        sync();
+        window.addEventListener('scroll', sync, { passive: true });
+      })();
+
+      // 목차 — 현재 읽고 있는 섹션 표시
+      (() => {
+        const links = document.querySelectorAll('.toc a');
+        if (!links.length) return;
+        const map = {};
+        const targets = [];
+        links.forEach((a) => {
+          const id = decodeURIComponent(a.getAttribute('href').slice(1));
+          const el = document.getElementById(id);
+          if (el) {
+            map[id] = a;
+            targets.push(el);
+          }
+        });
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (!e.isIntersecting) return;
+              links.forEach((a) => { a.classList.remove('active'); });
+              const a = map[e.target.id];
+              if (a) a.classList.add('active');
+            });
+          },
+          // 헤더 아래 상단 밴드에 들어온 헤딩을 현재 섹션으로 본다
+          { rootMargin: '-72px 0px -75% 0px' }
+        );
+        targets.forEach((el) => { io.observe(el); });
+      })();
+
+      // 글 제목이 헤더 위로 지나가면, 소개 문구 자리를 제목으로 바꿔치기
+      {
+        const postTitle = document.querySelector('article.post h1.post-title');
+        const slot = document.querySelector('.header-post-title');
+        const tagline = document.querySelector('.tagline');
+        if (postTitle && slot && tagline) {
+          // 제목은 span 으로 감싼다 — 넘칠 때 이 span 만 흐르게 하려고
+          const inner = document.createElement('span');
+          inner.textContent = postTitle.textContent.trim();
+          slot.appendChild(inner);
+          // 슬롯 폭보다 길면 잘라내는 대신 흐르게 한다
+          requestAnimationFrame(() => {
+            if (inner.scrollWidth > slot.clientWidth + 2) slot.classList.add('is-long');
+          });
+          const io = new IntersectionObserver(
+            ([entry]) => {
+              const hidden = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+              slot.hidden = !hidden;
+              tagline.hidden = hidden;
+            },
+            { rootMargin: '-4px 0px 0px 0px', threshold: 0 }
+          );
+          io.observe(postTitle);
+        }
+      }
+
+      // 정렬 필터 접기/펼치기 — 선택된 항목만 보이고, 누르면 스르륵 펼쳐진다
+      {
+        const bar = document.querySelector('.sort-bar');
+        if (bar) {
+          const toggle = bar.querySelector('.sort-toggle');
+          const current = bar.querySelector('.sort-current');
+          const setOpen = (open) => {
+            bar.classList.toggle('open', open);
+            toggle.setAttribute('aria-expanded', String(open));
+          };
+          toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setOpen(!bar.classList.contains('open'));
+          });
+          // 항목을 고르면 라벨을 바꾸고 접는다 (정렬 자체는 각 페이지 스크립트가 처리)
+          bar.querySelectorAll('.sort-btn').forEach((b) => {
+            b.addEventListener('click', () => {
+              current.textContent = b.textContent.trim();
+              setOpen(false);
+            });
+          });
+          document.addEventListener('click', (e) => {
+            if (bar.classList.contains('open') && !bar.contains(e.target)) setOpen(false);
+          });
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') setOpen(false);
+          });
+        }
+      }
+
+      // 모바일 햄버거 메뉴
+      {
+        const toggle = document.getElementById('nav-toggle');
+        const nav = document.getElementById('site-nav');
+        const setOpen = (open) => {
+          nav.classList.toggle('open', open);
+          toggle.setAttribute('aria-expanded', String(open));
+          toggle.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+          toggle.classList.toggle('is-open', open);
+        };
+        toggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          setOpen(!nav.classList.contains('open'));
+        });
+        // 메뉴 밖을 누르거나 ESC 를 누르면 닫는다
+        document.addEventListener('click', (e) => {
+          if (nav.classList.contains('open') && !nav.contains(e.target)) setOpen(false);
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') setOpen(false);
+        });
+      }
+
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const next =
+          document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+      });
+    </script> <script type="module">
+      // mermaid 클라이언트 렌더 (기존 Jekyll 셋업과 동일하게 mermaid@10 사용)
+      if (document.querySelector('pre.mermaid')) {
+        const { default: mermaid } = await import(
+          'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'
+        );
+        mermaid.initialize({
+          startOnLoad: false,
+          theme:
+            document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+        });
+        mermaid.run({ querySelector: 'pre.mermaid' });
+      }
+    </script> </body> </html>

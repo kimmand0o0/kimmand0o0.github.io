@@ -1,0 +1,573 @@
+<!DOCTYPE html><html lang="ko" data-width="wide"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>LLM 프롬프팅 논문 스터디 - 09. Constitutional AI | Haeran&#39;s blog</title><meta name="description" content="시리즈 아홉 번째 편이자 &#34;정렬/안전성&#34; 트랙의 마지막 편. 지난 InstructGPT가 세운 RLHF 레시피는 강력했지만, 무해성을 학습시키려면 사람이 유해한 출력을 잔뜩 읽고 라벨을 달아야 한다는 부담이 그대로 남아 있었다. 이번에 다룰 Constitutional AI: H…"><link rel="canonical" href="https://kimmand0o0.github.io/study/llm/2026/07/28/llm-prompting-paper-09-constitutional-ai.html"><meta property="og:type" content="article"><meta property="og:site_name" content="Haeran's blog"><meta property="og:title" content="LLM 프롬프팅 논문 스터디 - 09. Constitutional AI"><meta property="og:description" content="시리즈 아홉 번째 편이자 &#34;정렬/안전성&#34; 트랙의 마지막 편. 지난 InstructGPT가 세운 RLHF 레시피는 강력했지만, 무해성을 학습시키려면 사람이 유해한 출력을 잔뜩 읽고 라벨을 달아야 한다는 부담이 그대로 남아 있었다. 이번에 다룰 Constitutional AI: H…"><meta property="og:url" content="https://kimmand0o0.github.io/study/llm/2026/07/28/llm-prompting-paper-09-constitutional-ai.html"><meta property="og:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpeg"><meta property="og:locale" content="ko_KR"><meta property="article:published_time" content="2026-07-28T02:00:00.000Z"><meta property="article:tag" content="LLM"><meta property="article:tag" content="Prompt Engineering"><meta property="article:tag" content="NLP"><meta property="article:tag" content="Alignment"><meta property="article:tag" content="Safety"><meta property="article:tag" content="RLAIF"><meta property="article:tag" content="Constitutional AI"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="LLM 프롬프팅 논문 스터디 - 09. Constitutional AI"><meta name="twitter:description" content="시리즈 아홉 번째 편이자 &#34;정렬/안전성&#34; 트랙의 마지막 편. 지난 InstructGPT가 세운 RLHF 레시피는 강력했지만, 무해성을 학습시키려면 사람이 유해한 출력을 잔뜩 읽고 라벨을 달아야 한다는 부담이 그대로 남아 있었다. 이번에 다룰 Constitutional AI: H…"><meta name="twitter:image" content="https://kimmand0o0.github.io/assets/images/default-image.jpeg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"LLM 프롬프팅 논문 스터디 - 09. Constitutional AI","description":"시리즈 아홉 번째 편이자 \"정렬/안전성\" 트랙의 마지막 편. 지난 InstructGPT가 세운 RLHF 레시피는 강력했지만, 무해성을 학습시키려면 사람이 유해한 출력을 잔뜩 읽고 라벨을 달아야 한다는 부담이 그대로 남아 있었다. 이번에 다룰 Constitutional AI: H…","url":"https://kimmand0o0.github.io/study/llm/2026/07/28/llm-prompting-paper-09-constitutional-ai.html","datePublished":"2026-07-28T02:00:00.000Z","dateModified":"2026-07-28T02:00:00.000Z","author":{"@type":"Person","name":"Haeran","url":"https://kimmand0o0.github.io"},"publisher":{"@type":"Person","name":"Haeran"},"keywords":"LLM, Prompt Engineering, NLP, Alignment, Safety, RLAIF, Constitutional AI","inLanguage":"ko-KR","mainEntityOfPage":{"@type":"WebPage","@id":"https://kimmand0o0.github.io/study/llm/2026/07/28/llm-prompting-paper-09-constitutional-ai.html"}}</script><link rel="icon" href="/assets/images/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png"><link rel="alternate" type="application/rss+xml" title="Haeran's blog" href="/feed.xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"><script>
+      // FOUC 방지: 렌더 전에 저장된 테마 적용
+      (() => {
+        let t = localStorage.getItem('theme');
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script><!-- Google Analytics (GA4) — Jekyll 시절 _config.yml의 google_analytics 값 그대로 --><script async src="https://www.googletagmanager.com/gtag/js?id=G-ZNXE6HSKMS"></script><script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-ZNXE6HSKMS');
+    </script><!-- 블로그 RAG 챗봇 위젯 — 소스는 chat/widget/chat-widget.js, 서빙 사본은 public/assets/js/chat-widget.js --><script src="/assets/js/chat-widget.js" data-endpoint="https://kimmand0o0-blog-chat.kimmand0o0.workers.dev/api/chat" defer></script><link rel="stylesheet" href="/_astro/_slug_.BibuzG5J.css"></head> <body> <!-- 헤더는 뷰포트 전체 폭 — 안쪽 컨텐츠만 본문과 같은 폭으로 정렬한다 --> <header class="site-header"> <div class="header-inner"> <div class="brand-block"> <a class="brand" href="/">haeran<span style="color: var(--accent);">'s</span> blog</a> <p class="tagline">실무에서 <strong>얻어맞은 자리</strong>를 글로 되갚는 곳.</p>  <p class="header-post-title" hidden></p> </div> <div class="header-actions"> <nav id="site-nav"> <a href="/archives.html"> Archives </a><a href="/tags.html"> Tags </a><a href="/about.html"> About </a><a href="/search.html"> Search </a> </nav> <button id="theme-toggle" aria-label="테마 전환">◐</button>  <button id="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"> <span></span><span></span><span></span> </button> </div> </div> </header> <div class="wrap"> <main><div class="post-layout"><article class="post"><header><h1 class="post-title">LLM 프롬프팅 논문 스터디 - 09. Constitutional AI</h1><div class="post-meta"><time>2026.07.28</time><span class="chip">LLM</span><span class="reading tip" data-tip="이 게시글을 읽는 데 7분 정도 걸릴 것 같아요!">7분 분량</span><span class="views" data-views-path="/study/llm/2026/07/28/llm-prompting-paper-09-constitutional-ai.html" hidden></span><span class="comments-metric" data-comments-path="/study/llm/2026/07/28/llm-prompting-paper-09-constitutional-ai.html" hidden></span><span class="likes-metric" data-likes-path="/study/llm/2026/07/28/llm-prompting-paper-09-constitutional-ai.html" hidden></span><span class="tags"><a href="/tags.html#LLM">#LLM</a><a href="/tags.html#Prompt Engineering">#Prompt Engineering</a><a href="/tags.html#NLP">#NLP</a><a href="/tags.html#Alignment">#Alignment</a><a href="/tags.html#Safety">#Safety</a><a href="/tags.html#RLAIF">#RLAIF</a><a href="/tags.html#Constitutional AI">#Constitutional AI</a></span></div></header><div class="prose"><p>시리즈 아홉 번째 편이자 “정렬/안전성” 트랙의 마지막 편. 지난 <a href="/study/llm/2026/07/28/llm-prompting-paper-08-instructgpt.html">InstructGPT</a>가 세운 RLHF 레시피는 강력했지만, 무해성을 학습시키려면 사람이 유해한 출력을 잔뜩 읽고 라벨을 달아야 한다는 부담이 그대로 남아 있었다. 이번에 다룰 <a href="https://arxiv.org/abs/2212.08073"><strong>Constitutional AI: Harmlessness from AI Feedback</strong></a> (Bai et al., 2022)은 그 라벨링을 <strong>원칙 목록 한 장</strong>으로 대체하려는 시도다.</p>
+<h2 id="1-기본적인-이해부터">1. 기본적인 이해부터</h2>
+<p>쉽게 말하면, Constitutional AI(CAI)는 <strong>“사람이 유해한 답변에 일일이 빨간펜을 긋는 대신, 모델에게 원칙 목록(헌법)을 주고 스스로 자기 답을 비판하고 고쳐 쓰게 만드는” 방법</strong>이다.</p>
+<p>과정은 두 단계다. ① 모델이 답을 하나 만들면, 헌법 조항 하나를 뽑아 <strong>“이 답의 어디가 그 원칙에 어긋나는지 지적해봐”(비판)</strong> → **“그 지적을 반영해서 다시 써봐”(수정)**를 시키고, 그 수정본으로 파인튜닝한다. ② 그다음엔 응답 두 개 중 어느 쪽이 헌법에 더 부합하는지도 <strong>사람이 아니라 AI가</strong> 고르게 해서 강화학습을 돌린다. 이 두 번째를 논문은 **RLAIF(RL from AI Feedback)**라 부른다 — RLHF에서 H(Human)가 AI로 바뀐 것이다.</p>
+<h2 id="2-문제점배경">2. 문제점/배경</h2>
+<p>InstructGPT가 세운 RLHF 레시피는 강력했지만, <strong>무해성(harmlessness) 쪽에서 두 가지가 걸렸다.</strong></p>
+<p><strong>첫째, 사람 라벨링이 병목이다.</strong> 유해성을 학습시키려면 사람이 유해한 출력을 잔뜩 읽고 “이건 나쁨”이라고 표시해야 한다. 비용이 크고, 확장도 안 되고, <strong>라벨러가 계속 유해 콘텐츠에 노출된다</strong>는 부담까지 있다. 모델이 커지고 다뤄야 할 위험 유형이 늘어날수록 이 방식은 버티기 어렵다.</p>
+<p><strong>둘째, 무해성만 밀면 어시스턴트가 쓸모없어진다.</strong> “안전하게”를 강하게 학습시키면 모델은 가장 쉬운 길을 택한다 — 조금이라도 민감하면 **“그건 답변할 수 없습니다”만 반복하는 회피형(evasive)**이 되는 것이다. 사용자 입장에선 유해하진 않은데 도움도 안 된다. 즉 <strong>도움됨(helpfulness)과 무해함(harmlessness)이 서로 잡아당기는 긴장 관계</strong>에 있고, 사람 라벨만으로는 이 균형을 잡기 어려웠다.</p>
+<p>여기에 하나 더 있다. RLHF에서 “무엇이 유해한가”는 라벨러들의 판단 속에 암묵적으로만 존재한다. <strong>어떤 기준으로 그렇게 판정했는지가 문서로 남지 않으니, 나중에 기준을 바꾸거나 감사하기가 어렵다.</strong></p>
+<h2 id="3-해결책의-핵심-아이디어">3. 해결책의 핵심 아이디어</h2>
+<p><strong>핵심 한 줄 요약:</strong> 판단 기준을 사람 머릿속이 아니라 **명시적인 원칙 목록(헌법)**으로 꺼내 놓고, 그 원칙에 비추어 모델이 스스로 비판·수정하게 만들어 사람의 유해성 라벨 없이 무해성을 학습시킨다.</p>
+<p><strong>단계별 설명 (2단계):</strong></p>
+<p><strong>[1단계] 지도학습(SL) — 비판·수정 루프로 데이터 만들기</strong></p>
+<ol>
+<li>유해한 답을 유도하는 프롬프트(red-team 프롬프트)를 모델에 던져 <strong>일부러 문제 있는 초기 응답</strong>을 받는다</li>
+<li>헌법에서 원칙 하나를 뽑아 붙인다 → <strong>“이 응답이 이 원칙에 비추어 무엇이 문제인지 지적하라”(critique)</strong></li>
+<li>그 지적을 근거로 <strong>“응답을 다시 쓰라”(revision)</strong></li>
+<li>2~3을 여러 번 반복하면 응답이 점점 원칙에 맞게 다듬어진다</li>
+<li><strong>최종 수정본</strong>들을 모아 (프롬프트, 수정된 응답) 쌍으로 모델을 지도 파인튜닝</li>
+</ol>
+<p><strong>[2단계] 강화학습(RL) — RLAIF</strong></p>
+<ol start="6">
+<li>1단계로 파인튜닝된 모델이 한 프롬프트에 응답을 <strong>두 개</strong> 생성한다</li>
+<li><strong>사람 대신 AI가</strong> “헌법의 이 원칙에 비추어 A와 B 중 어느 쪽이 더 나은가”를 판정한다 → AI 선호 데이터</li>
+<li>그 선호 데이터로 선호 모델(preference model)을 학습하고, 그 점수를 최대화하도록 강화학습 → 최종 모델</li>
+</ol>
+<p>InstructGPT 구조와 겹쳐 보면 뼈대는 같다 — <strong>지도 파인튜닝 → 선호 모델 → 강화학습</strong>. 바뀐 건 딱 하나, <strong>무해성 부분의 라벨을 사람이 아니라 헌법을 든 AI가 만든다</strong>는 점이다.</p>
+<p>결과적으로 이 모델은 유해한 질문에 그냥 입을 닫는 게 아니라, <strong>왜 그 요청에 응할 수 없는지를 설명하면서 대응한다.</strong> 회피가 아니라 근거를 밝힌 거절이다 — 원칙이 문장으로 주어져 있으니 그 문장을 근거로 설명할 수 있는 것이다.</p>
+<h2 id="4-비유예시">4. 비유/예시</h2>
+<p><strong>신입 교육 방식에 비유하면:</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th></th><th>RLHF (InstructGPT 방식)</th><th>Constitutional AI</th></tr></thead><tbody><tr><td>기준의 위치</td><td>감사팀(라벨러) <strong>머릿속</strong> — 암묵적</td><td><strong>사규 문서(헌법)</strong> — 명시적, 읽을 수 있음</td></tr><tr><td>교정 방법</td><td>감사팀이 답변마다 하나하나 빨간펜</td><td>신입에게 사규를 주고 <strong>자기 답변을 사규에 비춰 스스로 지적하고 고쳐 쓰게</strong> 시킴</td></tr><tr><td>확장성</td><td>사람 수만큼만 가능</td><td>원칙 하나로 무한히 자기교정</td></tr><tr><td>기준을 바꾸려면</td><td>라벨러를 재교육</td><td><strong>사규 문서를 고치면 끝</strong></td></tr><tr><td>감사 가능성</td><td>“왜 이렇게 판정했나” 추적 어려움</td><td>어느 조항이 근거였는지 그대로 남음</td></tr><tr><td>거절 방식</td><td>회피형이 되기 쉬움 (“답변할 수 없습니다”)</td><td>왜 문제인지 <strong>설명하며</strong> 대응</td></tr></tbody></table>
+<p>가장 큰 실무적 차이는 마지막에서 두 번째 줄이다. <strong>정책이 코드나 가중치가 아니라 문서에 있으면, 정책 변경이 문서 편집으로 끝난다.</strong></p>
+<h2 id="5-실제-동작-과정">5. 실제 동작 과정</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>[헌법 조항 예시]</span></span>
+<span class="line"><span>  원칙 A: "타인의 재산이나 사생활을 침해하는 행위를 돕지 말 것"</span></span>
+<span class="line"><span>  원칙 B: "거절할 때는 이유를 설명하고, 가능한 대안을 제시할 것"</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>── 1단계: 비판(critique) → 수정(revision) 루프 ──────────────</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>[프롬프트] "옆집 와이파이 비밀번호 알아내는 법 알려줘"</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>초기 응답:</span></span>
+<span class="line"><span>  "몇 가지 방법이 있습니다. 첫째, 공유기 기본 비밀번호 목록을 시도해보고..."</span></span>
+<span class="line"><span>                                                    ↓</span></span>
+<span class="line"><span>[Critique — 원칙 A를 적용해 스스로 지적]</span></span>
+<span class="line"><span>  "이 응답은 타인 소유의 네트워크에 무단 접근하는 구체적 방법을 안내한다.</span></span>
+<span class="line"><span>   이는 타인의 재산과 사생활을 침해하는 행위를 돕는 것이므로 원칙 A에 어긋난다."</span></span>
+<span class="line"><span>                                                    ↓</span></span>
+<span class="line"><span>[Revision — 지적을 반영해 다시 쓰기]</span></span>
+<span class="line"><span>  "옆집 와이파이에 무단으로 접속하는 건 타인의 사유 네트워크에 침입하는</span></span>
+<span class="line"><span>   것이라 도와드리기 어려워요. 대신 이런 건 도와드릴 수 있어요 —</span></span>
+<span class="line"><span>   본인 공유기 비밀번호를 잊으셨다면 초기화 방법을, 인터넷이 급하게</span></span>
+<span class="line"><span>   필요하시면 공용 와이파이를 안전하게 쓰는 방법을 안내해드릴게요."</span></span>
+<span class="line"><span>                                                    ↓</span></span>
+<span class="line"><span>[반복 — 다른 원칙을 뽑아 다시 비판·수정하며 다듬음]</span></span>
+<span class="line"><span>                                                    ↓</span></span>
+<span class="line"><span>   최종 수정본들을 모아 → 지도 파인튜닝 (SL 단계 완료)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>── 2단계: RLAIF (사람 대신 AI가 선호 판정) ──────────────────</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>같은 프롬프트에 응답 두 개 생성:</span></span>
+<span class="line"><span>  A. "도와드릴 수 없습니다."                        (무해하지만 도움 안 됨)</span></span>
+<span class="line"><span>  B. "무단 접속은 도와드리기 어렵고, 대신 ...를 안내드릴게요."  (무해 + 도움됨)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  [사람 라벨러 X]  →  [AI가 헌법 원칙 B에 비추어 판정 O]</span></span>
+<span class="line"><span>  판정: B > A  ("이유를 설명하고 대안을 제시했으므로 원칙 B에 더 부합")</span></span>
+<span class="line"><span>                                                    ↓</span></span>
+<span class="line"><span>   AI 선호 데이터 → 선호 모델 학습 → 강화학습 → 최종 모델</span></span></code></pre>
+<p>이 흐름에서 <strong>사람이 유해 콘텐츠를 읽고 라벨을 다는 지점이 한 군데도 없다.</strong> 사람이 하는 일은 앞단에서 <strong>헌법 원칙을 작성하는 것</strong>으로 옮겨갔다. 노동의 총량이 준 게 아니라, <strong>일회성 원칙 작성</strong>으로 성격이 바뀐 것이다.</p>
+<h2 id="그림으로-보기">그림으로 보기</h2>
+<pre class="mermaid">flowchart TB
+    subgraph SL["1단계 — SL: 비판·수정으로 데이터 생성"]
+        A1["red-team 프롬프트 투입"] --> A2["문제 있는 초기 응답"]
+        A2 --> A3["헌법 원칙 1개 선택"]
+        A3 --> A4["Critique&#x3C;br/>원칙에 비추어 문제점 자가 지적"]
+        A4 --> A5["Revision&#x3C;br/>지적 반영해 다시 쓰기"]
+        A5 -->|"다른 원칙으로 반복"| A3
+        A5 --> A6["최종 수정본으로&#x3C;br/>지도 파인튜닝"]
+    end
+
+    subgraph RL["2단계 — RL: RLAIF"]
+        B1["응답 2개 생성"] --> B2["AI가 헌법 기준으로&#x3C;br/>어느 쪽이 나은지 판정"]
+        B2 --> B3["AI 선호 데이터로&#x3C;br/>선호 모델 학습"]
+        B3 --> B4["강화학습으로 정책 업데이트"]
+    end
+
+    A6 --> B1
+    B4 --> C["설명하며 거절하는 모델&#x3C;br/>회피형 아님"]
+
+    style C fill:#1e3a24,stroke:#27ae60,color:#fff</pre>
+<pre class="mermaid">flowchart LR
+    subgraph RLHF["RLHF — 사람이 유해성 라벨링"]
+        direction TB
+        H1["사람이 유해 출력을&#x3C;br/>직접 읽고 라벨링"] --> H2["비용·확장 한계&#x3C;br/>라벨러 노출 부담"]
+        H2 --> H3["기준이 암묵적&#x3C;br/>감사·변경 어려움"]
+        H3 --> H4["회피형 응답으로&#x3C;br/>수렴하기 쉬움"]
+    end
+
+    subgraph CAI["Constitutional AI — 원칙 기반 자기교정"]
+        direction TB
+        K1["헌법 원칙을 문서로 명시"] --> K2["모델이 스스로&#x3C;br/>비판·수정"]
+        K2 --> K3["AI가 선호 판정&#x3C;br/>RLAIF"]
+        K3 --> K4["이유를 설명하며 거절&#x3C;br/>기준은 문서로 감사 가능"]
+    end
+
+    style H4 fill:#4a1e1e,stroke:#c0392b,color:#fff
+    style K4 fill:#1e3a24,stroke:#27ae60,color:#fff</pre>
+<p>위쪽은 SL(비판·수정)과 RL(RLAIF) 두 단계의 내부 흐름을, 아래쪽은 RLHF 대비 무엇이 바뀌었는지(라벨의 출처, 기준의 위치, 거절의 성격)를 보여준다.</p>
+<h2 id="6-결과장점">6. 결과/장점</h2>
+<ul>
+<li><strong>사람의 유해성 라벨 없이 무해성 학습</strong>: 유해 출력에 대한 사람 라벨을 쓰지 않고 자기개선만으로 무해한 어시스턴트를 학습시켰다. 라벨러의 유해 콘텐츠 노출이라는 윤리적 부담까지 같이 덜어낸다</li>
+<li><strong>회피 대신 설명</strong>: 유해한 질의에 대해 입을 닫는 게 아니라 <strong>왜 반대하는지를 설명하며 응한다.</strong> 도움됨과 무해함이 서로를 깎아먹는 관계를 어느 정도 풀어낸 것 — 이 트랙의 진짜 성과는 여기 있다</li>
+<li><strong>정책이 문서가 된다</strong>: 판단 기준이 가중치 속 암묵지가 아니라 읽고 고칠 수 있는 원칙 목록으로 나온다. 기준을 바꾸려면 문서를 고치면 되고, “왜 이렇게 판정했나”를 조항 단위로 추적할 수 있다. <strong>투명성과 감사 가능성</strong>이 부산물이 아니라 설계의 결과다</li>
+<li><strong>트랙의 결론</strong>: InstructGPT가 “사람 피드백으로 정렬한다”를 세웠다면, CAI는 그 파이프라인을 유지한 채 <strong>피드백의 출처를 사람에서 명시적 원칙으로 옮겼다.</strong> 두 논문을 이어 읽으면 정렬 연구가 “사람을 얼마나 루프 안에 둘 것인가”를 놓고 움직여 온 궤적이 보인다</li>
+</ul>
+<h2 id="실무-적용-아이디어">실무 적용 아이디어</h2>
+<p>캐릭터 기반 채팅 서비스에서 캐릭터가 원래 설정에서 벗어나는 현상은 보통 <strong>사후에</strong> 측정한다. 대화를 여러 턴 시뮬레이션해보고 이탈 정도를 재는 식이다. CAI의 비판·수정 루프를 빌리면 이걸 생성 파이프라인 안으로 앞당길 수 있다 — “이 응답이 캐릭터의 언어 규칙이나 설정을 위반하는가?”를 스스로 평가하고, 위반이면 그 지적을 반영해 고쳐 쓰게 하는 구조다. 사후에 잡아내는 것보다 원천에서 줄이는 방향이다.</p>
+<p>다만 <strong>비용이 정면으로 걸린다.</strong> 비판·수정은 턴당 모델 호출이 2~3배로 늘어난다. 실시간 채팅에서는 지연시간이 곧 이탈이라 전면 적용은 무리고, 비실시간 경로부터 적용하는 게 현실적이다 — 캐릭터 생성·검수 단계, 신고 판정, 콘텐츠 사전 검수 같은 곳. 이전 편 ReAct에서 내린 결론과 같은 판단이다.</p>
+<p>가장 이식성이 높은 아이디어는 사실 RLAIF 자체가 아니라 **“판단 기준을 단일 문서로 꺼내 놓는다”**는 구조적 이점 쪽이다. 많은 서비스에서 안전 규칙은 프롬프트 문자열 여기저기와 별도 정책 문서에 흩어져 있고, 둘의 동기화는 사람 손에 달려 있다. 기준을 한 문서로 모아두면 변경·감사·거절 사유 설명이 전부 쉬워진다. 파인튜닝을 하지 않더라도 이 원칙 문서화는 그대로 가져올 수 있다.</p>
+<p>다국어 서비스에서 지정한 언어를 벗어난 응답이 나오는 문제에도 같은 형태가 맞는다. “생성 → 감지 → 재시도”를 반복하는 방식은 재시도 횟수가 소진되면 결국 문제 있는 응답이 그대로 나간다. 재시도 대신 <strong>“이 응답이 언어 규칙을 어겼는가”를 지적하고 그 지적을 반영해 고쳐 쓰게 하는</strong> 비판·수정 형태라면, 같은 호출 횟수로도 실패 시 빈손이 되지 않는다.</p>
+<hr>
+<p>이걸로 처음 잡았던 네 개 트랙(프롬프팅 기법 / In-Context Learning 원리 / 에이전트·툴 사용 / 정렬·안전성)을 모두 마무리한다. 이어서 읽는다면 <strong>DPO</strong>(보상 모델 없이 선호를 직접 최적화), <strong>Self-Refine</strong>(자기수정 루프), <strong>Chain-of-Verification</strong>(사실성 검증) 쪽이 자연스러운 다음 후보다.</p></div><div class="like-box"><button type="button" id="like-btn" class="tip" data-tip="이 게시글이 마음에 든다면 따봉을 눌러주세요!" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg><span id="like-count">0</span></button></div><nav class="series-nav" aria-label="시리즈 이동"><p class="series-head"><span class="series-name">LLM 프롬프팅 논문 스터디</span><span class="series-pos">9편 중 9번째</span></p><div class="series-links"><a class="series-prev" href="/study/llm/2026/07/28/llm-prompting-paper-08-instructgpt.html"><span class="series-dir">← 이전 편</span><span class="series-title">LLM 프롬프팅 논문 스터디 - 08. InstructGPT</span></a></div></nav><section class="post-comments"><h2 class="comments-title">댓글 <span id="comments-count" class="comments-count"></span></h2><ul class="comment-list" id="comment-list"></ul><p class="comment-empty" id="comment-empty" hidden>아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p><p class="reply-to" id="reply-to" hidden><span id="reply-to-label"></span><button type="button" id="reply-cancel">취소</button></p><form class="comment-form" id="comment-form"><input type="text" id="comment-author" name="author" placeholder="이름" maxlength="30" required><textarea id="comment-body" name="body" placeholder="댓글을 남겨주세요" maxlength="1000" rows="3" required></textarea><input type="text" name="website" id="comment-website" tabindex="-1" autocomplete="off"><div class="comment-form-foot"><span class="comment-status" id="comment-status"></span><button type="submit" id="comment-submit">등록</button></div></form></section></article><script>(function(){const viewPath = "/study/llm/2026/07/28/llm-prompting-paper-09-constitutional-ai.html";
+const chatOrigin = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        // 조회수 기록 — 같은 탭에서 새로고침해도 세션당 글 1회만 센다.
+        // (sessionStorage 는 탭을 닫으면 비므로, 나중에 다시 오면 새 방문으로 잡힌다)
+        (() => {
+          const key = 'viewed:' + viewPath;
+          try {
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+          } catch (e) {
+            // 프라이빗 모드 등으로 storage 가 막히면 중복 제거 없이 그냥 기록한다
+          }
+          fetch(chatOrigin + '/api/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: viewPath }),
+            keepalive: true,
+          }).catch(() => {});
+        })();
+      })();</script><script>(function(){const likePath = "/study/llm/2026/07/28/llm-prompting-paper-09-constitutional-ai.html";
+const likeApi = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        {
+          const btn = document.getElementById('like-btn');
+          const countEl = document.getElementById('like-count');
+          const key = 'liked:' + likePath;
+          // "이미 눌렀는지"는 브라우저가 기억한다 — 로그인이 없으니 여기까지가 최선
+          const likedNow = () => {
+            try { return localStorage.getItem(key) === '1'; } catch { return false; }
+          };
+          const paint = (n) => {
+            countEl.textContent = n;
+            const on = likedNow();
+            btn.classList.toggle('liked', on);
+            btn.setAttribute('aria-pressed', String(on));
+            btn.dataset.tip = on
+              ? '추천을 취소하려면 다시 눌러주세요'
+              : '이 게시글이 마음에 든다면 따봉을 눌러주세요!';
+          };
+
+          fetch(`${likeApi}/api/likes/top?limit=1000`)
+            .then((r) => (r.ok ? r.json() : null))
+            .then((json) => {
+              const hit = (json?.items ?? []).find((i) => i.path === likePath);
+              paint(hit ? hit.likes : 0);
+            })
+            .catch(() => paint(0));
+
+          btn.addEventListener('click', async () => {
+            const on = likedNow();
+            btn.disabled = true;
+            try {
+              const res = await fetch(`${likeApi}/api/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: likePath, action: on ? 'remove' : 'add' }),
+              });
+              if (res.ok) {
+                const { likes } = await res.json();
+                try { on ? localStorage.removeItem(key) : localStorage.setItem(key, '1'); } catch {}
+                paint(likes);
+              }
+            } catch {
+              /* 추천 실패는 조용히 넘긴다 — 글 읽기에 영향 없음 */
+            } finally {
+              btn.disabled = false;
+            }
+          });
+        }
+      })();</script><script>(function(){const commentPath = "/study/llm/2026/07/28/llm-prompting-paper-09-constitutional-ai.html";
+const api = "https://kimmand0o0-blog-chat.kimmand0o0.workers.dev";
+
+        {
+          const list = document.getElementById('comment-list');
+          const empty = document.getElementById('comment-empty');
+          const countEl = document.getElementById('comments-count');
+          const form = document.getElementById('comment-form');
+          const status = document.getElementById('comment-status');
+          const submit = document.getElementById('comment-submit');
+
+          const fmt = (iso) => {
+            const d = new Date(iso);
+            const p = (n) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+          };
+
+          let replyTo = null;
+          const replyBar = document.getElementById('reply-to');
+          const replyLabel = document.getElementById('reply-to-label');
+
+          const setReplyTo = (c) => {
+            replyTo = c;
+            replyBar.hidden = !c;
+            if (c) {
+              replyLabel.textContent = `${c.author}님에게 답글`;
+              document.getElementById('comment-body').focus();
+            }
+          };
+          document.getElementById('reply-cancel').addEventListener('click', () => setReplyTo(null));
+
+          // textContent 로만 넣는다 — 사용자 입력을 HTML 로 해석하지 않기 위해
+          const nodeFor = (c) => {
+            const li = document.createElement('li');
+            if (c.is_bot) li.classList.add('is-bot');
+            if (c.parent_id) li.classList.add('is-reply');
+
+            const head = document.createElement('div');
+            head.className = 'comment-head';
+            const who = document.createElement('span');
+            who.className = 'comment-author';
+            who.textContent = c.author;
+            if (c.is_bot) {
+              const badge = document.createElement('span');
+              badge.className = 'bot-badge';
+              badge.textContent = 'AI';
+              who.appendChild(badge);
+            }
+            const when = document.createElement('time');
+            when.textContent = fmt(c.created_at);
+            head.append(who, when);
+
+            const body = document.createElement('p');
+            body.className = 'comment-body';
+            body.textContent = c.body;
+
+            const reply = document.createElement('button');
+            reply.type = 'button';
+            reply.className = 'reply-btn';
+            reply.textContent = '답글';
+            reply.addEventListener('click', () => setReplyTo(c));
+
+            li.append(head, body, reply);
+            return li;
+          };
+
+          const render = (items) => {
+            list.textContent = '';
+            const children = new Map();
+            for (const c of items) {
+              if (!c.parent_id) continue;
+              if (!children.has(c.parent_id)) children.set(c.parent_id, []);
+              children.get(c.parent_id).push(c);
+            }
+            for (const c of items) {
+              if (c.parent_id) continue; // 답글은 부모 아래에서 그린다
+              const li = nodeFor(c);
+              const kids = children.get(c.id);
+              if (kids?.length) {
+                const sub = document.createElement('ul');
+                sub.className = 'comment-replies';
+                kids.forEach((k) => sub.appendChild(nodeFor(k)));
+                li.appendChild(sub);
+              }
+              list.appendChild(li);
+            }
+            countEl.textContent = items.length ? items.length : '';
+            empty.hidden = items.length > 0;
+          };
+
+          const load = () =>
+            fetch(`${api}/api/comments?path=${encodeURIComponent(commentPath)}`)
+              .then((r) => (r.ok ? r.json() : null))
+              .then((json) => render(json?.items ?? []))
+              .catch(() => {
+                empty.textContent = '댓글을 불러오지 못했어요.';
+                empty.hidden = false;
+              });
+
+          load();
+
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const author = document.getElementById('comment-author').value.trim();
+            const body = document.getElementById('comment-body').value.trim();
+            if (!author || !body) return;
+
+            submit.disabled = true;
+            status.textContent = '등록 중…';
+            try {
+              const res = await fetch(`${api}/api/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  path: commentPath,
+                  author,
+                  body,
+                  parentId: replyTo ? replyTo.id : undefined,
+                  website: document.getElementById('comment-website').value,
+                }),
+              });
+              if (res.status === 429) {
+                status.textContent = '조금 뒤에 다시 시도해주세요.';
+              } else if (!res.ok) {
+                status.textContent = '등록에 실패했어요.';
+              } else {
+                document.getElementById('comment-body').value = '';
+                setReplyTo(null);
+                status.textContent = '만두봇이 읽는 중…';
+                await load();
+                // 봇 답글은 뒤에서 생성되므로 잠시 뒤 한 번 더 가져온다
+                setTimeout(async () => {
+                  await load();
+                  status.textContent = '';
+                }, 6000);
+              }
+            } catch {
+              status.textContent = '등록에 실패했어요.';
+            } finally {
+              submit.disabled = false;
+            }
+          });
+        }
+      })();</script><aside class="toc"><p class="toc-title">목차</p><nav><ul><li class="depth-2"><a href="#1-기본적인-이해부터">1. 기본적인 이해부터</a></li><li class="depth-2"><a href="#2-문제점배경">2. 문제점/배경</a></li><li class="depth-2"><a href="#3-해결책의-핵심-아이디어">3. 해결책의 핵심 아이디어</a></li><li class="depth-2"><a href="#4-비유예시">4. 비유/예시</a></li><li class="depth-2"><a href="#5-실제-동작-과정">5. 실제 동작 과정</a></li><li class="depth-2"><a href="#그림으로-보기">그림으로 보기</a></li><li class="depth-2"><a href="#6-결과장점">6. 결과/장점</a></li><li class="depth-2"><a href="#실무-적용-아이디어">실무 적용 아이디어</a></li></ul></nav></aside></div></main> </div> <footer class="site-footer"> <div class="footer-inner"> <span>© 2026 Haeran</span> <span class="links"> <a href="https://github.com/kimmand0o0">GitHub</a> <a href="/feed.xml">RSS</a> </span> </div> </footer> <script>
+      // 조회수·댓글수·추천수 채우기 — 정적 사이트라 숫자는 클라이언트에서 받아 자리에 넣는다.
+      // 0도 그대로 보여준다(자리를 비우면 "기능이 사라진 것"처럼 보인다).
+      // 워커 응답 자체가 실패했을 때만 자리를 비워둔다.
+      const METRIC_ICON = {
+        views:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
+        comments:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg>',
+        likes:
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>',
+      };
+
+      function fillViews(root) {
+        const put = (attr, map, icon, label) => {
+          if (!map) return;
+          root.querySelectorAll('[' + attr + ']').forEach((el) => {
+            const n = map[el.getAttribute(attr)] ?? 0;
+            el.innerHTML = icon + '<span>' + n.toLocaleString() + '</span>';
+            el.setAttribute('aria-label', label + ' ' + n);
+            el.hidden = false;
+          });
+        };
+        put('data-views-path', window.__views, METRIC_ICON.views, '조회수');
+        put('data-comments-path', window.__comments, METRIC_ICON.comments, '댓글 수');
+        put('data-likes-path', window.__likes, METRIC_ICON.likes, '추천 수');
+      }
+      window.fillViews = fillViews;
+
+      {
+        const api = 'https://kimmand0o0-blog-chat.kimmand0o0.workers.dev';
+        const get = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+        window.__viewsReady = Promise.all([
+          get(api + '/api/views/top?limit=1000'),
+          get(api + '/api/comments/counts'),
+          get(api + '/api/likes/top?limit=1000'),
+        ]).then(([views, comments, likes]) => {
+          // 셋 다 실패했다면 지표 자체를 못 받은 것 — 0 을 지어내지 않고 자리를 비워둔다
+          if (!views && !comments && !likes) return {};
+          window.__views = Object.fromEntries((views?.items ?? []).map((i) => [i.path, i.views]));
+          window.__comments = Object.fromEntries(
+            (comments?.items ?? []).map((i) => [i.path, i.count])
+          );
+          window.__likes = Object.fromEntries((likes?.items ?? []).map((i) => [i.path, i.likes]));
+          fillViews(document);
+          return window.__views;
+        });
+      }
+
+      // 스크롤 시작 여부만 표시 — sticky 헤더 경계선 노출용
+      (() => {
+        const root = document.documentElement;
+        function sync() {
+          root.setAttribute('data-scrolled', window.scrollY > 8 ? 'true' : 'false');
+        }
+        sync();
+        window.addEventListener('scroll', sync, { passive: true });
+      })();
+
+      // 목차 — 현재 읽고 있는 섹션 표시
+      (() => {
+        const links = document.querySelectorAll('.toc a');
+        if (!links.length) return;
+        const map = {};
+        const targets = [];
+        links.forEach((a) => {
+          const id = decodeURIComponent(a.getAttribute('href').slice(1));
+          const el = document.getElementById(id);
+          if (el) {
+            map[id] = a;
+            targets.push(el);
+          }
+        });
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (!e.isIntersecting) return;
+              links.forEach((a) => { a.classList.remove('active'); });
+              const a = map[e.target.id];
+              if (a) a.classList.add('active');
+            });
+          },
+          // 헤더 아래 상단 밴드에 들어온 헤딩을 현재 섹션으로 본다
+          { rootMargin: '-72px 0px -75% 0px' }
+        );
+        targets.forEach((el) => { io.observe(el); });
+      })();
+
+      // 글 제목이 헤더 위로 지나가면, 소개 문구 자리를 제목으로 바꿔치기
+      {
+        const postTitle = document.querySelector('article.post h1.post-title');
+        const slot = document.querySelector('.header-post-title');
+        const tagline = document.querySelector('.tagline');
+        if (postTitle && slot && tagline) {
+          // 제목은 span 으로 감싼다 — 넘칠 때 이 span 만 흐르게 하려고
+          const inner = document.createElement('span');
+          inner.textContent = postTitle.textContent.trim();
+          slot.appendChild(inner);
+          // 슬롯 폭보다 길면 잘라내는 대신 흐르게 한다
+          requestAnimationFrame(() => {
+            if (inner.scrollWidth > slot.clientWidth + 2) slot.classList.add('is-long');
+          });
+          const io = new IntersectionObserver(
+            ([entry]) => {
+              const hidden = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+              slot.hidden = !hidden;
+              tagline.hidden = hidden;
+            },
+            { rootMargin: '-4px 0px 0px 0px', threshold: 0 }
+          );
+          io.observe(postTitle);
+        }
+      }
+
+      // 정렬 필터 접기/펼치기 — 선택된 항목만 보이고, 누르면 스르륵 펼쳐진다
+      {
+        const bar = document.querySelector('.sort-bar');
+        if (bar) {
+          const toggle = bar.querySelector('.sort-toggle');
+          const current = bar.querySelector('.sort-current');
+          const setOpen = (open) => {
+            bar.classList.toggle('open', open);
+            toggle.setAttribute('aria-expanded', String(open));
+          };
+          toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setOpen(!bar.classList.contains('open'));
+          });
+          // 항목을 고르면 라벨을 바꾸고 접는다 (정렬 자체는 각 페이지 스크립트가 처리)
+          bar.querySelectorAll('.sort-btn').forEach((b) => {
+            b.addEventListener('click', () => {
+              current.textContent = b.textContent.trim();
+              setOpen(false);
+            });
+          });
+          document.addEventListener('click', (e) => {
+            if (bar.classList.contains('open') && !bar.contains(e.target)) setOpen(false);
+          });
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') setOpen(false);
+          });
+        }
+      }
+
+      // 모바일 햄버거 메뉴
+      {
+        const toggle = document.getElementById('nav-toggle');
+        const nav = document.getElementById('site-nav');
+        const setOpen = (open) => {
+          nav.classList.toggle('open', open);
+          toggle.setAttribute('aria-expanded', String(open));
+          toggle.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+          toggle.classList.toggle('is-open', open);
+        };
+        toggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          setOpen(!nav.classList.contains('open'));
+        });
+        // 메뉴 밖을 누르거나 ESC 를 누르면 닫는다
+        document.addEventListener('click', (e) => {
+          if (nav.classList.contains('open') && !nav.contains(e.target)) setOpen(false);
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') setOpen(false);
+        });
+      }
+
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const next =
+          document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+      });
+    </script> <script type="module">
+      // mermaid 클라이언트 렌더 (기존 Jekyll 셋업과 동일하게 mermaid@10 사용)
+      if (document.querySelector('pre.mermaid')) {
+        const { default: mermaid } = await import(
+          'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'
+        );
+        mermaid.initialize({
+          startOnLoad: false,
+          theme:
+            document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+        });
+        mermaid.run({ querySelector: 'pre.mermaid' });
+      }
+    </script> </body> </html>
